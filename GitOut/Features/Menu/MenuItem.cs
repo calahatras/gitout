@@ -9,7 +9,7 @@ namespace GitOut.Features.Menu
         public bool IsItem => !IsHeader && !IsDivider;
 
         public string? Name { get; set; }
-        public string? Icon { get; set; }
+        public string? IconResourceKey { get; set; }
 
         public ICommand? Command { get; set; }
     }

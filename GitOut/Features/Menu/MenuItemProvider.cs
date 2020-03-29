@@ -17,7 +17,7 @@ namespace GitOut.Features.Menu
         public IEnumerable<MenuItem> GetMenuItems(INavigationService navigation) => contexts.Select(context => new MenuItem
         {
             Name = context.Name,
-            Icon = context.Icon,
+            IconResourceKey = context.IconResourceKey,
             Command = context.PageName == null
                 ? null
                 : new NavigateLocalCommand<object>(

@@ -14,7 +14,7 @@ namespace GitOut.Features.Git
             {
                 PageName = typeof(GitLogPage).FullName,
                 Name = "Log",
-                Icon = "source-commit"
+                IconResourceKey = "source-commit"
             });
         }
     }

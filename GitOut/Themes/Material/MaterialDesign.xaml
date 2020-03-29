@@ -426,7 +426,6 @@
         <Setter Property="Content">
             <Setter.Value>
                 <Canvas Width="24" Height="24">
-                    <!-- https://materialdesignicons.com/icon/arrow-left-->
                     <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource arrow-left}" />
                 </Canvas>
             </Setter.Value>
@@ -1070,7 +1069,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Canvas Width="24" Height="24">
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{Binding Icon, Converter={converters:StaticResourceConverter}}"/>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"/>
                                     </Canvas>
                                     <TextBlock Grid.Column="1" Text="{Binding Name}" FontFamily="Roboto"/>
                                 </Grid>
