@@ -66,7 +66,8 @@ namespace GitOut
             services.AddSingleton<ITitleService, TitleService>();
             services.AddSingleton<IStorage, FileStorage>();
 
-            var menuProvider = new MenuItemProvider(new[] {
+            var menuProvider = new MenuItemProvider(new[]
+            {
                 new MenuItemContext
                 {
                     Name = "INNEHÅLL",
