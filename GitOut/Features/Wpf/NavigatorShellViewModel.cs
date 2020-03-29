@@ -15,7 +15,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace GitOut.Features.Wpf
 {
-    public class ShellViewModel : INotifyPropertyChanged
+    public class NavigatorShellViewModel : INotifyPropertyChanged
     {
         private readonly CollectionViewSource menuItems;
 
@@ -24,10 +24,10 @@ namespace GitOut.Features.Wpf
         private bool isMenuVisible;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public ShellViewModel() { }
+        public NavigatorShellViewModel() { }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
-        public ShellViewModel(
+        public NavigatorShellViewModel(
             IHostApplicationLifetime life,
             INavigationService navigation,
             ISnackbarService snack,

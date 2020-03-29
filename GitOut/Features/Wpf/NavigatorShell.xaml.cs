@@ -4,13 +4,13 @@ using System.Windows.Input;
 
 namespace GitOut.Features.Wpf
 {
-    public partial class Shell : Window
+    public partial class NavigatorShell : Window
     {
         private StateNames resizeFromState;
         private Point lastPosition;
         private bool isResizing;
 
-        public Shell(ShellViewModel dataContext)
+        public NavigatorShell(NavigatorShellViewModel dataContext)
         {
             InitializeComponent();
             DataContext = dataContext;

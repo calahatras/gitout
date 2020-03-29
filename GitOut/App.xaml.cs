@@ -81,7 +81,7 @@ namespace GitOut
             services.AddOptions();
             services.AddOptions<NavigationRegistrationOptions>().Configure(options =>
             {
-                options.StartupWindow = typeof(Shell).FullName!;
+                options.StartupWindow = typeof(NavigatorShell).FullName!;
                 options.StartupType = typeof(GitLogPage).FullName!;
             });
             services.AddOptions<SettingsOptions>().Configure(options =>
@@ -90,8 +90,8 @@ namespace GitOut
             });
             services.AddLogging();
 
-            services.AddTransient<ShellViewModel>();
-            services.AddScoped<Shell>();
+            services.AddTransient<NavigatorShellViewModel>();
+            services.AddScoped<NavigatorShell>();
 
             services.AddHostedService<Bootstrap>();
         }
