@@ -8,12 +8,18 @@ namespace GitOut.Features.Wpf.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool visible = bool.Parse(value.ToString());
+            string? str = value.ToString();
+            bool visible = str != null && bool.Parse(str);
             if (parameter == null)
             {
                 return visible ? "On" : "Off";
             }
-            string[] s = parameter.ToString().Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+            string? serializedParameter = parameter.ToString();
+            if (serializedParameter == null)
+            {
+                throw new ArgumentException("parameter may not be null", nameof(parameter));
+            }
+            string[] s = serializedParameter.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
             return visible ? s[0] : s[1];
         }
 

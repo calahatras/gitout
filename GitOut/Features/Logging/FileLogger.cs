@@ -10,7 +10,7 @@ namespace GitOut.Features.Logging
 
         public FileLogger(string filePath) => this.filePath = filePath;
 
-        public IDisposable BeginScope<TState>(TState state) => null;
+        public IDisposable BeginScope<TState>(TState state) => throw new InvalidOperationException("FileLogger does not support scoped");
 
         public bool IsEnabled(LogLevel logLevel) => true;
 

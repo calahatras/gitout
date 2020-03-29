@@ -13,7 +13,12 @@ namespace GitOut.Features.Wpf.Converters
             {
                 throw new InvalidOperationException("The target type must be of type Visibility");
             }
-            int count = int.Parse(value.ToString());
+            string? str = value.ToString();
+            if (str == null)
+            {
+                throw new ArgumentException("value.ToString() may not be null", nameof(value));
+            }
+            int count = int.Parse(str);
             return count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
