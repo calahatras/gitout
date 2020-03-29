@@ -1,0 +1,34 @@
+﻿<UserControl
+    x:Class="GitOut.Features.Settings.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:GitOut.Features.Settings"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=local:SettingsViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+>
+    <Grid
+        Style="{StaticResource LayoutRootGridStyle}"
+    >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Style="{StaticResource CardPanelStyle}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource Header6TextStyle}">Resurser</TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Button
+                        Style="{StaticResource MaterialButtonStyle}"
+                        Command="{Binding OpenSettingsFolderCommand}"
+                        ToolTip="Öppna mappen med inställningar"
+                    >
+                        INSTÄLLNINGAR
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
