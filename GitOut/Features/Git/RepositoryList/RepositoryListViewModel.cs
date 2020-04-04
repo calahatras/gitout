@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -13,12 +12,15 @@ namespace GitOut.Features.Git.RepositoryList
 {
     public class RepositoryListViewModel
     {
+        public readonly object repositoriesLock = new object();
+
         public RepositoryListViewModel(
             INavigationService navigation,
             IGitRepositoryStorage storage
         )
         {
             var repositories = new ObservableCollection<IGitRepository>();
+            BindingOperations.EnableCollectionSynchronization(repositories, repositoriesLock);
             Repositories = CollectionViewSource.GetDefaultView(repositories);
             Repositories.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
 
@@ -29,17 +31,16 @@ namespace GitOut.Features.Git.RepositoryList
                 repository => repository != null
             );
 
-            SynchronizationContext sync = SynchronizationContext.Current!;
             Task.Run(() =>
             {
                 IEnumerable<IGitRepository> repos = storage.GetAll();
-                sync.Post(s =>
+                lock (repositoriesLock)
                 {
                     foreach (IGitRepository repo in repos)
                     {
                         repositories.Add(repo);
                     }
-                }, null);
+                };
             });
         }
 
