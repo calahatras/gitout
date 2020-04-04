@@ -26,16 +26,16 @@
                 </Setter.Value>
             </Setter>
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
             <Setter Property="Padding" Value="4 1" />
             <Setter Property="Margin" Value="0 0 4 0" />
-            <Setter Property="CornerRadius" Value="4" />
             <Setter Property="TextElement.FontSize" Value="12" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialGray50}"/>
         </Style>
         <Style x:Key="GitLogListStyle" TargetType="{x:Type ListView}">
             <Setter Property="Background" Value="{DynamicResource MaterialBackgroundBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource MaterialBackgroundBackground}"/>
             <Setter Property="FontFamily" Value="Roboto"/>
-            <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialGray100}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ListBox}">
@@ -45,16 +45,17 @@
                                 <Setter Property="Padding" Value="2"/>
                                 <Setter Property="BorderBrush" Value="Transparent"/>
                                 <Setter Property="BorderThickness" Value="0 1 0 1"/>
-                                <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialGray100}"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type ListBoxItem}">
                                             <Border
-                                            x:Name="Bd"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            Background="{TemplateBinding Background}"
-                                            SnapsToDevicePixels="True">
+                                                x:Name="Bd"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Background="{TemplateBinding Background}"
+                                                SnapsToDevicePixels="True"
+                                            >
                                                 <ContentPresenter 
                                                 Margin="{TemplateBinding Padding}"
                                                 TextElement.Foreground="{TemplateBinding Foreground}"
