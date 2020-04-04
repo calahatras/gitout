@@ -17,10 +17,7 @@ namespace GitOut.Features.Git.Log
         )
         {
             GitLogPageOptions? options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!);
-            if (options == null)
-            {
-                throw new ArgumentNullException("Options may not be null");
-            }
+            _ = options ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             title.Title = "Log";
 
             var entries = new ObservableCollection<GitHistoryEvent>();

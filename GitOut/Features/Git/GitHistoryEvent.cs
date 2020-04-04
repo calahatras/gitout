@@ -72,22 +72,10 @@ namespace GitOut.Features.Git
 
             public GitHistoryEvent Build()
             {
-                if (authorEmail == null)
-                {
-                    throw new ArgumentNullException(nameof(authorEmail), "Author email may not be null when building");
-                }
-                if (authorName == null)
-                {
-                    throw new ArgumentNullException(nameof(authorName), "Author name may not be null when building");
-                }
-                if (authorDate == null)
-                {
-                    throw new ArgumentNullException(nameof(authorDate), "Author date may not be null when building");
-                }
-                if (subject == null)
-                {
-                    throw new ArgumentNullException(nameof(subject), "Subject may not be null when building");
-                }
+                _ = authorEmail ?? throw new ArgumentNullException(nameof(authorEmail), "Author email may not be null when building");
+                _ = authorName ?? throw new ArgumentNullException(nameof(authorName), "Author name may not be null when building");
+                _ = authorDate ?? throw new ArgumentNullException(nameof(authorDate), "Author date may not be null when building");
+                _ = subject ?? throw new ArgumentNullException(nameof(subject), "Subject may not be null when building");
                 return new GitHistoryEvent(hash, parent, mergeParent, authorDate, GitAuthor.Create(authorName, authorEmail), subject, bodyBuilder.ToString());
             }
 
