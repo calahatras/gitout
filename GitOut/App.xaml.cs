@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using GitOut.Features.Git;
-using GitOut.Features.Git.Log;
+using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Menu;
@@ -82,7 +82,7 @@ namespace GitOut
             services.AddOptions<NavigationRegistrationOptions>().Configure(options =>
             {
                 options.StartupWindow = typeof(NavigatorShell).FullName!;
-                options.StartupType = typeof(GitLogPage).FullName!;
+                options.StartupType = typeof(RepositoryListPage).FullName!;
             });
             services.AddOptions<SettingsOptions>().Configure(options =>
             {

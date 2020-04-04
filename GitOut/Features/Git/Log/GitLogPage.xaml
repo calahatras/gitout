@@ -5,12 +5,149 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
+    xmlns:git="clr-namespace:GitOut.Features.Git.Diagnostics"
+    xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     mc:Ignorable="d" 
     d:DataContext="{d:DesignInstance Type=local:GitLogViewModel}"
-    d:DesignHeight="450" d:DesignWidth="800">
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+>
+    <UserControl.Resources>
+        <converters:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
+        <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#dd9900dd"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="#ffff66ff"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4 2" />
+            <Setter Property="Margin" Value="0 0 4 0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="TextElement.FontSize" Value="12" />
+        </Style>
+        <Style x:Key="GitLogListStyle" TargetType="{x:Type ListView}">
+            <Setter Property="Background" Value="{DynamicResource MaterialBackgroundBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialBackgroundBackground}"/>
+            <Setter Property="FontFamily" Value="Roboto"/>
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialGray100}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBox}">
+                        <ControlTemplate.Resources>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Setter Property="MinHeight" Value="28"/>
+                                <Setter Property="Padding" Value="2"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0 1 0 1"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                            <Border
+                                            x:Name="Bd"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Background="{TemplateBinding Background}"
+                                            SnapsToDevicePixels="True">
+                                                <ContentPresenter 
+                                                Margin="{TemplateBinding Padding}"
+                                                TextElement.Foreground="{TemplateBinding Foreground}"
+                                                VerticalAlignment="Center"
+                                            />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="BorderThickness" Value="0 1 0 1"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource MaterialGray800}"/>
+                                        <Setter Property="Background" Value="{DynamicResource MaterialBackgroundHover}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource MaterialGray50}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderThickness" Value="0 1 0 1"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource MaterialGray800}"/>
+                                        <Setter Property="Background" Value="{DynamicResource MaterialBackgroundHover}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource MaterialGray50}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ControlTemplate.Resources>
+                        <Border
+                            x:Name="Bd"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True"
+                        >
+                            <ScrollViewer
+                                Padding="{TemplateBinding Padding}"
+                                Focusable="False"
+                                HorizontalScrollBarVisibility="Disabled"
+                            >
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </ScrollViewer>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="True">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     <Grid
         Style="{StaticResource LayoutRootGridStyle}"
     >
-        <TextBlock>Git Log page works!</TextBlock>
+        <ListView
+            ItemsSource="{Binding Entries}"
+            Style="{StaticResource GitLogListStyle}"
+            TextElement.FontSize="12"
+        >
+            <ListView.ItemTemplate>
+                <DataTemplate DataType="git:GitHistoryEvent">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ItemsControl ItemsSource="{Binding Branches}" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource BranchStyle}">
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Grid.Column="1" FontWeight="{Binding IsHead, Converter={StaticResource BooleanToFontWeightConverter}}" Text="{Binding Subject, Mode=OneWay}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="2">
+                            <Run Text="{Binding Author.Name, Mode=OneWay}" />
+                            <Run Text="{Binding Author.Email, Mode=OneWay}" />
+                            <Run Text="{Binding AuthorDate, Mode=OneWay}" />
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </UserControl>

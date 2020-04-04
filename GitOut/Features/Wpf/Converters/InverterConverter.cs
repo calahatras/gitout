@@ -18,7 +18,7 @@ namespace GitOut.Features.Wpf.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            var s = value.ToString();
+            string? s = value.ToString();
             if (s == null)
             {
                 throw new ArgumentException("value.ToString() may not be null", nameof(value));
