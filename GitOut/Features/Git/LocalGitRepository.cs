@@ -98,5 +98,4 @@ namespace GitOut.Features.Git
 
         public static LocalGitRepository InitializeFromPath(DirectoryPath path) => new LocalGitRepository(path);
     }
-
 }
