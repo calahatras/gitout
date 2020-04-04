@@ -26,7 +26,7 @@
                 </Setter.Value>
             </Setter>
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="4 2" />
+            <Setter Property="Padding" Value="4 1" />
             <Setter Property="Margin" Value="0 0 4 0" />
             <Setter Property="CornerRadius" Value="4" />
             <Setter Property="TextElement.FontSize" Value="12" />
