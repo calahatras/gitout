@@ -70,11 +70,7 @@ namespace GitOut.Features.Navigation
 
         public void Navigate(string pageName, object? options)
         {
-            var pageType = Type.GetType(pageName);
-            if (pageType == null)
-            {
-                throw new ArgumentNullException("Invalid page name", pageName);
-            }
+            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), "Invalid page name " + pageName);
             IServiceScope scope = provider.CreateScope();
             object service;
             if (options != null)
