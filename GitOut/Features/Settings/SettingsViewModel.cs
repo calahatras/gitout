@@ -12,6 +12,7 @@ using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
+using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 
@@ -26,6 +27,7 @@ namespace GitOut.Features.Settings
         public SettingsViewModel(
             ITitleService title,
             ISnackbarService snacks,
+            IThemeService themes,
             IGitRepositoryStorage storage,
             IOptions<SettingsOptions> options
         )
@@ -70,11 +72,19 @@ namespace GitOut.Features.Settings
                     storage.Add(localrepo);
                     snacks.Show("Added repository");
                 });
+
+            ChangeThemeCommand = new CallbackCommand<ThemePaletteViewModel>(
+                theme =>
+                {
+                    themes.ChangeTheme(theme);
+                    snacks.ShowSuccess($"Changed theme to {theme.Name}");
+                });
         }
 
         public ICollectionView ValidRepositoryPaths { get; }
         public ICommand OpenSettingsFolderCommand { get; }
         public ICommand SearchRootFolderCommand { get; }
         public ICommand AddRepositoryCommand { get; }
+        public ICommand ChangeThemeCommand { get; }
     }
 }

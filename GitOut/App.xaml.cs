@@ -11,6 +11,7 @@ using GitOut.Features.Menu;
 using GitOut.Features.Navigation;
 using GitOut.Features.Settings;
 using GitOut.Features.Storage;
+using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -70,13 +71,14 @@ namespace GitOut
             {
                 new MenuItemContext
                 {
-                    Name = "INNEHÅLL",
+                    Name = "git out",
                 }
             });
             services.AddSingleton<IMenuItemProvider>(menuProvider);
 
             services.AddSettingsFeature(menuProvider);
             services.AddGitFeature(menuProvider);
+            services.AddThemeFeature();
 
             services.AddOptions();
             services.AddOptions<NavigationRegistrationOptions>().Configure(options =>
@@ -84,10 +86,7 @@ namespace GitOut
                 options.StartupWindow = typeof(NavigatorShell).FullName!;
                 options.StartupType = typeof(RepositoryListPage).FullName!;
             });
-            services.AddOptions<SettingsOptions>().Configure(options =>
-            {
-                options.SettingsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gitout");
-            });
+            services.AddOptions<SettingsOptions>().Configure(options => options.SettingsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gitout"));
             services.AddLogging();
 
             services.AddTransient<NavigatorShellViewModel>();

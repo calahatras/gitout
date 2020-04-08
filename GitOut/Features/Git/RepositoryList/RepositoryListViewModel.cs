@@ -4,8 +4,11 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Commands;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.IO;
+using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 
 namespace GitOut.Features.Git.RepositoryList
@@ -16,7 +19,8 @@ namespace GitOut.Features.Git.RepositoryList
 
         public RepositoryListViewModel(
             INavigationService navigation,
-            IGitRepositoryStorage storage
+            IGitRepositoryStorage storage,
+            ISnackbarService snacks
         )
         {
             var repositories = new ObservableCollection<IGitRepository>();
@@ -29,6 +33,11 @@ namespace GitOut.Features.Git.RepositoryList
                 typeof(GitLogPage).FullName!,
                 repository => GitLogPageOptions.OpenRepository(repository),
                 repository => repository != null
+            );
+            CopyContentCommand = new CopyTextToClipBoardCommand<DirectoryPath>(
+                path => path.Directory,
+                path => path != null,
+                text => snacks.ShowSuccess("Copied text to clipboard")
             );
 
             Task.Run(() =>
@@ -46,5 +55,6 @@ namespace GitOut.Features.Git.RepositoryList
 
         public ICollectionView Repositories { get; }
         public ICommand NavigateToLogCommand { get; }
+        public ICommand CopyContentCommand { get; }
     }
 }
