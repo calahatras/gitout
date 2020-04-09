@@ -16,8 +16,8 @@ namespace GitOut.Features.Git.Storage
         ) => this.storage = storage;
 
         public void Add(IGitRepository repository) => storage.Set(RepositoriesSectionKey, GetAll()
-            .Select(repo => repo.WorkingDirectory)
-            .Concat(new[] { repository.WorkingDirectory })
+            .Select(repo => repo.WorkingDirectory.Directory)
+            .Concat(new[] { repository.WorkingDirectory.Directory })
             .ToArray()
         );
 
