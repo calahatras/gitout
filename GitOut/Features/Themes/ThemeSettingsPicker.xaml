@@ -45,7 +45,7 @@
     >
         <StackPanel>
             <TextBlock Text="Tema" Style="{StaticResource Header6TextStyle}" />
-            <ItemsControl ItemsSource="{Binding Themes}">
+            <ItemsControl ItemsSource="{Binding Themes}" Focusable="False">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel/>
