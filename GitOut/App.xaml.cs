@@ -86,7 +86,9 @@ namespace GitOut
                 options.StartupWindow = typeof(NavigatorShell).FullName!;
                 options.StartupType = typeof(RepositoryListPage).FullName!;
             });
-            services.AddOptions<SettingsOptions>().Configure(options => options.SettingsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gitout"));
+            services.AddOptions<SettingsOptions>().Configure(options =>
+                options.SettingsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gitout")
+            );
             services.AddLogging();
 
             services.AddTransient<NavigatorShellViewModel>();
