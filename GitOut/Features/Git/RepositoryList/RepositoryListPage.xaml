@@ -39,10 +39,7 @@
                                 CommandParameter="{Binding WorkingDirectory}"
                                 ToolTip="Kopiera sökväg"
                             >
-                                <Canvas Width="20" Height="20">
-                                    <Canvas.RenderTransform>
-                                        <ScaleTransform ScaleX=".8" ScaleY=".8" />
-                                    </Canvas.RenderTransform>
+                                <Canvas Width="24">
                                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
                                 </Canvas>
                             </Button>
@@ -52,9 +49,6 @@
                                 CommandParameter="{Binding}"
                             >
                                 <Canvas Width="24" Height="24">
-                                    <Canvas.RenderTransform>
-                                        <ScaleTransform ScaleX="1" ScaleY="1" />
-                                    </Canvas.RenderTransform>
                                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ChevronRight}"/>
                                 </Canvas>
                             </Button>
