@@ -26,6 +26,35 @@
     Language="sv"
     d:DataContext="{d:DesignInstance Type={x:Type local:NavigatorShellViewModel}}"
 >
+    <Window.InputBindings>
+        <KeyBinding Key="P" Command="{Binding OpenSettingsCommand}" />
+        <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding NavigateBackCommand}" />
+    </Window.InputBindings>
+    <Window.Resources>
+        <Style x:Key="NavigationToolbarStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Background" Value="#212225"/>
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+        </Style>
+        <Style x:Key="NavigationTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="Roboto light" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="#cccccc" />
+            <Setter Property="Margin" Value="6 4" />
+        </Style>
+        <Style x:Key="MenuButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}">
+            <Setter Property="Content">
+                <Setter.Value>
+                    <Canvas Width="24" Height="24">
+                        <Canvas.LayoutTransform>
+                            <ScaleTransform ScaleX=".7" ScaleY=".7" />
+                        </Canvas.LayoutTransform>
+                        <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource Cog}" />
+                    </Canvas>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid x:Name="PART_Root">
         <Grid.Resources>
             <converters:WindowStateToVisibilityConverter x:Key="WindowStateToVisibilityConverter"/>
@@ -70,49 +99,24 @@
             </Border.BorderBrush>
         </Border>
         <DockPanel>
-            <Border
-                DockPanel.Dock="Left"
-                x:Name="PART_Drawer"
-                Style="{StaticResource MaterialDrawerMenuStyle}"
-                Visibility="{Binding IsMenuVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
-            >
-                <ListBox
-                    x:Name="MenuItems"
-                    ItemsSource="{Binding MenuItems}"
-                    MinWidth="160"
-                    Style="{StaticResource MaterialNavListStyle}"
-                />
-            </Border>
-            <Grid>
-            </Grid>
             <Grid
                 DockPanel.Dock="Top"
-                Style="{StaticResource MaterialToolbarStyle}"
+                Style="{StaticResource NavigationToolbarStyle}"
             >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel
-                    Margin="12,0,0,0"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                >
-                    <Button Style="{StaticResource MenuButtonStyle}" Command="{Binding ToggleMenuCommand}" ToolTip="Menu"/>
-                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{Binding NavigateBackCommand}" ToolTip="Back"/>
-                </StackPanel>
-                <TextBlock
-                    Grid.Column="1"
-                    Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, NotifyOnTargetUpdated=True}"
-                    Style="{DynamicResource AnimatedMaterialToolbarHeaderStyle}"
-                />
+                <TextBlock Grid.Column="1"  Text="git out" Style="{StaticResource NavigationTitleStyle}" />
                 <StackPanel
                     Grid.Column="2"
-                    Margin="0,-32,0,0"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                 >
+                    <Button Style="{StaticResource MenuButtonStyle}" Command="{Binding OpenSettingsCommand}" ToolTip="Settings"/>
+                    <Border BorderThickness="1 1 0 0" BorderBrush="{DynamicResource MaterialLightDividers}" Margin="8 4"/>
+
                     <Button Style="{StaticResource MinimizeButtonStyle}" Command="{Binding MinimizeCommand}" CommandParameter="{Binding ElementName=window}"/>
                     <Button Visibility="{Binding WindowState, ElementName=window, Converter={StaticResource WindowStateToVisibilityConverter}, ConverterParameter=Normal}" Style="{StaticResource MaximizeButtonStyle}" Command="{Binding MaximizeCommand}" CommandParameter="{Binding ElementName=window}"/>
                     <Button Visibility="{Binding WindowState, ElementName=window, Converter={StaticResource WindowStateToVisibilityConverter}, ConverterParameter=Maximized}" Style="{StaticResource RestoreButtonStyle}" Command="{Binding RestoreCommand}" CommandParameter="{Binding ElementName=window}"/>

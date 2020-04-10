@@ -25,13 +25,10 @@ namespace GitOut.Features.Wpf.Converters
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            var rootObjectProvider = serviceProvider.GetService(typeof(IRootObjectProvider)) as IRootObjectProvider;
-            if (rootObjectProvider == null)
+            if (serviceProvider.GetService(typeof(IRootObjectProvider)) is IRootObjectProvider rootObjectProvider)
             {
-                return this;
+                _target = rootObjectProvider.RootObject as Control;
             }
-
-            _target = rootObjectProvider.RootObject as Control;
             return this;
         }
     }

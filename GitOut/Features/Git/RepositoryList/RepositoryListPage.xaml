@@ -39,18 +39,14 @@
                                 CommandParameter="{Binding WorkingDirectory}"
                                 ToolTip="Kopiera sökväg"
                             >
-                                <Canvas Width="24">
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                </Canvas>
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
                             </Button>
                             <Button
                                 Style="{StaticResource MaterialButtonStyle}"
                                 Command="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 CommandParameter="{Binding}"
                             >
-                                <Canvas Width="24" Height="24">
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ChevronRight}"/>
-                                </Canvas>
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ChevronRight}"/>
                             </Button>
                         </StackPanel>
                     </Grid>

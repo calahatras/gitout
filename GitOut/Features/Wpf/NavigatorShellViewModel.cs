@@ -9,19 +9,16 @@ using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Commands;
 using GitOut.Features.Material.Snackbar;
-using GitOut.Features.Menu;
 using GitOut.Features.Navigation;
+using GitOut.Features.Settings;
 using Microsoft.Extensions.Hosting;
 
 namespace GitOut.Features.Wpf
 {
     public class NavigatorShellViewModel : INotifyPropertyChanged
     {
-        private readonly CollectionViewSource menuItems;
-
         private string? title;
         private ContentControl? content;
-        private bool isMenuVisible;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         public NavigatorShellViewModel() { }
@@ -31,30 +28,24 @@ namespace GitOut.Features.Wpf
             IHostApplicationLifetime life,
             INavigationService navigation,
             ISnackbarService snack,
-            ITitleService titleService,
-            IMenuItemProvider menuItemsProvider
+            ITitleService titleService
         )
         {
             navigation.NavigationRequested += (sender, args) => Content = args.Control;
             titleService.TitleChanged += (sender, args) => Title = args.Title;
-
-            menuItems = new CollectionViewSource
-            {
-                Source = menuItemsProvider.GetMenuItems(navigation)
-            };
 
             var snacks = new ObservableCollection<Snack>();
             Snacks = CollectionViewSource.GetDefaultView(snacks);
             Snacks.SortDescriptions.Add(new SortDescription("DateAddedUtc", ListSortDirection.Ascending));
             snack.SnackReceived += (sender, args) => ShowSnackAsync(args.Snack, snacks).ConfigureAwait(false);
 
-            CloseCommand = new CallbackCommand(() => life.StopApplication());
-            NavigateBackCommand = new CallbackCommand(
-                navigation.Back,
-                navigation.CanGoBack
-            );
-            ToggleMenuCommand = new CallbackCommand(
-                () => IsMenuVisible = !IsMenuVisible
+            CloseCommand = new CallbackCommand(life.StopApplication);
+            NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
+            OpenSettingsCommand = new NavigateLocalCommand<object>(
+                navigation,
+                typeof(SettingsPage).FullName!,
+                null,
+                _ => navigation.CurrentPage != typeof(SettingsPage).FullName
             );
         }
 
@@ -63,13 +54,8 @@ namespace GitOut.Features.Wpf
         public ICommand RestoreCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Normal);
         public ICommand CloseCommand { get; }
         public ICommand NavigateBackCommand { get; }
-        public ICommand ToggleMenuCommand { get; }
 
-        public bool IsMenuVisible
-        {
-            get => isMenuVisible;
-            private set => SetProperty(ref isMenuVisible, value);
-        }
+        public ICommand OpenSettingsCommand { get; }
 
         public string? Title
         {
@@ -83,7 +69,6 @@ namespace GitOut.Features.Wpf
             private set => SetProperty(ref content, value);
         }
 
-        public ICollectionView MenuItems => menuItems.View;
         public ICollectionView Snacks { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;

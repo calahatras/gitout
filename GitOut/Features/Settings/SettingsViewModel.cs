@@ -26,19 +26,32 @@ namespace GitOut.Features.Settings
 
         public SettingsViewModel(
             ITitleService title,
+            INavigationService navigation,
             ISnackbarService snacks,
             IThemeService themes,
             IGitRepositoryStorage storage,
             IOptions<SettingsOptions> options
         )
         {
-            title.Title = "Inställningar";
+            title.Title = "Settings";
 
             var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
             ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
-            OpenSettingsFolderCommand = new NavigateExternalCommand(new Uri("file://" + options.Value.SettingsFolder));
+            MenuItem[] menuItems = new[]
+            {
+                new MenuItem
+                {
+                    Command = new CallbackCommand(
+                        () => {}
+                    ),
+                    IconResourceKey = "Cog",
+                    Name = "Settings"
+                }
+            };
+            MenuItems = CollectionViewSource.GetDefaultView(menuItems);
 
+            OpenSettingsFolderCommand = new NavigateExternalCommand(new Uri("file://" + options.Value.SettingsFolder));
             SearchRootFolderCommand = new CallbackCommand<string>(
                 folder =>
                 {
@@ -64,7 +77,6 @@ namespace GitOut.Features.Settings
                 },
                 folder => !string.IsNullOrEmpty(folder)
             );
-
             AddRepositoryCommand = new CallbackCommand<ValidGitRepositoryPathViewModel>(
                 repository =>
                 {
@@ -72,19 +84,22 @@ namespace GitOut.Features.Settings
                     storage.Add(localrepo);
                     snacks.Show("Added repository");
                 });
-
             ChangeThemeCommand = new CallbackCommand<ThemePaletteViewModel>(
                 theme =>
                 {
                     themes.ChangeTheme(theme);
                     snacks.ShowSuccess($"Changed theme to {theme.Name}");
                 });
+            NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
         }
 
         public ICollectionView ValidRepositoryPaths { get; }
+        public ICollectionView MenuItems { get; }
+
         public ICommand OpenSettingsFolderCommand { get; }
         public ICommand SearchRootFolderCommand { get; }
         public ICommand AddRepositoryCommand { get; }
         public ICommand ChangeThemeCommand { get; }
+        public ICommand NavigateBackCommand { get; }
     }
 }
