@@ -19,7 +19,7 @@ namespace GitOut.Features.Git
             {
                 PageName = typeof(RepositoryListPage).FullName,
                 Name = "Repositories",
-                IconResourceKey = "source-commit"
+                IconResourceKey = "SourceCommit"
             });
         }
     }

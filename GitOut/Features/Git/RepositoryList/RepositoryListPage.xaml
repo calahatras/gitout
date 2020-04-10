@@ -43,7 +43,7 @@
                                     <Canvas.RenderTransform>
                                         <ScaleTransform ScaleX=".8" ScaleY=".8" />
                                     </Canvas.RenderTransform>
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource content-copy}"/>
+                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
                                 </Canvas>
                             </Button>
                             <Button
@@ -55,7 +55,7 @@
                                     <Canvas.RenderTransform>
                                         <ScaleTransform ScaleX="1" ScaleY="1" />
                                     </Canvas.RenderTransform>
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource chevron-right}"/>
+                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ChevronRight}"/>
                                 </Canvas>
                             </Button>
                         </StackPanel>

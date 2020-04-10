@@ -450,7 +450,7 @@
         <Setter Property="Content">
             <Setter.Value>
                 <Canvas Width="24" Height="24">
-                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource arrow-left}" />
+                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource ArrowLeft}" />
                 </Canvas>
             </Setter.Value>
         </Setter>
@@ -460,7 +460,7 @@
         <Setter Property="Content">
             <Setter.Value>
                 <Canvas Width="24" Height="24">
-                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource menu}" />
+                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource Menu}" />
                 </Canvas>
             </Setter.Value>
         </Setter>
