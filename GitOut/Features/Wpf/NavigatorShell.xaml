@@ -109,7 +109,7 @@
                 />
                 <StackPanel
                     Grid.Column="2"
-                    Margin="0,-24,0,0"
+                    Margin="0,-32,0,0"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                 >

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using GitOut.Features.Logging;
+using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,6 +15,7 @@ namespace GitOut.Features.Navigation
     {
         private readonly IServiceProvider provider;
         private readonly ITitleService titleService;
+        private readonly IThemeService theme;
         private readonly ILogger<NavigationService> logger;
         private readonly Stack<Tuple<ContentControl, string?, IServiceScope>> pageStack = new Stack<Tuple<ContentControl, string?, IServiceScope>>();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
@@ -24,11 +26,13 @@ namespace GitOut.Features.Navigation
             IServiceProvider provider,
             IHostApplicationLifetime life,
             ITitleService title,
+            IThemeService theme,
             ILogger<NavigationService> logger
         )
         {
             this.provider = provider;
             titleService = title;
+            this.theme = theme;
             this.logger = logger;
             life.ApplicationStopping.Register(() =>
             {
@@ -90,6 +94,7 @@ namespace GitOut.Features.Navigation
                     {
                         logger.LogInformation(LogEventId.Navigation, "Navigating to page " + pageName);
                         currentPage = page;
+                        theme.RegisterResourceProvider(page.Resources);
                         page.Show();
                     }
                     break;

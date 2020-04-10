@@ -103,27 +103,61 @@
         <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="MinWidth" Value="120"/>
-        <Setter Property="MinHeight" Value="20"/>
+        <Setter Property="MinHeight" Value="32"/>
         <Setter Property="Margin" Value="0 0 0 16"/>
         <Setter Property="AllowDrop" Value="true"/>
         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                    <Border
-                        Name="Border"
-                        CornerRadius="2"
-                        Padding="2"
-                        Background="{TemplateBinding Background}"
-                        BorderThickness="0 0 0 1"
-                        BorderBrush="{DynamicResource MaterialLightDividers}"
-                    >
+                    <Grid>
+                        <Grid Name="Inactive">
+                            <Border
+                                Name="InactiveBorder"
+                                CornerRadius="2"
+                                Padding="2"
+                                BorderThickness="0 0 0 1"
+                                BorderBrush="{DynamicResource MaterialLightDividers}"
+                            />
+                            <TextBlock
+                                x:Name="InactivePlaceholder"
+                                Text="{TemplateBinding AutomationProperties.HelpText}"
+                                Foreground="{DynamicResource MaterialForegroundBase}"
+                                FontSize="12"
+                            >
+                                <TextBlock.RenderTransform>
+                                    <MatrixTransform Matrix=".75 0 0 .75 0 -4" />
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                        </Grid>
+                        <Grid Name="Active">
+                            <Border
+                                Name="ActiveBorder"
+                                CornerRadius="2"
+                                Padding="2"
+                                BorderThickness="0 0 0 1"
+                                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                            />
+                            <TextBlock
+                                x:Name="ActivePlaceholder"
+                                Text="{TemplateBinding AutomationProperties.HelpText}"
+                                Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                FontSize="12"
+                            >
+                                <TextBlock.RenderTransform>
+                                    <MatrixTransform Matrix=".75 0 0 .75 0 -4" />
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                        </Grid>
+
+                        <ScrollViewer Margin="0 10 0 0" x:Name="PART_ContentHost" />
+
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="CommonStates">
                                 <VisualState x:Name="Normal"/>
                                 <VisualState x:Name="Disabled">
                                     <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.BorderBrush)">
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="InactiveBorder" Storyboard.TargetProperty="(Border.BorderBrush)">
                                             <ObjectAnimationUsingKeyFrames.KeyFrames>
                                                 <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{StaticResource MaterialLightDisabledText}"/>
                                             </ObjectAnimationUsingKeyFrames.KeyFrames>
@@ -132,7 +166,7 @@
                                 </VisualState>
                                 <VisualState x:Name="ReadOnly">
                                     <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.BorderBrush)">
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="InactiveBorder" Storyboard.TargetProperty="(Border.BorderBrush)">
                                             <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{StaticResource MaterialDarkDisabledText}"/>
                                         </ObjectAnimationUsingKeyFrames>
                                     </Storyboard>
@@ -142,49 +176,39 @@
                             <VisualStateGroup Name="FocusStates">
                                 <VisualState Name="Unfocused">
                                     <Storyboard>
-                                        <ColorAnimation
-                                            Storyboard.TargetName="Border"
-                                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                            To="{StaticResource MaterialLightDividersColor}"
-                                            Duration="0:0:0.1"
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Inactive"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.3"
                                         />
-                                        <ColorAnimation
-                                            Storyboard.TargetName="Placeholder"
-                                            Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
-                                            To="{StaticResource MaterialLightDividersColor}"
-                                            Duration="0:0:0.1"
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Active"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.3"
                                         />
                                     </Storyboard>
                                 </VisualState>
                                 <VisualState Name="Focused">
                                     <Storyboard>
-                                        <ColorAnimation
-                                            Storyboard.TargetName="Border"
-                                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                            To="{StaticResource PrimaryHueMidColor}"
-                                            Duration="0:0:0.2"
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Inactive"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.1"
                                         />
-                                        <ColorAnimation
-                                            Storyboard.TargetName="Placeholder"
-                                            Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
-                                            To="{StaticResource PrimaryHueMidColor}"
-                                            Duration="0:0:0.2"
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Active"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.1"
                                         />
                                     </Storyboard>
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Grid>
-                            <TextBlock
-                                x:Name="Placeholder"
-                                Text="{TemplateBinding AutomationProperties.HelpText}"
-                                Foreground="{DynamicResource MaterialLightDividers}"
-                                FontSize="10"
-                                Margin="0 -12 0 0"
-                            />
-                            <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
-                        </Grid>
-                    </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -426,7 +450,7 @@
         <Setter Property="Content">
             <Setter.Value>
                 <Canvas Width="24" Height="24">
-                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource arrow-left}" />
+                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource ArrowLeft}" />
                 </Canvas>
             </Setter.Value>
         </Setter>
@@ -436,7 +460,7 @@
         <Setter Property="Content">
             <Setter.Value>
                 <Canvas Width="24" Height="24">
-                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource menu}" />
+                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource Menu}" />
                 </Canvas>
             </Setter.Value>
         </Setter>
@@ -1065,24 +1089,18 @@
                             <Button Command="{Binding Command}" Style="{StaticResource ListViewItemButtonStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" MinWidth="32"/>
+                                        <ColumnDefinition Width="Auto" MinWidth="40"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Canvas Width="24" Height="24">
+                                    <Canvas>
                                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"/>
                                     </Canvas>
-                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontFamily="Roboto"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontFamily="Roboto" FontWeight="Light" />
                                 </Grid>
                             </Button>
                         </Grid>
                         <Grid Visibility="{Binding IsHeader, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" MinWidth="32"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="1" Foreground="{DynamicResource MaterialGray400}" FontSize="12" FontWeight="Bold" Text="{Binding Name}" FontFamily="Roboto"/>
-                            </Grid>
+                            <TextBlock Margin="16 0 0 0"  Foreground="{DynamicResource MaterialGray400}" FontSize="12" FontWeight="Bold" Text="{Binding Name}" FontFamily="Roboto"/>
                         </Grid>
                         <Separator Visibility="{Binding IsDivider, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     </Grid>

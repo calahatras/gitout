@@ -15,16 +15,8 @@
     <UserControl.Resources>
         <converters:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
         <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Color="#dd9900dd"/>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="BorderBrush">
-                <Setter.Value>
-                    <SolidColorBrush Color="#ffff66ff"/>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="4" />
             <Setter Property="Padding" Value="4 1" />

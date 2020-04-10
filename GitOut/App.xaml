@@ -21,10 +21,19 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Grid x:Name="LayoutRoot" Background="Transparent" Width="44" Height="30">
-                                <TextBlock x:Name="txt" Text="{TemplateBinding Content}" FontFamily="Segoe MDL2 Assets" FontSize="10" 
-                                   Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   RenderOptions.ClearTypeHint="Auto" TextOptions.TextRenderingMode="Aliased"  TextOptions.TextFormattingMode="Display"/>
+                            <Grid x:Name="LayoutRoot" Background="Transparent" Width="36" Height="20">
+                                <TextBlock
+                                    x:Name="txt"
+                                    Text="{TemplateBinding Content}"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="9"
+                                    Foreground="#FFFFFF"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    RenderOptions.ClearTypeHint="Auto"
+                                    TextOptions.TextRenderingMode="Aliased"
+                                    TextOptions.TextFormattingMode="Display"
+                                />
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">

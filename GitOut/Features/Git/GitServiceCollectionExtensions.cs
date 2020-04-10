@@ -17,15 +17,9 @@ namespace GitOut.Features.Git
             services.AddScoped<RepositoryListViewModel>();
             menu.Add(new MenuItemContext
             {
-                PageName = typeof(GitLogPage).FullName,
-                Name = "Log",
-                IconResourceKey = "source-commit"
-            });
-            menu.Add(new MenuItemContext
-            {
                 PageName = typeof(RepositoryListPage).FullName,
                 Name = "Repositories",
-                IconResourceKey = "source-commit"
+                IconResourceKey = "SourceCommit"
             });
         }
     }

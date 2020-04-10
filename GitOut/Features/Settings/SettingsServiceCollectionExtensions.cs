@@ -13,7 +13,7 @@ namespace GitOut.Features.Settings
             {
                 PageName = typeof(SettingsPage).FullName,
                 Name = "Inställningar",
-                IconResourceKey = "cog"
+                IconResourceKey = "Cog"
             });
         }
     }
