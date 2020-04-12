@@ -7,6 +7,7 @@ namespace GitOut.Features.Git
     public interface IGitRepository
     {
         DirectoryPath WorkingDirectory { get; }
+        string? Name { get; }
 
         Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync();
     }

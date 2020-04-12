@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
     mc:Ignorable="d"
@@ -12,84 +13,151 @@
     d:DesignWidth="800"
     x:Name="Root"
 >
-    <Grid
-        Style="{StaticResource LayoutRootGridStyle}"
-    >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel>
-            <Border Style="{StaticResource CardPanelStyle}">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource Header6TextStyle}">Resurser</TextBlock>
-                    <StackPanel Orientation="Horizontal">
-                        <Button
-                            Style="{StaticResource MaterialButtonStyle}"
-                            Command="{Binding OpenSettingsFolderCommand}"
-                            ToolTip="Öppna mappen med inställningar"
-                        >
-                            INSTÄLLNINGAR
-                        </Button>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource CardPanelStyle}">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource Header6TextStyle}">Rotmapp för git-repos</TextBlock>
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox x:Name="FolderInput" Style="{StaticResource MaterialInputStyle}" AutomationProperties.HelpText="Mapp"/>
-                        <Grid
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                        >
-                            <Button
-                                Style="{StaticResource MaterialButtonStyle}"
-                                Command="{Binding SearchRootFolderCommand}"
-                                CommandParameter="{Binding Path=Text, ElementName=FolderInput}"
-                            >
-                                SÖK
-                            </Button>
+    <UserControl.Resources>
+        <Style x:Key="BackstageMenuStyle" TargetType="{x:Type Grid}">
+            <Setter Property="MinWidth" Value="280" />
+            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+        </Style>
+        <Style x:Key="NavigateBackButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}">
+            <Setter Property="Content">
+                <Setter.Value>
+                    <Canvas Width="24" Height="24">
+                        <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource ArrowLeft}" />
+                    </Canvas>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="MaterialNavListStyle" BasedOn="{StaticResource MaterialListStyle}" TargetType="{x:Type ListBox}">
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialLightDividers}"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate DataType="MenuItem">
+                        <Grid>
+                            <Grid Visibility="{Binding IsItem, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Button Command="{Binding Command}" Style="{StaticResource ListViewItemButtonStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" MinWidth="40"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontFamily="Roboto" FontWeight="Light" />
+                                    </Grid>
+                                </Button>
+                            </Grid>
+                            <Grid Visibility="{Binding IsHeader, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Margin="16 0 0 0"  Foreground="{DynamicResource MaterialGray400}" FontSize="12" FontWeight="Bold" Text="{Binding Name}" FontFamily="Roboto"/>
+                            </Grid>
+                            <Separator Visibility="{Binding IsDivider, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </Grid>
-                    </Grid>
-                    <ListView ItemsSource="{Binding ValidRepositoryPaths}" Style="{StaticResource MaterialListStyle}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate DataType="local:ValidGitRepositoryPathViewModel">
-                                <Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Style="{StaticResource LayoutRootGridStyle}">
+        <DockPanel>
+            <Grid
+                DockPanel.Dock="Left"
+                Style="{StaticResource BackstageMenuStyle}"
+            >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid
+                    Margin="16"
+                    HorizontalAlignment="Left"
+                >
+                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{Binding NavigateBackCommand}" />
+                </Grid>
+
+                <ListBox
+                    x:Name="MenuItems"
+                    Grid.Row="1"
+                    ItemsSource="{Binding MenuItems}"
+                    MinWidth="160"
+                    Style="{StaticResource MaterialNavListStyle}"
+                />
+            </Grid>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="1">
+                <Grid Margin="0 0 0 32">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <Border Style="{StaticResource CardPanelStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Header6TextStyle}" Text="Resources" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button
+                                        Style="{StaticResource MaterialButtonStyle}"
+                                        Command="{Binding OpenSettingsFolderCommand}"
+                                        ToolTip="Open configuration folder in Explorer"
+                                        Content="CONFIGURATION"
+                                    />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource CardPanelStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Header6TextStyle}" Text="Repositories" />
+                                <Grid VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Text="{Binding Name}" />
-                                        <TextBlock Grid.Row="1" Text="{Binding WorkingDirectory}" Style="{StaticResource SecondaryTextStyle}" />
-                                    </Grid>
+                                    <TextBox x:Name="FolderInput" Style="{StaticResource MaterialInputStyle}" AutomationProperties.HelpText="Path"/>
                                     <Grid
                                         Grid.Column="1"
                                         VerticalAlignment="Center"
                                     >
                                         <Button
                                             Style="{StaticResource MaterialButtonStyle}"
-                                            Command="{Binding DataContext.AddRepositoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                        >
-                                            LÄGG TILL
-                                        </Button>
+                                            Command="{Binding SearchRootFolderCommand}"
+                                            CommandParameter="{Binding Path=Text, ElementName=FolderInput}"
+                                            Content="SEARCH"
+                                        />
                                     </Grid>
                                 </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </StackPanel>
-            </Border>
-            <themes:ThemeSettingsPicker ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}" />
-        </StackPanel>
+                                <ListView ItemsSource="{Binding ValidRepositoryPaths}" Style="{StaticResource MaterialListStyle}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate DataType="local:ValidGitRepositoryPathViewModel">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="{Binding Name}" />
+                                                    <TextBlock Grid.Row="1" Text="{Binding WorkingDirectory}" Style="{StaticResource SecondaryTextStyle}" />
+                                                </Grid>
+                                                <Grid
+                                                    Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                >
+                                                    <Button
+                                                        Style="{StaticResource MaterialButtonStyle}"
+                                                        Command="{Binding DataContext.AddRepositoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="ADD"
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </StackPanel>
+                        </Border>
+                        <themes:ThemeSettingsPicker ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}" />
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </DockPanel>
     </Grid>
 </UserControl>

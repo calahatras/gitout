@@ -2,7 +2,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:snack="GitOut.Features.Material.Snackbar"
-    xmlns:menu="GitOut.Features.Menu"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
 >
     <ResourceDictionary.MergedDictionaries>
@@ -93,7 +92,7 @@
     </Style>
 
     <Style x:Key="Header6TextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource HeaderBaseTextStyle}">
-        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="Medium"/>
     </Style>
 
@@ -442,26 +441,6 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="NavigateBackButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}">
-        <Setter Property="Content">
-            <Setter.Value>
-                <Canvas Width="24" Height="24">
-                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource ArrowLeft}" />
-                </Canvas>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="MenuButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}">
-        <Setter Property="Content">
-            <Setter.Value>
-                <Canvas Width="24" Height="24">
-                    <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource Menu}" />
-                </Canvas>
             </Setter.Value>
         </Setter>
     </Style>
@@ -1074,37 +1053,6 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="MaterialNavListStyle" BasedOn="{StaticResource MaterialListStyle}" TargetType="{x:Type ListBox}">
-        <Setter Property="BorderThickness" Value="0,0,1,0"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource MaterialLightDividers}"/>
-        <Setter Property="ItemTemplate">
-            <Setter.Value>
-                <DataTemplate DataType="menu:MenuItem">
-                    <Grid>
-                        <Grid Visibility="{Binding IsItem, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Button Command="{Binding Command}" Style="{StaticResource ListViewItemButtonStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" MinWidth="40"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Canvas>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"/>
-                                    </Canvas>
-                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontFamily="Roboto" FontWeight="Light" />
-                                </Grid>
-                            </Button>
-                        </Grid>
-                        <Grid Visibility="{Binding IsHeader, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Margin="16 0 0 0"  Foreground="{DynamicResource MaterialGray400}" FontSize="12" FontWeight="Bold" Text="{Binding Name}" FontFamily="Roboto"/>
-                        </Grid>
-                        <Separator Visibility="{Binding IsDivider, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    </Grid>
-                </DataTemplate>
             </Setter.Value>
         </Setter>
     </Style>

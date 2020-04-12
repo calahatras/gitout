@@ -8,6 +8,9 @@ using System.Xaml;
 
 namespace GitOut.Features.Wpf.Converters
 {
+    /// <summary>
+    /// Refactored version to look up resources via a binding; from https://stackoverflow.com/a/36641146
+    /// </summary>
     public class StaticResourceConverter : MarkupExtension, IValueConverter
     {
         private Control? _target;
@@ -25,13 +28,10 @@ namespace GitOut.Features.Wpf.Converters
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            var rootObjectProvider = serviceProvider.GetService(typeof(IRootObjectProvider)) as IRootObjectProvider;
-            if (rootObjectProvider == null)
+            if (serviceProvider.GetService(typeof(IRootObjectProvider)) is IRootObjectProvider rootObjectProvider)
             {
-                return this;
+                _target = rootObjectProvider.RootObject as Control;
             }
-
-            _target = rootObjectProvider.RootObject as Control;
             return this;
         }
     }

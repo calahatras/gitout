@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace GitOut.Features.Menu
+namespace GitOut.Features.Settings
 {
     public class MenuItem
     {

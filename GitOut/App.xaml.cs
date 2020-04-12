@@ -7,7 +7,6 @@ using GitOut.Features.Git;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
-using GitOut.Features.Menu;
 using GitOut.Features.Navigation;
 using GitOut.Features.Settings;
 using GitOut.Features.Storage;
@@ -67,17 +66,8 @@ namespace GitOut
             services.AddSingleton<ITitleService, TitleService>();
             services.AddSingleton<IStorage, FileStorage>();
 
-            var menuProvider = new MenuItemProvider(new[]
-            {
-                new MenuItemContext
-                {
-                    Name = "git out",
-                }
-            });
-            services.AddSingleton<IMenuItemProvider>(menuProvider);
-
-            services.AddSettingsFeature(menuProvider);
-            services.AddGitFeature(menuProvider);
+            services.AddSettingsFeature();
+            services.AddGitFeature();
             services.AddThemeFeature();
 
             services.AddOptions();

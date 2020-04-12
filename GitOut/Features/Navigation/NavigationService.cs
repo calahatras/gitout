@@ -53,6 +53,7 @@ namespace GitOut.Features.Navigation
             });
         }
 
+        public string? CurrentPage { get; private set; }
         public event EventHandler<NavigationEventArgs>? NavigationRequested;
 
         public void Back()
@@ -66,6 +67,7 @@ namespace GitOut.Features.Navigation
             OnNavigationRequested(latest);
             titleService.Title = title;
             logger.LogInformation(LogEventId.Navigation, "Navigating back");
+            CurrentPage = latest.GetType().FullName;
 
             scope.Dispose();
         }
@@ -104,6 +106,7 @@ namespace GitOut.Features.Navigation
                         logger.LogInformation(LogEventId.Navigation, "Navigating to control " + pageName);
                         OnNavigationRequested(control);
                         pageStack.Push(new Tuple<ContentControl, string?, IServiceScope>(control, currentTitle, scope));
+                        CurrentPage = pageName;
                     }
                     break;
                 default: throw new ArgumentOutOfRangeException("Invalid navigational type: " + service != null ? service.ToString() : pageName);
