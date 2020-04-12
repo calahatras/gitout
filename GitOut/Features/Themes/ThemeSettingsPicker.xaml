@@ -44,7 +44,7 @@
         Style="{StaticResource CardPanelStyle}"
     >
         <StackPanel>
-            <TextBlock Text="Tema" Style="{StaticResource Header6TextStyle}" />
+            <TextBlock Text="Theme" Style="{StaticResource Header6TextStyle}" />
             <ItemsControl ItemsSource="{Binding Themes}" Focusable="False">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
