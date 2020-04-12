@@ -14,7 +14,6 @@
     x:Name="Root"
 >
     <UserControl.Resources>
-        <converters:StaticResourceConverter x:Key="StaticResourceConverter"/>
         <Style x:Key="BackstageMenuStyle" TargetType="{x:Type Grid}">
             <Setter Property="MinWidth" Value="280" />
             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
@@ -42,7 +41,7 @@
                                             <ColumnDefinition Width="Auto" MinWidth="40"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{Binding IconResourceKey, Converter={StaticResource StaticResourceConverter}}"/>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"/>
                                         <TextBlock Grid.Column="1" Text="{Binding Name}" FontFamily="Roboto" FontWeight="Light" />
                                     </Grid>
                                 </Button>

@@ -50,10 +50,10 @@
                                                 SnapsToDevicePixels="True"
                                             >
                                                 <ContentPresenter 
-                                                Margin="{TemplateBinding Padding}"
-                                                TextElement.Foreground="{TemplateBinding Foreground}"
-                                                VerticalAlignment="Center"
-                                            />
+                                                    Margin="{TemplateBinding Padding}"
+                                                    TextElement.Foreground="{TemplateBinding Foreground}"
+                                                    VerticalAlignment="Center"
+                                                />
                                             </Border>
                                         </ControlTemplate>
                                     </Setter.Value>
