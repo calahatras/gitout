@@ -8,14 +8,14 @@ namespace GitOut.Features.Git.Log
     {
         private static readonly List<AvailableColor> colors = new List<AvailableColor>
         {
-            new AvailableColor(Color.FromArgb(255, 255, 255, 0)),
-            new AvailableColor(Color.FromArgb(255, 255, 200, 100)),
-            new AvailableColor(Color.FromArgb(255, 0, 255, 255)),
-            new AvailableColor(Color.FromArgb(255, 100, 255, 100)),
-            new AvailableColor(Color.FromArgb(255, 255, 255, 255)),
-            new AvailableColor(Color.FromArgb(255, 200, 200, 200)),
-            new AvailableColor(Color.FromArgb(255, 100, 100, 100)),
-            new AvailableColor(Color.FromArgb(255, 50, 50, 50))
+            new AvailableColor(Color.FromRgb(255, 255, 0)),
+            new AvailableColor(Color.FromRgb(255, 200, 100)),
+            new AvailableColor(Color.FromRgb(0, 255, 255)),
+            new AvailableColor(Color.FromRgb(100, 255, 100)),
+            new AvailableColor(Color.FromRgb(255, 255, 255)),
+            new AvailableColor(Color.FromRgb(200, 200, 200)),
+            new AvailableColor(Color.FromRgb(100, 100, 100)),
+            new AvailableColor(Color.FromRgb(50, 50, 50))
         };
 
         private readonly List<GitTreeNode> nodes = new List<GitTreeNode>();
