@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
 
@@ -27,6 +28,8 @@ namespace GitOut.Features.Git.Log
         public IReadOnlyCollection<GitTreeNode> Nodes => nodes;
 
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
+
+        public static void BeginProcessing() => colors.ForEach(c => c.Available = true);
 
         private IEnumerable<TreeBuildingLeaf> ProcessBottom(IEnumerable<TreeBuildingLeaf> leafs)
         {
