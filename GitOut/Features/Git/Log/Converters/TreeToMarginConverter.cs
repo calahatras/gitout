@@ -22,7 +22,7 @@ namespace GitOut.Features.Git.Log.Converters
                 .SelectMany(layers => layers)
                 .Max();
 
-            return new Thickness((maxIndex+1) * Distance, 0, 0, 0);
+            return new Thickness(10 + (maxIndex + 1) * Distance, 0, 0, 0);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
