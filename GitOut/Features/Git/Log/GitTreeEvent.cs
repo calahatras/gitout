@@ -1,29 +1,28 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 
 namespace GitOut.Features.Git.Log
 {
     public class GitTreeEvent
     {
-        private static readonly List<Color> colors;
+        private static readonly List<AvailableColor> colors;
         private readonly List<GitTreeNode> nodes;
-        private int colorIndex;
 
-        static GitTreeEvent() => colors = new List<Color>
+        static GitTreeEvent() => colors = new List<AvailableColor>
             {
-                Color.FromArgb(255, 255, 255, 0),
-                Color.FromArgb(255, 255, 200, 100),
-                Color.FromArgb(255, 0, 255, 255),
-                Color.FromArgb(255, 100, 255, 100),
-                Color.FromArgb(255, 255, 255, 255),
-                Color.FromArgb(255, 200, 200, 200),
-                Color.FromArgb(255, 100, 100, 100),
-                Color.FromArgb(255, 50, 50, 50),
+                new AvailableColor(Color.FromArgb(255, 255, 255, 0)),
+                new AvailableColor(Color.FromArgb(255, 255, 200, 100)),
+                new AvailableColor(Color.FromArgb(255, 0, 255, 255)),
+                new AvailableColor(Color.FromArgb(255, 100, 255, 100)),
+                new AvailableColor(Color.FromArgb(255, 255, 255, 255)),
+                new AvailableColor(Color.FromArgb(255, 200, 200, 200)),
+                new AvailableColor(Color.FromArgb(255, 100, 100, 100)),
+                new AvailableColor(Color.FromArgb(255, 50, 50, 50))
             };
 
-        public GitTreeEvent(GitHistoryEvent historyEvent, int colorIndex)
+        public GitTreeEvent(GitHistoryEvent historyEvent)
         {
-            this.colorIndex = colorIndex;
             Event = historyEvent;
             CommitIndex = -1;
             nodes = new List<GitTreeNode>();
@@ -33,8 +32,6 @@ namespace GitOut.Features.Git.Log
 
         public GitHistoryEvent Event { get; }
         public IReadOnlyCollection<GitTreeNode> Nodes => nodes;
-
-        public int ColorIndex => colorIndex;
 
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
 
@@ -56,7 +53,7 @@ namespace GitOut.Features.Git.Log
                         bottomLeafs.Add(new TreeBuildingLeaf(Event.Parent, leaf.Current));
                         if (Event.MergedParent != null)
                         {
-                            var node = new GitTreeNode(null, new Line(from, to++), NextColor(), true);
+                            var node = new GitTreeNode(null, new Line(from, to++), GetNextAvailableColor(), true);
                             nodes.Add(node);
                             bottomLeafs.Add(new TreeBuildingLeaf(Event.MergedParent, node));
                         }
@@ -71,12 +68,12 @@ namespace GitOut.Features.Git.Log
             }
             if (!processedCommit)
             {
-                var node = new GitTreeNode(null, new Line(from, to), NextColor(), true);
+                var node = new GitTreeNode(null, new Line(from, to), GetNextAvailableColor(), true);
                 nodes.Add(node);
                 bottomLeafs.Add(new TreeBuildingLeaf(Event.Parent, node));
                 if (Event.MergedParent != null)
                 {
-                    var mergedNode = new GitTreeNode(null, new Line(from, to++), NextColor(), true);
+                    var mergedNode = new GitTreeNode(null, new Line(from, to++), GetNextAvailableColor(), true);
                     nodes.Add(mergedNode);
                     bottomLeafs.Add(new TreeBuildingLeaf(Event.MergedParent, mergedNode));
                 }
@@ -84,7 +81,26 @@ namespace GitOut.Features.Git.Log
             return bottomLeafs;
         }
 
-        private Color NextColor() => colors[colorIndex++ % (colors.Count - 1)];
+        private Color GetNextAvailableColor()
+        {
+            AvailableColor nextColor = colors.FirstOrDefault(ac => ac.Available);
+            if (nextColor is null)
+            {
+                colors.ForEach(ac => ac.Available = true);
+                nextColor = colors[0];
+            }
+            nextColor.Available = false;
+            return nextColor.Color;
+        }
+
+        private void SetColorAvailable(Color color)
+        {
+            AvailableColor availableColor = colors.FirstOrDefault(ac => ac.Color == color);
+            if (availableColor != null)
+            {
+                availableColor.Available = true;
+            }
+        }
 
         private IEnumerable<TreeBuildingLeaf> ProcessTop(IEnumerable<TreeBuildingLeaf> leafs)
         {
@@ -109,7 +125,7 @@ namespace GitOut.Features.Git.Log
                     else
                     {
                         node = new GitTreeNode(new Line(from++, CommitIndex), null, leaf.Current.Color, true);
-                        --colorIndex;
+                        SetColorAvailable(leaf.Current.Color);
                     }
                     nodes.Add(node);
                 }
@@ -126,6 +142,17 @@ namespace GitOut.Features.Git.Log
             }
 
             return topLeafs;
+        }
+        private class AvailableColor
+        {
+            public AvailableColor(Color color)
+            {
+                Available = true;
+                Color = color;
+            }
+
+            public bool Available { get; set; }
+            public Color Color { get; }
         }
     }
 }

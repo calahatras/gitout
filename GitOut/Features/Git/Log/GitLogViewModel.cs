@@ -49,13 +49,11 @@ namespace GitOut.Features.Git.Log
             var stopwatch = Stopwatch.StartNew();
             var events = new List<GitTreeEvent>();
             IEnumerable<TreeBuildingLeaf> leafs = Enumerable.Empty<TreeBuildingLeaf>();
-            GitTreeEvent? previous = null;
             foreach (GitHistoryEvent item in log)
             {
-                var node = new GitTreeEvent(item, previous?.ColorIndex ?? 0);
+                var node = new GitTreeEvent(item);
                 leafs = node.Process(leafs);
                 events.Add(node);
-                previous = node;
             }
             Trace.WriteLine($"Built git tree: {stopwatch.Elapsed.TotalMilliseconds}ms");
 
