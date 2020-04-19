@@ -8,7 +8,7 @@ namespace GitOut.Features.Git.Log.Converters
 {
     public class TreeToMarginConverter : IValueConverter
     {
-        public const int Distance = 20;
+        public const int Distance = 15;
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
