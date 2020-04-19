@@ -28,7 +28,7 @@ namespace GitOut.Features.Git.Log
             {
                 if (value is Line bottom && Top is Line top && top.Down != bottom.Up)
                 {
-                    throw new ArgumentException(LinesDoNotMeetError);
+                    throw new ArgumentException(LinesDoNotMeetError, nameof(value));
                 }
 
                 bottomLayer = value;

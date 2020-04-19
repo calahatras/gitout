@@ -133,12 +133,12 @@ namespace GitOut.Features.Git.Log.Converters
         {
             if (!(node.Top is Line topLayer))
             {
-                throw new ArgumentException("no toplayer when commit is missing");
+                throw new ArgumentException("no top layer when commit is missing", nameof(node));
             }
 
             if (!(node.Bottom is Line bottomLayer))
             {
-                throw new ArgumentException("no bottomlayer when commit is missing");
+                throw new ArgumentException("no bottomlayer when commit is missing", nameof(node));
             }
 
             if (topLayer.Up == bottomLayer.Down)

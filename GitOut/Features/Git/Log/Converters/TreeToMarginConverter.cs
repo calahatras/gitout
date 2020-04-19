@@ -18,7 +18,7 @@ namespace GitOut.Features.Git.Log.Converters
             }
 
             int maxIndex = gitTreeEvent.Nodes
-                .Select(n => new [] { n.Top?.Up ?? 0, n.Top?.Down ?? 0, n.Bottom?.Down ?? 0})
+                .Select(n => new[] { n.Top?.Up ?? 0, n.Top?.Down ?? 0, n.Bottom?.Down ?? 0 })
                 .SelectMany(layers => layers)
                 .Max();
 

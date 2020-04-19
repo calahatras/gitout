@@ -6,30 +6,23 @@ namespace GitOut.Features.Git.Log
 {
     public class GitTreeEvent
     {
-        private static readonly List<AvailableColor> colors;
-        private readonly List<GitTreeNode> nodes;
-
-        static GitTreeEvent() => colors = new List<AvailableColor>
-            {
-                new AvailableColor(Color.FromArgb(255, 255, 255, 0)),
-                new AvailableColor(Color.FromArgb(255, 255, 200, 100)),
-                new AvailableColor(Color.FromArgb(255, 0, 255, 255)),
-                new AvailableColor(Color.FromArgb(255, 100, 255, 100)),
-                new AvailableColor(Color.FromArgb(255, 255, 255, 255)),
-                new AvailableColor(Color.FromArgb(255, 200, 200, 200)),
-                new AvailableColor(Color.FromArgb(255, 100, 100, 100)),
-                new AvailableColor(Color.FromArgb(255, 50, 50, 50))
-            };
-
-        public GitTreeEvent(GitHistoryEvent historyEvent)
+        private static readonly List<AvailableColor> colors = new List<AvailableColor>
         {
-            Event = historyEvent;
-            CommitIndex = -1;
-            nodes = new List<GitTreeNode>();
-        }
+            new AvailableColor(Color.FromArgb(255, 255, 255, 0)),
+            new AvailableColor(Color.FromArgb(255, 255, 200, 100)),
+            new AvailableColor(Color.FromArgb(255, 0, 255, 255)),
+            new AvailableColor(Color.FromArgb(255, 100, 255, 100)),
+            new AvailableColor(Color.FromArgb(255, 255, 255, 255)),
+            new AvailableColor(Color.FromArgb(255, 200, 200, 200)),
+            new AvailableColor(Color.FromArgb(255, 100, 100, 100)),
+            new AvailableColor(Color.FromArgb(255, 50, 50, 50))
+        };
 
-        public int CommitIndex { get; set; }
+        private readonly List<GitTreeNode> nodes = new List<GitTreeNode>();
 
+        public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
+
+        public int CommitIndex { get; set; } = -1;
         public GitHistoryEvent Event { get; }
         public IReadOnlyCollection<GitTreeNode> Nodes => nodes;
 
@@ -143,15 +136,12 @@ namespace GitOut.Features.Git.Log
 
             return topLeafs;
         }
+
         private class AvailableColor
         {
-            public AvailableColor(Color color)
-            {
-                Available = true;
-                Color = color;
-            }
+            public AvailableColor(Color color) => Color = color;
 
-            public bool Available { get; set; }
+            public bool Available { get; set; } = true;
             public Color Color { get; }
         }
     }
