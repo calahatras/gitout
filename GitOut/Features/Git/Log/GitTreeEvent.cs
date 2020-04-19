@@ -43,12 +43,12 @@ namespace GitOut.Features.Git.Log
                     if (Event.Parent != null)
                     {
                         leaf.Current.Bottom = new Line(from, to++);
-                        bottomLeafs.Add(new TreeBuildingLeaf(Event.Parent, leaf.Current));
+                        bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, leaf.Current));
                         if (Event.MergedParent != null)
                         {
                             var node = new GitTreeNode(null, new Line(from, to++), GetNextAvailableColor(), true);
                             nodes.Add(node);
-                            bottomLeafs.Add(new TreeBuildingLeaf(Event.MergedParent, node));
+                            bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, node));
                         }
                     }
                     ++from;
@@ -56,19 +56,22 @@ namespace GitOut.Features.Git.Log
                 else
                 {
                     leaf.Current.Bottom = new Line(from++, to++);
-                    bottomLeafs.Add(new TreeBuildingLeaf(leaf.LookingFor, leaf.Current));
+                    bottomLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, leaf.Current));
                 }
             }
             if (!processedCommit)
             {
                 var node = new GitTreeNode(null, new Line(from, to), GetNextAvailableColor(), true);
                 nodes.Add(node);
-                bottomLeafs.Add(new TreeBuildingLeaf(Event.Parent, node));
-                if (Event.MergedParent != null)
+                if (Event.Parent != null)
                 {
-                    var mergedNode = new GitTreeNode(null, new Line(from, to++), GetNextAvailableColor(), true);
-                    nodes.Add(mergedNode);
-                    bottomLeafs.Add(new TreeBuildingLeaf(Event.MergedParent, mergedNode));
+                    bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, node));
+                    if (Event.MergedParent != null)
+                    {
+                        var mergedNode = new GitTreeNode(null, new Line(from, to++), GetNextAvailableColor(), true);
+                        nodes.Add(mergedNode);
+                        bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, mergedNode));
+                    }
                 }
             }
             return bottomLeafs;
@@ -113,7 +116,7 @@ namespace GitOut.Features.Git.Log
                         // add node to topleafs, so that it's processed in ProcessBottom
                         // done only for the first branch that finds the commit, the other would be duplicates
                         // the LookingFor is unused later - it is the parents of the Event that will be used as LookingFor
-                        topLeafs.Add(new TreeBuildingLeaf(null, node));
+                        topLeafs.Add(TreeBuildingLeaf.WithoutParent(node));
                     }
                     else
                     {
@@ -126,7 +129,7 @@ namespace GitOut.Features.Git.Log
                 {
                     var newNode = new GitTreeNode(new Line(from++, to++), null, leaf.Current.Color, false);
                     nodes.Add(newNode);
-                    topLeafs.Add(new TreeBuildingLeaf(leaf.LookingFor, newNode));
+                    topLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, newNode));
                 }
             }
             if (CommitIndex == -1)
