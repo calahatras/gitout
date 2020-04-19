@@ -46,7 +46,7 @@ namespace GitOut.Features.Git.Log
                         bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, leaf.Current));
                         if (Event.MergedParent != null)
                         {
-                            var node = new GitTreeNode(null, new Line(from, to++), GetNextAvailableColor(), true);
+                            var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
                             nodes.Add(node);
                             bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, node));
                         }
@@ -61,14 +61,14 @@ namespace GitOut.Features.Git.Log
             }
             if (!processedCommit)
             {
-                var node = new GitTreeNode(null, new Line(from, to), GetNextAvailableColor(), true);
+                var node = GitTreeNode.WithBottomLine(new Line(from, to), GetNextAvailableColor(), true);
                 nodes.Add(node);
                 if (Event.Parent != null)
                 {
                     bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, node));
                     if (Event.MergedParent != null)
                     {
-                        var mergedNode = new GitTreeNode(null, new Line(from, to++), GetNextAvailableColor(), true);
+                        var mergedNode = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
                         nodes.Add(mergedNode);
                         bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, mergedNode));
                     }
@@ -111,7 +111,7 @@ namespace GitOut.Features.Git.Log
                     if (CommitIndex == -1)
                     {
                         CommitIndex = to++;
-                        node = new GitTreeNode(new Line(from++, CommitIndex), null, leaf.Current.Color, true);
+                        node = GitTreeNode.WithTopLine(new Line(from++, CommitIndex), leaf.Current.Color, true);
 
                         // add node to topleafs, so that it's processed in ProcessBottom
                         // done only for the first branch that finds the commit, the other would be duplicates
@@ -120,14 +120,14 @@ namespace GitOut.Features.Git.Log
                     }
                     else
                     {
-                        node = new GitTreeNode(new Line(from++, CommitIndex), null, leaf.Current.Color, true);
+                        node = GitTreeNode.WithTopLine(new Line(from++, CommitIndex), leaf.Current.Color, true);
                         SetColorAvailable(leaf.Current.Color);
                     }
                     nodes.Add(node);
                 }
                 else
                 {
-                    var newNode = new GitTreeNode(new Line(from++, to++), null, leaf.Current.Color, false);
+                    var newNode = GitTreeNode.WithTopLine(new Line(from++, to++), leaf.Current.Color, false);
                     nodes.Add(newNode);
                     topLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, newNode));
                 }
