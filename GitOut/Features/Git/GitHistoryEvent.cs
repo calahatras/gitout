@@ -116,7 +116,7 @@ namespace GitOut.Features.Git
                 }
                 if (line.Length > 80)
                 {
-                    mergeParent = GitCommitId.FromHash(span.Slice(80, 40));
+                    mergeParent = GitCommitId.FromHash(span.Slice(81, 40));
                 }
                 return this;
             }
