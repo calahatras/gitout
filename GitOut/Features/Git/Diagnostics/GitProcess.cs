@@ -65,13 +65,13 @@ namespace GitOut.Features.Git.Diagnostics
             void OnHandleData(object sender, DataReceivedEventArgs e)
             {
                 string? data = e.Data;
+                dataReceivedEvent.Set();
                 if (data == null)
                 {
                     dataCounter.Signal();
                 }
                 else
                 {
-                    dataReceivedEvent.Set();
                     queue.Post(data);
                 }
             }
