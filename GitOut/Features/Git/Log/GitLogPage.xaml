@@ -105,94 +105,122 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <Grid
-        Style="{StaticResource LayoutRootGridStyle}"
-    >
-        <ListView
-            ItemsSource="{Binding Entries}"
-            Style="{StaticResource GitLogListStyle}"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Style="{StaticResource MaterialToolbarStyle}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
+            <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
+                <Button
+                    Style="{StaticResource MaterialIconButtonStyle}"
+                    Command="{Binding NavigateToStageAreaCommand}"
+                    ToolTip="Open stage area"
+                >
+                    <Grid>
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FilePlus}"/>
+                        <Border Style="{StaticResource BadgeStyle}">
+                            <TextBlock Style="{StaticResource BadgeTextStyle}" Text="{Binding ChangesCount}" />
+                        </Border>
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </Grid>
+        <Grid
+            Grid.Row="1"
+            Style="{StaticResource LayoutRootGridStyle}"
         >
-            <ListView.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:GitTreeEvent}">
-                    <Grid x:Name="outerGrid" Height="28">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid>
-                            <ItemsControl ItemsSource="{Binding Nodes}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <Canvas />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Path
-                                            Fill="Transparent"
-                                            StrokeThickness="2"
-                                            Height="28"
-                                            Stroke="{Binding Color, Converter={StaticResource ColorToBrushConverter}}"
-                                        >
-                                            <Path.Data>
-                                                <MultiBinding Converter="{StaticResource TreeNodePathDataConverter}">
-                                                    <Binding Path="." />
-                                                    <Binding Path="ActualHeight" ElementName="outerGrid" />
-                                                </MultiBinding>
-                                            </Path.Data>
-                                        </Path>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </Grid>
-                        <Grid
-                            Grid.Column="1"
-                            Margin="{Binding DataContext, ElementName=outerGrid, Converter={StaticResource TreeToMarginConverter}}"
-                            DataContext="{Binding Event}"
-                        >
+            <ListView
+                ItemsSource="{Binding Entries}"
+                Style="{StaticResource GitLogListStyle}"
+            >
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:GitTreeEvent}">
+                        <Grid x:Name="outerGrid" Height="28">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <ItemsControl
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                ItemsSource="{Binding Branches}"
-                            >
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource BranchStyle}">
-                                            <TextBlock Text="{Binding Name}"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                            <TextBlock
+                            <Grid>
+                                <ItemsControl ItemsSource="{Binding Nodes}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Path
+                                                Fill="Transparent"
+                                                StrokeThickness="2"
+                                                Height="28"
+                                                Stroke="{Binding Color, Converter={StaticResource ColorToBrushConverter}}"
+                                            >
+                                                <Path.Data>
+                                                    <MultiBinding Converter="{StaticResource TreeNodePathDataConverter}">
+                                                        <Binding Path="." />
+                                                        <Binding Path="ActualHeight" ElementName="outerGrid" />
+                                                    </MultiBinding>
+                                                </Path.Data>
+                                            </Path>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                            <Grid
                                 Grid.Column="1"
-                                FontWeight="{Binding IsHead, Converter={StaticResource BooleanToFontWeightConverter}}"
-                                Text="{Binding Subject, Mode=OneWay}"
-                                VerticalAlignment="Center"
-                                TextTrimming="CharacterEllipsis"
-                            />
-                            <TextBlock
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
+                                Margin="{Binding DataContext, ElementName=outerGrid, Converter={StaticResource TreeToMarginConverter}}"
+                                DataContext="{Binding Event}"
                             >
-                                <Run Text="{Binding Author.Name, Mode=OneWay}" />
-                                <Run Text="{Binding Author.Email, Mode=OneWay}" />
-                                <Run Text="{Binding AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
-                            </TextBlock>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ItemsControl
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    ItemsSource="{Binding Branches}"
+                                >
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource BranchStyle}">
+                                                <TextBlock Text="{Binding Name}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    FontWeight="{Binding IsHead, Converter={StaticResource BooleanToFontWeightConverter}}"
+                                    Text="{Binding Subject, Mode=OneWay}"
+                                    VerticalAlignment="Center"
+                                    TextTrimming="CharacterEllipsis"
+                                />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                >
+                                    <Run Text="{Binding Author.Name, Mode=OneWay}" />
+                                    <Run Text="{Binding Author.Email, Mode=OneWay}" />
+                                    <Run Text="{Binding AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
+                                </TextBlock>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
     </Grid>
 </UserControl>
