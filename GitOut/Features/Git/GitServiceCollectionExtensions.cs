@@ -1,5 +1,6 @@
 ﻿using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
+using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,8 @@ namespace GitOut.Features.Git
             services.AddScoped<IGitRepositoryStorage, GitRepositoryStorage>();
             services.AddScoped<GitLogPage>();
             services.AddScoped<GitLogViewModel>();
+            services.AddScoped<GitStagePage>();
+            services.AddScoped<GitStageViewModel>();
             services.AddScoped<RepositoryListPage>();
             services.AddScoped<RepositoryListViewModel>();
         }

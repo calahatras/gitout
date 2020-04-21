@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -19,7 +21,64 @@ namespace GitOut.Features.Git.Diagnostics
             this.arguments = arguments;
         }
 
-        public async IAsyncEnumerable<string> ReadLines([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+        {
+            using var exec = new Process
+            {
+                EnableRaisingEvents = true,
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "git",
+                    Arguments = arguments.Arguments,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = workingDirectory.Directory
+                }
+            };
+            var watch = Stopwatch.StartNew();
+            exec.Start();
+            var source = new TaskCompletionSource<bool>();
+            if (cancellationToken != CancellationToken.None)
+            {
+                cancellationToken.Register(source.SetCanceled);
+            }
+            exec.Exited += (sender, e) => source.SetResult(true);
+            await source.Task;
+            Trace.WriteLine($"Running command {arguments.Arguments}: {watch.Elapsed.TotalMilliseconds}ms");
+        }
+
+        public async Task ExecuteAsync(StringBuilder writer, CancellationToken cancellationToken = default)
+        {
+            using var exec = new Process
+            {
+                EnableRaisingEvents = true,
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "git",
+                    Arguments = arguments.Arguments,
+                    RedirectStandardInput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = workingDirectory.Directory
+                }
+            };
+            var watch = Stopwatch.StartNew();
+            exec.Start();
+            var source = new TaskCompletionSource<bool>();
+            if (cancellationToken != CancellationToken.None)
+            {
+                cancellationToken.Register(source.SetCanceled);
+            }
+            exec.Exited += (sender, e) => source.SetResult(true);
+            using (StreamWriter processInput = exec.StandardInput)
+            {
+                await processInput.WriteAsync(writer, cancellationToken);
+            }
+            await source.Task;
+            Trace.WriteLine($"Running command {arguments.Arguments}: {watch.Elapsed.TotalMilliseconds}ms");
+        }
+
+        public async IAsyncEnumerable<string> ReadLinesAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             var dataCounter = new CountdownEvent(3);
             var dataReceivedEvent = new ManualResetEventSlim(false);

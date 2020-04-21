@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GitOut.Features.Git.Diagnostics
 {
     public interface IGitProcess
     {
-        IAsyncEnumerable<string> ReadLines(CancellationToken cancellationToken = default);
+        Task ExecuteAsync(CancellationToken cancellationToken = default);
+        Task ExecuteAsync(StringBuilder writer, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<string> ReadLinesAsync(CancellationToken cancellationToken = default);
     }
 }

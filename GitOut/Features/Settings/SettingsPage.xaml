@@ -22,7 +22,10 @@
             <Setter Property="Content">
                 <Setter.Value>
                     <Canvas Width="24" Height="24">
-                        <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource ArrowLeft}" />
+                        <Canvas.LayoutTransform>
+                            <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
+                        </Canvas.LayoutTransform>
+                        <Path Fill="{DynamicResource PrimaryHueMidForegroundBrush}" Data="{StaticResource ArrowLeftCircleOutline}" />
                     </Canvas>
                 </Setter.Value>
             </Setter>
