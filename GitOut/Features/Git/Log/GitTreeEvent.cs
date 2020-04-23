@@ -132,7 +132,12 @@ namespace GitOut.Features.Git.Log
                 {
                     var newNode = GitTreeNode.WithTopLine(new Line(from++, to++), leaf.Current.Color, false);
                     nodes.Add(newNode);
-                    topLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, newNode));
+                    if (leaf.LookingFor is null)
+                    {
+                        throw new InvalidOperationException("leaf should have something to look for");
+                    }
+
+                    topLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor, newNode));
                 }
             }
             if (commitIndex == -1)
