@@ -42,8 +42,7 @@ namespace GitOut.Features.Git.Log.Converters
             return geometry;
         }
 
-        public object[] ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture)
-            => throw new NotSupportedException();
+        public object[]? ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture) => null;
 
         private void DrawBottom(PathGeometry geometry, GitTreeNode node, double height)
         {
