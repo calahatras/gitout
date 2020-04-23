@@ -20,10 +20,10 @@ namespace GitOut.Features.Git.Log
         };
 
         private readonly List<GitTreeNode> nodes = new List<GitTreeNode>();
+        private int commitIndex = -1;
 
         public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
 
-        public int CommitIndex { get; set; } = -1;
         public GitHistoryEvent Event { get; }
         public IReadOnlyCollection<GitTreeNode> Nodes => nodes;
 
@@ -39,7 +39,7 @@ namespace GitOut.Features.Git.Log
             bool processedCommit = false;
             foreach (TreeBuildingLeaf leaf in leafs)
             {
-                if (from == CommitIndex)
+                if (from == commitIndex)
                 {
                     processedCommit = true;
 
@@ -111,10 +111,10 @@ namespace GitOut.Features.Git.Log
                 if (leaf.LookingFor == Event)
                 {
                     GitTreeNode node;
-                    if (CommitIndex == -1)
+                    if (commitIndex == -1)
                     {
-                        CommitIndex = to++;
-                        node = GitTreeNode.WithTopLine(new Line(from++, CommitIndex), leaf.Current.Color, true);
+                        commitIndex = to++;
+                        node = GitTreeNode.WithTopLine(new Line(from++, commitIndex), leaf.Current.Color, true);
 
                         // add node to topleafs, so that it's processed in ProcessBottom
                         // done only for the first branch that finds the commit, the other would be duplicates
@@ -123,7 +123,7 @@ namespace GitOut.Features.Git.Log
                     }
                     else
                     {
-                        node = GitTreeNode.WithTopLine(new Line(from++, CommitIndex), leaf.Current.Color, true);
+                        node = GitTreeNode.WithTopLine(new Line(from++, commitIndex), leaf.Current.Color, true);
                         SetColorAvailable(leaf.Current.Color);
                     }
                     nodes.Add(node);
@@ -135,9 +135,9 @@ namespace GitOut.Features.Git.Log
                     topLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, newNode));
                 }
             }
-            if (CommitIndex == -1)
+            if (commitIndex == -1)
             {
-                CommitIndex = to;
+                commitIndex = to;
             }
 
             return topLeafs;
