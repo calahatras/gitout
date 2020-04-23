@@ -12,6 +12,6 @@ namespace GitOut.Features.Wpf.Converters
             => value is Color color ? new SolidColorBrush(color) : DependencyProperty.UnsetValue;
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => throw new NotSupportedException();
+            => Binding.DoNothing;
     }
 }
