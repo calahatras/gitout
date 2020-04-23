@@ -29,6 +29,8 @@ namespace GitOut.Features.Git.Stage
         private DiffViewModel? selectedDiff;
         private bool diffWhitespace;
         private string commitMessage = string.Empty;
+        private int selectedWorkspaceIndex;
+        private int selectedIndexIndex;
 
         public GitStageViewModel(
             INavigationService navigation,
@@ -87,6 +89,16 @@ namespace GitOut.Features.Git.Stage
             set => SetProperty(ref commitMessage, value);
         }
 
+        public int SelectedWorkspaceIndex
+        {
+            get => selectedWorkspaceIndex;
+            set => SetProperty(ref selectedWorkspaceIndex, value);
+        }
+        public int SelectedIndexIndex
+        {
+            get => selectedIndexIndex;
+            set => SetProperty(ref selectedIndexIndex, value);
+        }
         public StatusChangeViewModel? SelectedChange
         {
             get => selectedChange;
@@ -183,16 +195,21 @@ namespace GitOut.Features.Git.Stage
             {
                 throw new ArgumentNullException(nameof(selectedChange), "No change is selected");
             }
-            if (selectedChange.Location == StatusChangeLocation.Index)
+            if (selectedChange.Location != StatusChangeLocation.Workspace)
             {
-                snack.Show("Sorry, can not reset from index yet");
+                snack.Show("Sorry, can only stage from workspace");
                 return;
             }
             GitPatch patch = selectedDiff.CreatePatch(viewer.Selection);
             SynchronizationContext? syncObject = SynchronizationContext.Current!;
+            int previousIndex = selectedWorkspaceIndex;
             await Repository.ExecuteApplyAsync(patch);
             await GetRepositoryStatusAsync();
-            if (selectedChange != null)
+            if (selectedChange == null)
+            {
+                SelectedWorkspaceIndex = previousIndex;
+            }
+            else
             {
                 int index = FindSortedIndex(workspaceFiles, item => selectedChange.Path.CompareTo(item.Path));
                 if (workspaceFiles[index].Path == selectedChange.Path)
@@ -314,7 +331,7 @@ namespace GitOut.Features.Git.Stage
             }
         }
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName]string? propertyName = null)
+        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
             if (!ReferenceEquals(prop, value))
             {

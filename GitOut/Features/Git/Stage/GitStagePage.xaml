@@ -105,6 +105,7 @@
                     Style="{StaticResource GitChangeListStyle}"
                     ItemsSource="{Binding WorkspaceFiles}"
                     SelectedValue="{Binding SelectedChange}"
+                    SelectedIndex="{Binding SelectedWorkspaceIndex}"
                 >
                     <ListView.InputBindings>
                         <KeyBinding
@@ -150,6 +151,7 @@
                     Style="{StaticResource GitChangeListStyle}"
                     ItemsSource="{Binding IndexFiles}"
                     SelectedValue="{Binding SelectedChange}"
+                    SelectedIndex="{Binding SelectedIndexIndex}"
                 >
                     <ListView.InputBindings>
                         <KeyBinding
