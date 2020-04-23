@@ -223,6 +223,11 @@
                         >
                             <FlowDocumentScrollViewer.InputBindings>
                                 <KeyBinding
+                                    Key="R"
+                                    Command="{Binding ResetSelectedTextCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=FlowDocumentScrollViewer}}"
+                                />
+                                <KeyBinding
                                     Key="S"
                                     Command="{Binding StageSelectedTextCommand}"
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=FlowDocumentScrollViewer}}"

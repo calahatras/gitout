@@ -7,5 +7,6 @@ namespace GitOut.Features.Git
         GitPatch Build();
         IGitPatchBuilder CreateHeader(string path, GitStatusChangeType changeType);
         IGitPatchBuilder CreateHunk(int fromFileRange, IEnumerable<PatchLine> lines);
+        IGitPatchBuilder SetMode(PatchMode mode);
     }
 }

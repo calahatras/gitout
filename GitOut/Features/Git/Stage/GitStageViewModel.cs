@@ -53,6 +53,7 @@ namespace GitOut.Features.Git.Stage
             RefreshStatusCommand = new AsyncCallbackCommand(() => GetRepositoryStatusAsync());
             CommitCommand = new AsyncCallbackCommand(() => CommitChanges(CommitMessage), () => !string.IsNullOrEmpty(CommitMessage));
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
+            ResetSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(StageSelectionAsync);
             AddAllCommand = new AsyncCallbackCommand(() => Repository.ExecuteAddAllAsync().ContinueWith(_ => GetRepositoryStatusAsync()));
             ResetHeadCommand = new AsyncCallbackCommand(() => Repository.ExecuteResetAllAsync().ContinueWith(_ => GetRepositoryStatusAsync()));
@@ -128,6 +129,7 @@ namespace GitOut.Features.Git.Stage
         public ICommand RefreshStatusCommand { get; }
         public ICommand AddAllCommand { get; }
         public ICommand StageFileCommand { get; }
+        public ICommand ResetSelectedTextCommand { get; }
         public ICommand StageSelectedTextCommand { get; }
         public ICommand ResetHeadCommand { get; }
         public ICommand CommitCommand { get; }
@@ -136,11 +138,19 @@ namespace GitOut.Features.Git.Stage
 
         public async void Navigated(NavigationType type) => await GetRepositoryStatusAsync();
 
-        private async Task<GitStatusResult> GetRepositoryStatusAsync()
+        private async Task GetRepositoryStatusAsync(SynchronizationContext? syncObject = null)
         {
+            syncObject ??= SynchronizationContext.Current!;
             GitStatusResult result = await Repository.ExecuteStatusAsync();
             ParseStatus(result);
-            return result;
+            if (selectedChange != null)
+            {
+                int index = FindSortedIndex(workspaceFiles, item => selectedChange.Path.CompareTo(item.Path));
+                if (workspaceFiles[index].Path == selectedChange.Path)
+                {
+                    await ExecuteDiffAsync(syncObject);
+                }
+            }
         }
 
         private async Task ExecuteDiffAsync(SynchronizationContext? syncObject = null)
@@ -176,13 +186,47 @@ namespace GitOut.Features.Git.Stage
         {
             if (model.Location == StatusChangeLocation.Index)
             {
+                int previousIndex = SelectedIndexIndex;
                 await Repository.ExecuteResetAsync(model.Model);
+                await GetRepositoryStatusAsync();
+                SelectedIndexIndex = previousIndex;
             }
             else
             {
+                int previousIndex = SelectedWorkspaceIndex;
                 await Repository.ExecuteAddAsync(model.Model);
+                await GetRepositoryStatusAsync();
+                SelectedWorkspaceIndex = previousIndex;
             }
-            await GetRepositoryStatusAsync();
+        }
+
+        private async Task ResetSelectionAsync(FlowDocumentScrollViewer viewer)
+        {
+            if (selectedDiff is null)
+            {
+                throw new ArgumentNullException(nameof(selectedDiff), "No diff is selected");
+            }
+            if (selectedChange == null)
+            {
+                throw new ArgumentNullException(nameof(selectedChange), "No change is selected");
+            }
+            SynchronizationContext? syncObject = SynchronizationContext.Current!;
+            string filename = Path.GetFileName(selectedChange.Path);
+            GitPatch? undopatch = selectedChange.Location == StatusChangeLocation.Workspace
+                ? selectedDiff.CreateUndoPatch(viewer.Selection)
+                : null;
+            GitPatch patch = selectedDiff.CreateResetPatch(viewer.Selection);
+            await Repository.ExecuteApplyAsync(patch);
+            await GetRepositoryStatusAsync(syncObject);
+
+            if (undopatch != null)
+            {
+                snack.ShowSuccess("Changes reset in " + filename, 8000, "UNDO", async () =>
+                {
+                    await Repository.ExecuteApplyAsync(undopatch);
+                    await GetRepositoryStatusAsync(syncObject);
+                });
+            }
         }
 
         private async Task StageSelectionAsync(FlowDocumentScrollViewer viewer)
@@ -200,7 +244,7 @@ namespace GitOut.Features.Git.Stage
                 snack.Show("Sorry, can only stage from workspace");
                 return;
             }
-            GitPatch patch = selectedDiff.CreatePatch(viewer.Selection);
+            GitPatch patch = selectedDiff.CreateAddPatch(viewer.Selection);
             SynchronizationContext? syncObject = SynchronizationContext.Current!;
             int previousIndex = selectedWorkspaceIndex;
             await Repository.ExecuteApplyAsync(patch);

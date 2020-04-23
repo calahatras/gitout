@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Threading;
 using System.Windows.Input;
 
 namespace GitOut.Features.Material.Snackbar
@@ -13,6 +14,7 @@ namespace GitOut.Features.Material.Snackbar
         public string? ActionText { get; set; }
         public ICommand? ActionCommand { get; set; }
 
+        public CancellationToken Canceled { get; set; }
         public Exception? Error { get; set; }
     }
 }

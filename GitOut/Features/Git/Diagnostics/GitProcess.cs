@@ -78,7 +78,7 @@ namespace GitOut.Features.Git.Diagnostics
             Trace.WriteLine($"Running command {arguments.Arguments}: {watch.Elapsed.TotalMilliseconds}ms");
         }
 
-        public async IAsyncEnumerable<string> ReadLinesAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<string> ReadLinesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var dataCounter = new CountdownEvent(3);
             var dataReceivedEvent = new ManualResetEventSlim(false);

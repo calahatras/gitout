@@ -93,7 +93,7 @@ namespace GitOut.Features.Git.Log
             return events;
         }
 
-        private void SetProperty<T>(ref T prop, T value, [CallerMemberName]string? propertyName = null)
+        private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
             if (!ReferenceEquals(prop, value))
             {

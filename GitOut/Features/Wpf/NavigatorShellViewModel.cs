@@ -52,6 +52,7 @@ namespace GitOut.Features.Wpf
         public ICommand MinimizeCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Minimized);
         public ICommand MaximizeCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Maximized);
         public ICommand RestoreCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Normal);
+        public ICommand ToggleWindowStateCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized);
         public ICommand CloseCommand { get; }
         public ICommand NavigateBackCommand { get; }
 
@@ -73,7 +74,7 @@ namespace GitOut.Features.Wpf
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void SetProperty<T>(ref T prop, T value, [CallerMemberName]string? propertyName = null)
+        private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
             if (!ReferenceEquals(prop, value))
             {
@@ -85,7 +86,11 @@ namespace GitOut.Features.Wpf
         private static async Task ShowSnackAsync(Snack snack, ICollection<Snack> snackStack)
         {
             Application.Current.Dispatcher.Invoke(() => snackStack.Add(snack));
-            await Task.Delay(snack.Duration).ConfigureAwait(false);
+            try
+            {
+                await Task.Delay(snack.Duration, snack.Canceled).ConfigureAwait(false);
+            }
+            catch (TaskCanceledException) { }
             Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack));
         }
     }

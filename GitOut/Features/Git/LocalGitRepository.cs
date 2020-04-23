@@ -135,7 +135,7 @@ namespace GitOut.Features.Git
             var args = GitProcessOptions.FromArguments(argumentBuilder.ToString());
 
             IGitProcess diff = CreateProcess(args);
-            IGitDiffBuilder builder = GitDiffResult.ResultFor(change);
+            IGitDiffBuilder builder = GitDiffResult.ResultFor(change, options);
             await foreach (string line in diff.ReadLinesAsync())
             {
                 builder.Feed(line);
@@ -175,7 +175,16 @@ namespace GitOut.Features.Git
 
         public Task ExecuteApplyAsync(GitPatch patch)
         {
-            IGitProcess apply = CreateProcess(GitProcessOptions.FromArguments($"apply --cached"));
+            var argumentsBuilder = new StringBuilder("apply");
+            switch (patch.Mode)
+            {
+                case PatchMode.AddIndex:
+                case PatchMode.ResetIndex:
+                    argumentsBuilder.Append(" --cached");
+                    break;
+            }
+
+            IGitProcess apply = CreateProcess(GitProcessOptions.FromArguments(argumentsBuilder.ToString()));
             return apply.ExecuteAsync(patch.Writer);
         }
 
