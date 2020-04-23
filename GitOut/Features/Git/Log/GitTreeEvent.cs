@@ -80,27 +80,6 @@ namespace GitOut.Features.Git.Log
             return bottomLeafs;
         }
 
-        private Color GetNextAvailableColor()
-        {
-            AvailableColor nextColor = colors.FirstOrDefault(ac => ac.Available);
-            if (nextColor is null)
-            {
-                colors.ForEach(ac => ac.Available = true);
-                nextColor = colors[0];
-            }
-            nextColor.Available = false;
-            return nextColor.Color;
-        }
-
-        private void SetColorAvailable(Color color)
-        {
-            AvailableColor availableColor = colors.FirstOrDefault(ac => ac.Color == color);
-            if (availableColor != null)
-            {
-                availableColor.Available = true;
-            }
-        }
-
         private IEnumerable<TreeBuildingLeaf> ProcessTop(IEnumerable<TreeBuildingLeaf> leafs)
         {
             int from = 0;
@@ -146,6 +125,27 @@ namespace GitOut.Features.Git.Log
             }
 
             return topLeafs;
+        }
+
+        private Color GetNextAvailableColor()
+        {
+            AvailableColor nextColor = colors.FirstOrDefault(ac => ac.Available);
+            if (nextColor is null)
+            {
+                colors.ForEach(ac => ac.Available = true);
+                nextColor = colors[0];
+            }
+            nextColor.Available = false;
+            return nextColor.Color;
+        }
+
+        private void SetColorAvailable(Color color)
+        {
+            AvailableColor availableColor = colors.FirstOrDefault(ac => ac.Color == color);
+            if (availableColor != null)
+            {
+                availableColor.Available = true;
+            }
         }
 
         private class AvailableColor
