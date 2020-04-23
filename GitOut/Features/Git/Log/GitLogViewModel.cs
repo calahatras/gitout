@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Windows.Data;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
@@ -21,18 +23,18 @@ namespace GitOut.Features.Git.Log
             _ = options ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             title.Title = "Log";
 
-            var entries = new ObservableCollection<GitHistoryEvent>();
+            var entries = new ObservableCollection<GitTreeEvent>();
             BindingOperations.EnableCollectionSynchronization(entries, entriesLock);
             Entries = CollectionViewSource.GetDefaultView(entries);
-            Entries.SortDescriptions.Add(new SortDescription("AuthorDate", ListSortDirection.Descending));
 
             options.Repository.ExecuteLogAsync()
+                .ContinueWith(task => BuildTree(task.Result))
                 .ContinueWith(task =>
                 {
-                    IEnumerable<GitHistoryEvent> history = task.Result;
+                    IEnumerable<GitTreeEvent> history = task.Result;
                     lock (entriesLock)
                     {
-                        foreach (GitHistoryEvent item in history)
+                        foreach (GitTreeEvent item in history)
                         {
                             entries.Add(item);
                         }
@@ -41,5 +43,22 @@ namespace GitOut.Features.Git.Log
         }
 
         public ICollectionView Entries { get; }
+
+        private IEnumerable<GitTreeEvent> BuildTree(IEnumerable<GitHistoryEvent> log)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            var events = new List<GitTreeEvent>();
+            IEnumerable<TreeBuildingLeaf> leafs = Enumerable.Empty<TreeBuildingLeaf>();
+            GitTreeEvent.ResetColors();
+            foreach (GitHistoryEvent item in log)
+            {
+                var node = new GitTreeEvent(item);
+                leafs = node.Process(leafs);
+                events.Add(node);
+            }
+            Trace.WriteLine($"Built git tree: {stopwatch.Elapsed.TotalMilliseconds}ms");
+
+            return events;
+        }
     }
 }
