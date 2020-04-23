@@ -49,7 +49,7 @@ namespace GitOut.Features.Git.Log
             var stopwatch = Stopwatch.StartNew();
             var events = new List<GitTreeEvent>();
             IEnumerable<TreeBuildingLeaf> leafs = Enumerable.Empty<TreeBuildingLeaf>();
-            GitTreeEvent.BeginProcessing();
+            GitTreeEvent.ResetColors();
             foreach (GitHistoryEvent item in log)
             {
                 var node = new GitTreeEvent(item);

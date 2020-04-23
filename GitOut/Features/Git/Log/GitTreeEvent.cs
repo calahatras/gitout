@@ -29,7 +29,7 @@ namespace GitOut.Features.Git.Log
 
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
 
-        public static void BeginProcessing() => colors.ForEach(c => c.Available = true);
+        public static void ResetColors() => colors.ForEach(c => c.Available = true);
 
         private IEnumerable<TreeBuildingLeaf> ProcessBottom(IEnumerable<TreeBuildingLeaf> leafs)
         {
