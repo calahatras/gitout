@@ -160,6 +160,11 @@
                                 VerticalAlignment="Center"
                                 ItemsSource="{Binding Branches}"
                             >
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource BranchStyle}">
