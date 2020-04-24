@@ -15,6 +15,7 @@
     <UserControl.Resources>
         <converters:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+        <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter" />
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
         <lc:TreeNodePathDataConverter x:Key="TreeNodePathDataConverter" />
 
@@ -175,10 +176,13 @@
                                 VerticalAlignment="Center"
                                 TextTrimming="CharacterEllipsis"
                             />
-                            <TextBlock Grid.Column="2">
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                            >
                                 <Run Text="{Binding Author.Name, Mode=OneWay}" />
                                 <Run Text="{Binding Author.Email, Mode=OneWay}" />
-                                <Run Text="{Binding AuthorDate, Mode=OneWay}" />
+                                <Run Text="{Binding AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
                             </TextBlock>
                         </Grid>
                     </Grid>
