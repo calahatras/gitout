@@ -41,6 +41,10 @@ namespace GitOut.Features.Git
                     throw new InvalidOperationException("Must set patch mode before hunking");
                 }
                 var edits = lines.ToList();
+                if (edits.Count == 0)
+                {
+                    return this;
+                }
                 if (fromFileRange > 1 && edits[0].Type != DiffLineType.None)
                 {
                     throw new InvalidOperationException("Cannot create patch hunk if first line is not unmodified");
