@@ -79,13 +79,13 @@
             </Button>
             <TextBlock Grid.Column="1" Text="Stage" Style="{StaticResource MaterialToolbarHeaderStyle}"/>
             <StackPanel Grid.Column="2"  Orientation="Horizontal" Style="{StaticResource MaterialToolbarOptionsStyle}">
-                <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
-                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileRefresh}"/>
-                </Button>
-                <Border Style="{StaticResource MaterialVerticalDivider}"/>
                 <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
                 </ToggleButton>
+                <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
+                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileRefresh}"/>
+                </Button>
             </StackPanel>
         </Grid>
         <Grid Margin="4 0 4 4" Grid.Row="1">
