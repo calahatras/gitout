@@ -145,6 +145,10 @@ namespace GitOut.Features.Git.Stage
             ParseStatus(result);
             if (selectedChange != null)
             {
+                if (workspaceFiles.Count == 0)
+                {
+                    return;
+                }
                 int index = FindSortedIndex(workspaceFiles, item => selectedChange.Path.CompareTo(item.Path));
                 if (workspaceFiles[index].Path == selectedChange.Path)
                 {
@@ -161,10 +165,12 @@ namespace GitOut.Features.Git.Stage
             }
             syncObject ??= SynchronizationContext.Current!;
 
-            if (selectedChange.Location == StatusChangeLocation.Workspace && selectedChange.Model.Type == GitStatusChangeType.Untracked)
+            GitStatusChange change = selectedChange.Model;
+            StatusChangeLocation location = selectedChange.Location;
+            if (change.Type == GitStatusChangeType.Untracked)
             {
-                string[] result = await File.ReadAllLinesAsync(Path.Combine(Repository.WorkingDirectory.Directory, selectedChange.Path));
-                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseFileContent(selectedChange.Model, result), null);
+                string[] result = await File.ReadAllLinesAsync(Path.Combine(Repository.WorkingDirectory.Directory, change.Path));
+                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseFileContent(change, result), null);
             }
             else
             {
@@ -173,11 +179,11 @@ namespace GitOut.Features.Git.Stage
                 {
                     optionsBuilder.IgnoreAllSpace();
                 }
-                if (selectedChange.Location == StatusChangeLocation.Index)
+                if (location == StatusChangeLocation.Index)
                 {
                     optionsBuilder.Cached();
                 }
-                GitDiffResult result = await Repository.ExecuteDiffAsync(selectedChange.Model, optionsBuilder.Build());
+                GitDiffResult result = await Repository.ExecuteDiffAsync(change, optionsBuilder.Build());
                 syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(result), null);
             }
         }
