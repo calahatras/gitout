@@ -276,13 +276,13 @@ namespace GitOut.Features.Git.Stage
         {
             foreach (GitStatusChange change in result.Changes)
             {
-                if (change.IndexStatus != GitModifiedStatusType.Unmodified)
+                if (change.IndexStatus.HasValue && change.IndexStatus != GitModifiedStatusType.Unmodified)
                 {
                     if (indexFiles.Count == 0)
                     {
                         lock (indexFilesLock)
                         {
-                            indexFiles.Insert(0, StatusChangeViewModel.AsStaged(change));
+                            indexFiles.Add(StatusChangeViewModel.AsStaged(change));
                         }
                         continue;
                     }
@@ -319,7 +319,7 @@ namespace GitOut.Features.Git.Stage
                     {
                         lock (workspaceFilesLock)
                         {
-                            workspaceFiles.Insert(0, StatusChangeViewModel.AsWorkspace(change));
+                            workspaceFiles.Add(StatusChangeViewModel.AsWorkspace(change));
                         }
                         continue;
                     }
