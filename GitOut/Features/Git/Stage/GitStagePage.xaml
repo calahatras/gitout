@@ -82,7 +82,7 @@
                 <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileRefresh}"/>
                 </Button>
-                <Border BorderThickness="1 0" BorderBrush="{DynamicResource MaterialLightDividers}" Margin="8 4"/>
+                <Border Style="{StaticResource MaterialVerticalDivider}"/>
                 <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
                 </ToggleButton>

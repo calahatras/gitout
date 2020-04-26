@@ -848,6 +848,12 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="MaterialVerticalDivider" TargetType="{x:Type Border}">
+        <Setter Property="BorderThickness" Value="1 0" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialLightDividers}" />
+        <Setter Property="Margin" Value="8 4" />
+    </Style>
+
     <Style x:Key="LayoutRootGridStyle" TargetType="{x:Type Grid}">
         <Setter Property="Background" Value="#EE303030" />
         <Setter Property="Focusable" Value="True" />
