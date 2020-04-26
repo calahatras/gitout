@@ -133,7 +133,7 @@
                                 <Canvas.LayoutTransform>
                                     <ScaleTransform ScaleX=".75" ScaleY=".75" />
                                 </Canvas.LayoutTransform>
-                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}"/>
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}"/>
                             </Canvas>
                         </Button>
                         <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding ResetHeadCommand}" ToolTip="Reset to workspace">
@@ -141,7 +141,7 @@
                                 <Canvas.LayoutTransform>
                                     <ScaleTransform ScaleX=".75" ScaleY=".75" />
                                 </Canvas.LayoutTransform>
-                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowUp}"/>
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowUp}"/>
                             </Canvas>
                         </Button>
                     </StackPanel>
