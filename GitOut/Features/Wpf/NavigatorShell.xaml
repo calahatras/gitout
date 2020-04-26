@@ -9,8 +9,8 @@
     mc:Ignorable="d"
     x:Name="window"
     Title="git out"
-    Width="1024"
-    Height="600"
+    Width="1280"
+    Height="800"
     MinHeight="300"
     MinWidth="320"
     WindowStyle="None"
@@ -26,6 +26,14 @@
     Language="sv"
     d:DataContext="{d:DesignInstance Type={x:Type local:NavigatorShellViewModel}}"
 >
+    <WindowChrome.WindowChrome>
+        <WindowChrome
+            CaptionHeight="0"
+            CornerRadius="0"
+            ResizeBorderThickness="4"
+            GlassFrameThickness="0"
+        />
+    </WindowChrome.WindowChrome>
     <Window.InputBindings>
         <KeyBinding Key="P" Command="{Binding OpenSettingsCommand}" />
         <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding NavigateBackCommand}" />
