@@ -8,20 +8,20 @@ namespace GitOut.Features.Wpf
     {
         public AsyncCallbackCommand(Func<Task> execute) : base(o => execute()) { }
 
-        public AsyncCallbackCommand(Func<Task> execute, Func<bool> canexecute) : base(o => execute(), o => canexecute()) { }
+        public AsyncCallbackCommand(Func<Task> execute, Func<bool> canExecute) : base(_ => execute(), _ => canExecute()) { }
     }
 
     public class AsyncCallbackCommand<TArg> : ICommand
     {
         private readonly Func<TArg, Task> execute;
-        private readonly Func<TArg, bool> canexecute;
+        private readonly Func<TArg, bool> canExecute;
 
         public AsyncCallbackCommand(Func<TArg, Task> execute) : this(execute, o => true) { }
 
-        public AsyncCallbackCommand(Func<TArg, Task> execute, Func<TArg, bool> canexecute)
+        public AsyncCallbackCommand(Func<TArg, Task> execute, Func<TArg, bool> canExecute)
         {
             this.execute = execute;
-            this.canexecute = canexecute;
+            this.canExecute = canExecute;
         }
 
         public event EventHandler CanExecuteChanged
@@ -30,7 +30,7 @@ namespace GitOut.Features.Wpf
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public bool CanExecute(object parameter) => canexecute((TArg)parameter);
+        public bool CanExecute(object parameter) => canExecute((TArg)parameter);
 
         public async void Execute(object parameter)
         {

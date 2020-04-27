@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -90,7 +91,7 @@ namespace GitOut.Features.Wpf
             {
                 await Task.Delay(snack.Duration, snack.Canceled).ConfigureAwait(false);
             }
-            catch (TaskCanceledException) { }
+            catch (OperationCanceledException) { }
             Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack));
         }
     }

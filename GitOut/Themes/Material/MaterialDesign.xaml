@@ -417,7 +417,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ButtonBase}">
                     <Grid
-                        x:Name="PART_grid"
                         Background="{TemplateBinding Background}"
                         TextElement.Foreground="{TemplateBinding Foreground}"
                         TextElement.FontSize="{TemplateBinding FontSize}"
@@ -429,7 +428,6 @@
                             Margin="3 3 5 5"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            x:Name="PART_contentpresenter"
                         />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -454,7 +452,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
                     <Grid
-                        x:Name="PART_grid"
                         Background="{TemplateBinding Background}"
                         TextElement.Foreground="{TemplateBinding Foreground}"
                         TextElement.FontSize="{TemplateBinding FontSize}"
@@ -466,7 +463,6 @@
                             Margin="3 3 5 5"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            x:Name="PART_contentpresenter"
                         />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -500,7 +496,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid
-                        x:Name="PART_grid"
                         ClipToBounds="True"
                         Background="Transparent"
                         Width="{TemplateBinding Width}"
@@ -512,7 +507,6 @@
                         VerticalAlignment="Center"
                     >
                         <Ellipse
-                            x:Name="PART_ellipse"
                             Fill="{DynamicResource SecondaryAccentBrush}"
                             Width="48"
                             Height="48"
@@ -528,7 +522,6 @@
                             </Ellipse.Effect>
                         </Ellipse>
                         <ContentPresenter
-                            x:Name="PART_contentpresenter"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                         />
@@ -608,7 +601,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border
-                        x:Name="PART_grid"
                         ClipToBounds="True"
                         Background="{TemplateBinding Background}"
                         TextElement.Foreground="{TemplateBinding Foreground}"
@@ -619,7 +611,6 @@
                         Height="{TemplateBinding Height}">
                         <ContentPresenter
                             Margin="{TemplateBinding Padding}"
-                            x:Name="PART_contentpresenter"
                             HorizontalAlignment="Center"
                         />
                     </Border>

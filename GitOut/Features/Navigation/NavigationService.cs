@@ -20,7 +20,7 @@ namespace GitOut.Features.Navigation
         private readonly Stack<Tuple<ContentControl, string?, IServiceScope>> pageStack = new Stack<Tuple<ContentControl, string?, IServiceScope>>();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
 
-        private Window? currentPage;
+        private Window? currentWindow;
 
         public NavigationService(
             IServiceProvider provider,
@@ -36,19 +36,21 @@ namespace GitOut.Features.Navigation
             this.logger = logger;
             life.ApplicationStopping.Register(() =>
             {
-                if (currentPage != null)
+                if (currentWindow != null)
                 {
                     try
                     {
-                        currentPage.Dispatcher.Invoke(() =>
+                        currentWindow.Dispatcher.Invoke(() =>
                         {
-                            if (currentPage.IsActive)
+                            if (currentWindow.IsActive)
                             {
-                                currentPage.Close();
+                                currentWindow.Close();
                             }
                         });
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch { }
+#pragma warning restore CA1031 // Do not catch general exception types
                 }
             });
         }
@@ -103,7 +105,7 @@ namespace GitOut.Features.Navigation
                 case Window window:
                     {
                         logger.LogInformation(LogEventId.Navigation, "Navigating to page " + pageName);
-                        currentPage = window;
+                        currentWindow = window;
                         theme.RegisterResourceProvider(window.Resources);
                         window.Show();
                     }

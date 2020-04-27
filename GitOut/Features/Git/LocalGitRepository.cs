@@ -143,35 +143,15 @@ namespace GitOut.Features.Git
             return builder.Build();
         }
 
-        public Task ExecuteAddAllAsync()
-        {
-            IGitProcess status = CreateProcess(GitProcessOptions.FromArguments("add --all"));
-            return status.ExecuteAsync();
-        }
+        public Task ExecuteAddAllAsync() => CreateProcess(GitProcessOptions.FromArguments("add --all")).ExecuteAsync();
 
-        public Task ExecuteResetAllAsync()
-        {
-            IGitProcess status = CreateProcess(GitProcessOptions.FromArguments("reset HEAD"));
-            return status.ExecuteAsync();
-        }
+        public Task ExecuteResetAllAsync() => CreateProcess(GitProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();
 
-        public Task ExecuteAddAsync(GitStatusChange change)
-        {
-            IGitProcess status = CreateProcess(GitProcessOptions.FromArguments($"add {change.Path}"));
-            return status.ExecuteAsync();
-        }
+        public Task ExecuteAddAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"add {change.Path}")).ExecuteAsync();
 
-        public Task ExecuteResetAsync(GitStatusChange change)
-        {
-            IGitProcess status = CreateProcess(GitProcessOptions.FromArguments($"reset -- {change.Path}"));
-            return status.ExecuteAsync();
-        }
+        public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
 
-        public Task ExecuteCommitAsync(string message)
-        {
-            IGitProcess status = CreateProcess(GitProcessOptions.FromArguments($"commit -m \"{message.Replace("\"", "\\\"")}\""));
-            return status.ExecuteAsync();
-        }
+        public Task ExecuteCommitAsync(string message) => CreateProcess(GitProcessOptions.FromArguments($"commit -m \"{message.Replace("\"", "\\\"")}\"")).ExecuteAsync();
 
         public Task ExecuteApplyAsync(GitPatch patch)
         {
