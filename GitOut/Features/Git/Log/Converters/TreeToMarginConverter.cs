@@ -21,7 +21,7 @@ namespace GitOut.Features.Git.Log.Converters
                 .SelectMany(n => new[] { n.Top?.Up ?? 0, n.Top?.Down ?? 0, n.Bottom?.Down ?? 0 })
                 .Max();
 
-            return new Thickness(10 + (maxIndex + 1) * Distance, 0, 0, 0);
+            return new Thickness(10 + (maxIndex + 1) * Distance, 0, 10, 0);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
