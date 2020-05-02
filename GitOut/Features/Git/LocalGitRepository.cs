@@ -17,13 +17,18 @@ namespace GitOut.Features.Git
 
         public GitStatusResult? CachedStatus { get; private set; }
 
-        public async Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync()
+        public async Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options)
         {
             IDictionary<GitCommitId, GitHistoryEvent> historyByCommitId = new Dictionary<GitCommitId, GitHistoryEvent>();
             IList<GitHistoryEvent> history = new List<GitHistoryEvent>();
             IGitHistoryEventBuilder builder = GitHistoryEvent.Builder();
             int state = 0;
-            IGitProcess log = CreateProcess(GitProcessOptions.FromArguments("-c log.showSignature=false log -z --all --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\""));
+            var argumentBuilder = new StringBuilder("-c log.showSignature=false log -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" --branches");
+            if (options.IncludeRemotes)
+            {
+                argumentBuilder.Append(" --remotes");
+            }
+            IGitProcess log = CreateProcess(GitProcessOptions.FromArguments(argumentBuilder.ToString()));
             await foreach (string line in log.ReadLinesAsync())
             {
                 switch (state)
@@ -80,12 +85,15 @@ namespace GitOut.Features.Git
                 children.ResolveParents(historyByCommitId);
             }
 
-            IGitProcess branches = CreateProcess(GitProcessOptions.FromArguments("for-each-ref --sort=-committerdate refs/heads/ --format=\"%(objectname) %(refname)\""));
+            IGitProcess branches = CreateProcess(GitProcessOptions.FromArguments("for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname)\""));
             await foreach (string line in branches.ReadLinesAsync())
             {
                 var id = GitCommitId.FromHash(line.Substring(0, 40));
-                var branch = GitBranchName.Create(line.Substring(52));
-                historyByCommitId[id].Branches.Add(branch);
+                if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? logitem))
+                {
+                    var branch = GitBranchName.Create(line.Substring(41));
+                    logitem.Branches.Add(branch);
+                }
             }
 
             IGitProcess head = CreateProcess(GitProcessOptions.FromArguments("rev-parse HEAD"));

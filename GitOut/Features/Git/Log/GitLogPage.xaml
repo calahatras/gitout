@@ -117,6 +117,17 @@
             </Grid.ColumnDefinitions>
             <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
             <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
+                <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
+                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
+                </ToggleButton>
+                <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                <Button
+                    Style="{StaticResource MaterialIconButtonStyle}"
+                    Command="{Binding RefreshStatusCommand}"
+                    ToolTip="Refresh"
+                >
+                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderRefresh}"/>
+                </Button>
                 <Button
                     Style="{StaticResource MaterialIconButtonStyle}"
                     Command="{Binding NavigateToStageAreaCommand}"

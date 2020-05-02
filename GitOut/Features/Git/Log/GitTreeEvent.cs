@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
@@ -25,6 +25,8 @@ namespace GitOut.Features.Git.Log
         public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
 
         public GitHistoryEvent Event { get; }
+        public Color BorderColor { get; private set; }
+        public Color Color { get; private set; }
         public IReadOnlyCollection<GitTreeNode> Nodes => nodes;
 
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
@@ -77,6 +79,8 @@ namespace GitOut.Features.Git.Log
                     }
                 }
             }
+            BorderColor = nodes.Last().Color;
+            Color = Color.Multiply(nodes.Last().Color, .6f);
             return bottomLeafs;
         }
 

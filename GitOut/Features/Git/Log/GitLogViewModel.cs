@@ -20,6 +20,7 @@ namespace GitOut.Features.Git.Log
         private readonly ObservableCollection<GitTreeEvent> entries = new ObservableCollection<GitTreeEvent>();
 
         private int changesCount;
+        private bool includeRemotes = true;
 
         public GitLogViewModel(
             INavigationService navigation,
@@ -34,8 +35,21 @@ namespace GitOut.Features.Git.Log
             Entries = CollectionViewSource.GetDefaultView(entries);
 
             NavigateToStageAreaCommand = new NavigateLocalCommand<object>(navigation, typeof(GitStagePage).FullName!, e => GitStagePageOptions.Stage(Repository));
+            RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
 
             Repository = options.Repository;
+        }
+
+        public bool IncludeRemotes
+        {
+            get => includeRemotes;
+            set
+            {
+                if (SetProperty(ref includeRemotes, value))
+                {
+                    _ = CheckRepositoryStatusAsync();
+                }
+            }
         }
 
         public int ChangesCount
@@ -49,6 +63,7 @@ namespace GitOut.Features.Git.Log
         public IGitRepository Repository { get; }
 
         public ICommand NavigateToStageAreaCommand { get; }
+        public ICommand RefreshStatusCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -62,7 +77,7 @@ namespace GitOut.Features.Git.Log
 
         private async Task CheckRepositoryStatusAsync()
         {
-            IEnumerable<GitHistoryEvent> tree = await Repository.ExecuteLogAsync();
+            IEnumerable<GitHistoryEvent> tree = await Repository.ExecuteLogAsync(IncludeRemotes ? LogOptions.WithRemoteBranches() : LogOptions.OnlyLocalBranches());
             IEnumerable<GitTreeEvent> history = BuildTree(tree);
             lock (entriesLock)
             {
@@ -93,13 +108,15 @@ namespace GitOut.Features.Git.Log
             return events;
         }
 
-        private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
             if (!ReferenceEquals(prop, value))
             {
                 prop = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
             }
+            return false;
         }
     }
 }
