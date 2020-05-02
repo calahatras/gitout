@@ -56,8 +56,8 @@ namespace GitOut.Features.Git.Stage
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(StageSelectionAsync);
-            AddAllCommand = new AsyncCallbackCommand(() => Repository.ExecuteAddAllAsync().ContinueWith(_ => GetRepositoryStatusAsync()));
-            ResetHeadCommand = new AsyncCallbackCommand(() => Repository.ExecuteResetAllAsync().ContinueWith(_ => GetRepositoryStatusAsync()));
+            AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync);
+            ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync);
 
             Repository = options.Repository;
             if (Repository.CachedStatus != null)
@@ -189,6 +189,20 @@ namespace GitOut.Features.Git.Stage
                 GitDiffResult result = await Repository.ExecuteDiffAsync(change, optionsBuilder.Build());
                 syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(result), null);
             }
+        }
+
+        private async Task StageAllFilesAsync()
+        {
+            SynchronizationContext? syncObject = SynchronizationContext.Current!;
+            await Repository.ExecuteAddAllAsync();
+            await GetRepositoryStatusAsync(syncObject);
+        }
+
+        private async Task ResetAllFilesAsync()
+        {
+            SynchronizationContext? syncObject = SynchronizationContext.Current!;
+            await Repository.ExecuteResetAllAsync();
+            await GetRepositoryStatusAsync(syncObject);
         }
 
         private async Task StageFileAsync(StatusChangeViewModel model)
