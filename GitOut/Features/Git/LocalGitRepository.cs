@@ -155,7 +155,7 @@ namespace GitOut.Features.Git
 
         public Task ExecuteApplyAsync(GitPatch patch)
         {
-            var argumentsBuilder = new StringBuilder("apply");
+            var argumentsBuilder = new StringBuilder("apply --ignore-whitespace");
             switch (patch.Mode)
             {
                 case PatchMode.AddIndex:
