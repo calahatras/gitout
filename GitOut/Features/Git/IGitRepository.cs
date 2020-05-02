@@ -10,6 +10,7 @@ namespace GitOut.Features.Git
         string? Name { get; }
 
         GitStatusResult? CachedStatus { get; }
+        GitHistoryEvent? Head { get; }
 
         Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync();
         Task<GitStatusResult> ExecuteStatusAsync();
@@ -21,6 +22,6 @@ namespace GitOut.Features.Git
         Task ExecuteResetAsync(GitStatusChange change);
 
         Task ExecuteApplyAsync(GitPatch patch);
-        Task ExecuteCommitAsync(string message);
+        Task ExecuteCommitAsync(GitCommitOptions options);
     }
 }

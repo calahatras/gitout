@@ -29,6 +29,7 @@ namespace GitOut.Features.Git.Stage
         private DiffViewModel? selectedDiff;
 
         private bool diffWhitespace;
+        private bool amendLastCommit;
         private string commitMessage = string.Empty;
         private int selectedWorkspaceIndex;
         private int selectedIndexIndex;
@@ -52,7 +53,7 @@ namespace GitOut.Features.Git.Stage
 
             NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
             RefreshStatusCommand = new AsyncCallbackCommand(() => GetRepositoryStatusAsync());
-            CommitCommand = new AsyncCallbackCommand(() => CommitChanges(CommitMessage), () => !string.IsNullOrEmpty(CommitMessage));
+            CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage));
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(StageSelectionAsync);
@@ -80,6 +81,23 @@ namespace GitOut.Features.Git.Stage
                     if (selectedChange != null)
                     {
                         _ = ExecuteDiffAsync();
+                    }
+                }
+            }
+        }
+
+        public bool AmendLastCommit
+        {
+            get => amendLastCommit;
+            set
+            {
+                SetProperty(ref amendLastCommit, value);
+                if (value)
+                {
+                    GitHistoryEvent? head = Repository.Head;
+                    if (head != null)
+                    {
+                        CommitMessage = head.Subject;
                     }
                 }
             }
@@ -286,12 +304,18 @@ namespace GitOut.Features.Git.Stage
             }
         }
 
-        private async Task CommitChanges(string message)
+        private async Task CommitChangesAsync()
         {
-            await Repository.ExecuteCommitAsync(message);
-            await GetRepositoryStatusAsync();
+            GitCommitOptions options = amendLastCommit
+                ? GitCommitOptions.AmendLatest(commitMessage)
+                : GitCommitOptions.CreateCommit(commitMessage);
+            await Repository.ExecuteCommitAsync(options);
             snack.ShowSuccess("Commited changes successfully");
-            CommitMessage = string.Empty;
+            await GetRepositoryStatusAsync();
+            if (!amendLastCommit)
+            {
+                CommitMessage = string.Empty;
+            }
             SelectedChange = null;
         }
 

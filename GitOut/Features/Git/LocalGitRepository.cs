@@ -16,6 +16,7 @@ namespace GitOut.Features.Git
         public string? Name => Path.GetFileName(WorkingDirectory.Directory);
 
         public GitStatusResult? CachedStatus { get; private set; }
+        public GitHistoryEvent? Head { get; private set; }
 
         public async Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync()
         {
@@ -92,7 +93,8 @@ namespace GitOut.Features.Git
             await foreach (string line in head.ReadLinesAsync())
             {
                 var id = GitCommitId.FromHash(line);
-                historyByCommitId[id].IsHead = true;
+                Head = historyByCommitId[id];
+                Head.IsHead = true;
             }
 
             return history;
@@ -151,7 +153,16 @@ namespace GitOut.Features.Git
 
         public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
 
-        public Task ExecuteCommitAsync(string message) => CreateProcess(GitProcessOptions.FromArguments($"commit -m \"{message.Replace("\"", "\\\"")}\"")).ExecuteAsync();
+        public Task ExecuteCommitAsync(GitCommitOptions options)
+        {
+            var argumentsBuilder = new StringBuilder("commit");
+            if (options.Amend)
+            {
+                argumentsBuilder.Append(" --amend");
+            }
+            argumentsBuilder.Append($" -m \"{options.Message.Replace("\"", "\\\"")}\"");
+            return CreateProcess(GitProcessOptions.FromArguments(argumentsBuilder.ToString())).ExecuteAsync();
+        }
 
         public Task ExecuteApplyAsync(GitPatch patch)
         {
