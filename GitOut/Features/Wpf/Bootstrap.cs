@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GitOut.Features.Navigation;
@@ -34,6 +34,5 @@ namespace GitOut.Features.Wpf
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
     }
 }

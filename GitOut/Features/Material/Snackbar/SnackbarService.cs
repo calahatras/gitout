@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Threading;
 using GitOut.Features.Commands;
 
 namespace GitOut.Features.Material.Snackbar
@@ -18,13 +19,22 @@ namespace GitOut.Features.Material.Snackbar
             Error = error
         });
 
-        public void ShowSuccess(string message, int duration = 3000, string? actionText = null, Action? onAction = null) => SendSnack(new Snack
+        public void ShowSuccess(string message, int duration = 3000, string? actionText = null, Action? onAction = null)
         {
-            Message = message,
-            Duration = duration,
-            ActionText = actionText,
-            ActionCommand = onAction == null ? null : new CallbackCommand(onAction)
-        });
+            var token = new CancellationTokenSource(duration);
+            SendSnack(new Snack
+            {
+                Message = message,
+                Duration = duration,
+                ActionText = actionText,
+                Canceled = token.Token,
+                ActionCommand = onAction == null ? null : new CallbackCommand(() =>
+                {
+                    token.Cancel();
+                    onAction();
+                })
+            });
+        }
 
         private void SendSnack(Snack snack) => SnackReceived?.Invoke(this, new SnackEventArgs(snack));
     }

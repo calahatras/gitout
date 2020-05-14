@@ -35,7 +35,7 @@
         />
     </WindowChrome.WindowChrome>
     <Window.InputBindings>
-        <KeyBinding Key="P" Command="{Binding OpenSettingsCommand}" />
+        <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding OpenSettingsCommand}" />
         <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding NavigateBackCommand}" />
     </Window.InputBindings>
     <Window.Resources>
@@ -109,8 +109,16 @@
         <DockPanel>
             <Grid
                 DockPanel.Dock="Top"
+                Margin="1 1 1 0"
                 Style="{StaticResource NavigationToolbarStyle}"
             >
+                <Grid.InputBindings>
+                    <MouseBinding
+                        MouseAction="LeftDoubleClick"
+                        Command="{Binding ToggleWindowStateCommand}"
+                        CommandParameter="{Binding ElementName=window}"
+                    />
+                </Grid.InputBindings>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -123,7 +131,7 @@
                     Orientation="Horizontal"
                 >
                     <Button Style="{StaticResource MenuButtonStyle}" Command="{Binding OpenSettingsCommand}" ToolTip="Settings"/>
-                    <Border BorderThickness="1 1 0 0" BorderBrush="{DynamicResource MaterialLightDividers}" Margin="8 4"/>
+                    <Border BorderThickness="1 0 0 0" BorderBrush="{DynamicResource MaterialLightDividers}" Margin="8 4"/>
 
                     <Button Style="{StaticResource MinimizeButtonStyle}" Command="{Binding MinimizeCommand}" CommandParameter="{Binding ElementName=window}"/>
                     <Button Visibility="{Binding WindowState, ElementName=window, Converter={StaticResource WindowStateToVisibilityConverter}, ConverterParameter=Normal}" Style="{StaticResource MaximizeButtonStyle}" Command="{Binding MaximizeCommand}" CommandParameter="{Binding ElementName=window}"/>

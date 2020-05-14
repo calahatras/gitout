@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,7 +20,7 @@ namespace GitOut.Features.Navigation
         private readonly Stack<Tuple<ContentControl, string?, IServiceScope>> pageStack = new Stack<Tuple<ContentControl, string?, IServiceScope>>();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
 
-        private Window? currentPage;
+        private Window? currentWindow;
 
         public NavigationService(
             IServiceProvider provider,
@@ -36,19 +36,21 @@ namespace GitOut.Features.Navigation
             this.logger = logger;
             life.ApplicationStopping.Register(() =>
             {
-                if (currentPage != null)
+                if (currentWindow != null)
                 {
                     try
                     {
-                        currentPage.Dispatcher.Invoke(() =>
+                        currentWindow.Dispatcher.Invoke(() =>
                         {
-                            if (currentPage.IsActive)
+                            if (currentWindow.IsActive)
                             {
-                                currentPage.Close();
+                                currentWindow.Close();
                             }
                         });
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch { }
+#pragma warning restore CA1031 // Do not catch general exception types
                 }
             });
         }
@@ -62,12 +64,20 @@ namespace GitOut.Features.Navigation
             {
                 return;
             }
-            (ContentControl _, string _, IServiceScope scope) = pageStack.Pop();
+            (ContentControl current, string _, IServiceScope scope) = pageStack.Pop();
             (ContentControl latest, string? title, IServiceScope _) = pageStack.Peek();
             OnNavigationRequested(latest);
             titleService.Title = title;
-            logger.LogInformation(LogEventId.Navigation, "Navigating back");
             CurrentPage = latest.GetType().FullName;
+            logger.LogInformation(LogEventId.Navigation, $"Navigating back to {CurrentPage} ({title})");
+            if (current.DataContext is INavigationListener navigatedToContext)
+            {
+                navigatedToContext.Navigated(NavigationType.NavigatedLeave);
+            }
+            if (latest.DataContext is INavigationListener revisitedContext)
+            {
+                revisitedContext.Navigated(NavigationType.NavigatedBack);
+            }
 
             scope.Dispose();
         }
@@ -92,21 +102,25 @@ namespace GitOut.Features.Navigation
             }
             switch (service = scope.ServiceProvider.GetService(pageType))
             {
-                case Window page:
+                case Window window:
                     {
                         logger.LogInformation(LogEventId.Navigation, "Navigating to page " + pageName);
-                        currentPage = page;
-                        theme.RegisterResourceProvider(page.Resources);
-                        page.Show();
+                        currentWindow = window;
+                        theme.RegisterResourceProvider(window.Resources);
+                        window.Show();
                     }
                     break;
-                case UserControl control:
+                case UserControl page:
                     {
                         string? currentTitle = titleService.Title;
                         logger.LogInformation(LogEventId.Navigation, "Navigating to control " + pageName);
-                        OnNavigationRequested(control);
-                        pageStack.Push(new Tuple<ContentControl, string?, IServiceScope>(control, currentTitle, scope));
+                        OnNavigationRequested(page);
+                        pageStack.Push(new Tuple<ContentControl, string?, IServiceScope>(page, currentTitle, scope));
                         CurrentPage = pageName;
+                        if (page.DataContext is INavigationListener listener)
+                        {
+                            listener.Navigated(NavigationType.Initial);
+                        }
                     }
                     break;
                 default: throw new ArgumentOutOfRangeException("Invalid navigational type: " + service != null ? service.ToString() : pageName);
