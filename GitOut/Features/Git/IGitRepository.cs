@@ -11,7 +11,7 @@ namespace GitOut.Features.Git
 
         GitStatusResult? CachedStatus { get; }
 
-        Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync();
+        Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options);
         Task<GitStatusResult> ExecuteStatusAsync();
         Task<GitDiffResult> ExecuteDiffAsync(GitStatusChange change, DiffOptions options);
 
