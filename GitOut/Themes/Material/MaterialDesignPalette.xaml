@@ -6,6 +6,7 @@
     <Color x:Key="MaterialLightDividersColor" A="212" R="255" G="255" B="255"/>
     <Color x:Key="MaterialBackgroundBackgroundColor" A="98" R="48" G="48" B="48"/>
     <Color x:Key="MaterialGray50Color" A="255" R="250" G="250" B="250"/>
+    <Color x:Key="MaterialGray300Color" A="178" R="255" G="255" B="255"/>
     <Color x:Key="MaterialGray500Color" A="255" R="158" G="158" B="158"/>
     <Color x:Key="MaterialGray800Color" A="255" R="66" G="66" B="66"/>
     <Color x:Key="MaterialBackgroundHoverColor" A="16" R="255" G="255" B="255"/>

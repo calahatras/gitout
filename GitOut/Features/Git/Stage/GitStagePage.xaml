@@ -243,12 +243,12 @@
                         </FlowDocumentScrollViewer>
                     </Grid>
                 </ScrollViewer>
-                <Border Grid.Row="1" Margin="4 8 0 0" Padding="0 2 8 2" Style="{StaticResource CardPanelStyle}">
+                <Border Grid.Row="1" Margin="4 8 0 1" Padding="0 2 8 2" Style="{StaticResource CardPanelStyle}">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" MinWidth="180"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         <TextBox
                             Style="{StaticResource MaterialFormAreaStyle}"
                             Text="{Binding CommitMessage, UpdateSourceTrigger=PropertyChanged}"
@@ -259,9 +259,21 @@
                                 <KeyBinding Key="Return" Modifiers="Shift" Command="{Binding CommitCommand}" />
                             </TextBox.InputBindings>
                         </TextBox>
-                        <Button Grid.Column="1" Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding CommitCommand}" ToolTip="Commit">
-                            <Path Fill="{StaticResource MaterialForegroundBase}" Data="{StaticResource ArrowRightBox}"/>
-                        </Button>
+                        <Grid
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Margin="8 0 0 8"
+                        >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" MinWidth="180"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" Content="Amend" IsChecked="{Binding AmendLastCommit}"/>
+                            <Button Grid.Column="2" Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding CommitCommand}" ToolTip="Commit">
+                                <Path Fill="{StaticResource MaterialForegroundBase}" Data="{StaticResource ArrowRightBox}"/>
+                            </Button>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
