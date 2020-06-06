@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Commands;
@@ -13,9 +13,12 @@ using GitOut.Features.Navigation;
 
 namespace GitOut.Features.Git.RepositoryList
 {
-    public class RepositoryListViewModel
+    public class RepositoryListViewModel : INavigationListener
     {
-        public readonly object repositoriesLock = new object();
+        private readonly object repositoriesLock = new object();
+        private readonly ObservableCollection<IGitRepository> repositories = new ObservableCollection<IGitRepository>();
+
+        private readonly IDisposable subscription;
 
         public RepositoryListViewModel(
             INavigationService navigation,
@@ -23,7 +26,6 @@ namespace GitOut.Features.Git.RepositoryList
             ISnackbarService snacks
         )
         {
-            var repositories = new ObservableCollection<IGitRepository>();
             BindingOperations.EnableCollectionSynchronization(repositories, repositoriesLock);
             Repositories = CollectionViewSource.GetDefaultView(repositories);
             Repositories.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
@@ -40,14 +42,23 @@ namespace GitOut.Features.Git.RepositoryList
                 text => snacks.ShowSuccess("Copied text to clipboard")
             );
 
-            Task.Run(() =>
+            subscription = storage.Repositories.Subscribe(finalList =>
             {
-                IEnumerable<IGitRepository> repos = storage.GetAll();
                 lock (repositoriesLock)
                 {
-                    foreach (IGitRepository repo in repos)
+                    foreach (IGitRepository repo in finalList)
                     {
-                        repositories.Add(repo);
+                        if (!repositories.Any(item => item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory)))
+                        {
+                            repositories.Add(repo);
+                        }
+                    }
+                    for (int i = 0; i < repositories.Count; ++i)
+                    {
+                        if (finalList.All(item => !item.WorkingDirectory.Directory.Equals(repositories[i].WorkingDirectory.Directory)))
+                        {
+                            repositories.RemoveAt(i--);
+                        }
                     }
                 };
             });
@@ -56,5 +67,13 @@ namespace GitOut.Features.Git.RepositoryList
         public ICollectionView Repositories { get; }
         public ICommand NavigateToLogCommand { get; }
         public ICommand CopyContentCommand { get; }
+
+        public void Navigated(NavigationType type)
+        {
+            if (type == NavigationType.NavigatedLeave)
+            {
+                subscription.Dispose();
+            }
+        }
     }
 }

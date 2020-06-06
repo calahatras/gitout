@@ -1,7 +1,10 @@
-﻿namespace GitOut.Features.Settings
+﻿using System;
+using System.IO;
+
+namespace GitOut.Features.Settings
 {
-    public class SettingsOptions
+    public static class SettingsOptions
     {
-        public string? SettingsFolder { get; set; }
+        public static string GetSettingsPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gitout", "config.json");
     }
 }

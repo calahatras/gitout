@@ -14,7 +14,6 @@ using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
-using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Settings
 {
@@ -29,8 +28,7 @@ namespace GitOut.Features.Settings
             INavigationService navigation,
             ISnackbarService snacks,
             IThemeService themes,
-            IGitRepositoryStorage storage,
-            IOptions<SettingsOptions> options
+            IGitRepositoryStorage storage
         )
         {
             title.Title = "Settings";
@@ -51,7 +49,7 @@ namespace GitOut.Features.Settings
             };
             MenuItems = CollectionViewSource.GetDefaultView(menuItems);
 
-            OpenSettingsFolderCommand = new NavigateExternalCommand(new Uri("file://" + options.Value.SettingsFolder));
+            OpenSettingsFolderCommand = new NavigateExternalCommand(new Uri("file://" + Directory.GetParent(SettingsOptions.GetSettingsPath())));
             SearchRootFolderCommand = new CallbackCommand<string>(
                 folder =>
                 {
