@@ -6,9 +6,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using GitOut.Features.Commands;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -188,10 +190,11 @@ namespace GitOut.Features.Git.Stage
 
             GitStatusChange change = selectedChange.Model;
             StatusChangeLocation location = selectedChange.Location;
+            double pixelsPerDip = VisualTreeHelper.GetDpi(Application.Current.MainWindow).PixelsPerDip;
             if (change.Type == GitStatusChangeType.Untracked)
             {
                 string[] result = await File.ReadAllLinesAsync(Path.Combine(Repository.WorkingDirectory.Directory, change.Path));
-                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseFileContent(change, result), null);
+                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseFileContent(change, result, pixelsPerDip), null);
             }
             else
             {
@@ -205,7 +208,13 @@ namespace GitOut.Features.Git.Stage
                     optionsBuilder.Cached();
                 }
                 GitDiffResult result = await Repository.ExecuteDiffAsync(change, optionsBuilder.Build());
-                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(result), null);
+                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(
+                    result,
+                    pixelsPerDip,
+                    (Brush)Application.Current.Resources["MaterialLightDividers"],
+                    (Brush)Application.Current.Resources["MaterialGray400"]
+                ),
+                null);
             }
         }
 

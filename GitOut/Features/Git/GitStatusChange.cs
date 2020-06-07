@@ -5,7 +5,7 @@ namespace GitOut.Features.Git
 {
     public class GitStatusChange
     {
-        public GitStatusChange(
+        private GitStatusChange(
             GitStatusChangeType type,
             GitModifiedStatusType? indexStatus,
             GitModifiedStatusType? workspaceStatus,

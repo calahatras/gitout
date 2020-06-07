@@ -17,7 +17,7 @@ namespace GitOut.Features.Git.Stage
         private readonly StatusChangeLocation location;
         private readonly List<(Run, HunkLine)> diffContexts;
 
-        public DiffViewModel(
+        private DiffViewModel(
             GitStatusChangeType changeType,
             string path,
             StatusChangeLocation location,
@@ -52,7 +52,7 @@ namespace GitOut.Features.Git.Stage
             return CreatePatch(selection, true, StatusChangeLocation.Index);
         }
 
-        public static DiffViewModel ParseDiff(GitDiffResult result)
+        public static DiffViewModel ParseDiff(GitDiffResult result, double pixelsPerDip, Brush dividerBrush, Brush headerForeground)
         {
             var document = new FlowDocument
             {
@@ -62,13 +62,12 @@ namespace GitOut.Features.Git.Stage
             };
             var lineNumbers = new List<LineNumberViewModel>();
             double maxWidth = 0;
-            double pixelsPerDip = VisualTreeHelper.GetDpi(Application.Current.MainWindow).PixelsPerDip;
             var diffContexts = new List<(Run, HunkLine)>();
             foreach (GitDiffHunk hunk in result.Hunks)
             {
                 var section = new Section
                 {
-                    BorderBrush = (Brush)Application.Current.Resources["MaterialLightDividers"],
+                    BorderBrush = dividerBrush,
                     BorderThickness = new Thickness(0, 0, 0, 1)
                 };
                 foreach (HunkLine text in hunk.Lines)
@@ -78,7 +77,7 @@ namespace GitOut.Features.Git.Stage
                     {
                         DiffLineType.Added => CreateAddedParagraph(text.StrippedLine),
                         DiffLineType.Removed => CreateRemovedParagraph(text.StrippedLine),
-                        DiffLineType.Header => CreateHeaderParagraph(text.StrippedLine),
+                        DiffLineType.Header => CreateHeaderParagraph(text.StrippedLine, headerForeground),
                         _ => CreateDefaultParagraph(text.StrippedLine)
                     };
                     double width = new FormattedText(text.StrippedLine, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, pixelsPerDip).Width;
@@ -98,10 +97,10 @@ namespace GitOut.Features.Git.Stage
                     Margin = new Thickness(0)
                 };
 
-            static Paragraph CreateHeaderParagraph(string text) => new Paragraph(new Run(text))
+            static Paragraph CreateHeaderParagraph(string text, Brush foreground) => new Paragraph(new Run(text))
             {
                 Background = Brushes.Transparent,
-                Foreground = (Brush)Application.Current.Resources["MaterialGray400"],
+                Foreground = foreground,
                 FontSize = 11,
                 Margin = new Thickness(0)
             };
@@ -119,7 +118,7 @@ namespace GitOut.Features.Git.Stage
             };
         }
 
-        public static DiffViewModel? ParseFileContent(GitStatusChange origin, string[] result)
+        public static DiffViewModel? ParseFileContent(GitStatusChange origin, string[] result, double pixelsPerDip)
         {
             var document = new FlowDocument
             {
@@ -129,7 +128,6 @@ namespace GitOut.Features.Git.Stage
             };
             var lineNumbers = new List<LineNumberViewModel>();
             double maxWidth = 0;
-            double pixelsPerDip = VisualTreeHelper.GetDpi(Application.Current.MainWindow).PixelsPerDip;
             int lineNumber = 0;
             var content = new Paragraph
             {
