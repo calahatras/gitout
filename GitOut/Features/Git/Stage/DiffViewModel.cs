@@ -172,22 +172,34 @@ namespace GitOut.Features.Git.Stage
             {
                 throw new InvalidOperationException("Invalid state, could not find matching paragraph");
             }
-            // find closest unedited line from selected paragraph, we need that text and line number
+
             var lines = new List<PatchLine>();
+            // find closest unedited line from selected paragraph, we need that text and line number
             int fromRangeIndex = 0, startOffset;
+            if (diffContexts[contextOffset].Item2.Type == DiffLineType.Header)
+            {
+                // user selected a header line; increment offset so that we actually get index from header line and not previous hunk
+                ++contextOffset;
+            }
             for (startOffset = contextOffset - 1; startOffset >= 0; --startOffset)
             {
                 HunkLine line = diffContexts[startOffset].Item2;
                 if (line.Type == DiffLineType.Header)
                 {
                     // since a header is only found if line is on first line number, set fromRange to 0
-                    fromRangeIndex = 0;
+                    fromRangeIndex = line.FromIndex!.Value;
                     break;
                 }
                 if (line.Type == DiffLineType.None || line.Type == DiffLineType.Removed)
                 {
                     lines.Insert(0, PatchLine.CreateLine(DiffLineType.None, line.StrippedLine));
                     fromRangeIndex = line.FromIndex!.Value;
+                    break;
+                }
+                if (options.Mode == PatchMode.ResetIndex && line.Type == DiffLineType.Added)
+                {
+                    lines.Insert(0, PatchLine.CreateLine(DiffLineType.None, line.StrippedLine));
+                    fromRangeIndex = line.ToIndex!.Value;
                     break;
                 }
             }
@@ -223,6 +235,11 @@ namespace GitOut.Features.Git.Stage
                 {
                     HunkLine line = diffContexts[endOffset].Item2;
                     if (line.Type == DiffLineType.None || line.Type == DiffLineType.Removed)
+                    {
+                        lines.Add(PatchLine.CreateLine(DiffLineType.None, options.TextTransform.Transform(line.StrippedLine)));
+                        break;
+                    }
+                    if (options.Mode == PatchMode.ResetIndex && line.Type == DiffLineType.Added)
                     {
                         lines.Add(PatchLine.CreateLine(DiffLineType.None, line.StrippedLine));
                         break;

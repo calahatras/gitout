@@ -30,7 +30,6 @@ namespace GitOut.Features.Git
                 {
                     throw new InvalidOperationException("Must set patch mode before building");
                 }
-                patchBuilder.Append('\n');
                 return new GitPatch(patchBuilder, mode);
             }
 
