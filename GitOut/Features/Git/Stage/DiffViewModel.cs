@@ -37,20 +37,14 @@ namespace GitOut.Features.Git.Stage
         public FlowDocument Document { get; }
         public IEnumerable<LineNumberViewModel> LineNumbers { get; }
 
-        public GitPatch CreateResetPatch(TextSelection selection)
-            => CreatePatch(selection, false, location);
+        public GitPatch CreateResetPatch(TextRange selection)
+            => CreatePatch(selection, PatchOptions.ResetFrom(location));
 
-        public GitPatch CreateUndoPatch(TextSelection selection)
-            => CreatePatch(selection, true, StatusChangeLocation.Workspace);
+        public GitPatch CreateUndoPatch(TextRange selection)
+            => CreatePatch(selection, PatchOptions.AddFrom(StatusChangeLocation.None, PatchLineTransform.None));
 
-        public GitPatch CreateAddPatch(TextSelection selection)
-        {
-            if (location == StatusChangeLocation.Index)
-            {
-                throw new InvalidOperationException("Cannot stage from index");
-            }
-            return CreatePatch(selection, true, StatusChangeLocation.Index);
-        }
+        public GitPatch CreateAddPatch(TextRange selection, PatchLineTransform options)
+            => CreatePatch(selection, PatchOptions.AddFrom(location, options));
 
         public static DiffViewModel ParseDiff(GitDiffResult result, double pixelsPerDip, Brush dividerBrush, Brush headerForeground)
         {
@@ -151,17 +145,10 @@ namespace GitOut.Features.Git.Stage
             return new DiffViewModel(GitStatusChangeType.Untracked, origin.Path, StatusChangeLocation.Workspace, document, lineNumbers, diffContexts);
         }
 
-        private GitPatch CreatePatch(TextSelection selection, bool keep, StatusChangeLocation applyLocation)
+        private GitPatch CreatePatch(TextRange selection, PatchOptions options)
         {
             IGitPatchBuilder builder = GitPatch.Builder();
-            if (applyLocation == StatusChangeLocation.Index)
-            {
-                builder.SetMode(keep ? PatchMode.AddIndex : PatchMode.ResetIndex);
-            }
-            else
-            {
-                builder.SetMode(keep ? PatchMode.AddWorkspace : PatchMode.ResetWorkspace);
-            }
+            builder.SetMode(options.Mode);
             builder.CreateHeader(path, changeType);
 
             TextPointer start = selection.Start;
@@ -192,7 +179,7 @@ namespace GitOut.Features.Git.Stage
                 }
                 if (line.Type == DiffLineType.None || line.Type == DiffLineType.Removed)
                 {
-                    lines.Insert(0, PatchLine.CreateLine(DiffLineType.None, line.StrippedLine));
+                    lines.Insert(0, PatchLine.CreateLine(DiffLineType.None, options.TextTransform.Transform(line.StrippedLine)));
                     fromRangeIndex = line.FromIndex!.Value;
                     break;
                 }
@@ -221,7 +208,7 @@ namespace GitOut.Features.Git.Stage
                     }
                     continue;
                 }
-                lines.Add(PatchLine.CreateLine(line.Type, line.StrippedLine));
+                lines.Add(PatchLine.CreateLine(line.Type, options.TextTransform.Transform(line.StrippedLine)));
                 if (run == end.Parent)
                 {
                     break;
@@ -250,6 +237,32 @@ namespace GitOut.Features.Git.Stage
             builder.CreateHunk(fromRangeIndex, lines);
             Trace.WriteLine(builder.Build().Writer.ToString());
             return builder.Build();
+        }
+
+        private struct PatchOptions
+        {
+            public PatchOptions(PatchMode patchMode, PatchLineTransform textTransform) : this()
+            {
+                Mode = patchMode;
+                TextTransform = textTransform;
+            }
+
+            public PatchMode Mode { get; }
+            public PatchLineTransform TextTransform { get; }
+
+            public static PatchOptions ResetFrom(StatusChangeLocation source) => new PatchOptions(source switch
+            {
+                StatusChangeLocation.Index => PatchMode.ResetIndex,
+                StatusChangeLocation.Workspace => PatchMode.ResetWorkspace,
+                _ => throw new InvalidOperationException($"Invalid source location for reset {source}"),
+            }, PatchLineTransform.None);
+
+            public static PatchOptions AddFrom(StatusChangeLocation source, PatchLineTransform textTransform) => new PatchOptions(source switch
+            {
+                StatusChangeLocation.None => PatchMode.AddWorkspace,
+                StatusChangeLocation.Workspace => PatchMode.AddIndex,
+                _ => throw new InvalidOperationException($"Invalid source location for add {source}"),
+            }, textTransform);
         }
     }
 }

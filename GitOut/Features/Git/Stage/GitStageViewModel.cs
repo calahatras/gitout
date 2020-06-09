@@ -15,12 +15,14 @@ using GitOut.Features.Commands;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
+using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Git.Stage
 {
     public class GitStageViewModel : INotifyPropertyChanged, INavigationListener
     {
         private readonly ISnackbarService snack;
+        private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
 
         private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new ObservableCollection<StatusChangeViewModel>();
         private readonly object workspaceFilesLock = new object();
@@ -39,13 +41,16 @@ namespace GitOut.Features.Git.Stage
         public GitStageViewModel(
             INavigationService navigation,
             ITitleService title,
-            ISnackbarService snack
+            ISnackbarService snack,
+            IOptionsMonitor<GitStageOptions> stagingOptions
         )
         {
             GitStagePageOptions options = navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             title.Title = "Stage";
 
+            this.snack = snack;
+            this.stagingOptions = stagingOptions;
             Repository = options.Repository;
 
             BindingOperations.EnableCollectionSynchronization(workspaceFiles, workspaceFilesLock);
@@ -67,8 +72,6 @@ namespace GitOut.Features.Git.Stage
             {
                 ParseStatus(Repository.CachedStatus);
             }
-
-            this.snack = snack;
         }
 
         public IGitRepository Repository { get; }
@@ -294,7 +297,12 @@ namespace GitOut.Features.Git.Stage
                 snack.Show("Sorry, can only stage from workspace");
                 return;
             }
-            GitPatch patch = selectedDiff.CreateAddPatch(viewer.Selection);
+            IPatchLineTransformBuilder builder = PatchLineTransform.Builder();
+            if (stagingOptions.CurrentValue.TrimLineEndings)
+            {
+                builder.TrimLines();
+            }
+            GitPatch patch = selectedDiff.CreateAddPatch(viewer.Selection, builder.Build());
             SynchronizationContext? syncObject = SynchronizationContext.Current!;
             int previousIndex = selectedWorkspaceIndex;
             await Repository.ExecuteApplyAsync(patch);
