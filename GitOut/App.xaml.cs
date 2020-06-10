@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using GitOut.Features.Git;
 using GitOut.Features.Git.RepositoryList;
+using GitOut.Features.Git.Storage;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -12,6 +13,7 @@ using GitOut.Features.Settings;
 using GitOut.Features.Storage;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,6 +27,7 @@ namespace GitOut
         public App()
         {
             host = new HostBuilder()
+                .ConfigureAppConfiguration(config => config.AddJsonFile(SettingsOptions.GetSettingsPath(), true, true))
                 .ConfigureServices(ConfigureServices)
                 .ConfigureLogging((host, builder) =>
                 {
@@ -64,7 +67,7 @@ namespace GitOut
             services.AddSingleton<ISnackbarService, SnackbarService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<ITitleService, TitleService>();
-            services.AddSingleton<IStorage, FileStorage>();
+            services.AddSingleton<IWritableStorage, FileStorage>();
 
             services.AddSettingsFeature();
             services.AddGitFeature();
@@ -76,9 +79,7 @@ namespace GitOut
                 options.StartupWindow = typeof(NavigatorShell).FullName!;
                 options.StartupType = typeof(RepositoryListPage).FullName!;
             });
-            services.AddOptions<SettingsOptions>().Configure(options =>
-                options.SettingsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gitout")
-            );
+            services.AddOptions<GitStoreOptions>().Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
             services.AddLogging();
 
             services.AddTransient<NavigatorShellViewModel>();
