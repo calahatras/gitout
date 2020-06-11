@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
     mc:Ignorable="d"
