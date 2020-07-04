@@ -25,6 +25,7 @@ namespace GitOut.Features.Settings
     {
         private readonly IWritableStorage storage;
         private bool trimLineEndings;
+        private string tabTransformText;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         public SettingsViewModel() { }
@@ -101,6 +102,7 @@ namespace GitOut.Features.Settings
             NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
 
             trimLineEndings = stageOptions.CurrentValue.TrimLineEndings;
+            tabTransformText = stageOptions.CurrentValue.TabTransformText;
             stageOptions.OnChange(value => SetProperty(ref trimLineEndings, value.TrimLineEndings));
         }
 
@@ -114,10 +116,19 @@ namespace GitOut.Features.Settings
             {
                 if (SetProperty(ref trimLineEndings, value))
                 {
-                    storage.Write(GitStageOptions.SectionKey, new GitStageOptions
-                    {
-                        TrimLineEndings = trimLineEndings
-                    });
+                    PersistStorage();
+                }
+            }
+        }
+
+        public string TabTransformText
+        {
+            get => tabTransformText;
+            set
+            {
+                if (SetProperty(ref tabTransformText, value))
+                {
+                    PersistStorage();
                 }
             }
         }
@@ -129,6 +140,12 @@ namespace GitOut.Features.Settings
         public ICommand NavigateBackCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void PersistStorage() => storage.Write(GitStageOptions.SectionKey, new GitStageOptions
+        {
+            TrimLineEndings = trimLineEndings,
+            TabTransformText = tabTransformText
+        });
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

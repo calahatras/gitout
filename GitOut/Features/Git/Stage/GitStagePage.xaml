@@ -99,9 +99,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <Grid
-                wpf:GridSplitterBehavior.FreezeRow="2"
-            >
+            <Grid wpf:GridSplitterBehavior.FreezeRow="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" MinHeight="20"/>
                     <RowDefinition Height="Auto"/>

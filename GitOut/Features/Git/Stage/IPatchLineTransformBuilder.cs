@@ -4,6 +4,6 @@
     {
         PatchLineTransform Build();
         IPatchLineTransformBuilder TrimLines();
-        IPatchLineTransformBuilder ConvertTabsToSpaces();
+        IPatchLineTransformBuilder ConvertTabsToSpaces(string replacement);
     }
 }

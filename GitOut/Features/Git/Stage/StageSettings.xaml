@@ -4,16 +4,22 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
     mc:Ignorable="d" 
     d:DesignHeight="450"
     d:DesignWidth="800"
 >
-    <Grid>
+    <StackPanel>
         <CheckBox
             Style="{StaticResource MaterialCheckBoxStyle}"
+            Margin="0 16 0 0"
             IsChecked="{Binding TrimLineEndings}"
             Content="Trim line endings"
         />
-    </Grid>
+        <TextBox
+            Style="{StaticResource MaterialInputStyle}"
+            Margin="0 16 0 0"
+            Text="{Binding TabTransformText}"
+            AutomationProperties.HelpText="Text to replace tabs with (leave empty to not replace tabs)"
+        />
+    </StackPanel>
 </UserControl>

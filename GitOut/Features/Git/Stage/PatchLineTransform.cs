@@ -1,4 +1,6 @@
-﻿namespace GitOut.Features.Git.Stage
+﻿using System;
+
+namespace GitOut.Features.Git.Stage
 {
     public struct PatchLineTransform
     {
@@ -6,14 +8,17 @@
 
         private readonly bool trimLineEndings;
         private readonly bool convertToSpaces;
+        private readonly string? tabReplacement;
 
         private PatchLineTransform(
             bool trimLineEndings,
-            bool convertToSpaces
+            bool convertToSpaces,
+            string? tabReplacement
         )
         {
             this.trimLineEndings = trimLineEndings;
             this.convertToSpaces = convertToSpaces;
+            this.tabReplacement = tabReplacement;
         }
 
         public override bool Equals(object? obj) =>
@@ -33,7 +38,7 @@
             }
             if (convertToSpaces)
             {
-                input = input.Replace('\t', ' ');
+                input = input.Replace("\t", tabReplacement);
             }
             return input;
         }
@@ -48,12 +53,14 @@
         {
             private bool trimEndings;
             private bool convertToSpaces;
+            private string? tabReplacement;
 
-            public PatchLineTransform Build() => new PatchLineTransform(trimEndings, convertToSpaces);
+            public PatchLineTransform Build() => new PatchLineTransform(trimEndings, convertToSpaces, tabReplacement);
 
-            public IPatchLineTransformBuilder ConvertTabsToSpaces()
+            public IPatchLineTransformBuilder ConvertTabsToSpaces(string replacement)
             {
                 convertToSpaces = true;
+                tabReplacement = replacement;
                 return this;
             }
 

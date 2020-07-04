@@ -5,5 +5,6 @@
         public const string SectionKey = "staging";
 
         public bool TrimLineEndings { get; set; }
+        public string TabTransformText { get; set; } = "  ";
     }
 }

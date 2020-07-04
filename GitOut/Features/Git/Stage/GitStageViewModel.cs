@@ -164,24 +164,7 @@ namespace GitOut.Features.Git.Stage
 
         public async void Navigated(NavigationType type) => await GetRepositoryStatusAsync();
 
-        private async Task GetRepositoryStatusAsync(SynchronizationContext? syncObject = null)
-        {
-            syncObject ??= SynchronizationContext.Current!;
-            GitStatusResult result = await Repository.ExecuteStatusAsync();
-            ParseStatus(result);
-            if (selectedChange != null)
-            {
-                if (workspaceFiles.Count == 0)
-                {
-                    return;
-                }
-                int index = FindSortedIndex(workspaceFiles, item => selectedChange.Path.CompareTo(item.Path));
-                if (workspaceFiles[index].Path == selectedChange.Path)
-                {
-                    await ExecuteDiffAsync(syncObject);
-                }
-            }
-        }
+        private async Task GetRepositoryStatusAsync() => ParseStatus(await Repository.ExecuteStatusAsync());
 
         private async Task ExecuteDiffAsync(SynchronizationContext? syncObject = null)
         {
@@ -225,14 +208,14 @@ namespace GitOut.Features.Git.Stage
         {
             SynchronizationContext? syncObject = SynchronizationContext.Current!;
             await Repository.ExecuteAddAllAsync();
-            await GetRepositoryStatusAsync(syncObject);
+            await GetRepositoryStatusAsync();
         }
 
         private async Task ResetAllFilesAsync()
         {
             SynchronizationContext? syncObject = SynchronizationContext.Current!;
             await Repository.ExecuteResetAllAsync();
-            await GetRepositoryStatusAsync(syncObject);
+            await GetRepositoryStatusAsync();
         }
 
         private async Task StageFileAsync(StatusChangeViewModel model)
@@ -242,14 +225,14 @@ namespace GitOut.Features.Git.Stage
                 int previousIndex = SelectedIndexIndex;
                 await Repository.ExecuteResetAsync(model.Model);
                 await GetRepositoryStatusAsync();
-                SelectedIndexIndex = previousIndex;
+                SelectedIndexIndex = previousIndex >= indexFiles.Count ? indexFiles.Count - 1 : previousIndex;
             }
             else
             {
                 int previousIndex = SelectedWorkspaceIndex;
                 await Repository.ExecuteAddAsync(model.Model);
                 await GetRepositoryStatusAsync();
-                SelectedWorkspaceIndex = previousIndex;
+                SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
             }
         }
 
@@ -270,14 +253,14 @@ namespace GitOut.Features.Git.Stage
                 : null;
             GitPatch patch = selectedDiff.CreateResetPatch(viewer.Selection);
             await Repository.ExecuteApplyAsync(patch);
-            await GetRepositoryStatusAsync(syncObject);
+            await GetRepositoryStatusAsync();
 
             if (undoPatch != null)
             {
                 snack.ShowSuccess("Changes reset in " + filename, 8000, "UNDO", async () =>
                 {
                     await Repository.ExecuteApplyAsync(undoPatch);
-                    await GetRepositoryStatusAsync(syncObject);
+                    await GetRepositoryStatusAsync();
                 });
             }
         }
@@ -301,6 +284,10 @@ namespace GitOut.Features.Git.Stage
             if (stagingOptions.CurrentValue.TrimLineEndings)
             {
                 builder.TrimLines();
+            }
+            if (!string.IsNullOrEmpty(stagingOptions.CurrentValue.TabTransformText))
+            {
+                builder.ConvertTabsToSpaces(stagingOptions.CurrentValue.TabTransformText);
             }
             GitPatch patch = selectedDiff.CreateAddPatch(viewer.Selection, builder.Build());
             SynchronizationContext? syncObject = SynchronizationContext.Current!;
