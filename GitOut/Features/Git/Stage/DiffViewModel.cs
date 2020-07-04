@@ -177,7 +177,7 @@ namespace GitOut.Features.Git.Stage
                     fromRangeIndex = line.FromIndex!.Value;
                     break;
                 }
-                if (line.Type == DiffLineType.None || line.Type == DiffLineType.Removed)
+                if (line.Type == DiffLineType.None || (options.Mode != PatchMode.ResetIndex && line.Type == DiffLineType.Removed))
                 {
                     lines.Insert(0, PatchLine.CreateLine(DiffLineType.None, options.TextTransform.Transform(line.StrippedLine)));
                     fromRangeIndex = line.FromIndex!.Value;
