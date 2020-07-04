@@ -40,32 +40,25 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <Border
-        Style="{StaticResource CardPanelStyle}"
-    >
-        <StackPanel>
-            <TextBlock Text="Theme" Style="{StaticResource Header6TextStyle}" />
-            <ItemsControl ItemsSource="{Binding Themes}" Focusable="False">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type local:ThemePaletteViewModel}">
-                        <Button
-                            Style="{StaticResource ThemeColorButtonStyle}"
-                            ToolTip="{Binding Name}"
-                            Command="{Binding DataContext.SelectThemeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            CommandParameter="{Binding}"
-                        >
-                            <Button.Background>
-                                <SolidColorBrush Color="{Binding PrimaryHueMidColor}"/>
-                            </Button.Background>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
-    </Border>
+    <ItemsControl ItemsSource="{Binding Themes}" Focusable="False">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type local:ThemePaletteViewModel}">
+                <Button
+                    Style="{StaticResource ThemeColorButtonStyle}"
+                    ToolTip="{Binding Name}"
+                    Command="{Binding DataContext.SelectThemeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{Binding}"
+                >
+                    <Button.Background>
+                        <SolidColorBrush Color="{Binding PrimaryHueMidColor}"/>
+                    </Button.Background>
+                </Button>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
 </UserControl>
