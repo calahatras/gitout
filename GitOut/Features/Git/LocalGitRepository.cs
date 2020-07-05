@@ -153,6 +153,20 @@ namespace GitOut.Features.Git
             return builder.Build();
         }
 
+        public async IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id)
+        {
+            IGitProcess process = CreateProcess(GitProcessOptions.FromArguments($"ls-tree -z {id.Hash}"));
+            await foreach (string line in process.ReadLinesAsync())
+            {
+                string[] fileLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string? fileLine in fileLines)
+                {
+                    var entry = GitFileEntry.Parse(fileLine);
+                    yield return entry;
+                }
+            }
+        }
+
         public Task ExecuteAddAllAsync() => CreateProcess(GitProcessOptions.FromArguments("add --all")).ExecuteAsync();
 
         public Task ExecuteResetAllAsync() => CreateProcess(GitProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();

@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
@@ -19,8 +20,13 @@ namespace GitOut.Features.Git.Log
         private readonly object entriesLock = new object();
         private readonly ObservableCollection<GitTreeEvent> entries = new ObservableCollection<GitTreeEvent>();
 
+        private readonly object rootFilesLock = new object();
+        private readonly ObservableCollection<IGitFileEntryViewModel> rootFiles = new ObservableCollection<IGitFileEntryViewModel>();
+
+        private GitTreeEvent? selectedLogEntry;
         private int changesCount;
         private bool includeRemotes = true;
+        private LogViewMode viewMode = LogViewMode.None;
 
         public GitLogViewModel(
             INavigationService navigation,
@@ -33,6 +39,9 @@ namespace GitOut.Features.Git.Log
 
             BindingOperations.EnableCollectionSynchronization(entries, entriesLock);
             Entries = CollectionViewSource.GetDefaultView(entries);
+
+            BindingOperations.EnableCollectionSynchronization(rootFiles, rootFilesLock);
+            RootFiles = CollectionViewSource.GetDefaultView(rootFiles);
 
             NavigateToStageAreaCommand = new NavigateLocalCommand<object>(navigation, typeof(GitStagePage).FullName!, e => GitStagePageOptions.Stage(Repository));
             RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
@@ -59,8 +68,33 @@ namespace GitOut.Features.Git.Log
         }
 
         public ICollectionView Entries { get; }
+        public ICollectionView RootFiles { get; }
 
         public IGitRepository Repository { get; }
+        public GitTreeEvent? SelectedLogEntry
+        {
+            get => selectedLogEntry;
+            set
+            {
+                if (SetProperty(ref selectedLogEntry, value))
+                {
+                    _ = ListLogFilesAsync(selectedLogEntry);
+                }
+            }
+        }
+
+        public LogViewMode ViewMode
+        {
+            get => viewMode;
+            set
+            {
+                if (SetProperty(ref viewMode, value))
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FileViewVisible)));
+                }
+            }
+        }
+        public bool FileViewVisible => ViewMode == LogViewMode.Files;
 
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
@@ -89,6 +123,31 @@ namespace GitOut.Features.Git.Log
             }
             GitStatusResult status = await Repository.ExecuteStatusAsync();
             ChangesCount = status.Changes.Count;
+        }
+
+        private async Task ListLogFilesAsync(GitTreeEvent? entry)
+        {
+            lock (rootFilesLock)
+            {
+                rootFiles.Clear();
+            }
+            if (entry is null)
+            {
+                ViewMode = LogViewMode.None;
+            }
+            else
+            {
+                ViewMode = LogViewMode.Files;
+                GitHistoryEvent changeset = entry.Event;
+                IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.ListIdAsync(changeset.Id, Repository);
+                await foreach (IGitFileEntryViewModel viewmodel in entries)
+                {
+                    lock (rootFilesLock)
+                    {
+                        rootFiles.Add(viewmodel);
+                    }
+                }
+            }
         }
 
         private IEnumerable<GitTreeEvent> BuildTree(IEnumerable<GitHistoryEvent> log)

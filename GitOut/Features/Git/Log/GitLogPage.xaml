@@ -5,14 +5,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
+    xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
     mc:Ignorable="d" 
     d:DataContext="{d:DesignInstance Type={x:Type local:GitLogViewModel}}"
     d:DesignHeight="450"
     d:DesignWidth="800"
 >
     <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter" />
@@ -104,6 +107,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="FileViewStyle" TargetType="{x:Type ColumnDefinition}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.FileViewVisible, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="False">
+                    <Setter Property="MaxWidth" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -145,10 +155,17 @@
         <Grid
             Grid.Row="1"
             Style="{StaticResource LayoutRootGridStyle}"
+            wpf:GridSplitterBehavior.FreezeColumn="2"
         >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" Style="{StaticResource FileViewStyle}" />
+                <ColumnDefinition Width="5*" Style="{StaticResource FileViewStyle}" />
+            </Grid.ColumnDefinitions>
             <ListView
                 ItemsSource="{Binding Entries}"
                 Style="{StaticResource GitLogListStyle}"
+                SelectedValue="{Binding SelectedLogEntry}"
             >
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:GitTreeEvent}">
@@ -222,6 +239,7 @@
                                 <TextBlock
                                     Grid.Column="2"
                                     VerticalAlignment="Center"
+                                    Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                 >
                                     <Run Text="{Binding Author.Name, Mode=OneWay}" />
                                     <Run Text="{Binding Author.Email, Mode=OneWay}" />
@@ -232,6 +250,49 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            <GridSplitter Grid.Column="1" Style="{StaticResource SplitVerticalStyle}" />
+            <Grid Grid.Column="2">
+                <TreeView ItemsSource="{Binding RootFiles}" Style="{StaticResource MaterialTreeViewStyle}">
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding Children}">
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                                    <Canvas.LayoutTransform>
+                                        <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                                    </Canvas.LayoutTransform>
+                                    <Path
+                                        Fill="{DynamicResource MaterialForegroundBase}"
+                                        Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+                                    />
+                                </Canvas>
+                                <TextBlock Text="{Binding FileName}" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                        <DataTemplate DataType="{x:Type files:GitFileViewModel}">
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                                    <Canvas.LayoutTransform>
+                                        <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                                    </Canvas.LayoutTransform>
+                                    <Path
+                                        Fill="{DynamicResource MaterialForegroundBase}"
+                                        Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+                                    />
+                                </Canvas>
+                                <TextBlock Text="{Binding FileName}" />
+                            </StackPanel>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type files:LoadingViewModel}">
+                            <Canvas Style="{StaticResource SpinIconStyle}">
+                                <Path
+                                    Fill="{StaticResource MaterialForegroundBase}"
+                                    Data="{StaticResource SourceCommitLocal}"
+                                />
+                            </Canvas>
+                        </DataTemplate>
+                    </TreeView.Resources>
+                </TreeView>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>
