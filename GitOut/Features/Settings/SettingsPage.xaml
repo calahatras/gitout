@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
     mc:Ignorable="d"
@@ -157,7 +158,19 @@
                                 </ListView>
                             </StackPanel>
                         </Border>
-                        <themes:ThemeSettingsPicker ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}" />
+                        <Border Style="{StaticResource CardPanelStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Header6TextStyle}" Text="Staging" />
+                                <staging:StageSettings />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource CardPanelStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Theme" Style="{StaticResource Header6TextStyle}" />
+                                <themes:ThemeSettingsPicker ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </ScrollViewer>

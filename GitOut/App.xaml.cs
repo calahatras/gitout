@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using GitOut.Features.Git;
 using GitOut.Features.Git.RepositoryList;
+using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
@@ -80,6 +81,7 @@ namespace GitOut
                 options.StartupType = typeof(RepositoryListPage).FullName!;
             });
             services.AddOptions<GitStoreOptions>().Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
+            services.AddOptions<GitStageOptions>().Bind(context.Configuration.GetSection(GitStageOptions.SectionKey));
             services.AddLogging();
 
             services.AddTransient<NavigatorShellViewModel>();

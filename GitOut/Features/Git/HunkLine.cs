@@ -44,7 +44,7 @@ namespace GitOut.Features.Git
         public string StrippedLine { get; }
         public DiffLineType Type { get; }
 
-        public static HunkLine AsHead(string line) => new HunkLine(DiffLineType.Header, line, null, null);
+        public static HunkLine AsHead(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.Header, line, fromIndex, toIndex);
         public static HunkLine AsLine(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.None, line, fromIndex, toIndex);
         public static HunkLine AsAdded(string line, int toIndex) => new HunkLine(DiffLineType.Added, line, null, toIndex);
         public static HunkLine AsRemoved(string line, int fromIndex) => new HunkLine(DiffLineType.Removed, line, fromIndex, null);

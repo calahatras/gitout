@@ -17,7 +17,7 @@ namespace GitOut.Features.Git.Stage
         private readonly StatusChangeLocation location;
         private readonly List<(Run, HunkLine)> diffContexts;
 
-        public DiffViewModel(
+        private DiffViewModel(
             GitStatusChangeType changeType,
             string path,
             StatusChangeLocation location,
@@ -37,22 +37,16 @@ namespace GitOut.Features.Git.Stage
         public FlowDocument Document { get; }
         public IEnumerable<LineNumberViewModel> LineNumbers { get; }
 
-        public GitPatch CreateResetPatch(TextSelection selection)
-            => CreatePatch(selection, false, location);
+        public GitPatch CreateResetPatch(TextRange selection)
+            => CreatePatch(selection, PatchOptions.ResetFrom(location));
 
-        public GitPatch CreateUndoPatch(TextSelection selection)
-            => CreatePatch(selection, true, StatusChangeLocation.Workspace);
+        public GitPatch CreateUndoPatch(TextRange selection)
+            => CreatePatch(selection, PatchOptions.AddFrom(StatusChangeLocation.None, PatchLineTransform.None));
 
-        public GitPatch CreateAddPatch(TextSelection selection)
-        {
-            if (location == StatusChangeLocation.Index)
-            {
-                throw new InvalidOperationException("Cannot stage from index");
-            }
-            return CreatePatch(selection, true, StatusChangeLocation.Index);
-        }
+        public GitPatch CreateAddPatch(TextRange selection, PatchLineTransform options)
+            => CreatePatch(selection, PatchOptions.AddFrom(location, options));
 
-        public static DiffViewModel ParseDiff(GitDiffResult result)
+        public static DiffViewModel ParseDiff(GitDiffResult result, double pixelsPerDip, Brush dividerBrush, Brush headerForeground)
         {
             var document = new FlowDocument
             {
@@ -62,13 +56,12 @@ namespace GitOut.Features.Git.Stage
             };
             var lineNumbers = new List<LineNumberViewModel>();
             double maxWidth = 0;
-            double pixelsPerDip = VisualTreeHelper.GetDpi(Application.Current.MainWindow).PixelsPerDip;
             var diffContexts = new List<(Run, HunkLine)>();
             foreach (GitDiffHunk hunk in result.Hunks)
             {
                 var section = new Section
                 {
-                    BorderBrush = (Brush)Application.Current.Resources["MaterialLightDividers"],
+                    BorderBrush = dividerBrush,
                     BorderThickness = new Thickness(0, 0, 0, 1)
                 };
                 foreach (HunkLine text in hunk.Lines)
@@ -78,7 +71,7 @@ namespace GitOut.Features.Git.Stage
                     {
                         DiffLineType.Added => CreateAddedParagraph(text.StrippedLine),
                         DiffLineType.Removed => CreateRemovedParagraph(text.StrippedLine),
-                        DiffLineType.Header => CreateHeaderParagraph(text.StrippedLine),
+                        DiffLineType.Header => CreateHeaderParagraph(text.StrippedLine, headerForeground),
                         _ => CreateDefaultParagraph(text.StrippedLine)
                     };
                     double width = new FormattedText(text.StrippedLine, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, pixelsPerDip).Width;
@@ -98,10 +91,10 @@ namespace GitOut.Features.Git.Stage
                     Margin = new Thickness(0)
                 };
 
-            static Paragraph CreateHeaderParagraph(string text) => new Paragraph(new Run(text))
+            static Paragraph CreateHeaderParagraph(string text, Brush foreground) => new Paragraph(new Run(text))
             {
                 Background = Brushes.Transparent,
-                Foreground = (Brush)Application.Current.Resources["MaterialGray400"],
+                Foreground = foreground,
                 FontSize = 11,
                 Margin = new Thickness(0)
             };
@@ -119,7 +112,7 @@ namespace GitOut.Features.Git.Stage
             };
         }
 
-        public static DiffViewModel? ParseFileContent(GitStatusChange origin, string[] result)
+        public static DiffViewModel? ParseFileContent(GitStatusChange origin, string[] result, double pixelsPerDip)
         {
             var document = new FlowDocument
             {
@@ -129,7 +122,6 @@ namespace GitOut.Features.Git.Stage
             };
             var lineNumbers = new List<LineNumberViewModel>();
             double maxWidth = 0;
-            double pixelsPerDip = VisualTreeHelper.GetDpi(Application.Current.MainWindow).PixelsPerDip;
             int lineNumber = 0;
             var content = new Paragraph
             {
@@ -153,17 +145,10 @@ namespace GitOut.Features.Git.Stage
             return new DiffViewModel(GitStatusChangeType.Untracked, origin.Path, StatusChangeLocation.Workspace, document, lineNumbers, diffContexts);
         }
 
-        private GitPatch CreatePatch(TextSelection selection, bool keep, StatusChangeLocation applyLocation)
+        private GitPatch CreatePatch(TextRange selection, PatchOptions options)
         {
             IGitPatchBuilder builder = GitPatch.Builder();
-            if (applyLocation == StatusChangeLocation.Index)
-            {
-                builder.SetMode(keep ? PatchMode.AddIndex : PatchMode.ResetIndex);
-            }
-            else
-            {
-                builder.SetMode(keep ? PatchMode.AddWorkspace : PatchMode.ResetWorkspace);
-            }
+            builder.SetMode(options.Mode);
             builder.CreateHeader(path, changeType);
 
             TextPointer start = selection.Start;
@@ -174,22 +159,34 @@ namespace GitOut.Features.Git.Stage
             {
                 throw new InvalidOperationException("Invalid state, could not find matching paragraph");
             }
-            // find closest unedited line from selected paragraph, we need that text and line number
+
             var lines = new List<PatchLine>();
+            // find closest unedited line from selected paragraph, we need that text and line number
             int fromRangeIndex = 0, startOffset;
+            if (diffContexts[contextOffset].Item2.Type == DiffLineType.Header)
+            {
+                // user selected a header line; increment offset so that we actually get index from header line and not previous hunk
+                ++contextOffset;
+            }
             for (startOffset = contextOffset - 1; startOffset >= 0; --startOffset)
             {
                 HunkLine line = diffContexts[startOffset].Item2;
                 if (line.Type == DiffLineType.Header)
                 {
                     // since a header is only found if line is on first line number, set fromRange to 0
-                    fromRangeIndex = 0;
+                    fromRangeIndex = line.FromIndex!.Value;
                     break;
                 }
-                if (line.Type == DiffLineType.None || line.Type == DiffLineType.Removed)
+                if (line.Type == DiffLineType.None || (options.Mode != PatchMode.ResetIndex && line.Type == DiffLineType.Removed))
+                {
+                    lines.Insert(0, PatchLine.CreateLine(DiffLineType.None, options.TextTransform.Transform(line.StrippedLine)));
+                    fromRangeIndex = line.FromIndex!.Value;
+                    break;
+                }
+                if (options.Mode == PatchMode.ResetIndex && line.Type == DiffLineType.Added)
                 {
                     lines.Insert(0, PatchLine.CreateLine(DiffLineType.None, line.StrippedLine));
-                    fromRangeIndex = line.FromIndex!.Value;
+                    fromRangeIndex = line.ToIndex!.Value;
                     break;
                 }
             }
@@ -211,7 +208,7 @@ namespace GitOut.Features.Git.Stage
                     }
                     continue;
                 }
-                lines.Add(PatchLine.CreateLine(line.Type, line.StrippedLine));
+                lines.Add(PatchLine.CreateLine(line.Type, options.TextTransform.Transform(line.StrippedLine)));
                 if (run == end.Parent)
                 {
                     break;
@@ -226,6 +223,11 @@ namespace GitOut.Features.Git.Stage
                     HunkLine line = diffContexts[endOffset].Item2;
                     if (line.Type == DiffLineType.None || line.Type == DiffLineType.Removed)
                     {
+                        lines.Add(PatchLine.CreateLine(DiffLineType.None, options.TextTransform.Transform(line.StrippedLine)));
+                        break;
+                    }
+                    if (options.Mode == PatchMode.ResetIndex && line.Type == DiffLineType.Added)
+                    {
                         lines.Add(PatchLine.CreateLine(DiffLineType.None, line.StrippedLine));
                         break;
                     }
@@ -235,6 +237,32 @@ namespace GitOut.Features.Git.Stage
             builder.CreateHunk(fromRangeIndex, lines);
             Trace.WriteLine(builder.Build().Writer.ToString());
             return builder.Build();
+        }
+
+        private struct PatchOptions
+        {
+            public PatchOptions(PatchMode patchMode, PatchLineTransform textTransform) : this()
+            {
+                Mode = patchMode;
+                TextTransform = textTransform;
+            }
+
+            public PatchMode Mode { get; }
+            public PatchLineTransform TextTransform { get; }
+
+            public static PatchOptions ResetFrom(StatusChangeLocation source) => new PatchOptions(source switch
+            {
+                StatusChangeLocation.Index => PatchMode.ResetIndex,
+                StatusChangeLocation.Workspace => PatchMode.ResetWorkspace,
+                _ => throw new InvalidOperationException($"Invalid source location for reset {source}"),
+            }, PatchLineTransform.None);
+
+            public static PatchOptions AddFrom(StatusChangeLocation source, PatchLineTransform textTransform) => new PatchOptions(source switch
+            {
+                StatusChangeLocation.None => PatchMode.AddWorkspace,
+                StatusChangeLocation.Workspace => PatchMode.AddIndex,
+                _ => throw new InvalidOperationException($"Invalid source location for add {source}"),
+            }, textTransform);
         }
     }
 }
