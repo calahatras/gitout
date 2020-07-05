@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -28,10 +28,12 @@ namespace GitOut.Features.Git.Storage
 
         public IObservable<IEnumerable<IGitRepository>> Repositories { get; }
 
-        public void Add(IGitRepository repository) => storage.Write(GitStoreOptions.SectionKey, (options.CurrentValue.Repositories ?? Array.Empty<string>())
-            .Concat(new[] { repository.WorkingDirectory.Directory })
-            .ToArray()
-        );
+        public void Add(IGitRepository repository) => storage.Write(GitStoreOptions.SectionKey, new
+        {
+            Repositories = (options.CurrentValue.Repositories ?? Array.Empty<string>())
+                .Concat(new[] { repository.WorkingDirectory.Directory })
+                .ToArray()
+        });
 
         private IEnumerable<IGitRepository> Convert(ICollection<string> repos) => repos
             .Select(DirectoryPath.Create)
