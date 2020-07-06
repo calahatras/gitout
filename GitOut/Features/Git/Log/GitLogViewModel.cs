@@ -6,10 +6,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Commands;
 using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Stage;
+using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
 
@@ -30,7 +33,8 @@ namespace GitOut.Features.Git.Log
 
         public GitLogViewModel(
             INavigationService navigation,
-            ITitleService title
+            ITitleService title,
+            ISnackbarService snack
         )
         {
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
@@ -45,6 +49,16 @@ namespace GitOut.Features.Git.Log
 
             NavigateToStageAreaCommand = new NavigateLocalCommand<object>(navigation, typeof(GitStagePage).FullName!, e => GitStagePageOptions.Stage(Repository));
             RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
+
+            CopyCommitHashCommand = new CallbackCommand(() =>
+            {
+                if (SelectedLogEntry is null)
+                {
+                    return;
+                }
+                Clipboard.SetText(SelectedLogEntry.Event.Id.Hash, TextDataFormat.Text);
+                snack.ShowSuccess("Copied hash to clipboard");
+            });
 
             Repository = options.Repository;
         }
@@ -98,6 +112,7 @@ namespace GitOut.Features.Git.Log
 
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
+        public ICommand CopyCommitHashCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
