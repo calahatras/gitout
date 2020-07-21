@@ -21,7 +21,9 @@
         <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter" />
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
         <lc:TreeNodePathDataConverter x:Key="TreeNodePathDataConverter" />
-
+        <ContextMenu x:Key="LogEventMenu">
+            <MenuItem Header="Copy commit hash" Command="{Binding CopyCommitHashCommand}" />
+        </ContextMenu>
         <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}" />
@@ -86,6 +88,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Background="{TemplateBinding Background}"
                             SnapsToDevicePixels="True"
+                            ContextMenu="{StaticResource LogEventMenu}"
                         >
                             <ScrollViewer
                                 Padding="{TemplateBinding Padding}"
