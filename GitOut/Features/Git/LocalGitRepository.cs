@@ -108,6 +108,25 @@ namespace GitOut.Features.Git
             return history;
         }
 
+        public async IAsyncEnumerable<GitStash> ExecuteStashListAsync()
+        {
+            IGitProcess stashes = CreateProcess(GitProcessOptions.FromArguments("stash list -z"));
+            await foreach (string line in stashes.ReadLinesAsync())
+            {
+                string[] stashEntries = line.Split('\0', StringSplitOptions.RemoveEmptyEntries);
+                foreach (string stashLine in stashEntries)
+                {
+                    IGitStashBuilder stash = GitStash.Parse(stashLine);
+                    IGitProcess getParentId = CreateProcess(GitProcessOptions.FromArguments($"rev-parse \"{stash.Name}~\""));
+                    await foreach (string parentId in getParentId.ReadLinesAsync())
+                    {
+                        stash.UseParent(parentId);
+                    }
+                    yield return stash.Build();
+                }
+            }
+        }
+
         public async Task<GitStatusResult> ExecuteStatusAsync()
         {
             IList<GitStatusChange> statusChanges = new List<GitStatusChange>();

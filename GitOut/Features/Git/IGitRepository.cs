@@ -13,6 +13,7 @@ namespace GitOut.Features.Git
         GitHistoryEvent? Head { get; }
 
         Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options);
+        IAsyncEnumerable<GitStash> ExecuteStashListAsync();
         Task<GitStatusResult> ExecuteStatusAsync();
         Task<GitDiffResult> ExecuteDiffAsync(GitStatusChange change, DiffOptions options);
         IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id);
