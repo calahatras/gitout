@@ -51,7 +51,7 @@
                                 </Button>
                             </Grid>
                             <Grid Visibility="{Binding IsHeader, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Margin="16 0 0 0"  Foreground="{DynamicResource MaterialGray400}" FontSize="12" FontWeight="Bold" Text="{Binding Name}" FontFamily="Roboto"/>
+                                <TextBlock Margin="16 0 0 0" Foreground="{DynamicResource MaterialGray400}" FontSize="12" FontWeight="Bold" Text="{Binding Name}" FontFamily="Roboto"/>
                             </Grid>
                             <Separator Visibility="{Binding IsDivider, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </Grid>
