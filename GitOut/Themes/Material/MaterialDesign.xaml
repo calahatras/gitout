@@ -848,7 +848,6 @@
     <Style x:Key="LayoutRootGridStyle" TargetType="{x:Type Grid}">
         <Setter Property="Background" Value="#EE303030" />
         <Setter Property="Focusable" Value="True" />
-        <Setter Property="Margin" Value="1 0 1 1" />
         <Setter Property="RenderTransform">
             <Setter.Value>
                 <TranslateTransform/>
