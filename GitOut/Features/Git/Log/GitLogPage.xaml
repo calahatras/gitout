@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:git="clr-namespace:GitOut.Features.Git"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
@@ -117,144 +118,187 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="StashesViewStyle" TargetType="{x:Type ColumnDefinition}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsStashesVisible, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="False">
+                    <Setter Property="MaxWidth" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid Style="{StaticResource MaterialToolbarStyle}">
+        <Grid
+            Grid.Row="1"
+            Style="{StaticResource LayoutRootGridStyle}"
+            wpf:GridSplitterBehavior.FreezeColumn="0"
+        >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" Style="{StaticResource StashesViewStyle}" />
+                <ColumnDefinition Width="Auto" Style="{StaticResource StashesViewStyle}" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="Auto" Style="{StaticResource FileViewStyle}" />
+                <ColumnDefinition Width="5*" Style="{StaticResource FileViewStyle}" />
             </Grid.ColumnDefinitions>
-            <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
-            <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
-                <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
-                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
-                </ToggleButton>
-                <Border Style="{StaticResource MaterialVerticalDivider}"/>
-                <Button
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Style="{StaticResource MaterialToolbarStyle}">
+                    <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="Stashes" />
+                </Grid>
+                <ListView
+                    Grid.Row="1"
+                    Style="{StaticResource MaterialListStyle}"
+                    ItemsSource="{Binding ActiveStashes}"
+                >
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="{x:Type git:GitStash}">
+                            <StackPanel Margin="0 4">
+                                <TextBlock Style="{StaticResource PrimaryTextStyle}" Margin="0">
+                                    <Run Text="{Binding StashIndex, Mode=OneWay, StringFormat={}{{ {0} }}:}" />
+                                    <Run Text="{Binding FromNode, Mode=OneWay}" FontSize="11" Foreground="{DynamicResource MaterialGray400}" />
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}" FontSize="12"  Text="{Binding FromParent}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+            <GridSplitter Grid.Column="1" Style="{StaticResource SplitVerticalStyle}" />
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Style="{StaticResource MaterialToolbarStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
+                    <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
+                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
+                        </ToggleButton>
+                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
+                        </ToggleButton>
+                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                        <Button
                     Style="{StaticResource MaterialIconButtonStyle}"
                     Command="{Binding RefreshStatusCommand}"
                     ToolTip="Refresh"
                 >
-                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderRefresh}"/>
-                </Button>
-                <Button
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderRefresh}"/>
+                        </Button>
+                        <Button
                     Style="{StaticResource MaterialIconButtonStyle}"
                     Command="{Binding NavigateToStageAreaCommand}"
                     ToolTip="Open stage area"
                 >
-                    <Grid>
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FilePlus}"/>
-                        <Border Style="{StaticResource BadgeStyle}">
-                            <TextBlock Style="{StaticResource BadgeTextStyle}" Text="{Binding ChangesCount}" />
-                        </Border>
-                    </Grid>
-                </Button>
-            </StackPanel>
-        </Grid>
-        <Grid
-            Grid.Row="1"
-            Style="{StaticResource LayoutRootGridStyle}"
-            wpf:GridSplitterBehavior.FreezeColumn="2"
-        >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" Style="{StaticResource FileViewStyle}" />
-                <ColumnDefinition Width="5*" Style="{StaticResource FileViewStyle}" />
-            </Grid.ColumnDefinitions>
-            <ListView
-                ItemsSource="{Binding Entries}"
-                Style="{StaticResource GitLogListStyle}"
-                SelectedValue="{Binding SelectedLogEntry}"
-            >
-                <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type local:GitTreeEvent}">
-                        <Grid x:Name="outerGrid" Height="28">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
                             <Grid>
-                                <ItemsControl ItemsSource="{Binding Nodes}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <Canvas />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Path
-                                                Fill="Transparent"
-                                                StrokeThickness="2"
-                                                Height="28"
-                                                Stroke="{Binding Color, Converter={StaticResource ColorToBrushConverter}}"
-                                            >
-                                                <Path.Data>
-                                                    <MultiBinding Converter="{StaticResource TreeNodePathDataConverter}">
-                                                        <Binding Path="." />
-                                                        <Binding Path="ActualHeight" ElementName="outerGrid" />
-                                                    </MultiBinding>
-                                                </Path.Data>
-                                            </Path>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FilePlus}"/>
+                                <Border Style="{StaticResource BadgeStyle}">
+                                    <TextBlock Style="{StaticResource BadgeTextStyle}" Text="{Binding ChangesCount}" />
+                                </Border>
                             </Grid>
-                            <Grid
-                                Grid.Column="1"
-                                Margin="{Binding DataContext, ElementName=outerGrid, Converter={StaticResource TreeToMarginConverter}}"
-                                DataContext="{Binding Event}"
-                            >
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <ListView
+                    Grid.Row="1"
+                    ItemsSource="{Binding Entries}"
+                    Style="{StaticResource GitLogListStyle}"
+                    SelectedValue="{Binding SelectedLogEntry}"
+                >
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:GitTreeEvent}">
+                            <Grid x:Name="outerGrid" Height="28">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ItemsControl
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    ItemsSource="{Binding Branches}"
-                                >
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Style="{StaticResource BranchStyle}">
-                                                <TextBlock Text="{Binding Name}"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <TextBlock
+                                <Grid>
+                                    <ItemsControl ItemsSource="{Binding Nodes}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <Canvas />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Path
+                                                    Fill="Transparent"
+                                                    StrokeThickness="2"
+                                                    Height="28"
+                                                    Stroke="{Binding Color, Converter={StaticResource ColorToBrushConverter}}"
+                                                >
+                                                    <Path.Data>
+                                                        <MultiBinding Converter="{StaticResource TreeNodePathDataConverter}">
+                                                            <Binding Path="." />
+                                                            <Binding Path="ActualHeight" ElementName="outerGrid" />
+                                                        </MultiBinding>
+                                                    </Path.Data>
+                                                </Path>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                                <Grid
                                     Grid.Column="1"
-                                    FontWeight="{Binding IsHead, Converter={StaticResource BooleanToFontWeightConverter}}"
-                                    Text="{Binding Subject, Mode=OneWay}"
-                                    VerticalAlignment="Center"
-                                    TextTrimming="CharacterEllipsis"
-                                />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    VerticalAlignment="Center"
-                                    Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                    Margin="{Binding DataContext, ElementName=outerGrid, Converter={StaticResource TreeToMarginConverter}}"
+                                    DataContext="{Binding Event}"
                                 >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ItemsControl
+                                        Grid.Column="0"
+                                        VerticalAlignment="Center"
+                                        ItemsSource="{Binding Branches}"
+                                    >
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource BranchStyle}">
+                                                    <TextBlock Text="{Binding Name}"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        FontWeight="{Binding IsHead, Converter={StaticResource BooleanToFontWeightConverter}}"
+                                        Text="{Binding Subject, Mode=OneWay}"
+                                        VerticalAlignment="Center"
+                                        TextTrimming="CharacterEllipsis"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                    >
                                     <Run Text="{Binding Author.Name, Mode=OneWay}" />
                                     <Run Text="{Binding Author.Email, Mode=OneWay}" />
                                     <Run Text="{Binding AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
-                                </TextBlock>
+                                    </TextBlock>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <GridSplitter Grid.Column="1" Style="{StaticResource SplitVerticalStyle}" />
-            <Grid Grid.Column="2">
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+            <GridSplitter Grid.Column="3" Style="{StaticResource SplitVerticalStyle}" />
+            <Grid Grid.Column="4">
                 <TreeView ItemsSource="{Binding RootFiles}" Style="{StaticResource MaterialTreeViewStyle}">
                     <TreeView.Resources>
                         <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding Children}">

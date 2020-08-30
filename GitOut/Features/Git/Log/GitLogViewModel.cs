@@ -20,6 +20,9 @@ namespace GitOut.Features.Git.Log
 {
     public class GitLogViewModel : INotifyPropertyChanged, INavigationListener
     {
+        private readonly object activeStashesLock = new object();
+        private readonly ObservableCollection<GitStash> activeStashes = new ObservableCollection<GitStash>();
+
         private readonly object entriesLock = new object();
         private readonly ObservableCollection<GitTreeEvent> entries = new ObservableCollection<GitTreeEvent>();
 
@@ -29,6 +32,7 @@ namespace GitOut.Features.Git.Log
         private GitTreeEvent? selectedLogEntry;
         private int changesCount;
         private bool includeRemotes = true;
+        private bool isStashesVisible = false;
         private LogViewMode viewMode = LogViewMode.None;
 
         public GitLogViewModel(
@@ -40,6 +44,9 @@ namespace GitOut.Features.Git.Log
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             title.Title = "Log";
+
+            BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
+            ActiveStashes = CollectionViewSource.GetDefaultView(activeStashes);
 
             BindingOperations.EnableCollectionSynchronization(entries, entriesLock);
             Entries = CollectionViewSource.GetDefaultView(entries);
@@ -81,6 +88,7 @@ namespace GitOut.Features.Git.Log
             private set => SetProperty(ref changesCount, value);
         }
 
+        public ICollectionView ActiveStashes { get; }
         public ICollectionView Entries { get; }
         public ICollectionView RootFiles { get; }
 
@@ -108,7 +116,18 @@ namespace GitOut.Features.Git.Log
                 }
             }
         }
-        public bool FileViewVisible => ViewMode == LogViewMode.Files;
+        public bool FileViewVisible => (ViewMode & LogViewMode.Files) == LogViewMode.Files;
+        public bool IsStashesVisible
+        {
+            get => isStashesVisible;
+            set
+            {
+                if (SetProperty(ref isStashesVisible, value) && value)
+                {
+                    _ = RefreshStashListAsync();
+                }
+            }
+        }
 
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
@@ -138,6 +157,30 @@ namespace GitOut.Features.Git.Log
             }
             GitStatusResult status = await Repository.ExecuteStatusAsync();
             ChangesCount = status.Changes.Count;
+        }
+
+        private async Task RefreshStashListAsync()
+        {
+            lock (activeStashesLock)
+            {
+                activeStashes.Clear();
+            }
+            await foreach (GitStash stashEntry in Repository.ExecuteStashListAsync())
+            {
+                for (int i = 0; i < entries.Count; ++i)
+                {
+                    if (entries[i].Event.Id == stashEntry.ParentId)
+                    {
+                        // todo: convert stash to githistoryevent, or wrap history event in viewmodel? :thinking:
+                        //entries.Insert(i, new GitTreeEvent());
+                    }
+                }
+
+                lock (activeStashesLock)
+                {
+                    activeStashes.Add(stashEntry);
+                }
+            }
         }
 
         private async Task ListLogFilesAsync(GitTreeEvent? entry)
