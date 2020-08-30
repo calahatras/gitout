@@ -92,7 +92,7 @@ namespace GitOut.Features.Git
                 var id = GitCommitId.FromHash(line.Substring(0, 40));
                 if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? logitem))
                 {
-                    var branch = GitBranchName.Create(line.Substring(41));
+                    var branch = GitBranchName.Create(line[41..]);
                     logitem.Branches.Add(branch);
                 }
             }

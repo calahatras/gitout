@@ -25,8 +25,16 @@ namespace GitOut.Features.Git.Log
         public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
 
         public GitHistoryEvent Event { get; }
-        public Color BorderColor { get; private set; }
-        public Color Color { get; private set; }
+        public SolidColorBrush CommitBrush
+        {
+            get
+            {
+                var commitBrush = new SolidColorBrush(colors[commitIndex % colors.Count].Color);
+                commitBrush.Freeze();
+                return commitBrush;
+            }
+        }
+
         public IReadOnlyCollection<GitTreeNode> Nodes => nodes;
 
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
@@ -79,8 +87,6 @@ namespace GitOut.Features.Git.Log
                     }
                 }
             }
-            BorderColor = nodes.Last().Color;
-            Color = Color.Multiply(nodes.Last().Color, .6f);
             return bottomLeafs;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,6 +49,11 @@ namespace GitOut
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            PresentationTraceSources.Refresh();
+            PresentationTraceSources.DataBindingSource.Listeners.Add(new ConsoleTraceListener());
+            PresentationTraceSources.DataBindingSource.Listeners.Add(new DebugTraceListener());
+            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Warning | SourceLevels.Error;
+
             ILogger<App> logger = host.Services.GetRequiredService<ILogger<App>>();
             logger.LogInformation(LogEventId.Application, "Application started");
             base.OnStartup(e);
@@ -98,5 +104,18 @@ namespace GitOut
         }
 
         private static Action LogLifetimeEvent(ILogger<App> logger, string message) => () => logger.LogInformation(LogEventId.Application, message);
+    }
+
+    public class DebugTraceListener : TraceListener
+    {
+        public override void Write(string message) { }
+
+        public override void WriteLine(string message)
+        {
+            if (Debugger.IsAttached)
+            {
+                Debugger.Break();
+            }
+        }
     }
 }

@@ -135,17 +135,17 @@ namespace GitOut.Features.Git.Log
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public async void Navigated(NavigationType type)
+        public void Navigated(NavigationType type)
         {
             if (type == NavigationType.Initial || type == NavigationType.NavigatedBack)
             {
-                await CheckRepositoryStatusAsync();
+                _ = CheckRepositoryStatusAsync();
             }
         }
 
         private async Task CheckRepositoryStatusAsync()
         {
-            IEnumerable<GitHistoryEvent> tree = await Repository.ExecuteLogAsync(IncludeRemotes ? LogOptions.WithRemoteBranches() : LogOptions.OnlyLocalBranches());
+            IEnumerable<GitHistoryEvent> tree = await Repository.ExecuteLogAsync(IncludeRemotes ? LogOptions.WithRemoteBranches() : LogOptions.OnlyLocalBranches()).ConfigureAwait(false);
             IEnumerable<GitTreeEvent> history = BuildTree(tree);
             lock (entriesLock)
             {
@@ -155,7 +155,7 @@ namespace GitOut.Features.Git.Log
                     entries.Add(item);
                 }
             }
-            GitStatusResult status = await Repository.ExecuteStatusAsync();
+            GitStatusResult status = await Repository.ExecuteStatusAsync().ConfigureAwait(false);
             ChangesCount = status.Changes.Count;
         }
 

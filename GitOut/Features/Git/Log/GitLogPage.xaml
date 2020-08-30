@@ -26,14 +26,14 @@
             <MenuItem Header="Copy commit hash" Command="{Binding CopyCommitHashCommand}" />
         </ContextMenu>
         <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="4 1" />
+            <Setter Property="Padding" Value="4 2" />
             <Setter Property="Margin" Value="0 0 4 0" />
-            <Setter Property="TextElement.FontSize" Value="12" />
-            <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialGray50}"/>
+            <Setter Property="TextElement.FontSize" Value="11" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialGray300}"/>
         </Style>
         <Style x:Key="GitLogListStyle" TargetType="{x:Type ListView}">
             <Setter Property="Background" Value="{DynamicResource MaterialBackgroundBackground}"/>
@@ -187,17 +187,17 @@
                         </ToggleButton>
                         <Border Style="{StaticResource MaterialVerticalDivider}"/>
                         <Button
-                    Style="{StaticResource MaterialIconButtonStyle}"
-                    Command="{Binding RefreshStatusCommand}"
-                    ToolTip="Refresh"
-                >
+                            Style="{StaticResource MaterialIconButtonStyle}"
+                            Command="{Binding RefreshStatusCommand}"
+                            ToolTip="Refresh"
+                        >
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderRefresh}"/>
                         </Button>
                         <Button
-                    Style="{StaticResource MaterialIconButtonStyle}"
-                    Command="{Binding NavigateToStageAreaCommand}"
-                    ToolTip="Open stage area"
-                >
+                            Style="{StaticResource MaterialIconButtonStyle}"
+                            Command="{Binding NavigateToStageAreaCommand}"
+                            ToolTip="Open stage area"
+                        >
                             <Grid>
                                 <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FilePlus}"/>
                                 <Border Style="{StaticResource BadgeStyle}">
@@ -249,7 +249,6 @@
                                 <Grid
                                     Grid.Column="1"
                                     Margin="{Binding DataContext, ElementName=outerGrid, Converter={StaticResource TreeToMarginConverter}}"
-                                    DataContext="{Binding Event}"
                                 >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -259,7 +258,7 @@
                                     <ItemsControl
                                         Grid.Column="0"
                                         VerticalAlignment="Center"
-                                        ItemsSource="{Binding Branches}"
+                                        ItemsSource="{Binding Event.Branches}"
                                     >
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -268,7 +267,10 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Style="{StaticResource BranchStyle}">
+                                                <Border
+                                                    Style="{StaticResource BranchStyle}"
+                                                    BorderBrush="{Binding DataContext.CommitBrush, RelativeSource={RelativeSource AncestorType=Grid}}"
+                                                >
                                                     <TextBlock Text="{Binding Name}"/>
                                                 </Border>
                                             </DataTemplate>
@@ -277,8 +279,8 @@
 
                                     <TextBlock
                                         Grid.Column="1"
-                                        FontWeight="{Binding IsHead, Converter={StaticResource BooleanToFontWeightConverter}}"
-                                        Text="{Binding Subject, Mode=OneWay}"
+                                        FontWeight="{Binding Event.IsHead, Converter={StaticResource BooleanToFontWeightConverter}, Mode=OneWay}"
+                                        Text="{Binding Event.Subject, Mode=OneWay}"
                                         VerticalAlignment="Center"
                                         TextTrimming="CharacterEllipsis"
                                     />
@@ -287,9 +289,9 @@
                                         VerticalAlignment="Center"
                                         Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                     >
-                                    <Run Text="{Binding Author.Name, Mode=OneWay}" />
-                                    <Run Text="{Binding Author.Email, Mode=OneWay}" />
-                                    <Run Text="{Binding AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
+                                        <Run Text="{Binding Event.Author.Name, Mode=OneWay}" ToolTip="{Binding Event.Author.Email}" />
+                                        <Run Text="{Binding Event.Id.Hash, Mode=OneWay}" />
+                                        <Run Text="{Binding Event.AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
                                     </TextBlock>
                                 </Grid>
                             </Grid>
