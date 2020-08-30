@@ -20,6 +20,7 @@
         <converters:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter" />
+        <converters:SubstringConverter x:Key="SubstringConverter" />
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
         <lc:TreeNodePathDataConverter x:Key="TreeNodePathDataConverter" />
         <ContextMenu x:Key="LogEventMenu">
@@ -290,7 +291,7 @@
                                         Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                     >
                                         <Run Text="{Binding Event.Author.Name, Mode=OneWay}" ToolTip="{Binding Event.Author.Email}" />
-                                        <Run Text="{Binding Event.Id.Hash, Mode=OneWay}" />
+                                        <Run Text="{Binding Event.Id.Hash, Mode=OneWay, Converter={StaticResource SubstringConverter}, ConverterParameter=7}" />
                                         <Run Text="{Binding Event.AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
                                     </TextBlock>
                                 </Grid>
