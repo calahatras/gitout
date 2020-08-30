@@ -66,7 +66,7 @@ namespace GitOut.Features.Git.Log
             }
             if (!processedCommit)
             {
-                var node = GitTreeNode.WithBottomLine(new Line(from, to), GetNextAvailableColor(), true);
+                var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
                 nodes.Add(node);
                 if (Event.Parent != null)
                 {
