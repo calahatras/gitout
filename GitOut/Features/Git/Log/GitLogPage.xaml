@@ -216,12 +216,16 @@
                 >
                     <ListView.ItemTemplate>
                         <DataTemplate DataType="{x:Type local:GitTreeEvent}">
-                            <Grid x:Name="outerGrid" Height="28">
+                            <Grid x:Name="outerGrid" MinHeight="28">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Grid>
+                                <Grid Grid.RowSpan="2">
                                     <ItemsControl ItemsSource="{Binding Nodes}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -233,7 +237,6 @@
                                                 <Path
                                                     Fill="Transparent"
                                                     StrokeThickness="2"
-                                                    Height="28"
                                                     Stroke="{Binding Color, Converter={StaticResource ColorToBrushConverter}}"
                                                 >
                                                     <Path.Data>
@@ -247,6 +250,8 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </Grid>
+
+                                <!-- deselected view -->
                                 <Grid
                                     Grid.Column="1"
                                     Margin="{Binding DataContext, ElementName=outerGrid, Converter={StaticResource TreeToMarginConverter}}"
@@ -294,6 +299,26 @@
                                         <Run Text="{Binding Event.Id.Hash, Mode=OneWay, Converter={StaticResource SubstringConverter}, ConverterParameter=7}" />
                                         <Run Text="{Binding Event.AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
                                     </TextBlock>
+                                </Grid>
+
+                                <!-- Selected view -->
+                                <Grid
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Margin="{Binding DataContext, ElementName=outerGrid, Converter={StaticResource TreeToMarginConverter}}"
+                                    Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    >
+                                    <StackPanel Margin="0 4 4 4">
+                                        <TextBlock>
+                                            <Run Text="commit:" />
+                                            <Run Text="{Binding Event.Id.Hash, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Event.Author.Name}"/>
+                                            <TextBlock Margin="4 0" Text="{Binding Event.Author.Email}" />
+
+                                        </StackPanel>
+                                    </StackPanel>
                                 </Grid>
                             </Grid>
                         </DataTemplate>
