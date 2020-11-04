@@ -6,9 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:git="clr-namespace:GitOut.Features.Git"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
-    xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:attached="clr-namespace:GitOut.Features.Wpf.AttachedProperties"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
     mc:Ignorable="d" 
     d:DataContext="{d:DesignInstance Type={x:Type local:GitLogViewModel}}"
@@ -212,7 +212,7 @@
                     Grid.Row="1"
                     ItemsSource="{Binding Entries}"
                     Style="{StaticResource GitLogListStyle}"
-                    SelectedValue="{Binding SelectedLogEntry}"
+                    attached:BindableSelectedItems.SelectedItems="{Binding SelectedLogEntries}"
                 >
                     <ListView.ItemTemplate>
                         <DataTemplate DataType="{x:Type local:GitTreeEvent}">
@@ -302,46 +302,10 @@
             </Grid>
             <GridSplitter Grid.Column="3" Style="{StaticResource SplitVerticalStyle}" />
             <Grid Grid.Column="4">
-                <TreeView ItemsSource="{Binding RootFiles}" Style="{StaticResource MaterialTreeViewStyle}">
-                    <TreeView.Resources>
-                        <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding Children}">
-                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                                    <Canvas.LayoutTransform>
-                                        <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                                    </Canvas.LayoutTransform>
-                                    <Path
-                                        Fill="{DynamicResource MaterialForegroundBase}"
-                                        Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                                    />
-                                </Canvas>
-                                <TextBlock Text="{Binding FileName}" />
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                        <DataTemplate DataType="{x:Type files:GitFileViewModel}">
-                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                                    <Canvas.LayoutTransform>
-                                        <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                                    </Canvas.LayoutTransform>
-                                    <Path
-                                        Fill="{DynamicResource MaterialForegroundBase}"
-                                        Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                                    />
-                                </Canvas>
-                                <TextBlock Text="{Binding FileName}" />
-                            </StackPanel>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type files:LoadingViewModel}">
-                            <Canvas Style="{StaticResource SpinIconStyle}">
-                                <Path
-                                    Fill="{StaticResource MaterialForegroundBase}"
-                                    Data="{StaticResource SourceCommitLocal}"
-                                />
-                            </Canvas>
-                        </DataTemplate>
-                    </TreeView.Resources>
-                </TreeView>
+                <local:GitFileTree
+                    RootFiles="{Binding RootFiles}"
+                    Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                />
             </Grid>
         </Grid>
     </Grid>

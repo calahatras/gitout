@@ -27,8 +27,8 @@ namespace GitOut.Features.Git.Log
 
         private readonly object rootFilesLock = new object();
         private readonly ObservableCollection<IGitFileEntryViewModel> rootFiles = new ObservableCollection<IGitFileEntryViewModel>();
+        private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new ObservableCollection<GitTreeEvent>();
 
-        private GitTreeEvent? selectedLogEntry;
         private int changesCount;
         private bool includeRemotes = true;
         private bool isStashesVisible = false;
@@ -63,6 +63,12 @@ namespace GitOut.Features.Git.Log
                 TextDataFormat.Text,
                 data => snack.ShowSuccess("Copied hash to clipboard")
             );
+
+            selectedLogEntries.CollectionChanged += (sender, args) =>
+            {
+                if (selectedLogEntries.Count > 0)
+                    _ = ListLogFilesAsync(selectedLogEntries.First());
+            };
         }
 
         public bool IncludeRemotes
@@ -88,17 +94,7 @@ namespace GitOut.Features.Git.Log
         public ICollectionView RootFiles { get; }
 
         public IGitRepository Repository { get; }
-        public GitTreeEvent? SelectedLogEntry
-        {
-            get => selectedLogEntry;
-            set
-            {
-                if (SetProperty(ref selectedLogEntry, value))
-                {
-                    _ = ListLogFilesAsync(selectedLogEntry);
-                }
-            }
-        }
+        public IList<GitTreeEvent> SelectedLogEntries => selectedLogEntries;
 
         public LogViewMode ViewMode
         {
