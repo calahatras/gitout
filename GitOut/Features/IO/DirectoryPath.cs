@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -22,6 +22,8 @@ namespace GitOut.Features.IO
         }
 
         public string Directory { get; }
+
+        public override string ToString() => Directory;
 
         public static DirectoryPath Create(string path) => new DirectoryPath(path);
     }

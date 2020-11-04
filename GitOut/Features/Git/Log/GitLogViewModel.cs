@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -25,14 +24,15 @@ namespace GitOut.Features.Git.Log
         private readonly object entriesLock = new object();
         private readonly ObservableCollection<GitTreeEvent> entries = new ObservableCollection<GitTreeEvent>();
 
-        private readonly object rootFilesLock = new object();
-        private readonly ObservableCollection<IGitFileEntryViewModel> rootFiles = new ObservableCollection<IGitFileEntryViewModel>();
         private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new ObservableCollection<GitTreeEvent>();
 
         private int changesCount;
         private bool includeRemotes = true;
         private bool isStashesVisible = false;
         private LogViewMode viewMode = LogViewMode.None;
+
+        private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
+        private LogEntriesViewModel? selectedContext;
 
         public GitLogViewModel(
             INavigationService navigation,
@@ -44,6 +44,7 @@ namespace GitOut.Features.Git.Log
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             Repository = options.Repository;
             title.Title = "Log";
+            Repository = options.Repository;
 
             BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
             ActiveStashes = CollectionViewSource.GetDefaultView(activeStashes);
@@ -51,24 +52,34 @@ namespace GitOut.Features.Git.Log
             BindingOperations.EnableCollectionSynchronization(entries, entriesLock);
             Entries = CollectionViewSource.GetDefaultView(entries);
 
-            BindingOperations.EnableCollectionSynchronization(rootFiles, rootFilesLock);
-            RootFiles = CollectionViewSource.GetDefaultView(rootFiles);
-
             NavigateToStageAreaCommand = new NavigateLocalCommand<object>(navigation, typeof(GitStagePage).FullName!, e => GitStagePageOptions.Stage(Repository));
             RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
 
-            CopyCommitHashCommand = new CopyTextToClipBoardCommand<GitTreeEvent?>(
-                gte => gte!.Event.Id.Hash,
+            selectedLogEntries.CollectionChanged += (sender, args) =>
+            {
+                SelectedContext = LogEntriesViewModel.CreateContext(selectedLogEntries, Repository, RevisionViewMode);
+                ViewMode = SelectedContext is null
+                    ? LogViewMode.None
+                    : LogViewMode.Files;
+                if (selectedLogEntries.Count >= 2)
+                {
+                    RevisionViewMode = LogRevisionViewMode.Diff;
+                }
+            };
+
+            CopyCommitHashCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
+                gte => gte!.Root.Event.Id.Hash,
                 gte => !(gte is null),
                 TextDataFormat.Text,
                 data => snack.ShowSuccess("Copied hash to clipboard")
             );
 
-            selectedLogEntries.CollectionChanged += (sender, args) =>
-            {
-                if (selectedLogEntries.Count > 0)
-                    _ = ListLogFilesAsync(selectedLogEntries.First());
-            };
+            CopySubjectCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
+                gte => gte!.Subject,
+                gte => !(gte is null),
+                TextDataFormat.Text,
+                data => snack.ShowSuccess("Copied subject to clipboard")
+            );
         }
 
         public bool IncludeRemotes
@@ -91,10 +102,15 @@ namespace GitOut.Features.Git.Log
 
         public ICollectionView ActiveStashes { get; }
         public ICollectionView Entries { get; }
-        public ICollectionView RootFiles { get; }
 
         public IGitRepository Repository { get; }
         public IList<GitTreeEvent> SelectedLogEntries => selectedLogEntries;
+
+        public LogEntriesViewModel? SelectedContext
+        {
+            get => selectedContext;
+            set => SetProperty(ref selectedContext, value);
+        }
 
         public LogViewMode ViewMode
         {
@@ -120,9 +136,37 @@ namespace GitOut.Features.Git.Log
             }
         }
 
+        public LogRevisionViewMode RevisionViewMode
+        {
+            get => revisionViewMode;
+            set
+            {
+                if (SetProperty(ref revisionViewMode, value))
+                {
+                    if (!(selectedContext is null))
+                    {
+                        selectedContext.SwitchViewAsync(revisionViewMode);
+                    }
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionAtCurrent)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionDiff)));
+                }
+            }
+        }
+        public bool ShowRevisionAtCurrent
+        {
+            get => RevisionViewMode == LogRevisionViewMode.CurrentRevision;
+            set { if (value) { RevisionViewMode = LogRevisionViewMode.CurrentRevision; } }
+        }
+        public bool ShowRevisionDiff
+        {
+            get => RevisionViewMode == LogRevisionViewMode.Diff;
+            set { if (value) { RevisionViewMode = LogRevisionViewMode.Diff; } }
+        }
+
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
+        public ICommand CopySubjectCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -170,31 +214,6 @@ namespace GitOut.Features.Git.Log
                 lock (activeStashesLock)
                 {
                     activeStashes.Add(stashEntry);
-                }
-            }
-        }
-
-        private async Task ListLogFilesAsync(GitTreeEvent? entry)
-        {
-            lock (rootFilesLock)
-            {
-                rootFiles.Clear();
-            }
-            if (entry is null)
-            {
-                ViewMode = LogViewMode.None;
-            }
-            else
-            {
-                ViewMode = LogViewMode.Files;
-                GitHistoryEvent changeset = entry.Event;
-                IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.ListIdAsync(changeset.Id, Repository);
-                await foreach (IGitFileEntryViewModel viewmodel in entries)
-                {
-                    lock (rootFilesLock)
-                    {
-                        rootFiles.Add(viewmodel);
-                    }
                 }
             }
         }

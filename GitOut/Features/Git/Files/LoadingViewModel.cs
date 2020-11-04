@@ -1,4 +1,4 @@
-﻿namespace GitOut.Features.Git.Files
+namespace GitOut.Features.Git.Files
 {
     public class LoadingViewModel : IGitFileEntryViewModel
     {

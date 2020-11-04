@@ -57,9 +57,9 @@ namespace GitOut.Features.Git
                         int zeroSeparator = line.IndexOf('\0');
                         if (zeroSeparator != -1)
                         {
-                            string body = line.Substring(0, zeroSeparator);
+                            string body = line[0..zeroSeparator];
                             builder.BuildBody(body);
-                            string hashes = line.Substring(zeroSeparator + 1);
+                            string hashes = line[(zeroSeparator + 1)..];
                             if (hashes.Length == 0)
                             {
                                 break;
@@ -192,27 +192,83 @@ namespace GitOut.Features.Git
             return CachedStatus;
         }
 
-        public async Task<GitDiffResult> ExecuteDiffAsync(GitStatusChange change, DiffOptions options)
+        public async Task<string[]> GetFileContentsAsync(GitFileId file)
         {
-            var argumentBuilder = new StringBuilder("--no-optional-locks diff --no-color ");
-            if (options.Cached)
+            var args = GitProcessOptions.FromArguments($"cat-file blob \"{file}\"");
+
+            IGitProcess diff = CreateProcess(args);
+            var content = new List<string>();
+            await foreach (string line in diff.ReadLinesAsync())
             {
-                argumentBuilder.Append("--cached ");
+                content.Add(line);
             }
-            if (options.IgnoreAllSpace)
+            return content.ToArray();
+        }
+
+        public async IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent)
+        {
+            string diffArguments = $"--no-optional-locks diff-tree --no-color {parent?.Hash ?? "-root"} {change} -z";
+            IGitProcess diff = CreateProcess(GitProcessOptions.FromArguments(diffArguments));
+
+            await foreach (string line in diff.ReadLinesAsync())
             {
-                argumentBuilder.Append("--ignore-all-space ");
+                string[] diffLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < diffLines.Length; ++i)
+                {
+                    string fileLine = diffLines[i++];
+                    string path = diffLines[i];
+                    IGitDiffFileEntryBuilder builder = GitDiffFileEntry.Parse(fileLine);
+                    if (builder.Type == GitDiffType.CopyEdit || builder.Type == GitDiffType.RenameEdit)
+                    {
+                        yield return builder.Build(path, diffLines[i + 1]);
+                        ++i;
+                    }
+                    else
+                    {
+                        yield return builder.Build(path);
+                    }
+                }
             }
-            argumentBuilder.Append($"-- {change.Path}");
+        }
+
+        public async Task<GitDiffResult> ExecuteDiffAsync(GitObjectId source, GitObjectId target, DiffOptions options)
+        {
+            if (source.IsEmpty)
+            {
+                throw new ArgumentException("Cannot diff empty hash", nameof(source));
+            }
+            if (target.IsEmpty)
+            {
+                throw new ArgumentException("Cannot diff empty hash", nameof(target));
+            }
+            if (target.Equals(source))
+            {
+                throw new ArgumentException("Source and target is the same object, must diff different id's", nameof(target));
+            }
+            string argumentBuilder = $"--no-optional-locks diff --no-color {string.Join(" ", options.GetArguments(false))} {target} {source}";
             var args = GitProcessOptions.FromArguments(argumentBuilder.ToString());
 
             IGitProcess diff = CreateProcess(args);
-            IGitDiffBuilder builder = GitDiffResult.ResultFor(change, options);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             await foreach (string line in diff.ReadLinesAsync())
             {
                 builder.Feed(line);
             }
-            return builder.Build();
+            return builder.Build(options);
+        }
+
+        public async Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options)
+        {
+            string argumentBuilder = $"--no-optional-locks diff --no-color {string.Join(" ", options.GetArguments())} -- {file}";
+            var args = GitProcessOptions.FromArguments(argumentBuilder);
+
+            IGitProcess diff = CreateProcess(args);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
+            await foreach (string line in diff.ReadLinesAsync())
+            {
+                builder.Feed(line);
+            }
+            return builder.Build(options);
         }
 
         public async IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id)
@@ -223,8 +279,7 @@ namespace GitOut.Features.Git
                 string[] fileLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string? fileLine in fileLines)
                 {
-                    var entry = GitFileEntry.Parse(fileLine);
-                    yield return entry;
+                    yield return GitFileEntry.Parse(fileLine);
                 }
             }
         }

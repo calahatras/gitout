@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitOut.Features.IO;
 
 namespace GitOut.Features.Git
 {
@@ -100,7 +101,7 @@ namespace GitOut.Features.Git
                 return this;
             }
 
-            public IGitPatchBuilder CreateHeader(string path, GitStatusChangeType type)
+            public IGitPatchBuilder CreateHeader(RelativeDirectoryPath path, GitStatusChangeType type)
             {
                 patchBuilder.AppendLine($"diff --git a/{path} b/{path}");
                 switch (type)

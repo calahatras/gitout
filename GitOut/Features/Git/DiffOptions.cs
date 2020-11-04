@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace GitOut.Features.Git
 {
     public class DiffOptions
@@ -10,6 +12,18 @@ namespace GitOut.Features.Git
 
         public bool Cached { get; }
         public bool IgnoreAllSpace { get; }
+
+        public IEnumerable<string> GetArguments(bool includeCached = true)
+        {
+            if (Cached && includeCached)
+            {
+                yield return "--cached";
+            }
+            if (IgnoreAllSpace)
+            {
+                yield return "--ignore-all-space";
+            }
+        }
 
         public static IDiffOptionsBuilder Builder() => new DiffOptionsBuilder();
 

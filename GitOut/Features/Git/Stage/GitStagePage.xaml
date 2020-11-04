@@ -79,7 +79,7 @@
                 <Path Height="24" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowLeft}"/>
             </Button>
             <TextBlock Grid.Column="1" Text="Stage" Style="{StaticResource MaterialToolbarHeaderStyle}"/>
-            <StackPanel Grid.Column="2"  Orientation="Horizontal" Style="{StaticResource MaterialToolbarOptionsStyle}">
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Style="{StaticResource MaterialToolbarOptionsStyle}">
                 <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
                 </ToggleButton>

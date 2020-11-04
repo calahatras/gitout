@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using GitOut.Features.IO;
 
 namespace GitOut.Features.Git.Stage
 {
@@ -13,13 +14,13 @@ namespace GitOut.Features.Git.Stage
         private static readonly Brush AddedLineBackground = new SolidColorBrush(Color.FromArgb(128, 90, 200, 90));
 
         private readonly GitStatusChangeType changeType;
-        private readonly string path;
+        private readonly RelativeDirectoryPath path;
         private readonly StatusChangeLocation location;
         private readonly List<(Run, HunkLine)> diffContexts;
 
         private DiffViewModel(
             GitStatusChangeType changeType,
-            string path,
+            RelativeDirectoryPath path,
             StatusChangeLocation location,
             FlowDocument document,
             IEnumerable<LineNumberViewModel> lineNumbers,
@@ -46,7 +47,7 @@ namespace GitOut.Features.Git.Stage
         public GitPatch CreateAddPatch(TextRange selection, PatchLineTransform options)
             => CreatePatch(selection, PatchOptions.AddFrom(location, options));
 
-        public static DiffViewModel ParseDiff(GitDiffResult result, double pixelsPerDip, Brush dividerBrush, Brush headerForeground)
+        public static DiffViewModel ParseDiff(GitStatusChange change, GitDiffResult result, double pixelsPerDip, Brush dividerBrush, Brush headerForeground)
         {
             var document = new FlowDocument
             {
@@ -83,7 +84,7 @@ namespace GitOut.Features.Git.Stage
                 document.Blocks.Add(section);
             }
             document.PageWidth = maxWidth + 20;
-            return new DiffViewModel(GitStatusChangeType.Ordinary, result.Change.Path, result.Options.Cached ? StatusChangeLocation.Index : StatusChangeLocation.Workspace, document, lineNumbers, diffContexts);
+            return new DiffViewModel(GitStatusChangeType.Ordinary, change.Path, result.Options.Cached ? StatusChangeLocation.Index : StatusChangeLocation.Workspace, document, lineNumbers, diffContexts);
 
             static Paragraph CreateDefaultParagraph(string text) =>
                 new Paragraph(new Run(text))
@@ -112,7 +113,7 @@ namespace GitOut.Features.Git.Stage
             };
         }
 
-        public static DiffViewModel? ParseFileContent(GitStatusChange origin, string[] result, double pixelsPerDip)
+        public static DiffViewModel ParseFileContent(GitStatusChange origin, string[] result, double pixelsPerDip)
         {
             var document = new FlowDocument
             {

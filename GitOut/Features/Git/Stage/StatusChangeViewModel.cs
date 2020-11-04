@@ -8,7 +8,7 @@ namespace GitOut.Features.Git.Stage
         {
             Model = model;
             Location = location;
-            Path = model.Path;
+            Path = model.Path.ToString();
             if (model.Type == GitStatusChangeType.Untracked)
             {
                 IconResourceKey = "FilePlus";

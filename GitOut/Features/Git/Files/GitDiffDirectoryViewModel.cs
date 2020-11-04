@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,10 +8,10 @@ using System.Windows.Data;
 
 namespace GitOut.Features.Git.Files
 {
-    public class GitDirectoryViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
+    public class GitDiffDirectoryViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
     {
-        private readonly GitFileEntry file;
-        private readonly Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup;
+        private readonly GitDiffFileEntry file;
+        private readonly Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup;
 
         private readonly object entriesLock = new object();
         private readonly ObservableCollection<IGitFileEntryViewModel> entries = new ObservableCollection<IGitFileEntryViewModel>();
@@ -19,9 +19,9 @@ namespace GitOut.Features.Git.Files
         private bool isExpanded;
         private bool isPopulated;
 
-        private GitDirectoryViewModel(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
+        private GitDiffDirectoryViewModel(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
         {
-            if (file.Type != GitFileType.Tree)
+            if (file.FileType != GitFileType.Tree)
             {
                 throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file));
             }
@@ -33,7 +33,7 @@ namespace GitOut.Features.Git.Files
             entries.Add(LoadingViewModel.Proxy);
         }
 
-        public string FileName => file.FileName.ToString();
+        public string FileName => file.SourceFileName.ToString();
         public string IconResourceKey => IsExpanded ? "FolderOpen" : "Folder";
         public bool IsExpanded
         {
@@ -53,7 +53,7 @@ namespace GitOut.Features.Git.Files
 
         private async Task PopulateChildrenAsync()
         {
-            IAsyncEnumerable<IGitFileEntryViewModel> files = lookup(file.Id);
+            IAsyncEnumerable<IGitFileEntryViewModel> files = lookup(file.SourceId, file.DestinationId);
             await foreach (IGitFileEntryViewModel entry in files)
             {
                 lock (entriesLock)
@@ -82,6 +82,6 @@ namespace GitOut.Features.Git.Files
             return false;
         }
 
-        public static GitDirectoryViewModel Wrap(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => new GitDirectoryViewModel(file, lookup);
+        public static GitDiffDirectoryViewModel Wrap(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => new GitDiffDirectoryViewModel(file, lookup);
     }
 }

@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using GitOut.Features.IO;
 
 namespace GitOut.Features.Git
 {
@@ -12,8 +13,10 @@ namespace GitOut.Features.Git
             PosixFileModes[]? headFileModes,
             PosixFileModes[]? indexFileModes,
             PosixFileModes[]? worktreeFileModes,
-            string path,
-            string? mergedPath
+            GitFileId? sourceId,
+            GitFileId? destinationId,
+            RelativeDirectoryPath path,
+            RelativeDirectoryPath? mergedPath
         )
         {
             Type = type;
@@ -22,6 +25,8 @@ namespace GitOut.Features.Git
             HeadFileModes = headFileModes;
             IndexFileModes = indexFileModes;
             WorktreeFileModes = worktreeFileModes;
+            SourceId = sourceId;
+            DestinationId = destinationId;
             Path = path;
             MergedPath = mergedPath;
         }
@@ -34,8 +39,11 @@ namespace GitOut.Features.Git
         public IReadOnlyCollection<PosixFileModes>? IndexFileModes { get; }
         public IReadOnlyCollection<PosixFileModes>? WorktreeFileModes { get; }
 
-        public string Path { get; }
-        public string? MergedPath { get; }
+        public GitFileId? SourceId { get; }
+        public GitFileId? DestinationId { get; }
+
+        public RelativeDirectoryPath Path { get; }
+        public RelativeDirectoryPath? MergedPath { get; }
 
         public static IGitStatusChangeBuilder Parse(string change) => new GitStatusChangeBuilder(change);
 
@@ -46,9 +54,13 @@ namespace GitOut.Features.Git
             private readonly PosixFileModes[]? headFileModes;
             private readonly PosixFileModes[]? indexFileModes;
             private readonly PosixFileModes[]? worktreeFileModes;
-            private readonly string path;
 
-            private string? mergedPath;
+            private readonly GitFileId? sourceId;
+            private readonly GitFileId? destinationId;
+
+            private readonly RelativeDirectoryPath path;
+
+            private RelativeDirectoryPath? mergedPath;
 
             public GitStatusChangeBuilder(string change)
             {
@@ -59,7 +71,7 @@ namespace GitOut.Features.Git
                 Type = GetStatusChangeType(change[0]);
                 if (Type == GitStatusChangeType.Untracked)
                 {
-                    path = change.Substring(2);
+                    path = RelativeDirectoryPath.Create(change[2..]);
                 }
                 else
                 {
@@ -70,20 +82,36 @@ namespace GitOut.Features.Git
 
                     stagedStatus = GetModifiedStatusType(change[2]);
                     unstagedStatus = GetModifiedStatusType(change[3]);
-                    headFileModes = GetFileModes(change.Substring(10, 6));
-                    indexFileModes = GetFileModes(change.Substring(17, 6));
-                    worktreeFileModes = GetFileModes(change.Substring(24, 6));
-                    path = change.Substring(113);
+                    headFileModes = GetFileModes(change[10..16]);
+                    indexFileModes = GetFileModes(change[17..23]);
+                    worktreeFileModes = GetFileModes(change[24..30]);
+
+                    sourceId = GitFileId.FromHash(change[31..71]);
+                    destinationId = GitFileId.FromHash(change[72..112]);
+
+                    path = Type == GitStatusChangeType.RenamedOrCopied
+                        ? RelativeDirectoryPath.Create(change[(change.IndexOf(' ', 113) + 1)..])
+                        : RelativeDirectoryPath.Create(change[113..]);
                 }
             }
 
             public GitStatusChangeType Type { get; }
 
-            public GitStatusChange Build() => new GitStatusChange(Type, stagedStatus, unstagedStatus, headFileModes, indexFileModes, worktreeFileModes, path, mergedPath);
+            public GitStatusChange Build() => new GitStatusChange(
+                Type,
+                stagedStatus,
+                unstagedStatus,
+                headFileModes,
+                indexFileModes,
+                worktreeFileModes,
+                sourceId,
+                destinationId,
+                path,
+                mergedPath);
 
             public IGitStatusChangeBuilder MergedFrom(string path)
             {
-                mergedPath = path;
+                mergedPath = RelativeDirectoryPath.Create(path);
                 return this;
             }
 

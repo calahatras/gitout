@@ -21,7 +21,7 @@
     TextElement.FontWeight="Regular"
     TextElement.FontSize="16"
     TextOptions.TextFormattingMode="Ideal" 
-    TextOptions.TextRenderingMode="Auto"        
+    TextOptions.TextRenderingMode="Auto"
     FontFamily="Roboto"
     Language="sv"
     d:DataContext="{d:DesignInstance Type={x:Type local:NavigatorShellViewModel}}"
@@ -124,7 +124,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="1"  Text="git out" Style="{StaticResource NavigationTitleStyle}" />
+                <TextBlock Grid.Column="1" Text="git out" Style="{StaticResource NavigationTitleStyle}" />
                 <StackPanel
                     Grid.Column="2"
                     VerticalAlignment="Center"

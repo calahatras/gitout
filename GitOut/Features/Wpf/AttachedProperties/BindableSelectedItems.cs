@@ -36,7 +36,7 @@ namespace GitOut.Features.Wpf.AttachedProperties
             }
 
             IList list = GetSelectedItems(listBox);
-            IEnumerable<object>? toRemove = list.OfType<object>().Where(x => !listBox.SelectedItems.Contains(x));
+            IEnumerable<object>? toRemove = list.OfType<object>().Where(x => !listBox.SelectedItems.Contains(x)).ToList();
             foreach (object? item in toRemove)
             {
                 list.Remove(item);

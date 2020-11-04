@@ -5,41 +5,28 @@ namespace GitOut.Features.Git
 {
     public class GitDiffResult
     {
-        private GitDiffResult(GitStatusChange change, DiffOptions options, string header, ICollection<GitDiffHunk> hunks)
+        private GitDiffResult(DiffOptions options, string header, ICollection<GitDiffHunk> hunks)
         {
-            Change = change;
             Options = options;
             Header = header;
             Hunks = hunks;
         }
 
-        public GitStatusChange Change { get; }
         public DiffOptions Options { get; }
         public string Header { get; }
         public IEnumerable<GitDiffHunk> Hunks { get; }
 
-        public static IGitDiffBuilder ResultFor(GitStatusChange change, DiffOptions options)
-            => new GitDiffBuilder(change, options);
+        public static IGitDiffBuilder Builder() => new GitDiffBuilder();
 
         private class GitDiffBuilder : IGitDiffBuilder
         {
-            private const string HunkIdentifier = "@@";
-
-            private readonly GitStatusChange change;
-            private readonly DiffOptions options;
             private readonly ICollection<GitDiffHunk> hunks = new List<GitDiffHunk>();
             private readonly ICollection<string> parts = new List<string>();
             private string? header;
 
             private bool hasHunk = false;
 
-            public GitDiffBuilder(GitStatusChange change, DiffOptions options)
-            {
-                this.change = change;
-                this.options = options;
-            }
-
-            public GitDiffResult Build()
+            public GitDiffResult Build(DiffOptions options)
             {
                 if (header is null)
                 {
@@ -47,12 +34,12 @@ namespace GitOut.Features.Git
                 }
                 var lastHunk = GitDiffHunk.Parse(parts);
                 hunks.Add(lastHunk);
-                return new GitDiffResult(change, options, header, hunks);
+                return new GitDiffResult(options, header, hunks);
             }
 
             public void Feed(string line)
             {
-                if (line.StartsWith(HunkIdentifier))
+                if (line.StartsWith(GitDiffHunk.HunkIdentifier))
                 {
                     if (hasHunk)
                     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -18,6 +18,8 @@ namespace GitOut.Features.IO
         }
 
         public string Name { get; }
+
+        public override string ToString() => Name;
 
         public static FileName Create(string path) => new FileName(path);
     }

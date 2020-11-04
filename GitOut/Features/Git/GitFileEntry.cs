@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using GitOut.Features.IO;
 
 namespace GitOut.Features.Git
 {
@@ -10,12 +11,12 @@ namespace GitOut.Features.Git
             Id = id;
             Type = type;
             FileModes = fileModes;
-            FileName = fileName;
+            FileName = FileName.Create(fileName);
         }
 
         public GitFileId Id { get; }
 
-        public string FileName { get; }
+        public FileName FileName { get; }
 
         public IEnumerable<PosixFileModes> FileModes { get; }
         public GitFileType Type { get; }
@@ -24,9 +25,9 @@ namespace GitOut.Features.Git
         {
             string[] parts = fileLine.Split('\t', 2);
             string[] metadata = parts[0].Split(' ', 3);
-            Enum.TryParse(metadata[0].Substring(3, 1), out PosixFileModes user);
-            Enum.TryParse(metadata[0].Substring(4, 1), out PosixFileModes group);
-            Enum.TryParse(metadata[0].Substring(5, 1), out PosixFileModes other);
+            Enum.TryParse(metadata[0][3..4], out PosixFileModes user);
+            Enum.TryParse(metadata[0][4..5], out PosixFileModes group);
+            Enum.TryParse(metadata[0][5..6], out PosixFileModes other);
 
             if (!Enum.TryParse(metadata[1], true, out GitFileType type))
             {

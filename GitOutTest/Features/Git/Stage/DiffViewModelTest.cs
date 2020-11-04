@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Documents;
 using System.Windows.Media;
 using NUnit.Framework;
@@ -12,7 +12,7 @@ namespace GitOut.Features.Git.Stage
         {
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             DiffOptions options = DiffOptions.Builder().Build();
-            IGitDiffBuilder builder = GitDiffResult.ResultFor(change, options);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
             builder.Feed("--- a/filename.txt");
@@ -22,8 +22,8 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult diff = builder.Build();
-            var viewModel = DiffViewModel.ParseDiff(diff, 1, Brushes.White, Brushes.White);
+            GitDiffResult diff = builder.Build(options);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
             TextPointer start = viewModel.Document.ContentStart;
             TextPointer end = viewModel.Document.ContentEnd;
 
@@ -47,7 +47,7 @@ namespace GitOut.Features.Git.Stage
         {
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             DiffOptions options = DiffOptions.Builder().Cached().Build();
-            IGitDiffBuilder builder = GitDiffResult.ResultFor(change, options);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
             builder.Feed("--- a/filename.txt");
@@ -57,8 +57,8 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult diff = builder.Build();
-            var viewModel = DiffViewModel.ParseDiff(diff, 1, Brushes.White, Brushes.White);
+            GitDiffResult diff = builder.Build(options);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
             TextPointer start = viewModel.Document.ContentStart;
             TextPointer end = viewModel.Document.ContentEnd;
 
@@ -82,7 +82,7 @@ namespace GitOut.Features.Git.Stage
         {
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             DiffOptions options = DiffOptions.Builder().Cached().Build();
-            IGitDiffBuilder builder = GitDiffResult.ResultFor(change, options);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
             builder.Feed("--- a/filename.txt");
@@ -92,8 +92,8 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult diff = builder.Build();
-            var viewModel = DiffViewModel.ParseDiff(diff, 1, Brushes.White, Brushes.White);
+            GitDiffResult diff = builder.Build(options);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
             int offset = 28;
             TextPointer start = viewModel.Document.ContentStart.GetPositionAtOffset(offset);
             TextPointer end = start.GetPositionAtOffset(3);
@@ -117,7 +117,7 @@ namespace GitOut.Features.Git.Stage
         {
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             DiffOptions options = DiffOptions.Builder().Cached().Build();
-            IGitDiffBuilder builder = GitDiffResult.ResultFor(change, options);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
             builder.Feed("--- a/filename.txt");
@@ -127,8 +127,8 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult diff = builder.Build();
-            var viewModel = DiffViewModel.ParseDiff(diff, 1, Brushes.White, Brushes.White);
+            GitDiffResult diff = builder.Build(options);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
             int offset = 28;
             TextPointer start = viewModel.Document.ContentStart.GetPositionAtOffset(offset);
             TextPointer end = start.GetPositionAtOffset(3);
@@ -152,7 +152,7 @@ namespace GitOut.Features.Git.Stage
         {
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             DiffOptions options = DiffOptions.Builder().Cached().Build();
-            IGitDiffBuilder builder = GitDiffResult.ResultFor(change, options);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
             builder.Feed("--- a/filename.txt");
@@ -183,8 +183,8 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  23");
             builder.Feed("+line  24");
             builder.Feed(" line1925");
-            GitDiffResult diff = builder.Build();
-            var viewModel = DiffViewModel.ParseDiff(diff, 1, Brushes.White, Brushes.White);
+            GitDiffResult diff = builder.Build(options);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
             int offset = 11 * 21;
             TextPointer start = viewModel.Document.ContentStart.GetPositionAtOffset(offset);
             TextPointer end = start.GetPositionAtOffset(10 * 6);

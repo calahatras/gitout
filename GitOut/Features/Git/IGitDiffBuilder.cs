@@ -1,8 +1,8 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git
 {
     public interface IGitDiffBuilder
     {
-        GitDiffResult Build();
+        GitDiffResult Build(DiffOptions options);
         void Feed(string line);
     }
 }
