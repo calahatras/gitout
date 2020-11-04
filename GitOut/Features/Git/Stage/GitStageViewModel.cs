@@ -206,14 +206,12 @@ namespace GitOut.Features.Git.Stage
 
         private async Task StageAllFilesAsync()
         {
-            SynchronizationContext? syncObject = SynchronizationContext.Current!;
             await Repository.ExecuteAddAllAsync();
             await GetRepositoryStatusAsync();
         }
 
         private async Task ResetAllFilesAsync()
         {
-            SynchronizationContext? syncObject = SynchronizationContext.Current!;
             await Repository.ExecuteResetAllAsync();
             await GetRepositoryStatusAsync();
         }

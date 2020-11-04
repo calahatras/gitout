@@ -58,9 +58,9 @@ namespace GitOut.Features.Git
                         int zeroSeparator = line.IndexOf('\0');
                         if (zeroSeparator != -1)
                         {
-                            string body = line.Substring(0, zeroSeparator);
+                            string body = line[0..zeroSeparator];
                             builder.BuildBody(body);
-                            string hashes = line.Substring(zeroSeparator + 1);
+                            string hashes = line[(zeroSeparator + 1)..];
                             if (hashes.Length == 0)
                             {
                                 break;
@@ -149,6 +149,19 @@ namespace GitOut.Features.Git
             return CachedStatus;
         }
 
+        public async Task<string[]> GetFileContents(GitFileEntry file)
+        {
+            var args = GitProcessOptions.FromArguments($"cat-file blob \"{file.Id}\"");
+
+            IGitProcess diff = CreateProcess(args);
+            var content = new List<string>();
+            await foreach (string line in diff.ReadLinesAsync())
+            {
+                content.Add(line);
+            }
+            return content.ToArray();
+        }
+
         public async Task<GitDiffResult> ExecuteDiffAsync(GitStatusChange change, DiffOptions options)
         {
             var argumentBuilder = new StringBuilder("--no-optional-locks diff --no-color ");
@@ -180,8 +193,7 @@ namespace GitOut.Features.Git
                 string[] fileLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string? fileLine in fileLines)
                 {
-                    var entry = GitFileEntry.Parse(fileLine);
-                    yield return entry;
+                    yield return GitFileEntry.Parse(fileLine);
                 }
             }
         }

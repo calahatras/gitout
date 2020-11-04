@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:git="clr-namespace:GitOut.Features.Git"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
+    xmlns:stage="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
@@ -112,6 +113,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="DiffViewStyle" TargetType="{x:Type ColumnDefinition}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=FileTree, Path=SelectedItem}" Value="Null">
+                    <Setter Property="MaxWidth" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="FileViewStyle" TargetType="{x:Type ColumnDefinition}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding DataContext.FileViewVisible, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="False">
@@ -139,6 +147,8 @@
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="Auto" Style="{StaticResource FileViewStyle}" />
                 <ColumnDefinition Width="5*" Style="{StaticResource FileViewStyle}" />
+                <ColumnDefinition Width="Auto" Style="{StaticResource DiffViewStyle}" />
+                <ColumnDefinition Width="5*" Style="{StaticResource DiffViewStyle}" />
             </Grid.ColumnDefinitions>
             <Grid>
                 <Grid.RowDefinitions>
@@ -302,7 +312,11 @@
             </Grid>
             <GridSplitter Grid.Column="3" Style="{StaticResource SplitVerticalStyle}" />
             <Grid Grid.Column="4">
-                <TreeView ItemsSource="{Binding RootFiles}" Style="{StaticResource MaterialTreeViewStyle}">
+                <TreeView
+                    x:Name="FileTree"
+                    ItemsSource="{Binding RootFiles}"
+                    Style="{StaticResource MaterialTreeViewStyle}"
+                >
                     <TreeView.Resources>
                         <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding Children}">
                             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
@@ -342,6 +356,27 @@
                         </DataTemplate>
                     </TreeView.Resources>
                 </TreeView>
+            </Grid>
+            <GridSplitter Grid.Column="5" Style="{StaticResource SplitVerticalStyle}" />
+            <Grid Grid.Column="6">
+                <ContentPresenter Content="{Binding ElementName=FileTree, Path=SelectedItem, FallbackValue=Nothing}">
+                    <ContentPresenter.Resources>
+                        <DataTemplate DataType="{x:Type files:GitFileViewModel}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Style="{StaticResource PrimaryTextStyle}"  Text="{Binding FileName}" />
+                                <FlowDocumentScrollViewer
+                                    Document="{Binding Document}"
+                                    Grid.Row="1"
+                                    HorizontalAlignment="Stretch"
+                                />
+                            </Grid>
+                        </DataTemplate>
+                    </ContentPresenter.Resources>
+                </ContentPresenter>
             </Grid>
         </Grid>
     </Grid>

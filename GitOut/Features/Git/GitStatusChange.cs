@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace GitOut.Features.Git
@@ -59,7 +59,7 @@ namespace GitOut.Features.Git
                 Type = GetStatusChangeType(change[0]);
                 if (Type == GitStatusChangeType.Untracked)
                 {
-                    path = change.Substring(2);
+                    path = change[2..];
                 }
                 else
                 {
@@ -73,7 +73,7 @@ namespace GitOut.Features.Git
                     headFileModes = GetFileModes(change.Substring(10, 6));
                     indexFileModes = GetFileModes(change.Substring(17, 6));
                     worktreeFileModes = GetFileModes(change.Substring(24, 6));
-                    path = change.Substring(113);
+                    path = change[113..];
                 }
             }
 

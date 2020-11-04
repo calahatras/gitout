@@ -44,6 +44,7 @@ namespace GitOut.Features.Git.Log
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             title.Title = "Log";
+            Repository = options.Repository;
 
             BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
             ActiveStashes = CollectionViewSource.GetDefaultView(activeStashes);
@@ -66,8 +67,6 @@ namespace GitOut.Features.Git.Log
                 Clipboard.SetText(SelectedLogEntry.Event.Id.Hash, TextDataFormat.Text);
                 snack.ShowSuccess("Copied hash to clipboard");
             });
-
-            Repository = options.Repository;
         }
 
         public bool IncludeRemotes

@@ -17,6 +17,7 @@ namespace GitOut.Features.Git
         Task<GitStatusResult> ExecuteStatusAsync();
         Task<GitDiffResult> ExecuteDiffAsync(GitStatusChange change, DiffOptions options);
         IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id);
+        Task<string[]> GetFileContents(GitFileEntry file);
 
         Task ExecuteAddAllAsync();
         Task ExecuteResetAllAsync();

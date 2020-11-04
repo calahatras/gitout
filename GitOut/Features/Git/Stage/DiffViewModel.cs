@@ -112,7 +112,7 @@ namespace GitOut.Features.Git.Stage
             };
         }
 
-        public static DiffViewModel? ParseFileContent(GitStatusChange origin, string[] result, double pixelsPerDip)
+        public static DiffViewModel ParseFileContent(GitStatusChange origin, string[] result, double pixelsPerDip)
         {
             var document = new FlowDocument
             {

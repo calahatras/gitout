@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 
 namespace GitOut.Features.Git
@@ -23,6 +23,8 @@ namespace GitOut.Features.Git
         public string Hash { get; }
 
         public override int GetHashCode() => Hash.GetHashCode();
+
+        public override string ToString() => Hash;
 
         public bool Equals(GitObjectId? obj) => !(obj is null) && Hash.Equals(obj.Hash);
 
