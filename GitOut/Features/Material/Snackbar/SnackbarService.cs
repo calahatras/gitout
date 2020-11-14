@@ -1,6 +1,6 @@
 using System;
 using System.Threading;
-using GitOut.Features.Commands;
+using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Material.Snackbar
 {

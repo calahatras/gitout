@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using GitOut.Features.Commands;
 using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Material.Snackbar;
@@ -43,6 +42,7 @@ namespace GitOut.Features.Git.Log
         {
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
+            Repository = options.Repository;
             title.Title = "Log";
 
             BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
@@ -57,17 +57,12 @@ namespace GitOut.Features.Git.Log
             NavigateToStageAreaCommand = new NavigateLocalCommand<object>(navigation, typeof(GitStagePage).FullName!, e => GitStagePageOptions.Stage(Repository));
             RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
 
-            CopyCommitHashCommand = new CallbackCommand(() =>
-            {
-                if (SelectedLogEntry is null)
-                {
-                    return;
-                }
-                Clipboard.SetText(SelectedLogEntry.Event.Id.Hash, TextDataFormat.Text);
-                snack.ShowSuccess("Copied hash to clipboard");
-            });
-
-            Repository = options.Repository;
+            CopyCommitHashCommand = new CopyTextToClipBoardCommand<GitTreeEvent?>(
+                gte => gte!.Event.Id.Hash,
+                gte => !(gte is null),
+                TextDataFormat.Text,
+                data => snack.ShowSuccess("Copied hash to clipboard")
+            );
         }
 
         public bool IncludeRemotes

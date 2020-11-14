@@ -11,7 +11,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using GitOut.Features.Commands;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
@@ -206,14 +205,12 @@ namespace GitOut.Features.Git.Stage
 
         private async Task StageAllFilesAsync()
         {
-            SynchronizationContext? syncObject = SynchronizationContext.Current!;
             await Repository.ExecuteAddAllAsync();
             await GetRepositoryStatusAsync();
         }
 
         private async Task ResetAllFilesAsync()
         {
-            SynchronizationContext? syncObject = SynchronizationContext.Current!;
             await Repository.ExecuteResetAllAsync();
             await GetRepositoryStatusAsync();
         }

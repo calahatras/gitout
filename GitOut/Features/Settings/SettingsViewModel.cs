@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using GitOut.Features.Commands;
 using GitOut.Features.Git;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;

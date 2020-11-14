@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Data;
 using System.Windows.Input;
-using GitOut.Features.Commands;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
+using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Git.RepositoryList
 {
@@ -36,9 +36,9 @@ namespace GitOut.Features.Git.RepositoryList
                 repository => GitLogPageOptions.OpenRepository(repository),
                 repository => repository != null
             );
-            CopyContentCommand = new CopyTextToClipBoardCommand<DirectoryPath>(
-                path => path.Directory,
-                path => path != null,
+            CopyContentCommand = new CopyTextToClipBoardCommand<DirectoryPath?>(
+                path => path!.Directory,
+                path => !(path is null),
                 text => snacks.ShowSuccess("Copied text to clipboard")
             );
 

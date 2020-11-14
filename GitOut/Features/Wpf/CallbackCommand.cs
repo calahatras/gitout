@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Windows.Input;
 
-namespace GitOut.Features.Commands
+namespace GitOut.Features.Wpf
 {
     public class CallbackCommand : CallbackCommand<object>
     {
