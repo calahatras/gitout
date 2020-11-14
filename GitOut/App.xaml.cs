@@ -86,6 +86,7 @@ namespace GitOut
                 options.StartupWindow = typeof(NavigatorShell).FullName!;
                 options.StartupType = typeof(RepositoryListPage).FullName!;
             });
+            services.AddOptions<NavigationWindowOptions>().Bind(context.Configuration.GetSection(NavigationWindowOptions.SectionKey));
             services.AddOptions<GitStoreOptions>().Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
             services.AddOptions<GitStageOptions>().Bind(context.Configuration.GetSection(GitStageOptions.SectionKey));
             services.AddLogging();

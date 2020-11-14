@@ -1,4 +1,4 @@
-﻿namespace GitOut.Features.Navigation
+namespace GitOut.Features.Navigation
 {
     public class NavigationRegistrationOptions
     {

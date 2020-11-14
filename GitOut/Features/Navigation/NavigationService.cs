@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using GitOut.Features.Logging;
+using GitOut.Features.Storage;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Navigation
 {
@@ -16,6 +18,8 @@ namespace GitOut.Features.Navigation
         private readonly IServiceProvider provider;
         private readonly ITitleService titleService;
         private readonly IThemeService theme;
+        private readonly IOptions<NavigationWindowOptions> windowOptions;
+        private readonly IWritableStorage storage;
         private readonly ILogger<NavigationService> logger;
         private readonly Stack<Tuple<ContentControl, string?, IServiceScope>> pageStack = new Stack<Tuple<ContentControl, string?, IServiceScope>>();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
@@ -27,10 +31,14 @@ namespace GitOut.Features.Navigation
             IHostApplicationLifetime life,
             ITitleService title,
             IThemeService theme,
+            IOptions<NavigationWindowOptions> windowOptions,
+            IWritableStorage storage,
             ILogger<NavigationService> logger
         )
         {
             this.provider = provider;
+            this.windowOptions = windowOptions;
+            this.storage = storage;
             titleService = title;
             this.theme = theme;
             this.logger = logger;
@@ -106,6 +114,36 @@ namespace GitOut.Features.Navigation
                     {
                         logger.LogInformation(LogEventId.Navigation, "Navigating to page " + pageName);
                         currentWindow = window;
+                        NavigationWindowOptions cachedValues = windowOptions.Value;
+                        if (cachedValues.Width.HasValue)
+                        {
+                            currentWindow.Width = cachedValues.Width.Value;
+                        }
+                        if (cachedValues.Height.HasValue)
+                        {
+                            currentWindow.Height = cachedValues.Height.Value;
+                        }
+                        if (cachedValues.Top.HasValue)
+                        {
+                            currentWindow.Top = cachedValues.Top.Value;
+                        }
+                        if (cachedValues.Left.HasValue)
+                        {
+                            currentWindow.Left = cachedValues.Left.Value;
+                        }
+                        currentWindow.Closing += (sender, args) =>
+                        {
+                            if (currentWindow.WindowState == WindowState.Normal)
+                            {
+                                storage.Write(NavigationWindowOptions.SectionKey, new
+                                {
+                                    Width = currentWindow.ActualWidth,
+                                    Height = currentWindow.ActualHeight,
+                                    currentWindow.Left,
+                                    currentWindow.Top
+                                });
+                            }
+                        };
                         theme.RegisterResourceProvider(window.Resources);
                         window.Show();
                     }
