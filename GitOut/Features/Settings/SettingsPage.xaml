@@ -168,7 +168,10 @@
                         <Border Style="{StaticResource CardPanelStyle}">
                             <StackPanel>
                                 <TextBlock Text="Theme" Style="{StaticResource Header6TextStyle}" />
-                                <themes:ThemeSettingsPicker ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}" />
+                                <themes:ThemeSettingsPicker
+                                    SelectThemeCommand="{Binding SelectThemeCommand}"
+                                    ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}"
+                                />
                             </StackPanel>
                         </Border>
                     </StackPanel>

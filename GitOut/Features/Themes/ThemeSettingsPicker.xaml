@@ -51,7 +51,7 @@
                 <Button
                     Style="{StaticResource ThemeColorButtonStyle}"
                     ToolTip="{Binding Name}"
-                    Command="{Binding DataContext.SelectThemeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding SelectThemeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{Binding}"
                 >
                     <Button.Background>

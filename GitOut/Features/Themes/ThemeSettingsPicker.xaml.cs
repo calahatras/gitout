@@ -11,6 +11,18 @@ namespace GitOut.Features.Themes
 {
     public partial class ThemeSettingsPicker : UserControl
     {
+        public static readonly DependencyProperty ThemeSelectedProperty = DependencyProperty.Register(
+            "ThemeSelected",
+            typeof(ICommand),
+            typeof(ThemeSettingsPicker)
+        );
+
+        public static readonly DependencyProperty SelectThemeCommandProperty = DependencyProperty.Register(
+            "SelectThemeCommand",
+            typeof(ICommand),
+            typeof(ThemeSettingsPicker)
+        );
+
         public ThemeSettingsPicker()
         {
             InitializeComponent();
@@ -23,7 +35,11 @@ namespace GitOut.Features.Themes
             set => SetValue(ThemeSelectedProperty, value);
         }
 
-        public static readonly DependencyProperty ThemeSelectedProperty = DependencyProperty.Register("ThemeSelected", typeof(ICommand), typeof(ThemeSettingsPicker));
+        public ICommand SelectThemeCommand
+        {
+            get { return (ICommand)GetValue(SelectThemeCommandProperty); }
+            set { SetValue(SelectThemeCommandProperty, value); }
+        }
 
         private class ThemeSettingsViewModel
         {
