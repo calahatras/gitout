@@ -10,9 +10,9 @@ namespace GitOut.Features.Git
         string? Name { get; }
 
         GitStatusResult? CachedStatus { get; }
-        GitHistoryEvent? Head { get; }
 
         Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options);
+        Task<GitHistoryEvent> GetHeadAsync();
         IAsyncEnumerable<GitStash> ExecuteStashListAsync();
         Task<GitStatusResult> ExecuteStatusAsync();
         Task<GitDiffResult> ExecuteDiffAsync(GitStatusChange change, DiffOptions options);

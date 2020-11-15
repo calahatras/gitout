@@ -34,6 +34,7 @@ namespace GitOut.Features.Git.Stage
         private bool diffWhitespace;
         private bool amendLastCommit;
         private string commitMessage = string.Empty;
+        private string cachedCommitMessage = string.Empty;
         private int selectedWorkspaceIndex;
         private int selectedIndexIndex;
 
@@ -98,11 +99,12 @@ namespace GitOut.Features.Git.Stage
                 SetProperty(ref amendLastCommit, value);
                 if (value)
                 {
-                    GitHistoryEvent? head = Repository.Head;
-                    if (head != null)
-                    {
-                        CommitMessage = head.Subject;
-                    }
+                    cachedCommitMessage = CommitMessage;
+                    _ = SetAppendCommitMessageAsync();
+                }
+                else
+                {
+                    CommitMessage = cachedCommitMessage;
                 }
             }
         }
@@ -164,6 +166,16 @@ namespace GitOut.Features.Git.Stage
         public async void Navigated(NavigationType type) => await GetRepositoryStatusAsync();
 
         private async Task GetRepositoryStatusAsync() => ParseStatus(await Repository.ExecuteStatusAsync());
+
+        private async Task SetAppendCommitMessageAsync()
+        {
+            try
+            {
+                GitHistoryEvent head = await Repository.GetHeadAsync();
+                CommitMessage = head.Subject;
+            }
+            catch (InvalidOperationException) { }
+        }
 
         private async Task ExecuteDiffAsync(SynchronizationContext? syncObject = null)
         {
