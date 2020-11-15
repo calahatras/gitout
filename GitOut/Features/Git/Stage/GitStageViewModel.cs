@@ -60,7 +60,7 @@ namespace GitOut.Features.Git.Stage
 
             NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
             RefreshStatusCommand = new AsyncCallbackCommand(() => GetRepositoryStatusAsync());
-            CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage));
+            CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage) && indexFiles.Count > 0);
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<FlowDocumentScrollViewer>(StageSelectionAsync);
