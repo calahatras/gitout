@@ -15,6 +15,12 @@
             IsChecked="{Binding TrimLineEndings}"
             Content="Trim line endings"
         />
+        <CheckBox
+            Style="{StaticResource MaterialCheckBoxStyle}"
+            Margin="0 16 0 0"
+            IsChecked="{Binding ShowSpacesAsDots}"
+            Content="Show dots instead of spaces"
+        />
         <TextBox
             Style="{StaticResource MaterialInputStyle}"
             Margin="0 16 0 0"

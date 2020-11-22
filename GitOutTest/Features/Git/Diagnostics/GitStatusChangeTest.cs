@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
 namespace GitOut.Features.Git.Diagnostics
 {
@@ -13,7 +13,7 @@ namespace GitOut.Features.Git.Diagnostics
             Assert.That(change.Type, Is.EqualTo(GitStatusChangeType.Ordinary));
             Assert.That(change.IndexStatus, Is.EqualTo(GitModifiedStatusType.Modified));
             Assert.That(change.WorkspaceStatus, Is.EqualTo(GitModifiedStatusType.Unmodified));
-            Assert.That(change.Path, Is.EqualTo("GitOut/Features/Git/Log/GitLogPage.xaml"));
+            Assert.That(change.Path.ToString(), Is.EqualTo("GitOut/Features/Git/Log/GitLogPage.xaml"));
         }
 
         [Test]
@@ -23,7 +23,7 @@ namespace GitOut.Features.Git.Diagnostics
             GitStatusChange change = GitStatusChange.Parse(line).Build();
 
             Assert.That(change.Type, Is.EqualTo(GitStatusChangeType.Untracked));
-            Assert.That(change.Path, Is.EqualTo("GitOut/Features/Git/Log/GitLogPage.xaml"));
+            Assert.That(change.Path.ToString(), Is.EqualTo("GitOut/Features/Git/Log/GitLogPage.xaml"));
         }
     }
 }

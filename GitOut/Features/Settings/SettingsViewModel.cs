@@ -24,6 +24,7 @@ namespace GitOut.Features.Settings
     {
         private readonly IWritableStorage storage;
         private bool trimLineEndings;
+        private bool showSpacesAsDots;
         private string tabTransformText;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -102,11 +103,28 @@ namespace GitOut.Features.Settings
 
             trimLineEndings = stageOptions.CurrentValue.TrimLineEndings;
             tabTransformText = stageOptions.CurrentValue.TabTransformText;
-            stageOptions.OnChange(value => SetProperty(ref trimLineEndings, value.TrimLineEndings));
+            showSpacesAsDots = stageOptions.CurrentValue.ShowSpacesAsDots;
+            stageOptions.OnChange(value =>
+            {
+                SetProperty(ref trimLineEndings, value.TrimLineEndings);
+                SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots);
+            });
         }
 
         public ICollectionView ValidRepositoryPaths { get; }
         public ICollectionView MenuItems { get; }
+
+        public bool ShowSpacesAsDots
+        {
+            get => showSpacesAsDots;
+            set
+            {
+                if (SetProperty(ref showSpacesAsDots, value))
+                {
+                    PersistStorage();
+                }
+            }
+        }
 
         public bool TrimLineEndings
         {
@@ -142,6 +160,7 @@ namespace GitOut.Features.Settings
 
         private void PersistStorage() => storage.Write(GitStageOptions.SectionKey, new GitStageOptions
         {
+            ShowSpacesAsDots = showSpacesAsDots,
             TrimLineEndings = trimLineEndings,
             TabTransformText = tabTransformText
         });

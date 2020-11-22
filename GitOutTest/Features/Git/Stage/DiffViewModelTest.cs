@@ -23,7 +23,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult diff = builder.Build(options);
-            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, new DiffDisplayOptions(1, Brushes.White, Brushes.White));
             TextPointer start = viewModel.Document.ContentStart;
             TextPointer end = viewModel.Document.ContentEnd;
 
@@ -58,7 +58,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult diff = builder.Build(options);
-            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, new DiffDisplayOptions(1, Brushes.White, Brushes.White));
             TextPointer start = viewModel.Document.ContentStart;
             TextPointer end = viewModel.Document.ContentEnd;
 
@@ -93,7 +93,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult diff = builder.Build(options);
-            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, new DiffDisplayOptions(1, Brushes.White, Brushes.White));
             int offset = 28;
             TextPointer start = viewModel.Document.ContentStart.GetPositionAtOffset(offset);
             TextPointer end = start.GetPositionAtOffset(3);
@@ -128,7 +128,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult diff = builder.Build(options);
-            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, new DiffDisplayOptions(1, Brushes.White, Brushes.White));
             int offset = 28;
             TextPointer start = viewModel.Document.ContentStart.GetPositionAtOffset(offset);
             TextPointer end = start.GetPositionAtOffset(3);
@@ -184,7 +184,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  24");
             builder.Feed(" line1925");
             GitDiffResult diff = builder.Build(options);
-            var viewModel = DiffViewModel.ParseDiff(change, diff, 1, Brushes.White, Brushes.White);
+            var viewModel = DiffViewModel.ParseDiff(change, diff, new DiffDisplayOptions(1, Brushes.White, Brushes.White));
             int offset = 11 * 21;
             TextPointer start = viewModel.Document.ContentStart.GetPositionAtOffset(offset);
             TextPointer end = start.GetPositionAtOffset(10 * 6);
