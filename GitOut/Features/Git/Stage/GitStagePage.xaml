@@ -16,6 +16,7 @@
         <KeyBinding Key="F5" Command="{Binding RefreshStatusCommand}" />
     </UserControl.InputBindings>
     <UserControl.Resources>
+        <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
         <Style x:Key="GitChangeListStyle" BasedOn="{StaticResource MaterialListStyle}" TargetType="{x:Type ListView}">
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -49,7 +50,7 @@
                                     <ScaleTransform ScaleX=".6" ScaleY=".6" />
                                 </Canvas.LayoutTransform>
                                 <Path
-                                    Fill="{DynamicResource MaterialForegroundBase}"
+                                    Fill="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
                                     Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
                                 />
                             </Canvas>
