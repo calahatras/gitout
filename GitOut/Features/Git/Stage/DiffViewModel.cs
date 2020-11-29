@@ -47,7 +47,7 @@ namespace GitOut.Features.Git.Stage
         public GitPatch CreateAddPatch(TextRange selection, PatchLineTransform options)
             => CreatePatch(selection, PatchOptions.AddFrom(location, options));
 
-        public static DiffViewModel ParseDiff(GitStatusChange change, GitDiffResult result, double pixelsPerDip, Brush dividerBrush, Brush headerForeground)
+        public static DiffViewModel ParseDiff(GitStatusChange change, GitDiffResult result, DiffDisplayOptions display)
         {
             var document = new FlowDocument
             {
@@ -62,7 +62,7 @@ namespace GitOut.Features.Git.Stage
             {
                 var section = new Section
                 {
-                    BorderBrush = dividerBrush,
+                    BorderBrush = display.DividerBrush,
                     BorderThickness = new Thickness(0, 0, 0, 1)
                 };
                 foreach (HunkLine text in hunk.Lines)
@@ -70,12 +70,12 @@ namespace GitOut.Features.Git.Stage
                     lineNumbers.Add(new LineNumberViewModel(text.FromIndex, text.ToIndex));
                     Paragraph p = text.Type switch
                     {
-                        DiffLineType.Added => CreateAddedParagraph(text.StrippedLine),
-                        DiffLineType.Removed => CreateRemovedParagraph(text.StrippedLine),
-                        DiffLineType.Header => CreateHeaderParagraph(text.StrippedLine, headerForeground),
-                        _ => CreateDefaultParagraph(text.StrippedLine)
+                        DiffLineType.Added => CreateAddedParagraph(display.Transform.Transform(text.StrippedLine)),
+                        DiffLineType.Removed => CreateRemovedParagraph(display.Transform.Transform(text.StrippedLine)),
+                        DiffLineType.Header => CreateHeaderParagraph(text.StrippedLine, display.HeaderForeground),
+                        _ => CreateDefaultParagraph(display.Transform.Transform(text.StrippedLine))
                     };
-                    double width = new FormattedText(text.StrippedLine, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, pixelsPerDip).Width;
+                    double width = new FormattedText(display.Transform.Transform(text.StrippedLine), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, display.PixelsPerDip).Width;
                     maxWidth = Math.Max(maxWidth, width);
                     section.Blocks.Add(p);
 

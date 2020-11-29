@@ -202,13 +202,19 @@ namespace GitOut.Features.Git.Stage
                 GitDiffResult result = change.Type == GitStatusChangeType.RenamedOrCopied
                     ? await Repository.ExecuteDiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
                     : await Repository.ExecuteDiffAsync(change.Path, optionsBuilder.Build());
-                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(
-                    change,
-                    result,
-                    pixelsPerDip,
-                    (Brush)Application.Current.Resources["MaterialLightDividers"],
-                    (Brush)Application.Current.Resources["MaterialGray400"]
-                ),
+                DiffDisplayOptions display = stagingOptions.CurrentValue.ShowSpacesAsDots
+                    ? new DiffDisplayOptions(
+                        pixelsPerDip,
+                        (Brush)Application.Current.Resources["MaterialLightDividers"],
+                        (Brush)Application.Current.Resources["MaterialGray400"],
+                        new ShowSpacesAsDotsTransform()
+                    )
+                    : new DiffDisplayOptions(
+                        pixelsPerDip,
+                        (Brush)Application.Current.Resources["MaterialLightDividers"],
+                        (Brush)Application.Current.Resources["MaterialGray400"]
+                    );
+                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(change, result, display),
                 null);
             }
         }

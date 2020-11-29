@@ -1,8 +1,6 @@
-﻿using System;
-
 namespace GitOut.Features.Git.Stage
 {
-    public struct PatchLineTransform
+    public struct PatchLineTransform : ITextTransform
     {
         public static readonly PatchLineTransform None = new PatchLineTransform();
 
