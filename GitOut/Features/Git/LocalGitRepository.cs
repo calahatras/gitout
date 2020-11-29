@@ -245,7 +245,7 @@ namespace GitOut.Features.Git
             {
                 throw new ArgumentException("Source and target is the same object, must diff different id's", nameof(target));
             }
-            string argumentBuilder = $"--no-optional-locks diff --no-color {string.Join(" ", options.GetArguments(false))} {target} {source}";
+            string argumentBuilder = $"--no-optional-locks diff --no-color {string.Join(" ", options.GetArguments(false))} {source} {target}";
             var args = GitProcessOptions.FromArguments(argumentBuilder.ToString());
 
             IGitProcess diff = CreateProcess(args);
