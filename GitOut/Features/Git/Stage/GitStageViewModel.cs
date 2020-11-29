@@ -158,7 +158,13 @@ namespace GitOut.Features.Git.Stage
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public async void Navigated(NavigationType type) => await GetRepositoryStatusAsync();
+        public async void Navigated(NavigationType type)
+        {
+            if (type == NavigationType.Initial)
+            {
+                await GetRepositoryStatusAsync();
+            }
+        }
 
         private async Task GetRepositoryStatusAsync() => ParseStatus(await Repository.ExecuteStatusAsync());
 
@@ -199,23 +205,29 @@ namespace GitOut.Features.Git.Stage
                 {
                     optionsBuilder.Cached();
                 }
-                GitDiffResult result = change.Type == GitStatusChangeType.RenamedOrCopied
-                    ? await Repository.ExecuteDiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
-                    : await Repository.ExecuteDiffAsync(change.Path, optionsBuilder.Build());
-                DiffDisplayOptions display = stagingOptions.CurrentValue.ShowSpacesAsDots
-                    ? new DiffDisplayOptions(
-                        pixelsPerDip,
-                        (Brush)Application.Current.Resources["MaterialLightDividers"],
-                        (Brush)Application.Current.Resources["MaterialGray400"],
-                        new ShowSpacesAsDotsTransform()
-                    )
-                    : new DiffDisplayOptions(
-                        pixelsPerDip,
-                        (Brush)Application.Current.Resources["MaterialLightDividers"],
-                        (Brush)Application.Current.Resources["MaterialGray400"]
-                    );
-                syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(change, result, display),
-                null);
+                if (location == StatusChangeLocation.Index && change.SourceId! == change.DestinationId!)
+                {
+                    syncObject.Post(s => SelectedDiff = DiffViewModel.ParseFileContent(change, new[] { $"File was renamed {change.MergedPath} => {change.Path}" }, pixelsPerDip), null);
+                }
+                else
+                {
+                    GitDiffResult result = change.Type == GitStatusChangeType.RenamedOrCopied && change.SourceId! != change.DestinationId!
+                        ? await Repository.ExecuteDiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
+                        : await Repository.ExecuteDiffAsync(change.Path, optionsBuilder.Build());
+                    DiffDisplayOptions display = stagingOptions.CurrentValue.ShowSpacesAsDots
+                        ? new DiffDisplayOptions(
+                            pixelsPerDip,
+                            (Brush)Application.Current.Resources["MaterialLightDividers"],
+                            (Brush)Application.Current.Resources["MaterialGray400"],
+                            new ShowSpacesAsDotsTransform()
+                        )
+                        : new DiffDisplayOptions(
+                            pixelsPerDip,
+                            (Brush)Application.Current.Resources["MaterialLightDividers"],
+                            (Brush)Application.Current.Resources["MaterialGray400"]
+                        );
+                    syncObject.Post(s => SelectedDiff = DiffViewModel.ParseDiff(change, result, display), null);
+                }
             }
         }
 
@@ -350,77 +362,11 @@ namespace GitOut.Features.Git.Stage
             {
                 if (change.IndexStatus.HasValue && change.IndexStatus != GitModifiedStatusType.Unmodified)
                 {
-                    if (indexFiles.Count == 0)
-                    {
-                        lock (indexFilesLock)
-                        {
-                            indexFiles.Add(StatusChangeViewModel.AsStaged(change));
-                        }
-                        continue;
-                    }
-                    int index = FindSortedIndex(indexFiles, item => change.Path.ToString().CompareTo(item.Path.ToString()));
-                    if (index >= indexFiles.Count)
-                    {
-                        lock (indexFilesLock)
-                        {
-                            indexFiles.Insert(index, StatusChangeViewModel.AsStaged(change));
-                        }
-                    }
-                    else if (indexFiles[index].Path.ToString() == change.Path.ToString())
-                    {
-                        if (indexFiles[index].Model.IndexStatus != change.IndexStatus)
-                        {
-                            lock (indexFilesLock)
-                            {
-                                indexFiles.RemoveAt(index);
-                                indexFiles.Insert(index, StatusChangeViewModel.AsStaged(change));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        lock (indexFilesLock)
-                        {
-                            indexFiles.Insert(index, StatusChangeViewModel.AsStaged(change));
-                        }
-                    }
+                    AddChangeToIndex(change);
                 }
                 if (change.WorkspaceStatus != GitModifiedStatusType.Unmodified || change.Type == GitStatusChangeType.Untracked)
                 {
-                    if (workspaceFiles.Count == 0)
-                    {
-                        lock (workspaceFilesLock)
-                        {
-                            workspaceFiles.Add(StatusChangeViewModel.AsWorkspace(change));
-                        }
-                        continue;
-                    }
-                    int index = FindSortedIndex(workspaceFiles, item => change.Path.ToString().CompareTo(item.Path.ToString()));
-                    if (index >= workspaceFiles.Count)
-                    {
-                        lock (workspaceFilesLock)
-                        {
-                            workspaceFiles.Insert(index, StatusChangeViewModel.AsWorkspace(change));
-                        }
-                    }
-                    else if (workspaceFiles[index].Path.ToString() == change.Path.ToString())
-                    {
-                        if (workspaceFiles[index].Model.WorkspaceStatus != change.WorkspaceStatus)
-                        {
-                            lock (workspaceFilesLock)
-                            {
-                                workspaceFiles.RemoveAt(index);
-                                workspaceFiles.Insert(index, StatusChangeViewModel.AsWorkspace(change));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        lock (workspaceFilesLock)
-                        {
-                            workspaceFiles.Insert(index, StatusChangeViewModel.AsWorkspace(change));
-                        }
-                    }
+                    AddChangeToWorkspace(change);
                 }
             }
             lock (indexFilesLock)
@@ -439,13 +385,88 @@ namespace GitOut.Features.Git.Stage
                 for (int i = 0; i < workspaceFiles.Count; ++i)
                 {
                     StatusChangeViewModel item = workspaceFiles[i];
-                    if (result.Changes.Where(res => res.Type == GitStatusChangeType.Untracked
-                        || (res.Type == GitStatusChangeType.Ordinary
-                            && res.WorkspaceStatus.HasValue
-                            && res.WorkspaceStatus.Value != GitModifiedStatusType.Unmodified)).All(res => res.Path.ToString() != item.Model.Path.ToString()))
+                    if (result.Changes.Any(res => res.Path.ToString() == item.Model.Path.ToString()
+                        && res.WorkspaceStatus.HasValue
+                        && res.WorkspaceStatus == GitModifiedStatusType.Unmodified))
                     {
                         workspaceFiles.RemoveAt(i--);
                     }
+                }
+            }
+        }
+
+        private void AddChangeToWorkspace(GitStatusChange change)
+        {
+            if (workspaceFiles.Count == 0)
+            {
+                lock (workspaceFilesLock)
+                {
+                    workspaceFiles.Add(StatusChangeViewModel.AsWorkspace(change));
+                }
+                return;
+            }
+            int index = FindSortedIndex(workspaceFiles, item => change.Path.ToString().CompareTo(item.Path.ToString()));
+            if (index >= workspaceFiles.Count)
+            {
+                lock (workspaceFilesLock)
+                {
+                    workspaceFiles.Insert(index, StatusChangeViewModel.AsWorkspace(change));
+                }
+            }
+            else if (workspaceFiles[index].Path.ToString() == change.Path.ToString())
+            {
+                if (workspaceFiles[index].Model.WorkspaceStatus != change.WorkspaceStatus)
+                {
+                    lock (workspaceFilesLock)
+                    {
+                        workspaceFiles.RemoveAt(index);
+                        workspaceFiles.Insert(index, StatusChangeViewModel.AsWorkspace(change));
+                    }
+                }
+            }
+            else
+            {
+                lock (workspaceFilesLock)
+                {
+                    workspaceFiles.Insert(index, StatusChangeViewModel.AsWorkspace(change));
+                }
+            }
+        }
+
+        private void AddChangeToIndex(GitStatusChange change)
+        {
+            if (indexFiles.Count == 0)
+            {
+                lock (indexFilesLock)
+                {
+                    indexFiles.Add(StatusChangeViewModel.AsStaged(change));
+                }
+                return;
+            }
+            int index = FindSortedIndex(indexFiles, item => change.Path.ToString().CompareTo(item.Path.ToString()));
+            if (index >= indexFiles.Count)
+            {
+                lock (indexFilesLock)
+                {
+                    indexFiles.Insert(index, StatusChangeViewModel.AsStaged(change));
+                }
+            }
+            else if (indexFiles[index].Path.ToString() == change.Path.ToString())
+            {
+                if (indexFiles[index].Model.IndexStatus != change.IndexStatus)
+                {
+                    lock (indexFilesLock)
+                    {
+                        indexFiles.RemoveAt(index);
+                        indexFiles.Insert(index, StatusChangeViewModel.AsStaged(change));
+                    }
+                }
+            }
+            else
+            {
+                lock (indexFilesLock)
+                {
+                    indexFiles.Insert(index, StatusChangeViewModel.AsStaged(change));
                 }
             }
         }
