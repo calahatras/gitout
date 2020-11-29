@@ -11,6 +11,7 @@ namespace GitOut.Features.Git.Stage
             Path = model.Path.ToString();
             if (model.Type == GitStatusChangeType.Untracked)
             {
+                Status = GitModifiedStatusType.Added;
                 IconResourceKey = "FilePlus";
             }
             else
@@ -22,6 +23,7 @@ namespace GitOut.Features.Git.Stage
                 {
                     throw new ArgumentNullException(nameof(model), "Got null status for tracked file");
                 }
+                Status = status.Value;
                 IconResourceKey = status switch
                 {
                     GitModifiedStatusType.Added => "FilePlus",
@@ -35,6 +37,7 @@ namespace GitOut.Features.Git.Stage
         }
 
         public string Path { get; }
+        public GitModifiedStatusType Status { get; }
         public string IconResourceKey { get; }
 
         public GitStatusChange Model { get; }
