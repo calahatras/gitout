@@ -61,6 +61,8 @@ namespace GitOut.Features.Navigation
 #pragma warning restore CA1031 // Do not catch general exception types
                 }
             });
+
+            Wpf.ApplicationCommands.Navigate.Back.Add(Back, CanGoBack);
         }
 
         public string? CurrentPage { get; private set; }
@@ -154,6 +156,7 @@ namespace GitOut.Features.Navigation
                         logger.LogInformation(LogEventId.Navigation, "Navigating to control " + pageName);
                         OnNavigationRequested(page);
                         pageStack.Push(new Tuple<ContentControl, string?, IServiceScope>(page, currentTitle, scope));
+                        Wpf.ApplicationCommands.Navigate.Back.RaiseExecuteChanged();
                         CurrentPage = pageName;
                         if (page.DataContext is INavigationListener listener)
                         {

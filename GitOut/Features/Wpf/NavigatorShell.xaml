@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:GitOut.Features.Wpf"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d"
     x:Name="window"
     Title="git out"
@@ -37,7 +38,7 @@
     </WindowChrome.WindowChrome>
     <Window.InputBindings>
         <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding OpenSettingsCommand}" />
-        <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding NavigateBackCommand}" />
+        <KeyBinding Key="Left" Modifiers="Alt" Command="{x:Static wpfcommands:Navigate.Back}" />
     </Window.InputBindings>
     <Window.Resources>
         <Style x:Key="NavigationToolbarStyle" TargetType="{x:Type Grid}">

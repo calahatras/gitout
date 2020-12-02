@@ -8,6 +8,7 @@
     xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=local:SettingsViewModel}"
     d:DesignHeight="450"
@@ -74,7 +75,7 @@
                     Margin="16"
                     HorizontalAlignment="Left"
                 >
-                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{Binding NavigateBackCommand}" />
+                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{x:Static wpfcommands:Navigate.Back}" />
                 </Grid>
 
                 <ListBox

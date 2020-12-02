@@ -33,7 +33,6 @@ namespace GitOut.Features.Settings
 
         public SettingsViewModel(
             ITitleService title,
-            INavigationService navigation,
             ISnackbarService snacks,
             IThemeService themes,
             IGitRepositoryStorage repositories,
@@ -100,7 +99,6 @@ namespace GitOut.Features.Settings
                     themes.ChangeTheme(theme);
                     snacks.ShowSuccess($"Changed theme to {theme.Name}");
                 });
-            NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
 
             trimLineEndings = stageOptions.CurrentValue.TrimLineEndings;
             tabTransformText = stageOptions.CurrentValue.TabTransformText;
@@ -155,7 +153,6 @@ namespace GitOut.Features.Settings
         public ICommand SearchRootFolderCommand { get; }
         public ICommand AddRepositoryCommand { get; }
         public ICommand ChangeThemeCommand { get; }
-        public ICommand NavigateBackCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
