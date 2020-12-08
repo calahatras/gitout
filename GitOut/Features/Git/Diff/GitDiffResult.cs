@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git.Diff
 {
     public class GitDiffResult
     {

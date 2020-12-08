@@ -1,6 +1,7 @@
 using System.Windows.Media;
+using GitOut.Features.Text;
 
-namespace GitOut.Features.Git.Stage
+namespace GitOut.Features.Git.Diff
 {
     public class DiffDisplayOptions
     {
@@ -26,7 +27,8 @@ namespace GitOut.Features.Git.Stage
             dividerBrush,
             headerForeground,
             new PassThroughTransform()
-        ) { }
+        )
+        { }
 
         public double PixelsPerDip { get; }
         public Brush DividerBrush { get; }

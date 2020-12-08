@@ -1,4 +1,4 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git.Patch
 {
     public class PatchLine
     {

@@ -4,6 +4,8 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diagnostics;
+using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 
 namespace GitOut.Features.Git
@@ -269,6 +271,18 @@ namespace GitOut.Features.Git
                 builder.Feed(line);
             }
             return builder.Build(options);
+        }
+
+        public async Task<GitDiffResult> ExecuteUntrackedDiffAsync(RelativeDirectoryPath path)
+        {
+            string[] result = await File.ReadAllLinesAsync(Path.Combine(WorkingDirectory.Directory, path.ToString()));
+            IGitDiffBuilder builder = GitDiffResult.Builder();
+            builder.Feed($"{GitDiffHunk.HunkIdentifier} -0,0 +1,{result.Length} {GitDiffHunk.HunkIdentifier}");
+            foreach (string line in result)
+            {
+                builder.Feed($"+{line}");
+            }
+            return builder.Build(DiffOptions.Builder().Build());
         }
 
         public async IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id)

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
     xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
@@ -17,6 +18,7 @@
     </UserControl.InputBindings>
     <UserControl.Resources>
         <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+        <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
         <Style x:Key="GitChangeListStyle" BasedOn="{StaticResource MaterialListStyle}" TargetType="{x:Type ListView}">
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -81,6 +83,10 @@
             </Button>
             <TextBlock Grid.Column="1" Text="Stage" Style="{StaticResource MaterialToolbarHeaderStyle}"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Style="{StaticResource MaterialToolbarOptionsStyle}">
+                <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding UndoPatchCommand}" ToolTip="Undo patch">
+                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource UndoVariant}"/>
+                </Button>
+                <Border Style="{StaticResource MaterialVerticalDivider}"/>
                 <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
                 </ToggleButton>
@@ -178,70 +184,54 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <ScrollViewer
-                    x:Name="DocumentScroll"
-                    VerticalScrollBarVisibility="Auto"
-                    HorizontalScrollBarVisibility="Auto"
+
+                <diff:GitDiffControl
+                    FilePath="{Binding SelectedChange.Model.Path}"
+                    Diff="{Binding SelectedDiffResult}"
+                    ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
                 >
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" MinWidth="20"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <ItemsControl ItemsSource="{Binding SelectedDiff.LineNumbers}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type local:LineNumberViewModel}">
-                                    <Grid
-                                        Margin="4 0"
-                                        TextElement.FontFamily="Consolas sans-serif"
-                                        TextElement.FontSize="12"
-                                        TextElement.Foreground="{DynamicResource MaterialGray400}"
-                                        HorizontalAlignment="Stretch"
-                                    >
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid HorizontalAlignment="Stretch">
-                                            <TextBlock
-                                                TextAlignment="Right"
-                                                Text="{Binding WorkingTreeLineNumber, TargetNullValue=' '}"
-                                            />
-                                        </Grid>
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="3 0 0 0"
-                                            TextAlignment="Right"
-                                            Text="{Binding IndexLineNumber}"
-                                        />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <FlowDocumentScrollViewer
-                            Grid.Column="1"
-                            Document="{Binding SelectedDiff.Document}"
-                            HorizontalAlignment="Stretch"
-                            VerticalScrollBarVisibility="Disabled"
-                            HorizontalScrollBarVisibility="Disabled"
-                            PreviewMouseWheel="TunnelEventToParentScroll"
-                        >
-                            <FlowDocumentScrollViewer.InputBindings>
-                                <KeyBinding
-                                    Key="R"
-                                    Command="{Binding ResetSelectedTextCommand}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=FlowDocumentScrollViewer}}"
-                                />
-                                <KeyBinding
-                                    Key="S"
-                                    Command="{Binding StageSelectedTextCommand}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=FlowDocumentScrollViewer}}"
-                                />
-                            </FlowDocumentScrollViewer.InputBindings>
-                        </FlowDocumentScrollViewer>
-                    </Grid>
-                </ScrollViewer>
+                    <diff:GitDiffControl.DocumentInputBindings>
+                        <KeyBinding
+                            Key="R"
+                            Command="{Binding ResetSelectedTextCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+                        />
+                        <KeyBinding
+                            Key="S"
+                            Command="{Binding StageSelectedTextCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+                        />
+                        <KeyBinding
+                            Key="E"
+                            Command="{Binding EditSelectedTextCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+                        />
+                    </diff:GitDiffControl.DocumentInputBindings>
+                </diff:GitDiffControl>
+                <Popup AllowsTransparency="True" IsOpen="{Binding EditHunk, Converter={StaticResource NullToBooleanConverter}}">
+                    <Border Style="{StaticResource CardPanelStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBox 
+                                Style="{StaticResource MaterialFormAreaStyle}"
+                                Text="{Binding EditHunk}"
+                            />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
+                                <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding PatchEditTextCommand}">
+                                    OK
+                                </Button>
+                                <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelEditTextCommand}">
+                                    CANCEL
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Popup>
                 <Border Grid.Row="1" Margin="4 8 0 1" Padding="0 2 8 2" Style="{StaticResource CardPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>

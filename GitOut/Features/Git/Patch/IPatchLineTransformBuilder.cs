@@ -1,8 +1,10 @@
-﻿namespace GitOut.Features.Git.Stage
+using GitOut.Features.Text;
+
+namespace GitOut.Features.Git.Patch
 {
     public interface IPatchLineTransformBuilder
     {
-        PatchLineTransform Build();
+        ITextTransform Build();
         IPatchLineTransformBuilder TrimLines();
         IPatchLineTransformBuilder ConvertTabsToSpaces(string replacement);
     }

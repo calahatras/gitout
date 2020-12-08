@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git.Diff
 {
     public class GitDiffFileEntryTest
     {

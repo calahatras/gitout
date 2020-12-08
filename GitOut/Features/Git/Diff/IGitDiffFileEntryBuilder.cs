@@ -1,4 +1,4 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git.Diff
 {
     public interface IGitDiffFileEntryBuilder
     {

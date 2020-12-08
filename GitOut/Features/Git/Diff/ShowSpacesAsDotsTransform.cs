@@ -1,4 +1,6 @@
-namespace GitOut.Features.Git.Stage
+using GitOut.Features.Text;
+
+namespace GitOut.Features.Git.Diff
 {
     public class ShowSpacesAsDotsTransform : ITextTransform
     {

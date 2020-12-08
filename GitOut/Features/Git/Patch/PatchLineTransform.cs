@@ -1,4 +1,6 @@
-namespace GitOut.Features.Git.Stage
+using GitOut.Features.Text;
+
+namespace GitOut.Features.Git.Patch
 {
     public struct PatchLineTransform : ITextTransform
     {
@@ -53,7 +55,7 @@ namespace GitOut.Features.Git.Stage
             private bool convertToSpaces;
             private string? tabReplacement;
 
-            public PatchLineTransform Build() => new PatchLineTransform(trimEndings, convertToSpaces, tabReplacement);
+            public ITextTransform Build() => new PatchLineTransform(trimEndings, convertToSpaces, tabReplacement);
 
             public IPatchLineTransformBuilder ConvertTabsToSpaces(string replacement)
             {

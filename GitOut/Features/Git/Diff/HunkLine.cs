@@ -1,6 +1,6 @@
 using System;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git.Diff
 {
     public class HunkLine
     {
@@ -9,29 +9,40 @@ namespace GitOut.Features.Git
             switch (type)
             {
                 case DiffLineType.Header:
-                    if (!line.StartsWith("@"))
+                    if (line[0] != '@')
                     {
                         throw new InvalidOperationException($"Invalid start of line for header {line}");
                     }
-                    StrippedLine = line.Substring(1);
+                    StrippedLine = line[1..];
                     break;
                 case DiffLineType.Added:
-                    if (!line.StartsWith("+"))
+                    if (line[0] != '+')
                     {
                         throw new InvalidOperationException($"Invalid start of line for added {line}");
                     }
-                    StrippedLine = line.Substring(1);
+                    StrippedLine = line[1..];
                     break;
                 case DiffLineType.Removed:
-                    if (!line.StartsWith("-"))
+                    if (line[0] != '-')
                     {
                         throw new InvalidOperationException($"Invalid start of line for removed {line}");
                     }
-                    StrippedLine = line.Substring(1);
+                    StrippedLine = line[1..];
+                    break;
+                case DiffLineType.Control:
+                    if (line[0] != '\\')
+                    {
+                        throw new InvalidOperationException($"Invalid start of line for control {line}");
+                    }
+                    StrippedLine = line;
                     break;
                 case DiffLineType.None:
                 default:
-                    StrippedLine = line.Length > 0 ? line.Substring(1) : line;
+                    if (line[0] != ' ')
+                    {
+                        throw new InvalidOperationException($"Invalid start of line for ordinal {line}");
+                    }
+                    StrippedLine = line.Length > 0 ? line[1..] : line;
                     break;
             }
             Type = type;
@@ -46,6 +57,7 @@ namespace GitOut.Features.Git
 
         public static HunkLine AsHead(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.Header, line, fromIndex, toIndex);
         public static HunkLine AsLine(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.None, line, fromIndex, toIndex);
+        public static HunkLine AsControl(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.Control, line, fromIndex, toIndex);
         public static HunkLine AsAdded(string line, int toIndex) => new HunkLine(DiffLineType.Added, line, null, toIndex);
         public static HunkLine AsRemoved(string line, int fromIndex) => new HunkLine(DiffLineType.Removed, line, fromIndex, null);
     }

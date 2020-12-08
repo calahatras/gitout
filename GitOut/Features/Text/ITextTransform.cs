@@ -1,4 +1,4 @@
-namespace GitOut.Features.Git.Stage
+namespace GitOut.Features.Text
 {
     public interface ITextTransform
     {
