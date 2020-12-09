@@ -39,6 +39,7 @@ namespace GitOut.Features.Git.Stage
 
         private string commitMessage = string.Empty;
         private string cachedCommitMessage = string.Empty;
+        private GitPatch? undoPatch;
 
         public GitStageViewModel(
             INavigationService navigation,
@@ -66,6 +67,7 @@ namespace GitOut.Features.Git.Stage
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(StageSelectionAsync);
+            UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => !(undoPatch is null));
             AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync);
             ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync);
         }
@@ -156,6 +158,7 @@ namespace GitOut.Features.Git.Stage
         public ICommand StageFileCommand { get; }
         public ICommand ResetSelectedTextCommand { get; }
         public ICommand StageSelectedTextCommand { get; }
+        public ICommand UndoPatchCommand { get; }
         public ICommand ResetHeadCommand { get; }
         public ICommand CommitCommand { get; }
 
