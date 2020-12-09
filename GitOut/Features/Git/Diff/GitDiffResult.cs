@@ -5,14 +5,12 @@ namespace GitOut.Features.Git.Diff
 {
     public class GitDiffResult
     {
-        private GitDiffResult(DiffOptions options, string header, ICollection<GitDiffHunk> hunks)
+        private GitDiffResult(string header, ICollection<GitDiffHunk> hunks)
         {
-            Options = options;
             Header = header;
             Hunks = hunks;
         }
 
-        public DiffOptions Options { get; }
         public string Header { get; }
         public IEnumerable<GitDiffHunk> Hunks { get; }
 
@@ -26,7 +24,7 @@ namespace GitOut.Features.Git.Diff
 
             private bool hasHunk = false;
 
-            public GitDiffResult Build(DiffOptions options)
+            public GitDiffResult Build()
             {
                 if (header is null)
                 {
@@ -34,7 +32,7 @@ namespace GitOut.Features.Git.Diff
                 }
                 var lastHunk = GitDiffHunk.Parse(parts);
                 hunks.Add(lastHunk);
-                return new GitDiffResult(options, header, hunks);
+                return new GitDiffResult(header, hunks);
             }
 
             public void Feed(string line)

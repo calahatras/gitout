@@ -256,7 +256,7 @@ namespace GitOut.Features.Git
             {
                 builder.Feed(line);
             }
-            return builder.Build(options);
+            return builder.Build();
         }
 
         public async Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options)
@@ -270,7 +270,7 @@ namespace GitOut.Features.Git
             {
                 builder.Feed(line);
             }
-            return builder.Build(options);
+            return builder.Build();
         }
 
         public async Task<GitDiffResult> ExecuteUntrackedDiffAsync(RelativeDirectoryPath path)
@@ -282,7 +282,7 @@ namespace GitOut.Features.Git
             {
                 builder.Feed($"+{line}");
             }
-            return builder.Build(DiffOptions.Builder().Build());
+            return builder.Build();
         }
 
         public async IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id)

@@ -2,7 +2,7 @@ namespace GitOut.Features.Git.Diff
 {
     public interface IGitDiffBuilder
     {
-        GitDiffResult Build(DiffOptions options);
+        GitDiffResult Build();
         void Feed(string line);
     }
 }

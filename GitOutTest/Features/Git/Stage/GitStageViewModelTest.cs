@@ -228,7 +228,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -294,7 +294,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1 ");
             builder.Feed("+    ");
             builder.Feed(" line3 ");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -361,7 +361,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -427,7 +427,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -493,7 +493,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line1");
             builder.Feed("+line2");
             builder.Feed(" line3");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -562,7 +562,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line1925");
             builder.Feed("+");
             builder.Feed(" line");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -635,7 +635,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+");
             builder.Feed("+line 12121");
             builder.Feed("\\ No newline at end of file");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -703,7 +703,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("-line18  ");
             builder.Feed("+line  19");
             builder.Feed(" line  24");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -773,7 +773,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  22");
             builder.Feed("+line  23");
             builder.Feed(" line  24");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -861,7 +861,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  23");
             builder.Feed("+line  24");
             builder.Feed(" line1925");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -946,7 +946,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  23");
             builder.Feed("+line  24");
             builder.Feed(" line1925");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -1021,7 +1021,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  23");
             builder.Feed("+line  24");
             builder.Feed(" line1925");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -1097,7 +1097,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  23");
             builder.Feed("+line  24");
             builder.Feed(" line1925");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
@@ -1174,7 +1174,7 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  23");
             builder.Feed("+line  24");
             builder.Feed(" line1925");
-            GitDiffResult result = builder.Build(DiffOptions.Builder().Build());
+            GitDiffResult result = builder.Build();
             repository
                 .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
