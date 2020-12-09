@@ -188,7 +188,6 @@
                 </Grid.RowDefinitions>
 
                 <diff:GitDiffControl
-                    FilePath="{Binding SelectedChange.Model.Path}"
                     Diff="{Binding SelectedDiffResult}"
                     ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
                 >

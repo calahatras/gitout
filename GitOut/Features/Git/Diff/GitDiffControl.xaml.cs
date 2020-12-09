@@ -7,7 +7,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using GitOut.Features.Git.Patch;
-using GitOut.Features.IO;
 
 namespace GitOut.Features.Git.Diff
 {
@@ -21,9 +20,6 @@ namespace GitOut.Features.Git.Diff
 
         public static readonly DependencyProperty ShowSpacesAsDotsProperty =
             DependencyProperty.Register(nameof(ShowSpacesAsDots), typeof(bool), typeof(GitDiffControl), new PropertyMetadata(false));
-
-        public static readonly DependencyProperty FilePathProperty =
-            DependencyProperty.Register(nameof(FilePath), typeof(RelativeDirectoryPath), typeof(GitDiffControl), new PropertyMetadata(null));
 
         public static readonly DependencyProperty DocumentProperty =
             DependencyProperty.Register(nameof(Document), typeof(FlowDocument), typeof(GitDiffControl), new PropertyMetadata(null));
@@ -39,12 +35,6 @@ namespace GitOut.Features.Git.Diff
         {
             get => (GitStatusChange)GetValue(ChangeProperty);
             set => SetValue(ChangeProperty, value);
-        }
-
-        public RelativeDirectoryPath FilePath
-        {
-            get => (RelativeDirectoryPath)GetValue(FilePathProperty);
-            set => SetValue(FilePathProperty, value);
         }
 
         public GitDiffResult Diff
