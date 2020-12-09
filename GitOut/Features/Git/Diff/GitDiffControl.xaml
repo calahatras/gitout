@@ -10,7 +10,7 @@
     <ScrollViewer
         x:Name="DocumentScroll"
         VerticalScrollBarVisibility="Auto"
-        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollBarVisibility="Auto"
     >
         <Grid>
             <Grid.ColumnDefinitions>
@@ -53,6 +53,7 @@
                 Document="{Binding Document, RelativeSource={RelativeSource AncestorType={x:Type local:GitDiffControl}}}"
                 HorizontalAlignment="Stretch"
                 VerticalScrollBarVisibility="Disabled"
+                HorizontalScrollBarVisibility="Disabled"
                 PreviewMouseWheel="TunnelEventToParentScroll"
             />
         </Grid>
