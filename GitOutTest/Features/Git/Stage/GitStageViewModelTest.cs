@@ -15,6 +15,91 @@ namespace GitOut.Features.Git.Stage
     public class GitStageViewModelTest
     {
         [Test]
+        public void UntrackedItemsShouldBeAddedToWorkspace()
+        {
+            var repository = new Mock<IGitRepository>();
+            GitStatusChange[] changes = new[]
+            {
+                GitStatusChange.Parse("? new.txt").Build()
+            };
+            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(changes));
+            var stageOptions = new GitStagePageOptions(repository.Object);
+
+            var navigation = new Mock<INavigationService>();
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            var title = new Mock<ITitleService>();
+            var snack = new Mock<ISnackbarService>();
+            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
+            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            {
+                ShowSpacesAsDots = false
+            });
+
+            var actor = new GitStageViewModel(
+                navigation.Object,
+                title.Object,
+                snack.Object,
+                options.Object
+            );
+
+            actor.Navigated(NavigationType.Initial);
+
+            Assert.That(actor.IndexFiles.IsEmpty, Is.True);
+            Assert.That(actor.WorkspaceFiles.IsEmpty, Is.False);
+            int workspaceCount = 0;
+            foreach (object item in actor.WorkspaceFiles) { ++workspaceCount; }
+            Assert.That(workspaceCount, Is.EqualTo(1));
+            Assert.That(actor.WorkspaceFiles.MoveCurrentToFirst(), Is.True);
+            Assert.That(((StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem).Path, Is.EqualTo("new.txt"));
+        }
+
+        [Test]
+        public void UntrackedItemsShouldBeRemovedFromWorkspaceWhenStaged()
+        {
+            var repository = new Mock<IGitRepository>();
+            GitStatusChange[] initial = new[]
+            {
+                GitStatusChange.Parse("? new.txt").Build()
+            };
+            GitStatusChange[] staged = new[]
+            {
+                GitStatusChange.Parse("1 A. N... 000000 100644 100644 0000000000000000000000000000000000000000 abcb7caf7a6b8368b4ac4da17863bedbce945dab new.txt").Build()
+            };
+            repository.SetupSequence(m => m.ExecuteStatusAsync())
+                .ReturnsAsync(new GitStatusResult(initial))
+                .ReturnsAsync(new GitStatusResult(staged));
+            var stageOptions = new GitStagePageOptions(repository.Object);
+
+            var navigation = new Mock<INavigationService>();
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            var title = new Mock<ITitleService>();
+            var snack = new Mock<ISnackbarService>();
+            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
+            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            {
+                ShowSpacesAsDots = false
+            });
+
+            var actor = new GitStageViewModel(
+                navigation.Object,
+                title.Object,
+                snack.Object,
+                options.Object
+            );
+
+            actor.Navigated(NavigationType.Initial);
+            actor.RefreshStatusCommand.Execute(null);
+
+            Assert.That(actor.IndexFiles.IsEmpty, Is.False);
+            Assert.That(actor.WorkspaceFiles.IsEmpty, Is.True);
+            int indexCount = 0;
+            foreach (object item in actor.IndexFiles) { ++indexCount; }
+            Assert.That(indexCount, Is.EqualTo(1));
+            Assert.That(actor.IndexFiles.MoveCurrentToFirst(), Is.True);
+            Assert.That(((StatusChangeViewModel)actor.IndexFiles.CurrentItem).Path, Is.EqualTo("new.txt"));
+        }
+
+        [Test]
         public void RefreshShouldHandleRenamedFileWithWorkspaceChanges()
         {
             var repository = new Mock<IGitRepository>();

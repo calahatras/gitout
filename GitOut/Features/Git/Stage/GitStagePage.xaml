@@ -22,6 +22,7 @@
                         <Setter Property="Height" Value="22"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                     </Style>
                 </Setter.Value>
             </Setter>
@@ -116,16 +117,10 @@
                     SelectedIndex="{Binding SelectedWorkspaceIndex}"
                 >
                     <ListView.InputBindings>
-                        <KeyBinding
-                            Key="S"
-                            Command="{Binding StageFileCommand}"
-                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=ListView}}"
-                        />
-                        <KeyBinding
-                            Key="Enter"
-                            Command="{Binding StageFileCommand}"
-                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=ListView}}"
-                        />
+                        <KeyBinding Key="S" Command="{Binding StageWorkspaceFilesCommand}" />
+                        <KeyBinding Key="Enter" Command="{Binding StageWorkspaceFilesCommand}" />
+                        <KeyBinding Key="R" Command="{Binding ResetWorkspaceFilesCommand}" />
+                        <KeyBinding Key="Delete" Command="{Binding ResetWorkspaceFilesCommand}" />
                     </ListView.InputBindings>
                 </ListView>
                 <GridSplitter Grid.Row="1" Style="{StaticResource SplitHorizontalStyle}" />
@@ -162,16 +157,8 @@
                     SelectedIndex="{Binding SelectedIndexIndex}"
                 >
                     <ListView.InputBindings>
-                        <KeyBinding
-                            Key="R"
-                            Command="{Binding StageFileCommand}"
-                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=ListView}}"
-                        />
-                        <KeyBinding
-                            Key="Enter"
-                            Command="{Binding StageFileCommand}"
-                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=ListView}}"
-                        />
+                        <KeyBinding Key="R" Command="{Binding ResetIndexFilesCommand}" />
+                        <KeyBinding Key="Delete" Command="{Binding ResetIndexFilesCommand}" />
                     </ListView.InputBindings>
                 </ListView>
             </Grid>

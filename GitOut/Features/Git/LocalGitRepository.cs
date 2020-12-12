@@ -304,6 +304,8 @@ namespace GitOut.Features.Git
 
         public Task ExecuteAddAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"add {change.Path}")).ExecuteAsync();
 
+        public Task ExecuteCheckoutAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
+
         public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
 
         public Task ExecuteCommitAsync(GitCommitOptions options)

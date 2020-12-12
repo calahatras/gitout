@@ -65,6 +65,9 @@ namespace GitOut.Features.Git.Stage
             RefreshStatusCommand = new AsyncCallbackCommand(GetRepositoryStatusAsync);
             CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage) && indexFiles.Count > 0);
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
+            StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
+            ResetWorkspaceFilesCommand = new AsyncCallbackCommand(ResetWorkspaceFilesAsync);
+            ResetIndexFilesCommand = new AsyncCallbackCommand(ResetIndexFilesAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(StageSelectionAsync);
             UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => !(undoPatch is null));
@@ -156,6 +159,9 @@ namespace GitOut.Features.Git.Stage
         public ICommand RefreshStatusCommand { get; }
         public ICommand AddAllCommand { get; }
         public ICommand StageFileCommand { get; }
+        public ICommand StageWorkspaceFilesCommand { get; }
+        public ICommand ResetWorkspaceFilesCommand { get; }
+        public ICommand ResetIndexFilesCommand { get; }
         public ICommand ResetSelectedTextCommand { get; }
         public ICommand StageSelectedTextCommand { get; }
         public ICommand UndoPatchCommand { get; }
@@ -175,7 +181,7 @@ namespace GitOut.Features.Git.Stage
         private async Task GetRepositoryStatusAsync()
         {
             ParseStatus(await Repository.ExecuteStatusAsync());
-            if (!(SelectedChange is null))
+            if (!(selectedChange is null))
             {
                 await ExecuteDiffAsync();
             }
@@ -205,6 +211,15 @@ namespace GitOut.Features.Git.Stage
                 GitDiffResult result = await Repository.ExecuteUntrackedDiffAsync(change.Path);
                 SelectedDiffResult = result;
             }
+            else if (location == StatusChangeLocation.Index && (Monitor.IsEntered(indexFilesLock) || indexFiles.Count == 0))
+            {
+                // we end up here if the selected index was changed while we are adding items to the list, so we ignore the request since it will be updated later
+                return;
+            }
+            else if (location == StatusChangeLocation.Index && change.SourceId! == change.DestinationId!)
+            {
+                SelectedDiffResult = null;
+            }
             else
             {
                 IDiffOptionsBuilder optionsBuilder = DiffOptions.Builder();
@@ -216,16 +231,10 @@ namespace GitOut.Features.Git.Stage
                 {
                     optionsBuilder.Cached();
                 }
-                if (location == StatusChangeLocation.Index && change.SourceId! == change.DestinationId!)
-                {
-                }
-                else
-                {
-                    GitDiffResult result = change.Type == GitStatusChangeType.RenamedOrCopied && change.SourceId! != change.DestinationId!
-                        ? await Repository.ExecuteDiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
-                        : await Repository.ExecuteDiffAsync(change.Path, optionsBuilder.Build());
-                    SelectedDiffResult = result;
-                }
+                GitDiffResult result = change.Type == GitStatusChangeType.RenamedOrCopied && change.SourceId! != change.DestinationId!
+                    ? await Repository.ExecuteDiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
+                    : await Repository.ExecuteDiffAsync(change.Path, optionsBuilder.Build());
+                SelectedDiffResult = result;
             }
         }
 
@@ -257,6 +266,51 @@ namespace GitOut.Features.Git.Stage
                 await GetRepositoryStatusAsync();
                 SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
             }
+        }
+
+        private async Task StageWorkspaceFilesAsync()
+        {
+            undoPatch = null;
+            int previousIndex = SelectedWorkspaceIndex;
+            foreach (StatusChangeViewModel item in workspaceFiles)
+            {
+                if (item.IsSelected)
+                {
+                    await Repository.ExecuteAddAsync(item.Model);
+                }
+            }
+            await GetRepositoryStatusAsync();
+            SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
+        }
+
+        private async Task ResetWorkspaceFilesAsync()
+        {
+            undoPatch = null;
+            int previousIndex = SelectedWorkspaceIndex;
+            foreach (StatusChangeViewModel item in workspaceFiles)
+            {
+                if (item.IsSelected)
+                {
+                    await Repository.ExecuteCheckoutAsync(item.Model);
+                }
+            }
+            await GetRepositoryStatusAsync();
+            SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
+        }
+
+        private async Task ResetIndexFilesAsync()
+        {
+            undoPatch = null;
+            int previousIndex = SelectedIndexIndex;
+            foreach (StatusChangeViewModel item in indexFiles)
+            {
+                if (item.IsSelected)
+                {
+                    await Repository.ExecuteResetAsync(item.Model);
+                }
+            }
+            await GetRepositoryStatusAsync();
+            SelectedIndexIndex = previousIndex >= indexFiles.Count ? indexFiles.Count - 1 : previousIndex;
         }
 
         private async Task ResetSelectionAsync(IHunkLineVisitorProvider viewer)
@@ -428,8 +482,7 @@ namespace GitOut.Features.Git.Stage
                 {
                     StatusChangeViewModel item = workspaceFiles[i];
                     if (result.Changes.Count == 0 || result.Changes.All(res => res.Path.ToString() != item.Model.Path.ToString()
-                        || !res.WorkspaceStatus.HasValue
-                        || res.WorkspaceStatus == GitModifiedStatusType.Unmodified))
+                        || (res.WorkspaceStatus.HasValue && res.WorkspaceStatus == GitModifiedStatusType.Unmodified)))
                     {
                         if (selectedChange == item)
                         {
