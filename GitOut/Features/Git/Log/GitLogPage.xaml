@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
     xmlns:git="clr-namespace:GitOut.Features.Git"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
@@ -361,9 +362,10 @@
                                 <Grid Style="{StaticResource MaterialToolbarStyle}">
                                     <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding FileName}" />
                                 </Grid>
-                                <FlowDocumentScrollViewer
-                                    Document="{Binding Document}"
+                                <diff:GitDiffControl
                                     Grid.Row="1"
+                                    Diff="{Binding DiffResult}"
+                                    ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
                                     HorizontalAlignment="Stretch"
                                 />
                             </Grid>
@@ -377,10 +379,10 @@
                                 <Grid Style="{StaticResource MaterialToolbarStyle}">
                                     <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding FileName}" />
                                 </Grid>
-                                <FlowDocumentScrollViewer
-                                    Document="{Binding Document}"
+                                <diff:GitDiffControl
                                     Grid.Row="1"
-                                    HorizontalAlignment="Stretch"
+                                    Diff="{Binding DiffResult}"
+                                    ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
                                 />
                             </Grid>
                         </DataTemplate>

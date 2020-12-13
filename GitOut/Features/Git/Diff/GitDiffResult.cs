@@ -22,7 +22,7 @@ namespace GitOut.Features.Git.Diff
             private readonly ICollection<string> parts = new List<string>();
             private string? header;
 
-            private bool hasHunk = false;
+            private bool hasCreatedHeader = false;
 
             public GitDiffResult Build()
             {
@@ -39,7 +39,7 @@ namespace GitOut.Features.Git.Diff
             {
                 if (line.StartsWith(GitDiffHunk.HunkIdentifier))
                 {
-                    if (hasHunk)
+                    if (hasCreatedHeader)
                     {
                         hunks.Add(GitDiffHunk.Parse(parts));
                     }
@@ -48,7 +48,20 @@ namespace GitOut.Features.Git.Diff
                         header = string.Join("\r\n", parts);
                     }
                     parts.Clear();
-                    hasHunk = true;
+                    hasCreatedHeader = true;
+                }
+                else if (line.StartsWith("Binary files "))
+                {
+                    if (hasCreatedHeader)
+                    {
+                        hunks.Add(GitDiffHunk.Parse(parts));
+                    }
+                    else
+                    {
+                        header = string.Join("\r\n", parts);
+                    }
+                    parts.Clear();
+                    hasCreatedHeader = true;
                 }
                 parts.Add(line);
             }

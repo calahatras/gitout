@@ -79,7 +79,7 @@ namespace GitOut.Features.Git.Log
             {
                 rootFiles.Clear();
             }
-            IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.DiffIdAsync(Root.Event.Id, diff?.Event.Id ?? Root.Event.Parent?.Id, repository);
+            IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? Root.Event.Parent?.Id, Root.Event.Id, repository);
             await foreach (IGitFileEntryViewModel viewmodel in entries)
             {
                 lock (rootFilesLock)

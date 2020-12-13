@@ -20,9 +20,9 @@ namespace GitOut.Features.Git.Files
             }
         }
 
-        public static async IAsyncEnumerable<IGitFileEntryViewModel> DiffIdAsync(GitObjectId root, GitObjectId? diff, IGitRepository repository)
+        public static async IAsyncEnumerable<IGitFileEntryViewModel> DiffIdAsync(GitObjectId? root, GitObjectId diff, IGitRepository repository)
         {
-            await foreach (GitDiffFileEntry entry in repository.ExecuteListDiffChangesAsync(root, diff))
+            await foreach (GitDiffFileEntry entry in repository.ExecuteListDiffChangesAsync(diff, root))
             {
                 IGitFileEntryViewModel viewmodel = entry.FileType switch
                 {
