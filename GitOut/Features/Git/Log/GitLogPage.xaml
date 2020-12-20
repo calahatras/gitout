@@ -194,14 +194,20 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
                     <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
+                        <Button
+                            Style="{StaticResource MaterialIconButtonStyle}"
+                            Command="{Binding CopyContentCommand}"
+                            ToolTip="Copy path"
+                        >
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                        </Button>
+                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
                         <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
                         </ToggleButton>
-                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
                         <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
                         </ToggleButton>
-                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
                         <Button
                             Style="{StaticResource MaterialIconButtonStyle}"
                             Command="{Binding RefreshStatusCommand}"
@@ -209,6 +215,7 @@
                         >
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderRefresh}"/>
                         </Button>
+                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
                         <Button
                             Style="{StaticResource MaterialIconButtonStyle}"
                             Command="{Binding NavigateToStageAreaCommand}"

@@ -6,10 +6,8 @@ using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Storage;
-using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
-using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Git.RepositoryList
 {
@@ -36,11 +34,6 @@ namespace GitOut.Features.Git.RepositoryList
                 repository => GitLogPageOptions.OpenRepository(repository),
                 repository => repository != null
             );
-            CopyContentCommand = new CopyTextToClipBoardCommand<DirectoryPath?>(
-                path => path!.Directory,
-                path => !(path is null),
-                text => snacks.ShowSuccess("Copied text to clipboard")
-            );
 
             subscription = storage.Repositories.Subscribe(finalList =>
             {
@@ -66,7 +59,6 @@ namespace GitOut.Features.Git.RepositoryList
 
         public ICollectionView Repositories { get; }
         public ICommand NavigateToLogCommand { get; }
-        public ICommand CopyContentCommand { get; }
 
         public void Navigated(NavigationType type)
         {

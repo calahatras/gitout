@@ -67,6 +67,12 @@ namespace GitOut.Features.Git.Log
                 }
             };
 
+            CopyContentCommand = new CopyTextToClipBoardCommand<object>(
+                d => Repository.WorkingDirectory.Directory,
+                d => true,
+                text => snack.ShowSuccess("Copied path to clipboard")
+            );
+
             CopyCommitHashCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
                 gte => gte!.Root.Event.Id.Hash,
                 gte => !(gte is null),
@@ -165,6 +171,7 @@ namespace GitOut.Features.Git.Log
 
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
+        public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
 
