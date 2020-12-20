@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -182,7 +183,8 @@ namespace GitOut.Features.Git.Diff
                             DiffLineType.Control => CreateHeaderParagraph(text.StrippedLine, display.HeaderForeground),
                             _ => CreateDefaultParagraph(display.Transform.Transform(text.StrippedLine))
                         };
-                        double width = new FormattedText(display.Transform.Transform(text.StrippedLine), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, display.PixelsPerDip).Width;
+                        double width = new FormattedText(
+                            display.Transform.Transform(text.StrippedLine), CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, display.PixelsPerDip).Width;
                         maxWidth = Math.Max(maxWidth, width);
                         section.Blocks.Add(p);
 
@@ -240,7 +242,7 @@ namespace GitOut.Features.Git.Diff
                 {
                     string line = result[i];
                     lineNumbers.Add(new LineNumberViewModel(lineNumber++, null));
-                    double width = new FormattedText(line, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, pixelsPerDip).Width;
+                    double width = new FormattedText(line, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, pixelsPerDip).Width;
                     maxWidth = Math.Max(maxWidth, width);
                     var run = new Run(line);
                     content.Inlines.Add(run);
