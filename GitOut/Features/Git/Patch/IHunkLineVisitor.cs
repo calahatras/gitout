@@ -8,8 +8,6 @@ namespace GitOut.Features.Git.Patch
         bool IsDone { get; }
         HunkLine Current { get; }
 
-        void Reset();
-
         HunkLine FindPrepositionHunk();
         IEnumerable<HunkLine> TraverseSelectionHunks();
         HunkLine? FindPostpositionHunk();

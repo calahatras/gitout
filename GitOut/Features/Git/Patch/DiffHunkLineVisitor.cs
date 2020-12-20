@@ -10,7 +10,6 @@ namespace GitOut.Features.Git.Patch
         private readonly PatchMode mode;
         private readonly IList<HunkLine> diffContexts;
         private readonly int endOffset;
-        private readonly int startOffset;
         private int currentOffset;
 
         public DiffHunkLineVisitor(PatchMode mode, IEnumerable<HunkLine> diffContexts, int startOffset, int endOffset)
@@ -18,14 +17,11 @@ namespace GitOut.Features.Git.Patch
             this.mode = mode;
             this.diffContexts = diffContexts.ToList();
             this.endOffset = endOffset;
-            this.startOffset = startOffset;
             currentOffset = startOffset;
         }
 
         public bool IsDone => currentOffset >= endOffset;
         public HunkLine Current => diffContexts[currentOffset];
-
-        public void Reset() => currentOffset = startOffset;
 
         public HunkLine FindPrepositionHunk()
         {
