@@ -209,7 +209,8 @@
                             </Grid.RowDefinitions>
                             <TextBox
                                 Style="{StaticResource MaterialFormAreaStyle}"
-                                FontFamily="Consolas"
+                                TextElement.FontFamily="Consolas sans-serif"
+                                TextElement.FontSize="12"
                                 Text="{Binding EditHunk.Text}"
                             />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
