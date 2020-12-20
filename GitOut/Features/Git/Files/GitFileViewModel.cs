@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using GitOut.Features.Git.Stage;
+using GitOut.Features.Git.Diff;
 
 namespace GitOut.Features.Git.Files
 {

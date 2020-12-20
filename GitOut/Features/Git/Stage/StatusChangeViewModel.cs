@@ -1,9 +1,13 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace GitOut.Features.Git.Stage
 {
-    public class StatusChangeViewModel
+    public class StatusChangeViewModel : INotifyPropertyChanged
     {
+        private bool isSelected;
+
         private StatusChangeViewModel(GitStatusChange model, StatusChangeLocation location)
         {
             Model = model;
@@ -43,8 +47,27 @@ namespace GitOut.Features.Git.Stage
         public GitStatusChange Model { get; }
         public StatusChangeLocation Location { get; }
 
+        public bool IsSelected
+        {
+            get => isSelected;
+            set => SetProperty(ref isSelected, value);
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public static StatusChangeViewModel AsStaged(GitStatusChange change) => new StatusChangeViewModel(change, StatusChangeLocation.Index);
 
         public static StatusChangeViewModel AsWorkspace(GitStatusChange change) => new StatusChangeViewModel(change, StatusChangeLocation.Workspace);
+
+        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (!ReferenceEquals(prop, value))
+            {
+                prop = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+            return false;
+        }
     }
 }

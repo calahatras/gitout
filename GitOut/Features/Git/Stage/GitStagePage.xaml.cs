@@ -1,5 +1,4 @@
-﻿using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Controls;
 
 namespace GitOut.Features.Git.Stage
 {
@@ -9,18 +8,6 @@ namespace GitOut.Features.Git.Stage
         {
             InitializeComponent();
             DataContext = dataContext;
-        }
-
-        private void TunnelEventToParentScroll(object sender, MouseWheelEventArgs e)
-        {
-            if (Keyboard.Modifiers == ModifierKeys.Shift)
-            {
-                DocumentScroll.ScrollToHorizontalOffset(DocumentScroll.HorizontalOffset - e.Delta);
-            }
-            else
-            {
-                DocumentScroll.ScrollToVerticalOffset(DocumentScroll.VerticalOffset - e.Delta);
-            }
         }
     }
 }

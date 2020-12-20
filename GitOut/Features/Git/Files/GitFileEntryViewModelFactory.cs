@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GitOut.Features.Git.Diff;
 
 namespace GitOut.Features.Git.Files
 {

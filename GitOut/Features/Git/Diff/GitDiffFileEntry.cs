@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using GitOut.Features.IO;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git.Diff
 {
     public class GitDiffFileEntry
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git.Diff
 {
     public class GitDiffHunk
     {
@@ -34,11 +34,13 @@ namespace GitOut.Features.Git
             var headLine = HunkLine.AsHead(head, from, to);
 
             var hunks = new[] { headLine }
-                .Concat(lines.Skip(1).Select(line => line.StartsWith('+')
-                    ? HunkLine.AsAdded(line, to++)
-                    : line.StartsWith('-')
-                        ? HunkLine.AsRemoved(line, from++)
-                        : HunkLine.AsLine(line, from++, to++)))
+                .Concat(lines.Skip(1).Select(line => line[0] switch
+                {
+                    '+' => HunkLine.AsAdded(line, to++),
+                    '-' => HunkLine.AsRemoved(line, from++),
+                    '\\' => HunkLine.AsControl(line, from++, to++),
+                    _ => HunkLine.AsLine(line, from++, to++)
+                }))
                 .ToList();
             return new GitDiffHunk(hunks);
         }

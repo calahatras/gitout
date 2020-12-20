@@ -4,6 +4,8 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diagnostics;
+using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 
 namespace GitOut.Features.Git
@@ -254,7 +256,7 @@ namespace GitOut.Features.Git
             {
                 builder.Feed(line);
             }
-            return builder.Build(options);
+            return builder.Build();
         }
 
         public async Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options)
@@ -268,7 +270,19 @@ namespace GitOut.Features.Git
             {
                 builder.Feed(line);
             }
-            return builder.Build(options);
+            return builder.Build();
+        }
+
+        public async Task<GitDiffResult> ExecuteUntrackedDiffAsync(RelativeDirectoryPath path)
+        {
+            string[] result = await File.ReadAllLinesAsync(Path.Combine(WorkingDirectory.Directory, path.ToString()));
+            IGitDiffBuilder builder = GitDiffResult.Builder();
+            builder.Feed($"{GitDiffHunk.HunkIdentifier} -0,0 +1,{result.Length} {GitDiffHunk.HunkIdentifier}");
+            foreach (string line in result)
+            {
+                builder.Feed($"+{line}");
+            }
+            return builder.Build();
         }
 
         public async IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id)
@@ -289,6 +303,8 @@ namespace GitOut.Features.Git
         public Task ExecuteResetAllAsync() => CreateProcess(GitProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();
 
         public Task ExecuteAddAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"add {change.Path}")).ExecuteAsync();
+
+        public Task ExecuteCheckoutAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
 
         public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
 

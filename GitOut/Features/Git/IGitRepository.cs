@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 
 namespace GitOut.Features.Git
@@ -18,12 +20,14 @@ namespace GitOut.Features.Git
         IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent);
         Task<GitDiffResult> ExecuteDiffAsync(GitObjectId source, GitObjectId target, DiffOptions options);
         Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options);
+        Task<GitDiffResult> ExecuteUntrackedDiffAsync(RelativeDirectoryPath path);
         IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id);
         Task<string[]> GetFileContentsAsync(GitFileId file);
 
         Task ExecuteAddAllAsync();
         Task ExecuteResetAllAsync();
         Task ExecuteAddAsync(GitStatusChange change);
+        Task ExecuteCheckoutAsync(GitStatusChange change);
         Task ExecuteResetAsync(GitStatusChange change);
 
         Task ExecuteApplyAsync(GitPatch patch);
