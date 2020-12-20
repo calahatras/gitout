@@ -194,23 +194,37 @@ namespace GitOut.Features.Git
             return CachedStatus;
         }
 
-        public async Task<string[]> GetFileContentsAsync(GitFileId file)
+        public async Task<GitDiffResult> GetFileContentsAsync(GitFileId file)
         {
             var args = GitProcessOptions.FromArguments($"cat-file blob \"{file}\"");
 
             IGitProcess diff = CreateProcess(args);
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             var content = new List<string>();
             await foreach (string line in diff.ReadLinesAsync())
             {
                 content.Add(line);
             }
-            return content.ToArray();
+            builder.Feed($"{GitDiffHunk.HunkIdentifier} -1,{content.Count} +1,{content.Count} {GitDiffHunk.HunkIdentifier}");
+            foreach (string line in content)
+            {
+                builder.Feed($" {line}");
+            }
+            return builder.Build();
         }
 
         public async IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent)
         {
-            string diffArguments = $"--no-optional-locks diff-tree --no-color {parent?.Hash ?? "-root"} {change} -z";
-            IGitProcess diff = CreateProcess(GitProcessOptions.FromArguments(diffArguments));
+            var diffArguments = new StringBuilder($"--no-optional-locks diff-tree --no-color -z ");
+            if (parent is null)
+            {
+                diffArguments.Append($"{change} -root");
+            }
+            else
+            {
+                diffArguments.Append($"{parent.Hash} {change}");
+            }
+            IGitProcess diff = CreateProcess(GitProcessOptions.FromArguments(diffArguments.ToString()));
 
             await foreach (string line in diff.ReadLinesAsync())
             {
@@ -233,15 +247,15 @@ namespace GitOut.Features.Git
             }
         }
 
-        public async Task<GitDiffResult> ExecuteDiffAsync(GitObjectId source, GitObjectId target, DiffOptions options)
+        public async Task<GitDiffResult> ExecuteDiffAsync(GitFileId source, GitFileId target, DiffOptions options)
         {
             if (source.IsEmpty)
             {
-                throw new ArgumentException("Cannot diff empty hash", nameof(source));
+                return await GetFileContentsAsync(target);
             }
             if (target.IsEmpty)
             {
-                throw new ArgumentException("Cannot diff empty hash", nameof(target));
+                return await GetFileContentsAsync(source);
             }
             if (target.Equals(source))
             {

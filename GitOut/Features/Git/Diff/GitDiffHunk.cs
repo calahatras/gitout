@@ -21,28 +21,33 @@ namespace GitOut.Features.Git.Diff
             }
 
             string head = hunk.First();
-            if (!head.StartsWith($"{HunkIdentifier} "))
+            if (head.StartsWith($"{HunkIdentifier} "))
             {
-                throw new ArgumentException("Lines are not a valid diff hunk, must start and end with @@", nameof(hunk));
+                string[] headParts = head.Split(' ');
+                string[] fromFileRange = headParts[1].Split(',');
+                string[] toFileRange = headParts[2].Split(',');
+
+                int from = int.Parse(fromFileRange[0][1..]);
+                int to = int.Parse(toFileRange[0][1..]);
+                var headLine = HunkLine.AsHead(head, from, to);
+
+                var hunks = new[] { headLine }
+                    .Concat(lines.Skip(1).Select(line => line[0] switch
+                    {
+                        '+' => HunkLine.AsAdded(line, to++),
+                        '-' => HunkLine.AsRemoved(line, from++),
+                        '\\' => HunkLine.AsControl(line, from++, to++),
+                        _ => HunkLine.AsLine(line, from++, to++)
+                    }))
+                    .ToList();
+                return new GitDiffHunk(hunks);
             }
-            string[] headParts = head.Split(' ');
-            string[] fromFileRange = headParts[1].Split(',');
-            string[] toFileRange = headParts[2].Split(',');
+            else if (head.StartsWith("Binary files "))
+            {
+                return new GitDiffHunk(new[] { HunkLine.AsLine($" {head}", 0, 0) });
+            }
 
-            int from = int.Parse(fromFileRange[0][1..]);
-            int to = int.Parse(toFileRange[0][1..]);
-            var headLine = HunkLine.AsHead(head, from, to);
-
-            var hunks = new[] { headLine }
-                .Concat(lines.Skip(1).Select(line => line[0] switch
-                {
-                    '+' => HunkLine.AsAdded(line, to++),
-                    '-' => HunkLine.AsRemoved(line, from++),
-                    '\\' => HunkLine.AsControl(line, from++, to++),
-                    _ => HunkLine.AsLine(line, from++, to++)
-                }))
-                .ToList();
-            return new GitDiffHunk(hunks);
+            throw new ArgumentException("Lines are not a valid diff hunk", nameof(hunk));
         }
     }
 }

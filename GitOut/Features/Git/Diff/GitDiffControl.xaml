@@ -7,6 +7,9 @@
     xmlns:local="clr-namespace:GitOut.Features.Git.Diff"
     mc:Ignorable="d" 
 >
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
     <ScrollViewer
         x:Name="DocumentScroll"
         VerticalScrollBarVisibility="Auto"
@@ -31,17 +34,16 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Grid HorizontalAlignment="Stretch">
-                                <TextBlock
-                                    TextAlignment="Right"
-                                    Text="{Binding WorkingTreeLineNumber, TargetNullValue=' '}"
-                                />
-                            </Grid>
+                            <TextBlock
+                                TextAlignment="Right"
+                                Text="{Binding WorkingTreeLineNumber, TargetNullValue=' '}"
+                            />
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="3 0 0 0"
                                 TextAlignment="Right"
                                 Text="{Binding IndexLineNumber}"
+                                Visibility="{Binding IsDifferent, Converter={StaticResource BooleanToVisibilityConverter}}"
                             />
                         </Grid>
                     </DataTemplate>

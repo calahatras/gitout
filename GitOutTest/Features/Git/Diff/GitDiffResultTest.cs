@@ -37,5 +37,25 @@ namespace GitOut.Features.Git.Diff
             Assert.That(result.Header, Is.EqualTo("diff --git a/015ef887f9c85552a727a19a210ddd644aca41f3 b/d09ce91b690c5555ea2f9895614b6086dea5e2a6\r\nindex 015ef88..d09ce91 100644\r\n--- a/015ef887f9c85552a727a19a210ddd644aca41f3\r\n+++ b/d09ce91b690c5555ea2f9895614b6086dea5e2a6"));
             Assert.That(result.Hunks.Count(), Is.EqualTo(3));
         }
+
+        [Test]
+        public void ParseShouldParseBinaryDiff()
+        {
+            string[] diff = new[]
+            {
+                "diff --git a/GitOut/gitout.ico b/GitOut/gitout.ico",
+                "new file mode 100644",
+                "index 0000000..fe6742d",
+                "Binary files /dev/null and b/GitOut/gitout.ico differ",
+            };
+            IGitDiffBuilder builder = GitDiffResult.Builder();
+            foreach (string line in diff)
+            {
+                builder.Feed(line);
+            }
+            GitDiffResult result = builder.Build();
+            Assert.That(result.Header, Is.EqualTo("diff --git a/GitOut/gitout.ico b/GitOut/gitout.ico\r\nnew file mode 100644\r\nindex 0000000..fe6742d"));
+            Assert.That(result.Hunks.Count(), Is.EqualTo(1));
+        }
     }
 }

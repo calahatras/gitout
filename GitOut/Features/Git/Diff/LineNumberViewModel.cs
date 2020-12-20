@@ -10,5 +10,6 @@ namespace GitOut.Features.Git.Diff
 
         public int? WorkingTreeLineNumber { get; }
         public int? IndexLineNumber { get; }
+        public bool IsDifferent => WorkingTreeLineNumber != IndexLineNumber;
     }
 }
