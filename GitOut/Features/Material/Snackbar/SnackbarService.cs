@@ -13,9 +13,10 @@ namespace GitOut.Features.Material.Snackbar
             Message = message
         });
 
-        public void ShowError(string message, Exception error) => SendSnack(new Snack
+        public void ShowError(string message, Exception error, int duration = 3000) => SendSnack(new Snack
         {
             Message = message,
+            Duration = duration,
             Error = error
         });
 

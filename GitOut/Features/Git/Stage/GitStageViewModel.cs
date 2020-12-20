@@ -40,6 +40,7 @@ namespace GitOut.Features.Git.Stage
 
         private string commitMessage = string.Empty;
         private string cachedCommitMessage = string.Empty;
+        private EditPatchViewModel? editHunk = null;
         private GitPatch? undoPatch;
 
         public GitStageViewModel(
@@ -71,9 +72,13 @@ namespace GitOut.Features.Git.Stage
             ResetIndexFilesCommand = new AsyncCallbackCommand(ResetIndexFilesAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(StageSelectionAsync);
+            EditSelectedTextCommand = new CallbackCommand<IHunkLineVisitorProvider>(PrepareEditSelection);
             UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => !(undoPatch is null));
             AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync);
             ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync);
+
+            CancelEditTextCommand = new CallbackCommand(() => EditHunk = null);
+            PatchEditTextCommand = new AsyncCallbackCommand(PatchEditSelectionAsync, () => !(editHunk is null));
         }
 
         public IGitRepository Repository { get; }
@@ -147,6 +152,12 @@ namespace GitOut.Features.Git.Stage
             }
         }
 
+        public EditPatchViewModel? EditHunk
+        {
+            get => editHunk;
+            set => SetProperty(ref editHunk, value);
+        }
+
         public GitDiffResult? SelectedDiffResult
         {
             get => selectedDiffResult;
@@ -165,9 +176,12 @@ namespace GitOut.Features.Git.Stage
         public ICommand ResetIndexFilesCommand { get; }
         public ICommand ResetSelectedTextCommand { get; }
         public ICommand StageSelectedTextCommand { get; }
+        public ICommand EditSelectedTextCommand { get; }
         public ICommand UndoPatchCommand { get; }
         public ICommand ResetHeadCommand { get; }
         public ICommand CommitCommand { get; }
+        public ICommand CancelEditTextCommand { get; }
+        public ICommand PatchEditTextCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -436,6 +450,46 @@ namespace GitOut.Features.Git.Stage
             await Repository.ExecuteApplyAsync(undoPatch);
             await GetRepositoryStatusAsync();
             undoPatch = null;
+        }
+
+        private void PrepareEditSelection(IHunkLineVisitorProvider viewer)
+        {
+            if (selectedChange is null)
+            {
+                return;
+            }
+            IHunkLineVisitor? hunks = viewer.GetHunkVisitor(PatchMode.AddIndex);
+            if (hunks is null)
+            {
+                return;
+            }
+            try
+            {
+                EditHunk = EditPatchViewModel.StageFrom(hunks);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                snack.ShowError("Could not edit selected text", ioe);
+            }
+        }
+
+        private async Task PatchEditSelectionAsync()
+        {
+            if (selectedChange is null || editHunk is null)
+            {
+                return;
+            }
+            var patch = GitPatch.Create(
+                PatchMode.AddIndex,
+                selectedChange.Model.Path,
+                GitStatusChangeType.Ordinary,
+                editHunk.GetHunkVisitor(PatchMode.AddIndex)
+            );
+
+            await Repository.ExecuteApplyAsync(patch);
+            EditHunk = null;
+            snack.ShowSuccess("Staged edit", 5000);
+            await GetRepositoryStatusAsync();
         }
 
         private async Task CommitChangesAsync()
