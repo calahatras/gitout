@@ -15,11 +15,11 @@
         <ListView ItemsSource="{Binding Repositories}" Style="{StaticResource MaterialListStyle}">
             <ListView.ItemTemplate>
                 <DataTemplate DataType="local:IGitRepository">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                    <Button
+                        Style="{StaticResource ListViewItemButtonStyle}"
+                        Command="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"
+                    >
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -28,28 +28,7 @@
                             <TextBlock Text="{Binding Name}" />
                             <TextBlock Grid.Row="1" Text="{Binding WorkingDirectory.Directory}" Style="{StaticResource SecondaryTextStyle}" />
                         </Grid>
-                        <StackPanel
-                            Grid.Column="1"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                        >
-                            <Button
-                                Style="{StaticResource MaterialButtonStyle}"
-                                Command="{Binding DataContext.CopyContentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding WorkingDirectory}"
-                                ToolTip="Kopiera sökväg"
-                            >
-                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                            </Button>
-                            <Button
-                                Style="{StaticResource MaterialButtonStyle}"
-                                Command="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding}"
-                            >
-                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ChevronRight}"/>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
+                    </Button>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
