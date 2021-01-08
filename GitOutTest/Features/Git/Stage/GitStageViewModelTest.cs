@@ -1013,13 +1013,13 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("--- a/filename.txt");
             builder.Feed("+++ b/filename.txt");
             builder.Feed("@@ -3,8 +3,8 @@");
-            builder.Feed("     \"window\": false,");
-            builder.Feed("     \"anon\": true,");
-            builder.Feed("     \"application\": {");
-            builder.Feed("-      \"url\": \"http://localhost:43243\",");
-            builder.Feed("-      \"port\": 50");
-            builder.Feed("+      \"url\": \"http://localhost:2243\",");
-            builder.Feed("+      \"port\": 0");
+            builder.Feed("     \"line1\": false,");
+            builder.Feed("     \"line2\": true,");
+            builder.Feed("     \"line3\": {");
+            builder.Feed("-      \"line4\": true,");
+            builder.Feed("-      \"line5\": 50");
+            builder.Feed("+      \"line4\": false,");
+            builder.Feed("+      \"line5\": 0");
             builder.Feed("     }");
             builder.Feed("   }");
             builder.Feed(" }");
@@ -1067,9 +1067,9 @@ namespace GitOut.Features.Git.Stage
 --- a/filename.txt
 +++ b/filename.txt
 @@ -5,3 +5,2 @@
-     ""application"": {
--      ""url"": ""http://localhost:43243"",
-       ""port"": 50
+     ""line3"": {
+-      ""line4"": true,
+       ""line5"": 50
 ".Replace("\r\n", "\n")));
         }
 
