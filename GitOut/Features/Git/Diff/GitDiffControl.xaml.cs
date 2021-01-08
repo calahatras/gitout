@@ -99,6 +99,12 @@ namespace GitOut.Features.Git.Diff
             }
         }
 
+        private void CopySelectedText(object sender, ExecutedRoutedEventArgs e)
+        {
+            e.Handled = true;
+            Clipboard.SetText(HunksViewer.Selection.Text.Replace('\u00B7', ' '), TextDataFormat.Text);
+        }
+
         private static void OnDiffChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is GitDiffControl control)

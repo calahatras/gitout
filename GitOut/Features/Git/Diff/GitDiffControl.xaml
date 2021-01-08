@@ -57,7 +57,11 @@
                 VerticalScrollBarVisibility="Disabled"
                 HorizontalScrollBarVisibility="Disabled"
                 PreviewMouseWheel="TunnelEventToParentScroll"
-            />
+            >
+                <FlowDocumentScrollViewer.CommandBindings>
+                    <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CopySelectedText" />
+                </FlowDocumentScrollViewer.CommandBindings>
+            </FlowDocumentScrollViewer>
         </Grid>
     </ScrollViewer>
 </UserControl>
