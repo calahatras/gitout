@@ -56,9 +56,9 @@ namespace GitOut.Features.Git.Diff
 
         public InputBindingCollection DocumentInputBindings => HunksViewer.InputBindings;
 
-        public Rect? SelectionPosition => HunksViewer.Selection is null
-            ? null
-            : (Rect?)new Rect(HunksViewer.Selection.Start.GetCharacterRect(LogicalDirection.Forward).TopLeft, HunksViewer.Selection.End.GetCharacterRect(LogicalDirection.Forward).BottomRight);
+        public Rect SelectionPosition => HunksViewer.Selection is null
+            ? Rect.Empty
+            : new Rect(HunksViewer.Selection.Start.GetCharacterRect(LogicalDirection.Forward).TopLeft, HunksViewer.Selection.End.GetCharacterRect(LogicalDirection.Forward).BottomRight);
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
