@@ -15,7 +15,7 @@ namespace GitOut.Features.Git.Stage
         private readonly HunkLine preline;
         private readonly HunkLine postline;
 
-        string text;
+        private string text;
 
         public EditPatchViewModel(int fromRangeIndex, IEnumerable<HunkLine> lines, HunkLine preline, HunkLine postline)
         {
