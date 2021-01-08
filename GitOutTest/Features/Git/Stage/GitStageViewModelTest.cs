@@ -1003,6 +1003,77 @@ namespace GitOut.Features.Git.Stage
         }
 
         [Test]
+        public void StageSelectedTextCommandShouldRemoveOneSelectedLine()
+        {
+            string patchText = null;
+            var repository = new Mock<IGitRepository>();
+            IGitDiffBuilder builder = GitDiffResult.Builder();
+            builder.Feed("diff --git a/filename.txt b/filename.txt");
+            builder.Feed("index 0123456..789abcd 100644");
+            builder.Feed("--- a/filename.txt");
+            builder.Feed("+++ b/filename.txt");
+            builder.Feed("@@ -3,8 +3,8 @@");
+            builder.Feed("     \"window\": false,");
+            builder.Feed("     \"anon\": true,");
+            builder.Feed("     \"application\": {");
+            builder.Feed("-      \"url\": \"http://localhost:43243\",");
+            builder.Feed("-      \"port\": 50");
+            builder.Feed("+      \"url\": \"http://localhost:2243\",");
+            builder.Feed("+      \"port\": 0");
+            builder.Feed("     }");
+            builder.Feed("   }");
+            builder.Feed(" }");
+            GitDiffResult result = builder.Build();
+            repository
+                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+                .Returns(Task.CompletedTask);
+
+            GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
+            GitStatusChange[] initial = new[] { change };
+
+            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+
+            var stageOptions = new GitStagePageOptions(repository.Object);
+            var navigation = new Mock<INavigationService>();
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            var title = new Mock<ITitleService>();
+            var snack = new Mock<ISnackbarService>();
+            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
+            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            {
+                ShowSpacesAsDots = false
+            });
+
+            var document = new Mock<IHunkLineVisitorProvider>();
+            document
+                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 4));
+
+            var actor = new GitStageViewModel(
+                navigation.Object,
+                title.Object,
+                snack.Object,
+                options.Object
+            );
+
+            // initialize workspace files with initial change
+            actor.Navigated(NavigationType.Initial);
+            actor.WorkspaceFiles.MoveCurrentToFirst();
+            actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            actor.StageSelectedTextCommand.Execute(document.Object);
+            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+--- a/filename.txt
++++ b/filename.txt
+@@ -5,3 +5,2 @@
+     ""application"": {
+-      ""url"": ""http://localhost:43243"",
+       ""port"": 50
+".Replace("\r\n", "\n")));
+        }
+
+        [Test]
         public void ResetSelectedTextCommandShouldCreatePatchWhenMixedSelection()
         {
             string patchText = null;
