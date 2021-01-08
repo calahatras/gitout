@@ -10,7 +10,6 @@ namespace GitOut.Features.Wpf
         public NavigatorShell(NavigatorShellViewModel dataContext)
         {
             InitializeComponent();
-            MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
             DataContext = dataContext;
         }
 
