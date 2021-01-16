@@ -1,9 +1,10 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git
 {
     public interface IDiffOptionsBuilder
     {
         DiffOptions Build();
-        IDiffOptionsBuilder IgnoreAllSpace();
         IDiffOptionsBuilder Cached();
+        IDiffOptionsBuilder Recursive();
+        IDiffOptionsBuilder IgnoreAllSpace();
     }
 }

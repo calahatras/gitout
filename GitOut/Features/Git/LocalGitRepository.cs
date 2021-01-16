@@ -213,16 +213,20 @@ namespace GitOut.Features.Git
             return builder.Build();
         }
 
-        public async IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent)
+        public async IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options)
         {
             var diffArguments = new StringBuilder($"--no-optional-locks diff-tree --no-color -z ");
+            if (!(options is null))
+            {
+                diffArguments.Append(string.Join(" ", options.GetArguments()));
+            }
             if (parent is null)
             {
                 diffArguments.Append($"{change} -root");
             }
             else
             {
-                diffArguments.Append($"{parent.Hash} {change}");
+                diffArguments.Append($" {parent.Hash} {change}");
             }
             IGitProcess diff = CreateProcess(GitProcessOptions.FromArguments(diffArguments.ToString()));
 

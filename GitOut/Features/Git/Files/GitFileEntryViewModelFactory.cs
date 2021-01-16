@@ -38,5 +38,18 @@ namespace GitOut.Features.Git.Files
                 yield return viewmodel;
             }
         }
+
+        public static async IAsyncEnumerable<IGitFileEntryViewModel> DiffAllAsync(GitCommitId? root, GitCommitId diff, IGitRepository repository)
+        {
+            await foreach (GitDiffFileEntry entry in repository.ExecuteListDiffChangesAsync(diff, root, DiffOptions.Builder().Recursive().Build()))
+            {
+                IGitFileEntryViewModel viewmodel = entry.FileType switch
+                {
+                    GitFileType.Blob => GitDiffFileViewModel.Wrap(repository, entry),
+                    _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {entry.FileType}", nameof(entry))
+                };
+                yield return viewmodel;
+            }
+        }
     }
 }

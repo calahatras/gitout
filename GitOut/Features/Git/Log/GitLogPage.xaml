@@ -348,6 +348,9 @@
                         <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowRevisionDiff}" ToolTip="Show diff">
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource VectorDifference}"/>
                         </ToggleButton>
+                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowRevisionDiffInline}" ToolTip="Show diff inline">
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FormatListBullet}"/>
+                        </ToggleButton>
                     </StackPanel>
                 </Grid>
                 <local:GitFileTree
