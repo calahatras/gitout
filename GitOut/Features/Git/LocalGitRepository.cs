@@ -14,7 +14,10 @@ namespace GitOut.Features.Git
     {
         private readonly IGitProcessFactory processFactory;
 
-        private LocalGitRepository(DirectoryPath repositoryPath, IGitProcessFactory processFactory)
+        private LocalGitRepository(
+            DirectoryPath repositoryPath,
+            IGitProcessFactory processFactory
+        )
         {
             WorkingDirectory = repositoryPath;
             this.processFactory = processFactory;
