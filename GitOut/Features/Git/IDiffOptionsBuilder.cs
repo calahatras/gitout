@@ -4,7 +4,7 @@ namespace GitOut.Features.Git
     {
         DiffOptions Build();
         IDiffOptionsBuilder Cached();
-        IDiffOptionsBuilder Recursive();
         IDiffOptionsBuilder IgnoreAllSpace();
+        IDiffOptionsBuilder Recursive();
     }
 }
