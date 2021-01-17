@@ -104,7 +104,8 @@ namespace GitOut.Features.Git.Patch
                                 lines.Add(PatchLine.CreateLine(DiffLineType.Control, postline.StrippedLine));
                             }
                             else if (postline.Type == DiffLineType.None
-                                || ((mode == PatchMode.ResetIndex || mode == PatchMode.ResetWorkspace || mode == PatchMode.AddWorkspace) && postline.Type == DiffLineType.Added))
+                                || ((mode == PatchMode.ResetIndex || mode == PatchMode.ResetWorkspace || mode == PatchMode.AddWorkspace) && postline.Type == DiffLineType.Added)
+                                || (mode == PatchMode.AddIndex && postline.Type == DiffLineType.Removed))
                             {
                                 lines.Add(PatchLine.CreateLine(DiffLineType.None, postline.StrippedLine));
                             }

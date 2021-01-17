@@ -15,6 +15,7 @@
 >
     <UserControl.Resources>
         <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+        <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
         <Style x:Key="GitChangeListStyle" BasedOn="{StaticResource MaterialListStyle}" TargetType="{x:Type ListView}">
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -171,6 +172,7 @@
                 </Grid.RowDefinitions>
 
                 <diff:GitDiffControl
+                    x:Name="DiffControl"
                     Diff="{Binding SelectedDiffResult}"
                     ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
                 >
@@ -185,8 +187,43 @@
                             Command="{Binding StageSelectedTextCommand}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
                         />
+                        <KeyBinding
+                            Key="E"
+                            Command="{Binding EditSelectedTextCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+                        />
                     </diff:GitDiffControl.DocumentInputBindings>
                 </diff:GitDiffControl>
+                <Popup
+                    AllowsTransparency="True"
+                    IsOpen="{Binding EditHunk, Converter={StaticResource NullToBooleanConverter}}"
+                    PopupAnimation="Slide"
+                    PlacementRectangle="{Binding SelectionPosition, ElementName=DiffControl, Mode=OneWay}"
+                    PlacementTarget="{Binding ElementName=DiffControl, Mode=OneWay}"
+                >
+                    <Border Style="{StaticResource CardPanelStyle}" MinWidth="600" Margin="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBox
+                                Style="{StaticResource MaterialFormAreaStyle}"
+                                TextElement.FontFamily="Consolas sans-serif"
+                                TextElement.FontSize="12"
+                                Text="{Binding EditHunk.Text}"
+                            />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
+                                <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding PatchEditTextCommand}">
+                                    OK
+                                </Button>
+                                <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelEditTextCommand}">
+                                    CANCEL
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Popup>
                 <Border Grid.Row="1" Margin="4 8 0 1" Padding="0 2 8 2" Style="{StaticResource CardPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>

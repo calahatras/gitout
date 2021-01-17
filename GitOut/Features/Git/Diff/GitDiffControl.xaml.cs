@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -11,11 +12,8 @@ using GitOut.Features.Git.Patch;
 
 namespace GitOut.Features.Git.Diff
 {
-    public partial class GitDiffControl : UserControl, IHunkLineVisitorProvider
+    public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunkLineVisitorProvider
     {
-        public static readonly DependencyProperty ChangeProperty =
-            DependencyProperty.Register(nameof(Change), typeof(GitStatusChange), typeof(GitDiffControl), new PropertyMetadata(null));
-
         public static readonly DependencyProperty DiffProperty =
             DependencyProperty.Register(nameof(Diff), typeof(GitDiffResult), typeof(GitDiffControl), new PropertyMetadata(OnDiffChanges));
 
@@ -31,12 +29,6 @@ namespace GitOut.Features.Git.Diff
         private GitDiffViewModel? viewModel;
 
         public GitDiffControl() => InitializeComponent();
-
-        public GitStatusChange Change
-        {
-            get => (GitStatusChange)GetValue(ChangeProperty);
-            set => SetValue(ChangeProperty, value);
-        }
 
         public GitDiffResult Diff
         {
@@ -64,11 +56,18 @@ namespace GitOut.Features.Git.Diff
 
         public InputBindingCollection DocumentInputBindings => HunksViewer.InputBindings;
 
+        public Rect SelectionPosition => HunksViewer.Selection is null
+            ? Rect.Empty
+            : new Rect(HunksViewer.Selection.Start.GetCharacterRect(LogicalDirection.Forward).TopLeft, HunksViewer.Selection.End.GetCharacterRect(LogicalDirection.Forward).BottomRight);
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public IHunkLineVisitor? GetHunkVisitor(PatchMode mode)
         {
             if (viewModel is GitDiffViewModel document)
             {
                 TextRange selection = HunksViewer.Selection;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectionPosition)));
                 TextPointer start = selection.Start;
                 TextPointer end = selection.End;
                 List<(Run, HunkLine)>? diffContexts = document.DiffContexts;
@@ -98,6 +97,12 @@ namespace GitOut.Features.Git.Diff
             {
                 DocumentScroll.ScrollToVerticalOffset(DocumentScroll.VerticalOffset - e.Delta);
             }
+        }
+
+        private void CopySelectedText(object sender, ExecutedRoutedEventArgs e)
+        {
+            e.Handled = true;
+            Clipboard.SetText(HunksViewer.Selection.Text.Replace('\u00B7', ' '), TextDataFormat.Text);
         }
 
         private static void OnDiffChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
