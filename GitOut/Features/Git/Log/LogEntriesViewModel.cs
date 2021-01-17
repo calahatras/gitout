@@ -34,6 +34,7 @@ namespace GitOut.Features.Git.Log
         {
             LogRevisionViewMode.CurrentRevision => ListLogFilesAsync(),
             LogRevisionViewMode.Diff => ListDiffFilesAsync(),
+            LogRevisionViewMode.DiffInline => ListDiffInlineFilesAsync(),
             _ => Task.CompletedTask,
         };
 
@@ -80,6 +81,22 @@ namespace GitOut.Features.Git.Log
                 rootFiles.Clear();
             }
             IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? Root.Event.Parent?.Id, Root.Event.Id, repository);
+            await foreach (IGitFileEntryViewModel viewmodel in entries)
+            {
+                lock (rootFilesLock)
+                {
+                    rootFiles.Add(viewmodel);
+                }
+            }
+        }
+
+        private async Task ListDiffInlineFilesAsync()
+        {
+            lock (rootFilesLock)
+            {
+                rootFiles.Clear();
+            }
+            IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? Root.Event.Parent?.Id, Root.Event.Id, repository);
             await foreach (IGitFileEntryViewModel viewmodel in entries)
             {
                 lock (rootFilesLock)

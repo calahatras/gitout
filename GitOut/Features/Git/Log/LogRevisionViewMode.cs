@@ -4,6 +4,7 @@
     {
         None,
         CurrentRevision,
-        Diff
+        Diff,
+        DiffInline
     }
 }

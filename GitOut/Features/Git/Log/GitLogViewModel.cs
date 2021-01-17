@@ -155,6 +155,7 @@ namespace GitOut.Features.Git.Log
                     }
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionAtCurrent)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionDiff)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionDiffInline)));
                 }
             }
         }
@@ -167,6 +168,11 @@ namespace GitOut.Features.Git.Log
         {
             get => RevisionViewMode == LogRevisionViewMode.Diff;
             set { if (value) { RevisionViewMode = LogRevisionViewMode.Diff; } }
+        }
+        public bool ShowRevisionDiffInline
+        {
+            get => RevisionViewMode == LogRevisionViewMode.DiffInline;
+            set { if (value) { RevisionViewMode = LogRevisionViewMode.DiffInline; } }
         }
 
         public ICommand NavigateToStageAreaCommand { get; }

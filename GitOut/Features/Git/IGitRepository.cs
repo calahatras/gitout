@@ -17,7 +17,7 @@ namespace GitOut.Features.Git
         Task<GitHistoryEvent> GetHeadAsync();
         IAsyncEnumerable<GitStash> ExecuteStashListAsync();
         Task<GitStatusResult> ExecuteStatusAsync();
-        IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent);
+        IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options = default);
         Task<GitDiffResult> ExecuteDiffAsync(GitFileId source, GitFileId target, DiffOptions options);
         Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options);
         Task<GitDiffResult> ExecuteUntrackedDiffAsync(RelativeDirectoryPath path);

@@ -4,14 +4,20 @@ namespace GitOut.Features.Git
 {
     public class DiffOptions
     {
-        private DiffOptions(bool cached, bool ignoreAllSpace)
+        private DiffOptions(
+            bool cached,
+            bool ignoreAllSpace,
+            bool recursive
+        )
         {
             Cached = cached;
             IgnoreAllSpace = ignoreAllSpace;
+            Recursive = recursive;
         }
 
         public bool Cached { get; }
         public bool IgnoreAllSpace { get; }
+        public bool Recursive { get; }
 
         public IEnumerable<string> GetArguments(bool includeCached = true)
         {
@@ -23,6 +29,10 @@ namespace GitOut.Features.Git
             {
                 yield return "--ignore-all-space";
             }
+            if (Recursive)
+            {
+                yield return "-r";
+            }
         }
 
         public static IDiffOptionsBuilder Builder() => new DiffOptionsBuilder();
@@ -31,8 +41,9 @@ namespace GitOut.Features.Git
         {
             private bool cached;
             private bool ignoreAllSpace;
+            private bool recursive;
 
-            public DiffOptions Build() => new DiffOptions(cached, ignoreAllSpace);
+            public DiffOptions Build() => new DiffOptions(cached, ignoreAllSpace, recursive);
 
             public IDiffOptionsBuilder Cached()
             {
@@ -43,6 +54,12 @@ namespace GitOut.Features.Git
             public IDiffOptionsBuilder IgnoreAllSpace()
             {
                 ignoreAllSpace = true;
+                return this;
+            }
+
+            public IDiffOptionsBuilder Recursive()
+            {
+                recursive = true;
                 return this;
             }
         }
