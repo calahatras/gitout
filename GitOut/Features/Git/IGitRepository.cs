@@ -13,8 +13,11 @@ namespace GitOut.Features.Git
 
         GitStatusResult? CachedStatus { get; }
 
-        Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options);
         Task<GitHistoryEvent> GetHeadAsync();
+        IAsyncEnumerable<GitRemote> GetRemotesAsync();
+
+        Task ExecuteFetchAsync(GitRemote remote);
+        Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options);
         IAsyncEnumerable<GitStash> ExecuteStashListAsync();
         Task<GitStatusResult> ExecuteStatusAsync();
         IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options = default);

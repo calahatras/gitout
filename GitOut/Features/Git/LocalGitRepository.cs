@@ -28,6 +28,62 @@ namespace GitOut.Features.Git
 
         public GitStatusResult? CachedStatus { get; private set; }
 
+        public async Task<GitHistoryEvent> GetHeadAsync()
+        {
+            IGitProcess log = CreateProcess(GitProcessOptions.FromArguments("-c log.showSignature=false log -n1 -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" HEAD"));
+            int state = 0;
+            IGitHistoryEventBuilder builder = GitHistoryEvent.Builder();
+            await foreach (string line in log.ReadLinesAsync())
+            {
+                switch (state)
+                {
+                    case 0:
+                        builder.ParseHash(line);
+                        ++state;
+                        break;
+                    case 1:
+                        builder.ParseDate(long.Parse(line));
+                        ++state;
+                        break;
+                    case 2:
+                        builder.ParseAuthorName(line);
+                        ++state;
+                        break;
+                    case 3:
+                        builder.ParseAuthorEmail(line);
+                        ++state;
+                        break;
+                    case 4:
+                        builder.ParseSubject(line);
+                        ++state;
+                        break;
+                    case 5:
+                        int zeroSeparator = line.IndexOf('\0');
+                        if (zeroSeparator != -1)
+                        {
+                            throw new InvalidOperationException("Multiple history events found but expected only 1");
+                        }
+                        else
+                        {
+                            builder.BuildBody(line);
+                        }
+                        break;
+                }
+            }
+            return builder.Build();
+        }
+
+        public async IAsyncEnumerable<GitRemote> GetRemotesAsync()
+        {
+            IGitProcess remotes = CreateProcess(GitProcessOptions.FromArguments("remote"));
+            await foreach (string line in remotes.ReadLinesAsync())
+            {
+                yield return new GitRemote(line);
+            }
+        }
+
+        public Task ExecuteFetchAsync(GitRemote remote) => CreateProcess(GitProcessOptions.FromArguments($"fetch {remote.Name}")).ExecuteAsync();
+
         public async Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options)
         {
             IDictionary<GitCommitId, GitHistoryEvent> historyByCommitId = new Dictionary<GitCommitId, GitHistoryEvent>();
@@ -115,51 +171,6 @@ namespace GitOut.Features.Git
             }
 
             return history;
-        }
-
-        public async Task<GitHistoryEvent> GetHeadAsync()
-        {
-            IGitProcess log = CreateProcess(GitProcessOptions.FromArguments("-c log.showSignature=false log -n1 -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" HEAD"));
-            int state = 0;
-            IGitHistoryEventBuilder builder = GitHistoryEvent.Builder();
-            await foreach (string line in log.ReadLinesAsync())
-            {
-                switch (state)
-                {
-                    case 0:
-                        builder.ParseHash(line);
-                        ++state;
-                        break;
-                    case 1:
-                        builder.ParseDate(long.Parse(line));
-                        ++state;
-                        break;
-                    case 2:
-                        builder.ParseAuthorName(line);
-                        ++state;
-                        break;
-                    case 3:
-                        builder.ParseAuthorEmail(line);
-                        ++state;
-                        break;
-                    case 4:
-                        builder.ParseSubject(line);
-                        ++state;
-                        break;
-                    case 5:
-                        int zeroSeparator = line.IndexOf('\0');
-                        if (zeroSeparator != -1)
-                        {
-                            throw new InvalidOperationException("Multiple history events found but expected only 1");
-                        }
-                        else
-                        {
-                            builder.BuildBody(line);
-                        }
-                        break;
-                }
-            }
-            return builder.Build();
         }
 
         public async IAsyncEnumerable<GitStash> ExecuteStashListAsync()

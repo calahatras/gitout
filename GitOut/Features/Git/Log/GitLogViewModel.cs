@@ -24,7 +24,12 @@ namespace GitOut.Features.Git.Log
         private readonly object entriesLock = new object();
         private readonly ObservableCollection<GitTreeEvent> entries = new ObservableCollection<GitTreeEvent>();
 
+        private readonly object remotesLock = new object();
+        private readonly ObservableCollection<GitRemoteViewModel> remotes = new ObservableCollection<GitRemoteViewModel>();
+
         private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new ObservableCollection<GitTreeEvent>();
+
+        private readonly ISnackbarService snack;
 
         private int changesCount;
         private bool includeRemotes = true;
@@ -40,6 +45,7 @@ namespace GitOut.Features.Git.Log
             ISnackbarService snack
         )
         {
+            this.snack = snack;
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             Repository = options.Repository;
@@ -51,6 +57,9 @@ namespace GitOut.Features.Git.Log
 
             BindingOperations.EnableCollectionSynchronization(entries, entriesLock);
             Entries = CollectionViewSource.GetDefaultView(entries);
+
+            BindingOperations.EnableCollectionSynchronization(remotes, remotesLock);
+            Remotes = CollectionViewSource.GetDefaultView(remotes);
 
             NavigateToStageAreaCommand = new NavigateLocalCommand<object>(navigation, typeof(GitStagePage).FullName!, e => GitStagePageOptions.Stage(Repository));
             RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
@@ -66,6 +75,8 @@ namespace GitOut.Features.Git.Log
                     RevisionViewMode = LogRevisionViewMode.Diff;
                 }
             };
+
+            FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
 
             CopyContentCommand = new CopyTextToClipBoardCommand<object>(
                 d => Repository.WorkingDirectory.Directory,
@@ -108,6 +119,7 @@ namespace GitOut.Features.Git.Log
 
         public ICollectionView ActiveStashes { get; }
         public ICollectionView Entries { get; }
+        public ICollectionView Remotes { get; }
 
         public IGitRepository Repository { get; }
         public IList<GitTreeEvent> SelectedLogEntries => selectedLogEntries;
@@ -177,6 +189,7 @@ namespace GitOut.Features.Git.Log
 
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
+        public ICommand FetchRemotesCommand { get; }
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
@@ -188,6 +201,34 @@ namespace GitOut.Features.Git.Log
             if (type == NavigationType.Initial || type == NavigationType.NavigatedBack)
             {
                 _ = CheckRepositoryStatusAsync();
+            }
+            if (type == NavigationType.Initial)
+            {
+                _ = PopulateRemotesAsync();
+            }
+        }
+
+        private async Task FetchRemotesAsync()
+        {
+            foreach (GitRemoteViewModel remote in remotes)
+            {
+                if (remote.IsSelected)
+                {
+                    await Repository.ExecuteFetchAsync(remote.Model);
+                }
+            }
+            snack.ShowSuccess("Fetched all selected remotes", 8000);
+            await CheckRepositoryStatusAsync();
+        }
+
+        private async Task PopulateRemotesAsync()
+        {
+            await foreach (GitRemote remote in Repository.GetRemotesAsync())
+            {
+                lock (remotesLock)
+                {
+                    remotes.Add(GitRemoteViewModel.From(remote));
+                }
             }
         }
 

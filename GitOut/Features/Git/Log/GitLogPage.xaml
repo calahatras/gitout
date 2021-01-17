@@ -202,6 +202,77 @@
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
                         </Button>
                         <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                        <ToggleButton x:Name="Remotes" Style="{StaticResource MaterialIconToggleButtonStyle}" ToolTip="Remotes">
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource DownloadNetworkOutline}"/>
+                        </ToggleButton>
+                        <Popup
+                            StaysOpen="False"
+                            AllowsTransparency="True"
+                            IsOpen="{Binding IsChecked, ElementName=Remotes}"
+                            PopupAnimation="Fade"
+                            Placement="Bottom"
+                        >
+                            <Grid>
+                                <Border Style="{StaticResource CardPanelStyle}" MinWidth="200" Margin="16 8" Padding="0">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid Grid.Row="0" Margin="8 4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="1">
+                                                <Button
+                                                    Style="{StaticResource MaterialButtonStyle}"
+                                                    Command="{Binding FetchRemotesCommand}"
+                                                >
+                                                    FETCH
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                        <Border Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}"/>
+                                        <ListView
+                                            Grid.Row="2"
+                                            Style="{StaticResource MaterialListStyle}"
+                                            ItemsSource="{Binding Remotes}"
+                                        >
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type local:GitRemoteViewModel}">
+                                                    <ToggleButton IsChecked="{Binding IsSelected}" Style="{StaticResource MaterialListItemToggleButtonStyle}">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="32" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <Canvas Width="24" Height="24">
+                                                                <Canvas.LayoutTransform>
+                                                                    <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                                                                </Canvas.LayoutTransform>
+                                                                <Path
+                                                                    Fill="{DynamicResource MaterialForegroundBase}"
+                                                                    Data="{StaticResource CheckBold}"
+                                                                    HorizontalAlignment="Center"
+                                                                    Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                                />
+                                                            </Canvas>
+                                                            <TextBlock
+                                                                Grid.Column="1"
+                                                                Text="{Binding Name}"
+                                                                Style="{StaticResource NormalTextStyle}" VerticalAlignment="Center"
+                                                            />
+                                                        </Grid>
+                                                    </ToggleButton>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Popup>
                         <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
                         </ToggleButton>
