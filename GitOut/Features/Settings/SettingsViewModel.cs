@@ -37,6 +37,7 @@ namespace GitOut.Features.Settings
             ISnackbarService snacks,
             IThemeService themes,
             IGitRepositoryStorage repositories,
+            IGitRepositoryFactory gitFactory,
             IOptionsMonitor<GitStageOptions> stageOptions,
             IWritableStorage storage
         )
@@ -89,7 +90,7 @@ namespace GitOut.Features.Settings
             AddRepositoryCommand = new CallbackCommand<ValidGitRepositoryPathViewModel>(
                 repository =>
                 {
-                    var localrepo = LocalGitRepository.InitializeFromPath(DirectoryPath.Create(repository.WorkingDirectory));
+                    IGitRepository localrepo = gitFactory.Create(DirectoryPath.Create(repository.WorkingDirectory));
                     repositories.Add(localrepo);
                     snacks.Show("Added repository");
                 });

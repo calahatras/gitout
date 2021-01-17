@@ -12,7 +12,13 @@ namespace GitOut.Features.Git
 {
     public sealed class LocalGitRepository : IGitRepository
     {
-        private LocalGitRepository(DirectoryPath repositoryPath) => WorkingDirectory = repositoryPath;
+        private readonly IGitProcessFactory processFactory;
+
+        private LocalGitRepository(DirectoryPath repositoryPath, IGitProcessFactory processFactory)
+        {
+            WorkingDirectory = repositoryPath;
+            this.processFactory = processFactory;
+        }
 
         public DirectoryPath WorkingDirectory { get; }
         public string? Name => Path.GetFileName(WorkingDirectory.Directory);
@@ -348,8 +354,12 @@ namespace GitOut.Features.Git
             return apply.ExecuteAsync(patch.Writer);
         }
 
-        public static LocalGitRepository InitializeFromPath(DirectoryPath path) => new LocalGitRepository(path);
+        public static LocalGitRepository InitializeFromPath(
+            DirectoryPath path,
+            IGitProcessFactory processFactory
+        )
+            => new LocalGitRepository(path, processFactory);
 
-        private IGitProcess CreateProcess(GitProcessOptions arguments) => new GitProcess(WorkingDirectory, arguments);
+        private IGitProcess CreateProcess(GitProcessOptions arguments) => processFactory.Create(WorkingDirectory, arguments);
     }
 }
