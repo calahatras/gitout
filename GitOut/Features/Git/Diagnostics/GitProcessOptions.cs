@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace GitOut.Features.Git.Diagnostics
 {
@@ -22,16 +21,20 @@ namespace GitOut.Features.Git.Diagnostics
                 arguments.Add(argument);
                 return this;
             }
-            public IGitProcessOptionsBuilder AppendRange(IEnumerable<string>? collection)
+
+            public IGitProcessOptionsBuilder AppendRange(params string[] collection)
             {
-                if (!(collection is null))
-                {
-                    arguments.AddRange(collection);
-                }
+                arguments.AddRange(collection);
                 return this;
             }
 
-            public GitProcessOptions Build() => new GitProcessOptions(string.Join(" ", arguments.Select(a => a.Trim())));
+            public IGitProcessOptionsBuilder AppendRange(IEnumerable<string> collection)
+            {
+                arguments.AddRange(collection);
+                return this;
+            }
+
+            public GitProcessOptions Build() => new GitProcessOptions(string.Join(" ", arguments));
         }
     }
 }

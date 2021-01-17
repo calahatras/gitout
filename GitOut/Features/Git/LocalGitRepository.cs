@@ -215,22 +215,24 @@ namespace GitOut.Features.Git
 
         public async IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options)
         {
-            IGitProcessOptionsBuilder optionsBuilder = GitProcessOptions.Builder()
-                .Append("--no-optional-locks")
-                .Append("diff-tree")
-                .Append("--no-color")
-                .Append("-z")
-                .AppendRange(options?.GetArguments());
+            IGitProcessOptionsBuilder diffArguments = GitProcessOptions
+                .Builder()
+                .AppendRange("--no-optional-locks", "diff-tree", "--no-color", "-z");
+
+            if (!(options is null))
+            {
+                diffArguments.AppendRange(options.GetArguments());
+            }
 
             if (parent is null)
             {
-                optionsBuilder.Append($"{change} -root");
+                diffArguments.AppendRange(change.ToString(), "-root");
             }
             else
             {
-                optionsBuilder.Append($"{parent.Hash} {change}");
+                diffArguments.AppendRange(parent.Hash, change.ToString());
             }
-            IGitProcess diff = CreateProcess(optionsBuilder.Build());
+            IGitProcess diff = CreateProcess(diffArguments.Build());
 
             await foreach (string line in diff.ReadLinesAsync())
             {
