@@ -1,4 +1,5 @@
-﻿using GitOut.Features.Git.Log;
+using GitOut.Features.Git.Diagnostics;
+using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
@@ -11,6 +12,8 @@ namespace GitOut.Features.Git
         public static void AddGitFeature(this IServiceCollection services)
         {
             services.AddScoped<IGitRepositoryStorage, GitRepositoryStorage>();
+            services.AddScoped<IGitProcessFactory, GitProcessFactory>();
+            services.AddScoped<IGitRepositoryFactory, GitRepositoryFactory>();
             services.AddScoped<GitLogPage>();
             services.AddScoped<GitLogViewModel>();
             services.AddScoped<GitStagePage>();

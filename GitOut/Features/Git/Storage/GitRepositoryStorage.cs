@@ -13,14 +13,17 @@ namespace GitOut.Features.Git.Storage
     {
         private readonly IOptionsMonitor<GitStoreOptions> options;
         private readonly IWritableStorage storage;
+        private readonly IGitRepositoryFactory gitFactory;
 
         public GitRepositoryStorage(
             IOptionsMonitor<GitStoreOptions> options,
-            IWritableStorage storage
+            IWritableStorage storage,
+            IGitRepositoryFactory gitFactory
         )
         {
             this.options = options;
             this.storage = storage;
+            this.gitFactory = gitFactory;
             var repositories = new BehaviorSubject<IEnumerable<IGitRepository>>(Convert(options.CurrentValue.Repositories ?? Array.Empty<string>()));
             Repositories = repositories;
             options.OnChange(update => repositories.OnNext(Convert(update.Repositories ?? Array.Empty<string>())));
@@ -37,7 +40,7 @@ namespace GitOut.Features.Git.Storage
 
         private IEnumerable<IGitRepository> Convert(ICollection<string> repos) => repos
             .Select(DirectoryPath.Create)
-            .Select(LocalGitRepository.InitializeFromPath)
+            .Select(gitFactory.Create)
             .ToList();
     }
 }
