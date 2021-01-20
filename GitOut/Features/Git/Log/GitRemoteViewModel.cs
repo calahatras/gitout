@@ -7,10 +7,11 @@ namespace GitOut.Features.Git.Log
     {
         private bool isSelected;
 
-        public GitRemoteViewModel(GitRemote model)
+        public GitRemoteViewModel(GitRemote model, bool isSelected)
         {
             Name = model.Name;
             Model = model;
+            this.isSelected = isSelected;
         }
 
         public string Name { get; }
@@ -23,10 +24,7 @@ namespace GitOut.Features.Git.Log
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static GitRemoteViewModel From(GitRemote model) => new GitRemoteViewModel(model)
-        {
-            IsSelected = true
-        };
+        public static GitRemoteViewModel From(GitRemote model) => new GitRemoteViewModel(model, isSelected: true);
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
