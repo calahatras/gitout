@@ -19,7 +19,6 @@
 >
     <UserControl.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <converters:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter" />
         <converters:SubstringConverter x:Key="SubstringConverter" />
@@ -349,6 +348,16 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
+                                    <Grid.Style>
+                                        <Style TargetType="{x:Type Grid}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Event.IsHead}" Value="True">
+                                                    <Setter Property="Background" Value="#44000000" />
+                                                    <Setter Property="TextElement.FontWeight" Value="Bold" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
                                     <ItemsControl
                                         Grid.Column="0"
                                         VerticalAlignment="Center"
@@ -373,7 +382,6 @@
 
                                     <TextBlock
                                         Grid.Column="1"
-                                        FontWeight="{Binding Event.IsHead, Converter={StaticResource BooleanToFontWeightConverter}, Mode=OneWay}"
                                         Text="{Binding Event.Subject, Mode=OneWay}"
                                         VerticalAlignment="Center"
                                         TextTrimming="CharacterEllipsis"
