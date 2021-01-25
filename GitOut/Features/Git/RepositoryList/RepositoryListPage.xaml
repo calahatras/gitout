@@ -4,7 +4,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="GitOut.Features.Git.Diagnostics"
+    xmlns:git="clr-namespace:GitOut.Features.Git"
+    xmlns:text="clr-namespace:GitOut.Features.Text"
+    xmlns:local="clr-namespace:GitOut.Features.Git.RepositoryList"
     mc:Ignorable="d" 
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -12,25 +14,27 @@
     <Grid
         Style="{StaticResource LayoutRootGridStyle}"
     >
-        <ListView ItemsSource="{Binding Repositories}" Style="{StaticResource MaterialListStyle}">
-            <ListView.ItemTemplate>
-                <DataTemplate DataType="local:IGitRepository">
-                    <Button
-                        Style="{StaticResource ListViewItemButtonStyle}"
-                        Command="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding}"
-                    >
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Text="{Binding Name}" />
-                            <TextBlock Grid.Row="1" Text="{Binding WorkingDirectory.Directory}" Style="{StaticResource SecondaryTextStyle}" />
-                        </Grid>
-                    </Button>
+        <Grid.Resources>
+            <local:RepositoryQueryMatcher x:Key="RepositoryMatcher"/>
+        </Grid.Resources>
+        <text:Autocomplete
+            Header="Search repository name"
+            ItemsSource="{Binding Repositories}"
+            QueryMatcher="{StaticResource RepositoryMatcher}"
+            ItemSelectedCommand="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        >
+            <text:Autocomplete.ItemTemplate>
+                <DataTemplate DataType="{x:Type git:IGitRepository}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding Name}" />
+                        <TextBlock Grid.Row="1" Text="{Binding WorkingDirectory.Directory}" Style="{StaticResource SecondaryTextStyle}" />
+                    </Grid>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </text:Autocomplete.ItemTemplate>
+        </text:Autocomplete>
     </Grid>
 </UserControl>

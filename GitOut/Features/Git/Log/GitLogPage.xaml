@@ -9,6 +9,7 @@
     xmlns:details="clr-namespace:GitOut.Features.Git.Details"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
+    xmlns:text="clr-namespace:GitOut.Features.Text"
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:attached="clr-namespace:GitOut.Features.Wpf.AttachedProperties"
@@ -23,6 +24,7 @@
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter" />
         <converters:SubstringConverter x:Key="SubstringConverter" />
+        <files:FileEntryQueryMatcher x:Key="FileNameQueryMatcher" />
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
         <lc:TreeNodePathDataConverter x:Key="TreeNodePathDataConverter" />
         <ContextMenu x:Key="LogEventMenu">
@@ -432,6 +434,9 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding SelectedContext.Subject}"/>
                     <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
+                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsSearchDisplayed}" ToolTip="Search file">
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileSearch}"/>
+                        </ToggleButton>
                         <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowSpacesAsDots}" ToolTip="Show spaces as dots">
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CircleSmall}"/>
                         </ToggleButton>
@@ -453,6 +458,29 @@
                             </ToggleButton>
                         </ItemsControl>
                     </StackPanel>
+                    <Popup
+                        AllowsTransparency="True"
+                        IsOpen="{Binding IsSearchDisplayed}"
+                        PopupAnimation="None"
+                        Placement="Left"
+                        VerticalOffset="56"
+                    >
+                        <Border Style="{StaticResource CardPanelStyle}" Margin="16" MinWidth="280" MaxHeight="800">
+                            <text:Autocomplete
+                                Header="Filename"
+                                ItemsSource="{Binding SelectedContext.AllFiles}"
+                                QueryMatcher="{StaticResource FileNameQueryMatcher}"
+                                CancelCommand="{Binding CloseAutocompleteCommand}"
+                                ItemSelectedCommand="{Binding SelectedContext.SelectFileCommand}"
+                            >
+                                <text:Autocomplete.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type git:GitFileEntry}">
+                                        <TextBlock Text="{Binding FileName}" Style="{StaticResource NormalTextStyle}" />
+                                    </DataTemplate>
+                                </text:Autocomplete.ItemTemplate>
+                            </text:Autocomplete>
+                        </Border>
+                    </Popup>
                 </Grid>
                 <ItemsControl
                     Grid.Row="1"

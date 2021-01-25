@@ -36,6 +36,7 @@ namespace GitOut.Features.Git.Log
         private bool includeRemotes = true;
         private bool showSpacesAsDots;
         private bool isStashesVisible = false;
+        private bool isSearchDisplayed = false;
         private LogViewMode viewMode = LogViewMode.None;
 
         private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
@@ -115,6 +116,8 @@ namespace GitOut.Features.Git.Log
             });
 
             AppendSelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit => entries.First(e => e.Event.Id == commit.Id).IsSelected = true);
+            CloseAutocompleteCommand = new CallbackCommand(() => IsSearchDisplayed = false);
+            ShowSearchFilesCommand = new CallbackCommand(() => IsSearchDisplayed = true);
         }
 
         public bool IncludeRemotes
@@ -133,6 +136,12 @@ namespace GitOut.Features.Git.Log
         {
             get => showSpacesAsDots;
             set => SetProperty(ref showSpacesAsDots, value);
+        }
+
+        public bool IsSearchDisplayed
+        {
+            get => isSearchDisplayed;
+            set => SetProperty(ref isSearchDisplayed, value);
         }
 
         public int ChangesCount
@@ -219,6 +228,8 @@ namespace GitOut.Features.Git.Log
         public ICommand CopySubjectCommand { get; }
         public ICommand SelectCommitCommand { get; }
         public ICommand AppendSelectCommitCommand { get; }
+        public ICommand CloseAutocompleteCommand { get; }
+        public ICommand ShowSearchFilesCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
