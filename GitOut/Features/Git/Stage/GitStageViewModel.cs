@@ -427,7 +427,7 @@ namespace GitOut.Features.Git.Stage
             {
                 SelectedWorkspaceIndex = previousIndex;
             }
-            else
+            else if (workspaceFiles.Count > 0)
             {
                 int index;
                 lock (workspaceFilesLock)
