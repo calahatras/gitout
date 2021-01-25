@@ -40,7 +40,7 @@ namespace GitOut.Features.Git.Diff
                     break;
                 case DiffLineType.None:
                 default:
-                    if (line[0] != ' ')
+                    if (line.Length > 0 && line[0] != ' ')
                     {
                         throw new InvalidOperationException($"Invalid start of line for ordinal {line}");
                     }

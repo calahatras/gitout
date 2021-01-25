@@ -16,7 +16,7 @@
             Style="{StaticResource MaterialTreeViewStyle}"
         >
             <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding Children}">
+                <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding}">
                     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                         <Canvas Width="24" Height="24" Margin="0 0 3 0">
                             <Canvas.LayoutTransform>
@@ -51,34 +51,6 @@
                             Data="{StaticResource SourceCommitLocal}"
                         />
                     </Canvas>
-                </DataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type files:GitDiffDirectoryViewModel}" ItemsSource="{Binding Children}">
-                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                        <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                            <Canvas.LayoutTransform>
-                                <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                            </Canvas.LayoutTransform>
-                            <Path
-                                Fill="{DynamicResource MaterialForegroundBase}"
-                                Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                            />
-                        </Canvas>
-                        <TextBlock Text="{Binding FileName}" />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type files:GitDiffFileViewModel}">
-                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                        <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                            <Canvas.LayoutTransform>
-                                <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                            </Canvas.LayoutTransform>
-                            <Path
-                                Fill="{DynamicResource MaterialForegroundBase}"
-                                Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                            />
-                        </Canvas>
-                        <TextBlock Text="{Binding FileName}" />
-                    </StackPanel>
                 </DataTemplate>
             </TreeView.Resources>
         </TreeView>

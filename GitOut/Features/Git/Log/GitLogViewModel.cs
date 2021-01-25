@@ -13,6 +13,7 @@ using GitOut.Features.Git.Stage;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
+using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Git.Log
 {
@@ -33,6 +34,7 @@ namespace GitOut.Features.Git.Log
 
         private int changesCount;
         private bool includeRemotes = true;
+        private bool showSpacesAsDots;
         private bool isStashesVisible = false;
         private LogViewMode viewMode = LogViewMode.None;
 
@@ -42,10 +44,12 @@ namespace GitOut.Features.Git.Log
         public GitLogViewModel(
             INavigationService navigation,
             ITitleService title,
-            ISnackbarService snack
+            ISnackbarService snack,
+            IOptionsMonitor<GitStageOptions> stagingOptions
         )
         {
             this.snack = snack;
+            showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             Repository = options.Repository;
@@ -125,6 +129,12 @@ namespace GitOut.Features.Git.Log
             }
         }
 
+        public bool ShowSpacesAsDots
+        {
+            get => showSpacesAsDots;
+            set => SetProperty(ref showSpacesAsDots, value);
+        }
+
         public int ChangesCount
         {
             get => changesCount;
@@ -177,7 +187,7 @@ namespace GitOut.Features.Git.Log
                 {
                     if (!(selectedContext is null))
                     {
-                        selectedContext.SwitchViewAsync(revisionViewMode);
+                        selectedContext.ViewMode = revisionViewMode;
                     }
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionAtCurrent)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionDiff)));

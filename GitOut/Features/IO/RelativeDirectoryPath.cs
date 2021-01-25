@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -6,6 +7,11 @@ namespace GitOut.Features.IO
 {
     public class RelativeDirectoryPath
     {
+        public const char GitDirectorySeparatorChar = '/';
+        public static readonly RelativeDirectoryPath Root = new RelativeDirectoryPath(string.Empty);
+
+        private readonly Lazy<RelativeDirectoryPath> parent;
+
         private RelativeDirectoryPath(string path)
         {
             char[] invalidCharacters = Path.GetInvalidPathChars();
@@ -19,9 +25,16 @@ namespace GitOut.Features.IO
             }
 
             Directory = path;
+            string[] segments = Directory.Trim(GitDirectorySeparatorChar).Split(GitDirectorySeparatorChar);
+            parent = new Lazy<RelativeDirectoryPath>(() => segments[..^1].Length == 0 ? Root : new RelativeDirectoryPath(string.Join(GitDirectorySeparatorChar, segments[..^1])));
+            Segments = segments;
+            Name = segments[^1] ?? string.Empty;
         }
 
+        public string Name { get; }
         public string Directory { get; }
+        public IReadOnlyCollection<string> Segments { get; }
+        public RelativeDirectoryPath Parent => parent.Value;
 
         public override string ToString() => Directory;
 

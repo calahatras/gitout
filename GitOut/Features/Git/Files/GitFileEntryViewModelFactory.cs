@@ -8,7 +8,7 @@ namespace GitOut.Features.Git.Files
     {
         public static async IAsyncEnumerable<IGitFileEntryViewModel> ListIdAsync(GitObjectId id, IGitRepository repository)
         {
-            await foreach (GitFileEntry file in repository.ExecuteListFilesAsync(id))
+            await foreach (GitFileEntry file in repository.ExecuteListTreeAsync(id))
             {
                 IGitFileEntryViewModel viewmodel = file.Type switch
                 {
@@ -26,13 +26,13 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = entry.FileType switch
                 {
-                    GitFileType.Tree => GitDiffDirectoryViewModel.Wrap(entry, (treeId, destinationId) => entry.Type switch
+                    GitFileType.Tree => GitDirectoryViewModel.Wrap(entry, (treeId, destinationId) => entry.Type switch
                     {
                         GitDiffType.Create => ListIdAsync(destinationId, repository),
                         GitDiffType.Delete => ListIdAsync(treeId, repository),
                         _ => DiffIdAsync(treeId, destinationId, repository)
                     }),
-                    GitFileType.Blob => GitDiffFileViewModel.Wrap(repository, entry),
+                    GitFileType.Blob => GitFileViewModel.Wrap(repository, entry),
                     _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {entry.FileType}", nameof(entry))
                 };
                 yield return viewmodel;
@@ -45,7 +45,7 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = entry.FileType switch
                 {
-                    GitFileType.Blob => GitDiffFileViewModel.Wrap(repository, entry),
+                    GitFileType.Blob => GitFileViewModel.Wrap(repository, entry),
                     _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {entry.FileType}", nameof(entry))
                 };
                 yield return viewmodel;

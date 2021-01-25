@@ -44,7 +44,7 @@ namespace GitOut.Features.Wpf.AttachedProperties
 
             foreach (object? item in listBox.SelectedItems)
             {
-                if (item == null || list.Contains(item))
+                if (item is null || list.Contains(item))
                 {
                     continue;
                 }

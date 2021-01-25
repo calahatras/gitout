@@ -9,7 +9,7 @@ namespace GitOut.Features.Git
     public interface IGitRepository
     {
         DirectoryPath WorkingDirectory { get; }
-        string? Name { get; }
+        string Name { get; }
 
         GitStatusResult? CachedStatus { get; }
 
@@ -24,7 +24,7 @@ namespace GitOut.Features.Git
         Task<GitDiffResult> ExecuteDiffAsync(GitFileId source, GitFileId target, DiffOptions options);
         Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options);
         Task<GitDiffResult> ExecuteUntrackedDiffAsync(RelativeDirectoryPath path);
-        IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id);
+        IAsyncEnumerable<GitFileEntry> ExecuteListTreeAsync(GitObjectId id, DiffOptions? options = default);
         Task<GitDiffResult> GetFileContentsAsync(GitFileId file);
 
         Task ExecuteAddAllAsync();
