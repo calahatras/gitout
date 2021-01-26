@@ -87,14 +87,14 @@ namespace GitOut.Features.Git.Log
             CopyCommitHashCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
                 gte => gte!.Root.Event.Id.Hash,
                 gte => !(gte is null),
-                TextDataFormat.Text,
+                TextDataFormat.UnicodeText,
                 data => snack.ShowSuccess("Copied hash to clipboard")
             );
 
             CopySubjectCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
                 gte => gte!.Subject,
                 gte => !(gte is null),
-                TextDataFormat.Text,
+                TextDataFormat.UnicodeText,
                 data => snack.ShowSuccess("Copied subject to clipboard")
             );
         }

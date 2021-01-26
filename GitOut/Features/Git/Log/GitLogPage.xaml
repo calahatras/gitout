@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
     xmlns:git="clr-namespace:GitOut.Features.Git"
+    xmlns:details="clr-namespace:GitOut.Features.Git.Details"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
@@ -412,6 +413,7 @@
             >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid Style="{StaticResource MaterialToolbarStyle}">
@@ -432,9 +434,15 @@
                         </ToggleButton>
                     </StackPanel>
                 </Grid>
+                <details:GitHistoryEventDetails
+                    Grid.Row="1"
+                    GitHistoryEvent="{Binding SelectedContext.Root.Event}"
+                    CopyHashCommand="{Binding CopyCommitHashCommand}"
+                    CopyHashCommandParameter="{Binding SelectedContext}"
+                />
                 <local:GitFileTree
                     x:Name="FileTree"
-                    Grid.Row="1"
+                    Grid.Row="2"
                     RootFiles="{Binding SelectedContext.RootFiles}"
                 />
             </Grid>
