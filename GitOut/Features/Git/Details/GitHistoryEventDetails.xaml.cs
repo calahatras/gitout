@@ -23,6 +23,18 @@ namespace GitOut.Features.Git.Details
             typeof(GitHistoryEventDetails)
         );
 
+        public static readonly DependencyProperty GoToParentCommandProperty = DependencyProperty.Register(
+            nameof(GoToParentCommand),
+            typeof(ICommand),
+            typeof(GitHistoryEventDetails)
+        );
+
+        public static readonly DependencyProperty GoToMergedParentCommandProperty = DependencyProperty.Register(
+            nameof(GoToMergedParentCommand),
+            typeof(ICommand),
+            typeof(GitHistoryEventDetails)
+        );
+
         public static readonly DependencyProperty CopyHashCommandParameterProperty = DependencyProperty.Register(
             "CopyHashCommandParameter",
             typeof(object),
@@ -51,6 +63,18 @@ namespace GitOut.Features.Git.Details
         {
             get => (ICommand)GetValue(CopyHashCommandProperty);
             set => SetValue(CopyHashCommandProperty, value);
+        }
+
+        public ICommand GoToParentCommand
+        {
+            get { return (ICommand)GetValue(GoToParentCommandProperty); }
+            set { SetValue(GoToParentCommandProperty, value); }
+        }
+
+        public ICommand GoToMergedParentCommand
+        {
+            get { return (ICommand)GetValue(GoToMergedParentCommandProperty); }
+            set { SetValue(GoToMergedParentCommandProperty, value); }
         }
 
         public object CopyHashCommandParameter

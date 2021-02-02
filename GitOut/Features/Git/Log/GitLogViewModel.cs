@@ -97,6 +97,46 @@ namespace GitOut.Features.Git.Log
                 TextDataFormat.UnicodeText,
                 data => snack.ShowSuccess("Copied subject to clipboard")
             );
+
+            GoToParentCommand = new CallbackCommand(() =>
+            {
+                if (selectedContext is null)
+                {
+                    return;
+                }
+
+                if (!(selectedContext.Root.Event.Parent?.Id is GitCommitId commitId))
+                {
+                    return;
+                }
+
+                ReSelectItem(selectedContext.Root, commitId);
+            });
+
+            GoToMergedParentCommand = new CallbackCommand(() =>
+            {
+                if (selectedContext is null)
+                {
+                    return;
+                }
+
+                if (!(selectedContext.Root.Event.MergedParent?.Id is GitCommitId commitId))
+                {
+                    return;
+                }
+
+                ReSelectItem(selectedContext.Root, commitId);
+            });
+
+            void ReSelectItem(GitTreeEvent root, GitCommitId commitId)
+            {
+                selectedLogEntries.Clear();
+                foreach (GitTreeEvent? entry in entries)
+                {
+                    entry.IsSelected = false;
+                }
+                entries.First(e => e.Event.Id == commitId).IsSelected = true;
+            }
         }
 
         public bool IncludeRemotes
@@ -193,6 +233,8 @@ namespace GitOut.Features.Git.Log
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
+        public ICommand GoToParentCommand { get; }
+        public ICommand GoToMergedParentCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

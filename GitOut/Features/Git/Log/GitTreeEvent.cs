@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Media;
 
 namespace GitOut.Features.Git.Log
 {
-    public class GitTreeEvent
+    public class GitTreeEvent : INotifyPropertyChanged
     {
         private static readonly List<AvailableColor> colors = new List<AvailableColor>
         {
@@ -21,8 +22,11 @@ namespace GitOut.Features.Git.Log
 
         private readonly List<GitTreeNode> nodes = new List<GitTreeNode>();
         private int commitIndex = -1;
+        private bool isSelected;
 
         public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public GitHistoryEvent Event { get; }
         public SolidColorBrush CommitBrush
@@ -36,6 +40,18 @@ namespace GitOut.Features.Git.Log
         }
 
         public IReadOnlyCollection<GitTreeNode> Nodes => nodes;
+
+        public bool IsSelected
+        {
+            get => isSelected;
+            set
+            {
+                if (isSelected == value) return;
+
+                isSelected = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+            }
+        }
 
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
 

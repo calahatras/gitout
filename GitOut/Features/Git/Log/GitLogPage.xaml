@@ -307,6 +307,15 @@
                     Style="{StaticResource GitLogListStyle}"
                     attached:BindableSelectedItems.SelectedItems="{Binding SelectedLogEntries}"
                 >
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate DataType="{x:Type local:GitTreeEvent}">
                             <Grid x:Name="outerGrid" Height="28">
@@ -439,6 +448,8 @@
                     GitHistoryEvent="{Binding SelectedContext.Root.Event}"
                     CopyHashCommand="{Binding CopyCommitHashCommand}"
                     CopyHashCommandParameter="{Binding SelectedContext}"
+                    GoToParentCommand="{Binding GoToParentCommand}"
+                    GoToMergedParentCommand="{Binding GoToMergedParentCommand}"
                 />
                 <local:GitFileTree
                     x:Name="FileTree"

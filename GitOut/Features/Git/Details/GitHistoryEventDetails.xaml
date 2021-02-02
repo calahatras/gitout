@@ -45,6 +45,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -139,5 +140,36 @@
             </Viewbox>
         </StackPanel>
 
+        <StackPanel
+            Orientation="Horizontal"
+            Grid.ColumnSpan="2"
+            Grid.Row="5"
+        >
+            <TextBlock
+                Style="{StaticResource DetailsBodyStyle}"
+                Text="{Binding GitHistoryEvent.Parent.Id, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+            >
+                <TextBlock.InputBindings>
+                    <MouseBinding
+                        MouseAction="LeftClick"
+                        Command="{Binding GoToParentCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                    />
+                </TextBlock.InputBindings>
+            </TextBlock>
+
+            <TextBlock
+                Grid.Row="8"
+                Grid.Column="1"
+                Style="{StaticResource DetailsBodyStyle}"
+                Text="{Binding GitHistoryEvent.MergedParent.Id, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+            >
+                <TextBlock.InputBindings>
+                    <MouseBinding
+                        MouseAction="LeftClick"
+                        Command="{Binding GoToMergedParentCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                    />
+                </TextBlock.InputBindings>
+            </TextBlock>
+        </StackPanel>
     </Grid>
 </UserControl>
