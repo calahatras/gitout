@@ -84,18 +84,20 @@ namespace GitOut.Features.Git.Log
                 text => snack.ShowSuccess("Copied path to clipboard")
             );
 
-            CopyCommitHashCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
-                gte => gte!.Root.Event.Id.Hash,
-                gte => !(gte is null),
+            CopyCommitHashCommand = new CopyTextToClipBoardCommand<GitHistoryEvent?>(
+                ghe => ghe!.Id.Hash,
+                ghe => !(ghe is null),
                 TextDataFormat.UnicodeText,
-                data => snack.ShowSuccess("Copied hash to clipboard")
+                data => snack.ShowSuccess("Copied hash to clipboard"),
+                data => snack.ShowError(data.Message, data)
             );
 
             CopySubjectCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
                 gte => gte!.Subject,
                 gte => !(gte is null),
                 TextDataFormat.UnicodeText,
-                data => snack.ShowSuccess("Copied subject to clipboard")
+                data => snack.ShowSuccess("Copied subject to clipboard"),
+                data => snack.ShowError(data.Message, data)
             );
 
             GoToParentCommand = new CallbackCommand(() =>
