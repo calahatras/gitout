@@ -100,45 +100,18 @@ namespace GitOut.Features.Git.Log
                 data => snack.ShowError(data.Message, data)
             );
 
-            GoToParentCommand = new CallbackCommand(() =>
-            {
-                if (selectedContext is null)
-                {
-                    return;
-                }
-
-                if (!(selectedContext.Root.Event.Parent?.Id is GitCommitId commitId))
-                {
-                    return;
-                }
-
-                ReSelectItem(selectedContext.Root, commitId);
-            });
-
-            GoToMergedParentCommand = new CallbackCommand(() =>
-            {
-                if (selectedContext is null)
-                {
-                    return;
-                }
-
-                if (!(selectedContext.Root.Event.MergedParent?.Id is GitCommitId commitId))
-                {
-                    return;
-                }
-
-                ReSelectItem(selectedContext.Root, commitId);
-            });
-
-            void ReSelectItem(GitTreeEvent root, GitCommitId commitId)
+            SelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit =>
             {
                 selectedLogEntries.Clear();
                 foreach (GitTreeEvent? entry in entries)
                 {
                     entry.IsSelected = false;
                 }
-                entries.First(e => e.Event.Id == commitId).IsSelected = true;
-            }
+
+                GitTreeEvent gitTreeEvent = entries.First(e => e.Event.Id == commit.Id);
+                gitTreeEvent.IsSelected = true;
+                selectedLogEntries.Add(gitTreeEvent);
+            });
         }
 
         public bool IncludeRemotes
@@ -235,8 +208,7 @@ namespace GitOut.Features.Git.Log
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
-        public ICommand GoToParentCommand { get; }
-        public ICommand GoToMergedParentCommand { get; }
+        public ICommand SelectCommitCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

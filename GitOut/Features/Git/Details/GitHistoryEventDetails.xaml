@@ -5,39 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:GitOut.Features.Git.Details"
              xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
-             xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <converters:NullToVisibilityMultiConverter x:Key="NullToVisibilityMultiConverter" />
         <converters:NullOrEmptyToCollapsedConverter x:Key="NullOrEmptyToCollapsedConverter" />
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <converters:SubstringConverter x:Key="GitCommitSubstringConverter" />
-        <Style x:Key="DetailsHeaderStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource NormalTextStyle}">
-            <Setter Property="Margin" Value="8 4" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
-            <Setter Property="TextAlignment" Value="Left" />
-        </Style>
-        <Style x:Key="DetailsBodyStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource NormalTextStyle}">
-            <Setter Property="Margin" Value="0 4" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
-            <Setter Property="FontSize" Value="14" />
-        </Style>
-        <DataTemplate x:Key="DefaultBranchTemplate">
-            <Border
-                BorderThickness="0"
-                CornerRadius="4"
-                Padding="4 2"
-                Background="{DynamicResource MaterialBackgroundBackground}"
-            >
-            <TextBlock
-                FontSize="10"
-                Text="{Binding Name}"
-            />
-            </Border>
-        </DataTemplate>
     </UserControl.Resources>
 
     <Grid
@@ -49,182 +23,310 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*" MinHeight="30" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
- 
 
-        <TextBlock
+        <!-- first row -->
+        <Grid
             Grid.Row="0"
-            Text="Author:"
-            Style="{StaticResource DetailsHeaderStyle}"
-        />
-        <TextBlock
-            Grid.Row="0"
-            Grid.Column="1"
-            Style="{StaticResource DetailsBodyStyle}"
+            Margin="16 0 0 0"
         >
-            <!-- this weird syntax is due to WPF interpreting new lines as a white space -->
-            <Run Text="{Binding
-                GitHistoryEvent.Author.Name,
-                Mode=OneWay,
-                RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-            /> <Run Text="&lt;" /><Run Text="{Binding
-                GitHistoryEvent.Author.Email,
-                Mode=OneWay,
-                RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-            /><Run Text="&gt;" />
-        </TextBlock>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                FontSize="16"
+                ToolTip="Author"
+                Text="{Binding
+                    GitHistoryEvent.Author.Name,
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            />
+            <TextBlock
+                Grid.Row="1"
+                FontSize="12"
+                Text="{Binding
+                    GitHistoryEvent.Author.Email,
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            />
+            <TextBlock
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Margin="0 0 16 0"
+                HorizontalAlignment="Right"
+                FontSize="12"
+                ToolTip="Author Date"
+                Text="{Binding
+                    GitHistoryEvent.AuthorDate,
+                    StringFormat=G,
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            />
+        </Grid>
 
-        <TextBlock
+        <!-- second row -->
+        <Grid
             Grid.Row="1"
-            Text="Date:"
-            Style="{StaticResource DetailsHeaderStyle}"
-        />
-        <TextBlock
-            Grid.Row="1"
-            Grid.Column="1"
-            Text="{Binding GitHistoryEvent.AuthorDate,StringFormat=G, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-            Style="{StaticResource DetailsBodyStyle}"
-        />
-
-        <TextBlock
-            Grid.Row="2"
-            Text="Sha:"
-            VerticalAlignment="Center"
-            Style="{StaticResource DetailsHeaderStyle}"
-        />
-
-        <wpf:CopyableCommandText
-            Grid.Row="2"
-            Grid.Column="1"
-            FontFamily="Cascadia Code"
-            Text="{Binding
-                GitHistoryEvent.Id.Hash,
-                Converter={StaticResource GitCommitSubstringConverter},
-                ConverterParameter=7,
-                RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-            ToolTip="{Binding GitHistoryEvent.Id.Hash, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-            TextStyle="{StaticResource DetailsBodyStyle}"
-            CopyCommand="{Binding CopyHashCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-            CopyCommandParameter="{Binding GitHistoryEvent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-        />
-
-        <TextBlock
-            Grid.Row="3"
-            Text="Parents:"
-            Style="{StaticResource DetailsHeaderStyle}"
-            
         >
-            <TextBlock.Visibility>
-                <MultiBinding Converter="{StaticResource NullToVisibilityMultiConverter}">
-                    <Binding
-                        Path="GitHistoryEvent.Parent"
-                        RelativeSource="{RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}"
-                    />
-                    <Binding
-                        Path="GitHistoryEvent.MergedParent"
-                        RelativeSource="{RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}"
-                    />
-                </MultiBinding>
-            </TextBlock.Visibility>
-        </TextBlock>
-        <StackPanel
-            Orientation="Horizontal"
+            <ItemsControl
+                Margin="0 0 14 0"
+                HorizontalAlignment="Right"
+                ItemsSource="{Binding
+                    GitHistoryEvent.Branches,
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            >
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            BorderThickness="0"
+                            CornerRadius="4"
+                            Padding="4 2"
+                            Margin="2"
+                            Background="{DynamicResource MaterialBackgroundBackground}"
+                        >
+                            <TextBlock
+                            FontSize="12"
+                            Text="{Binding Name}"
+                        />
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+        <!-- third row: shas -->
+        <Grid
             Grid.Row="3"
-            Grid.Column="1"
+            Margin="12 8 0 0"
         >
-            <wpf:CopyableCommandText
-                Margin="0 0 8 0"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Viewbox
+                Width="20"
+                Height="20"
+            >
+                <Path
+                    Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                    Data="{StaticResource SourceBranch}"
+                />
+            </Viewbox>
+            <TextBlock
+                Grid.Column="1"
+                Margin="4 0 0 0"
                 FontFamily="Cascadia Code"
+                FontSize="14"
+                VerticalAlignment="Center"
+                ToolTip="Current commit"
+                Text="{Binding
+                    GitHistoryEvent.Id.Hash,
+                    Converter={StaticResource GitCommitSubstringConverter},
+                    ConverterParameter=7,
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            />
+            <Viewbox
+                Grid.Column="2"
+                Height="24"
+                Width="24"
+                VerticalAlignment="Center"
+            >
+                <Button
+                    Focusable="False"
+                    Padding="0"
+                    Margin="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Height="24"
+                    Command="{Binding
+                        CopyHashCommand,
+                        RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                    }"
+                    CommandParameter="{Binding
+                        GitHistoryEvent,
+                        RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                    }"
+                    Style="{StaticResource MaterialButtonStyle}"
+                >
+                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}" />
+                </Button>
+            </Viewbox>
+
+            <TextBlock
+                Grid.Column="3"
+                Margin="24 0 0 0"
+                FontSize="14"
+                FontFamily="Cascadia Code"
+                Foreground="{DynamicResource MaterialForegroundBase}"
+                VerticalAlignment="Center"
+                ToolTip="Parent"
                 Visibility="{Binding
                     GitHistoryEvent.Parent,
                     Converter={StaticResource NullToVisibilityConverter},
                     RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
                 }"
-                RouteCommand="{Binding GoToParentCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-                CopyCommand="{Binding CopyHashCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-                CopyCommandParameter="{Binding GitHistoryEvent.Parent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
                 Text="{Binding 
                     GitHistoryEvent.Parent.Id.Hash,
                     Converter={StaticResource GitCommitSubstringConverter},
                     ConverterParameter=7,
                     RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
                 }"
-                TextStyle="{StaticResource DetailsBodyStyle}"
-            />
-            <wpf:CopyableCommandText
-                FontFamily="Cascadia Code"
+            >
+                <TextBlock.InputBindings>
+                    <MouseBinding
+                        MouseAction="LeftClick"
+                        Command="{Binding GoToCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                        CommandParameter="{Binding GitHistoryEvent.Parent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                    />
+                </TextBlock.InputBindings>
+            </TextBlock>
+            <Viewbox
+                Grid.Column="4"
+                Height="24"
+                Width="24"
+                VerticalAlignment="Center"
+                Visibility="{Binding
+                    GitHistoryEvent.Parent,
+                    Converter={StaticResource NullToVisibilityConverter},
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            >
+                <Button
+                    Focusable="False"
+                    Padding="0"
+                    Margin="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Height="24"
+                    Command="{Binding
+                        CopyHashCommand,
+                        RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                    }"
+                    CommandParameter="{Binding
+                        GitHistoryEvent.Parent,
+                        RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                    }"
+                    Style="{StaticResource MaterialButtonStyle}"
+                >
+                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}" />
+                </Button>
+            </Viewbox>
 
+            <TextBlock
+                Grid.Column="5"
+                Margin="4 0 0 0"
+                FontSize="14"
+                FontFamily="Cascadia Code"
+                Foreground="{DynamicResource MaterialForegroundBase}"
+                VerticalAlignment="Center"
+                ToolTip="Parent"
                 Visibility="{Binding
                     GitHistoryEvent.MergedParent,
                     Converter={StaticResource NullToVisibilityConverter},
                     RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
                 }"
-                RouteCommand="{Binding GoToMergedParentCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-                CopyCommand="{Binding CopyHashCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-                CopyCommandParameter="{Binding GitHistoryEvent.MergedParent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
                 Text="{Binding 
                     GitHistoryEvent.MergedParent.Id.Hash,
                     Converter={StaticResource GitCommitSubstringConverter},
                     ConverterParameter=7,
                     RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
                 }"
-                TextStyle="{StaticResource DetailsBodyStyle}"
-            />
-        </StackPanel>
-
-
-        <TextBlock
-            Grid.Row="4"
-            Text="Branches:"
-            VerticalAlignment="Center"
-            Style="{StaticResource DetailsHeaderStyle}"
-        />
-        <ItemsControl
-            Grid.Row="4"
-            Grid.Column="1"
-            Grid.ColumnSpan="2"
-            Margin="0 4"
-            ItemsSource="{Binding GitHistoryEvent.Branches, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-            ItemTemplate="{Binding BranchTemplate, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-        >
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
+            >
+                <TextBlock.InputBindings>
+                    <MouseBinding
+                        MouseAction="LeftClick"
+                        Command="{Binding GoToCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                        CommandParameter="{Binding GitHistoryEvent.MergedParent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                    />
+                </TextBlock.InputBindings>
+            </TextBlock>
+            <Viewbox
+                Grid.Column="6"
+                Height="24"
+                Width="24"
+                VerticalAlignment="Center"
+                Visibility="{Binding
+                    GitHistoryEvent.MergedParent,
+                    Converter={StaticResource NullToVisibilityConverter},
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            >
+                <Button
+                    Focusable="False"
+                    Padding="0"
+                    Margin="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Height="24"
+                    Command="{Binding
+                        CopyHashCommand,
+                        RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                    }"
+                    CommandParameter="{Binding
+                        GitHistoryEvent.MergedParent,
+                        RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                    }"
+                    Style="{StaticResource MaterialButtonStyle}"
+                >
+                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}" />
+                </Button>
+            </Viewbox>
+        </Grid>
         
-        <TextBlock
-            Grid.Row="6"
-            Grid.ColumnSpan="3"
-            Text="Details:"
-            VerticalAlignment="Center"
-            Style="{StaticResource DetailsHeaderStyle}"
-        />
-        <Border
-            Grid.Row="7"
-            Grid.ColumnSpan="4"
-            BorderThickness="0 0 0 0"
-            CornerRadius="2"
-            Margin="8 0"
-            BorderBrush="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+        <!-- third row: subject -->
+        <Grid
+            Grid.Row="4"
+            Margin="16 8 16 0"
         >
-            <TextBlock
-                Margin="8 4"
-                Text="{Binding GitHistoryEvent.Body, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
-                Style="{StaticResource DetailsBodyStyle}"
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border
+                Grid.Row="0"
+                Margin="0 4 0 8"
+                Height="1"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource MaterialForegroundBase}"
+                HorizontalAlignment="Stretch"
             />
-
-        </Border>
-
+            <TextBlock
+                Grid.Row="1"
+                FontSize="16"
+                Text="{Binding
+                    GitHistoryEvent.Subject,
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            />
+            <TextBlock
+                Grid.Row="2"
+                FontSize="14"
+                Text="{Binding
+                    GitHistoryEvent.Body,
+                    RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}
+                }"
+            />
+            
+        </Grid>
     </Grid>
 </UserControl>

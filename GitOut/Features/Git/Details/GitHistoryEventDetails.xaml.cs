@@ -5,53 +5,25 @@ namespace GitOut.Features.Git.Details
 {
     public partial class GitHistoryEventDetails
     {
-        public static readonly DependencyProperty BranchTemplateProperty = DependencyProperty.Register(
-            "BranchTemplate",
-            typeof(DataTemplate),
-            typeof(GitHistoryEventDetails)
-        );
-
         public static readonly DependencyProperty GitHistoryEventProperty = DependencyProperty.Register(
-            "GitHistoryEvent",
+            nameof(GitHistoryEvent),
             typeof(GitHistoryEvent),
             typeof(GitHistoryEventDetails)
         );
 
         public static readonly DependencyProperty CopyHashCommandProperty = DependencyProperty.Register(
-            "CopyHashCommand",
+            nameof(CopyHashCommand),
             typeof(ICommand),
             typeof(GitHistoryEventDetails)
         );
 
-        public static readonly DependencyProperty GoToParentCommandProperty = DependencyProperty.Register(
-            nameof(GoToParentCommand),
+        public static readonly DependencyProperty GoToCommitCommandProperty = DependencyProperty.Register(
+            nameof(GoToCommitCommand),
             typeof(ICommand),
             typeof(GitHistoryEventDetails)
         );
 
-        public static readonly DependencyProperty GoToMergedParentCommandProperty = DependencyProperty.Register(
-            nameof(GoToMergedParentCommand),
-            typeof(ICommand),
-            typeof(GitHistoryEventDetails)
-        );
-
-        public static readonly DependencyProperty CopyHashCommandParameterProperty = DependencyProperty.Register(
-            "CopyHashCommandParameter",
-            typeof(object),
-            typeof(GitHistoryEventDetails)
-        );
-
-        public GitHistoryEventDetails()
-        {
-            InitializeComponent();
-            BranchTemplate = (DataTemplate)Resources["DefaultBranchTemplate"];
-        }
-
-        public DataTemplate BranchTemplate
-        {
-            get => (DataTemplate)GetValue(BranchTemplateProperty);
-            set => SetValue(BranchTemplateProperty, value);
-        }
+        public GitHistoryEventDetails() => InitializeComponent();
 
         public GitHistoryEvent GitHistoryEvent
         {
@@ -65,22 +37,10 @@ namespace GitOut.Features.Git.Details
             set => SetValue(CopyHashCommandProperty, value);
         }
 
-        public ICommand GoToParentCommand
+        public ICommand GoToCommitCommand
         {
-            get { return (ICommand)GetValue(GoToParentCommandProperty); }
-            set { SetValue(GoToParentCommandProperty, value); }
-        }
-
-        public ICommand GoToMergedParentCommand
-        {
-            get { return (ICommand)GetValue(GoToMergedParentCommandProperty); }
-            set { SetValue(GoToMergedParentCommandProperty, value); }
-        }
-
-        public object CopyHashCommandParameter
-        {
-            get => GetValue(CopyHashCommandParameterProperty);
-            set => SetValue(CopyHashCommandParameterProperty, value);
+            get => (ICommand)GetValue(GoToCommitCommandProperty);
+            set => SetValue(GoToCommitCommandProperty, value);
         }
     }
 }

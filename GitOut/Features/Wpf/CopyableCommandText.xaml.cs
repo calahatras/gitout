@@ -63,8 +63,8 @@ namespace GitOut.Features.Wpf
         }
         public MouseAction RouteAction
         {
-            get { return (MouseAction)GetValue(RouteActionProperty); }
-            set { SetValue(RouteActionProperty, value); }
+            get => (MouseAction)GetValue(RouteActionProperty);
+            set => SetValue(RouteActionProperty, value);
         }
         public ICommand RouteCommand
         {
