@@ -8,8 +8,13 @@ namespace GitOut.Features.Git.Diff
     {
         public const string HunkIdentifier = "@@";
 
-        private GitDiffHunk(IEnumerable<HunkLine> lines) => Lines = lines;
+        private GitDiffHunk(HunkLine header, IEnumerable<HunkLine> lines)
+        {
+            Header = header;
+            Lines = lines;
+        }
 
+        public HunkLine Header { get; }
         public IEnumerable<HunkLine> Lines { get; }
 
         public static GitDiffHunk Parse(IEnumerable<string> lines)
@@ -31,20 +36,21 @@ namespace GitOut.Features.Git.Diff
                 int to = int.Parse(toFileRange[0][1..]);
                 var headLine = HunkLine.AsHead(head, from, to);
 
-                var hunks = new[] { headLine }
-                    .Concat(lines.Skip(1).Select(line => line[0] switch
+                var hunks = lines
+                    .Skip(1)
+                    .Select(line => line[0] switch
                     {
                         '+' => HunkLine.AsAdded(line, to++),
                         '-' => HunkLine.AsRemoved(line, from++),
                         '\\' => HunkLine.AsControl(line, from++, to++),
                         _ => HunkLine.AsLine(line, from++, to++)
-                    }))
+                    })
                     .ToList();
-                return new GitDiffHunk(hunks);
+                return new GitDiffHunk(headLine, hunks);
             }
             else if (head.StartsWith("Binary files "))
             {
-                return new GitDiffHunk(new[] { HunkLine.AsLine($" {head}", 0, 0) });
+                return new GitDiffHunk(HunkLine.Empty, new[] { HunkLine.AsLine($" {head}", 0, 0) });
             }
 
             throw new ArgumentException("Lines are not a valid diff hunk", nameof(hunk));

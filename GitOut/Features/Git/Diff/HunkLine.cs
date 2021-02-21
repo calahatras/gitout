@@ -4,6 +4,8 @@ namespace GitOut.Features.Git.Diff
 {
     public class HunkLine
     {
+        public static readonly HunkLine Empty = new HunkLine(DiffLineType.None, string.Empty, null, null);
+
         private HunkLine(DiffLineType type, string line, int? fromIndex, int? toIndex)
         {
             switch (type)
