@@ -21,8 +21,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" MinHeight="30" />
         </Grid.RowDefinitions>
 
@@ -70,7 +68,7 @@
             />
         </Grid>
 
-        <!-- second row -->
+        <!-- second row, right column -->
         <Grid
             Grid.Row="1"
         >
@@ -106,9 +104,9 @@
             </ItemsControl>
         </Grid>
 
-        <!-- third row: shas -->
+        <!-- second row: left column -->
         <Grid
-            Grid.Row="3"
+            Grid.Row="1"
             Margin="12 8 0 0"
         >
             <Grid.ColumnDefinitions>
@@ -179,6 +177,7 @@
                 Foreground="{DynamicResource MaterialForegroundBase}"
                 VerticalAlignment="Center"
                 ToolTip="Parent"
+                Cursor="Hand"
                 Visibility="{Binding
                     GitHistoryEvent.Parent,
                     Converter={StaticResource NullToVisibilityConverter},
@@ -238,7 +237,8 @@
                 FontFamily="Cascadia Code"
                 Foreground="{DynamicResource MaterialForegroundBase}"
                 VerticalAlignment="Center"
-                ToolTip="Parent"
+                ToolTip="Right Parent"
+                Cursor="Hand"
                 Visibility="{Binding
                     GitHistoryEvent.MergedParent,
                     Converter={StaticResource NullToVisibilityConverter},
@@ -294,7 +294,7 @@
         
         <!-- third row: subject -->
         <Grid
-            Grid.Row="4"
+            Grid.Row="2"
             Margin="16 8 16 0"
         >
             <Grid.RowDefinitions>
