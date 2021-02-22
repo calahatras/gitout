@@ -115,7 +115,6 @@ namespace GitOut.Features.Git.Log
                 GitTreeEvent gitTreeEvent = entries.First(e => e.Event.Id == commit.Id);
                 isUpdating = false;
                 gitTreeEvent.IsSelected = true;
-                selectedLogEntries.Add(gitTreeEvent);
             });
         }
 
