@@ -448,7 +448,7 @@
                     ItemsSource="{Binding SelectedLogEntries}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <UniformGrid />
+                            <UniformGrid Rows="1" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
