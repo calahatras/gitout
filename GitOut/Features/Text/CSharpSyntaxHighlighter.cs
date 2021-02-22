@@ -43,6 +43,8 @@ namespace GitOut.Features.Text
             "this",
             "params",
             "lock",
+            "nameof",
+            "typeof",
             "bool",
             "true",
             "false",
