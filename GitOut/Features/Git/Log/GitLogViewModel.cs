@@ -34,6 +34,7 @@ namespace GitOut.Features.Git.Log
         private int changesCount;
         private bool includeRemotes = true;
         private bool isStashesVisible = false;
+        private bool isUpdating = false;
         private LogViewMode viewMode = LogViewMode.None;
 
         private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
@@ -66,6 +67,8 @@ namespace GitOut.Features.Git.Log
 
             selectedLogEntries.CollectionChanged += (sender, args) =>
             {
+                if (isUpdating) return;
+
                 SelectedContext = LogEntriesViewModel.CreateContext(selectedLogEntries, Repository, RevisionViewMode);
                 ViewMode = SelectedContext is null
                     ? LogViewMode.None
@@ -102,6 +105,7 @@ namespace GitOut.Features.Git.Log
 
             SelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit =>
             {
+                isUpdating = true;
                 selectedLogEntries.Clear();
                 foreach (GitTreeEvent? entry in entries)
                 {
@@ -109,6 +113,7 @@ namespace GitOut.Features.Git.Log
                 }
 
                 GitTreeEvent gitTreeEvent = entries.First(e => e.Event.Id == commit.Id);
+                isUpdating = false;
                 gitTreeEvent.IsSelected = true;
                 selectedLogEntries.Add(gitTreeEvent);
             });
