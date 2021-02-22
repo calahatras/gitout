@@ -23,6 +23,12 @@ namespace GitOut.Features.Git.Details
             typeof(GitHistoryEventDetails)
         );
 
+        public static readonly DependencyProperty AppendSelectCommitCommandProperty = DependencyProperty.Register(
+            nameof(AppendSelectCommitCommand),
+            typeof(ICommand),
+            typeof(GitHistoryEventDetails)
+        );
+
         public GitHistoryEventDetails() => InitializeComponent();
 
         public GitHistoryEvent GitHistoryEvent
@@ -41,6 +47,12 @@ namespace GitOut.Features.Git.Details
         {
             get => (ICommand)GetValue(GoToCommitCommandProperty);
             set => SetValue(GoToCommitCommandProperty, value);
+        }
+
+        public ICommand AppendSelectCommitCommand
+        {
+            get => (ICommand)GetValue(AppendSelectCommitCommandProperty);
+            set => SetValue(AppendSelectCommitCommandProperty, value);
         }
     }
 }

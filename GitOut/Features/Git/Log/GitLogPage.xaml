@@ -457,6 +457,7 @@
                                 GitHistoryEvent="{Binding Event}"
                                 CopyHashCommand="{Binding DataContext.CopyCommitHashCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
                                 GoToCommitCommand="{Binding DataContext.GoToCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                                AppendSelectCommitCommand="{Binding DataContext.AppendSelectCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
                             />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

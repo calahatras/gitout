@@ -196,6 +196,11 @@
                         Command="{Binding GoToCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
                         CommandParameter="{Binding GitHistoryEvent.Parent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
                     />
+                    <MouseBinding
+                        Gesture="Ctrl+LeftClick"
+                        Command="{Binding AppendSelectCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                        CommandParameter="{Binding GitHistoryEvent.Parent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                    />
                 </TextBlock.InputBindings>
             </TextBlock>
             <Viewbox
@@ -255,6 +260,11 @@
                     <MouseBinding
                         MouseAction="LeftClick"
                         Command="{Binding GoToCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                        CommandParameter="{Binding GitHistoryEvent.MergedParent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
+                    />
+                    <MouseBinding
+                        Gesture="Ctrl+LeftClick"
+                        Command="{Binding AppendSelectCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
                         CommandParameter="{Binding GitHistoryEvent.MergedParent, RelativeSource={RelativeSource AncestorType={x:Type local:GitHistoryEventDetails}}}"
                     />
                 </TextBlock.InputBindings>

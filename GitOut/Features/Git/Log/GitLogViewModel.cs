@@ -116,6 +116,8 @@ namespace GitOut.Features.Git.Log
                 isUpdating = false;
                 gitTreeEvent.IsSelected = true;
             });
+
+            AppendSelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit => entries.First(e => e.Event.Id == commit.Id).IsSelected = true);
         }
 
         public bool IncludeRemotes
@@ -213,6 +215,7 @@ namespace GitOut.Features.Git.Log
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
         public ICommand SelectCommitCommand { get; }
+        public ICommand AppendSelectCommitCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
