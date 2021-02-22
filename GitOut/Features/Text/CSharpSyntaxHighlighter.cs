@@ -81,8 +81,8 @@ namespace GitOut.Features.Text
         };
 
         private static readonly Regex KeywordRegex = new Regex($"\\b({string.Join("|", Keywords)})\\b", RegexOptions.Compiled);
-        private static readonly Regex controlKeywordRegex = new Regex($"\\b({string.Join("|", ControlKeywords)})\\b", RegexOptions.Compiled);
-        private static readonly Regex stringRegex = new Regex("\"(.)+?(?<!\\\\)\"", RegexOptions.Compiled);
+        private static readonly Regex ControlKeywordRegex = new Regex($"\\b({string.Join("|", ControlKeywords)})\\b", RegexOptions.Compiled);
+        private static readonly Regex StringRegex = new Regex("\"(.)+?(?<!\\\\)\"", RegexOptions.Compiled);
 
         public IEnumerable<Paragraph> Highlight(IEnumerable<string> document, ILineDecorator decorator) => document.Select((line, index) =>
         {
@@ -99,8 +99,8 @@ namespace GitOut.Features.Text
                 yield return new Run();
             }
             IReadOnlyCollection<Match> keywordMatch = KeywordRegex.Matches(line);
-            IReadOnlyCollection<Match> controlKeywordMatch = controlKeywordRegex.Matches(line);
-            IReadOnlyCollection<Match> stringMatch = stringRegex.Matches(line);
+            IReadOnlyCollection<Match> controlKeywordMatch = ControlKeywordRegex.Matches(line);
+            IReadOnlyCollection<Match> stringMatch = StringRegex.Matches(line);
 
             // join collections and remove invalid (e.g. keywords in string)
             IEnumerable<IDecoratedMatch> matches = Join(
