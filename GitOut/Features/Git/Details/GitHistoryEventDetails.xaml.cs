@@ -17,8 +17,8 @@ namespace GitOut.Features.Git.Details
             typeof(GitHistoryEventDetails)
         );
 
-        public static readonly DependencyProperty GoToCommitCommandProperty = DependencyProperty.Register(
-            nameof(GoToCommitCommand),
+        public static readonly DependencyProperty SelectCommitCommandProperty = DependencyProperty.Register(
+            nameof(SelectCommitCommand),
             typeof(ICommand),
             typeof(GitHistoryEventDetails)
         );
@@ -43,10 +43,10 @@ namespace GitOut.Features.Git.Details
             set => SetValue(CopyHashCommandProperty, value);
         }
 
-        public ICommand GoToCommitCommand
+        public ICommand SelectCommitCommand
         {
-            get => (ICommand)GetValue(GoToCommitCommandProperty);
-            set => SetValue(GoToCommitCommandProperty, value);
+            get => (ICommand)GetValue(SelectCommitCommandProperty);
+            set => SetValue(SelectCommitCommandProperty, value);
         }
 
         public ICommand AppendSelectCommitCommand

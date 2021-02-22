@@ -115,7 +115,7 @@ namespace GitOut
         {
             if (Debugger.IsAttached)
             {
-                    //Debugger.Break();
+                Debugger.Break();
             }
         }
     }
