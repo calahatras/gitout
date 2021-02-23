@@ -1,0 +1,107 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+
+namespace GitOut.Features.Wpf
+{
+    public class CompositeCommand : ICommand
+    {
+        private readonly List<(Action action, Func<bool> canAction)> actions = new List<(Action action, Func<bool> canAction)>();
+        private readonly List<(Func<Task> asyncAction, Func<bool> canAction)> tasks = new List<(Func<Task> asyncAction, Func<bool> canAction)>();
+
+        public CompositeCommand() { }
+
+        public CompositeCommand(Action action) => Add(action);
+
+        public CompositeCommand(Action action, Func<bool> canAction) => Add(action, canAction);
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+
+        public void AddAsync(Func<Task> asyncAction, Func<bool> canAction) => tasks.Add((asyncAction, canAction));
+
+        public void Add(Action action) => actions.Add((action, () => true));
+
+        public void Add(Action action, Func<bool> canAction) => actions.Add((action, canAction));
+
+        public bool CanExecute(object parameter) => actions.Any(a => a.canAction());
+
+        public async void Execute(object parameter)
+        {
+            foreach ((Action action, Func<bool> canAction) in actions)
+            {
+                if (canAction())
+                {
+                    action();
+                }
+            }
+            await ExecuteAsync();
+        }
+
+        private async Task ExecuteAsync()
+        {
+            foreach ((Func<Task> actionAsync, Func<bool> canAction) in tasks)
+            {
+                if (canAction())
+                {
+                    await actionAsync();
+                }
+            }
+        }
+
+        public void RaiseExecuteChanged() => CommandManager.InvalidateRequerySuggested();
+    }
+
+    public class CompositeCommand<T> : ICommand
+    {
+        private readonly List<(Action<T> action, Func<T, bool> canAction)> actions = new List<(Action<T> action, Func<T, bool> canAction)>();
+        private readonly List<(Func<T, Task> actionAsync, Func<T, bool> canAction)> tasks = new List<(Func<T, Task> actionAsync, Func<T, bool> canAction)>();
+
+        public CompositeCommand() { }
+
+        public CompositeCommand(Action<T> action) : this() => Add(action);
+
+        public CompositeCommand(Action<T> action, Func<T, bool> canAction) : this() => Add(action, canAction);
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+
+        public void Add(Action<T> action) => actions.Add((action, _ => true));
+
+        public void Add(Action<T> action, Func<T, bool> canAction) => actions.Add((action, canAction));
+
+        public void AddAsync(Func<T, Task> asyncaction, Func<T, bool> canAction) => tasks.Add((asyncaction, canAction));
+
+        public bool CanExecute(object parameter) => actions.Any(a => a.canAction((T)parameter)) || tasks.Any(a => a.canAction((T)parameter));
+
+        public async void Execute(object parameter)
+        {
+            if (!(parameter is T arg)) throw new ArgumentException(nameof(parameter));
+
+            await ExecuteAsync(arg);
+        }
+
+        private async Task ExecuteAsync(T parameter)
+        {
+            foreach ((Action<T> action, Func<T, bool> canAction) in actions)
+            {
+                if (canAction(parameter))
+                {
+                    action(parameter);
+                }
+            }
+
+            await Task.WhenAll(tasks.Where(t => t.canAction(parameter)).Select(t => t.actionAsync(parameter)));
+        }
+
+        public void RaiseExecuteChanged() => CommandManager.InvalidateRequerySuggested();
+    }
+}

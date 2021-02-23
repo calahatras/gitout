@@ -8,6 +8,7 @@
     xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d" 
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -76,7 +77,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding NavigateBackCommand}" ToolTip="Back">
+            <Button
+                Style="{StaticResource MaterialButtonStyle}"
+                Command="{x:Static wpfcommands:Navigate.Back}"
+                ToolTip="Back"
+            >
                 <Path Height="24" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowLeft}"/>
             </Button>
             <TextBlock Grid.Column="1" Text="Stage" Style="{StaticResource MaterialToolbarHeaderStyle}"/>

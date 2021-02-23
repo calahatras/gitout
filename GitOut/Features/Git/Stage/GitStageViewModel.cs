@@ -63,7 +63,6 @@ namespace GitOut.Features.Git.Stage
             BindingOperations.EnableCollectionSynchronization(indexFiles, indexFilesLock);
             IndexFiles = CollectionViewSource.GetDefaultView(indexFiles);
 
-            NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
             RefreshStatusCommand = new AsyncCallbackCommand(GetRepositoryStatusAsync);
             CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage) && indexFiles.Count > 0);
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
@@ -167,7 +166,6 @@ namespace GitOut.Features.Git.Stage
         public ICollectionView IndexFiles { get; }
         public ICollectionView WorkspaceFiles { get; }
 
-        public ICommand NavigateBackCommand { get; }
         public ICommand RefreshStatusCommand { get; }
         public ICommand AddAllCommand { get; }
         public ICommand StageFileCommand { get; }

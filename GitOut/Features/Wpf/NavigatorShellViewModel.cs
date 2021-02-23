@@ -40,7 +40,6 @@ namespace GitOut.Features.Wpf
             snack.SnackReceived += (sender, args) => ShowSnackAsync(args.Snack, snacks).ConfigureAwait(false);
 
             CloseCommand = new CallbackCommand(life.StopApplication);
-            NavigateBackCommand = new CallbackCommand(navigation.Back, navigation.CanGoBack);
             OpenSettingsCommand = new NavigateLocalCommand<object>(
                 navigation,
                 typeof(SettingsPage).FullName!,
@@ -54,7 +53,6 @@ namespace GitOut.Features.Wpf
         public ICommand RestoreCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Normal);
         public ICommand ToggleWindowStateCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized);
         public ICommand CloseCommand { get; }
-        public ICommand NavigateBackCommand { get; }
 
         public ICommand OpenSettingsCommand { get; }
 
