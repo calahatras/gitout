@@ -9,6 +9,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using GitOut.Features.Git.Patch;
+using GitOut.Features.Text;
 
 namespace GitOut.Features.Git.Diff
 {
@@ -68,16 +69,16 @@ namespace GitOut.Features.Git.Diff
             {
                 TextRange selection = HunksViewer.Selection;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectionPosition)));
-                TextPointer start = selection.Start;
-                TextPointer end = selection.End;
-                List<(Run, HunkLine)>? diffContexts = document.DiffContexts;
+                Paragraph start = selection.Start.Paragraph;
+                Paragraph end = selection.End.Paragraph;
+                List<(Paragraph, HunkLine)> diffContexts = document.DiffContexts;
 
-                int contextOffset = diffContexts.FindIndex(context => context.Item1 == start.Parent);
+                int contextOffset = diffContexts.FindIndex(context => context.Item1 == start);
                 if (contextOffset == -1)
                 {
                     throw new InvalidOperationException("Invalid state, could not find matching paragraph");
                 }
-                int endOffset = diffContexts.FindIndex(contextOffset, context => context.Item1 == end.Parent);
+                int endOffset = diffContexts.FindIndex(contextOffset, context => context.Item1 == end);
                 if (endOffset == -1)
                 {
                     endOffset = diffContexts.Count - 1;
@@ -130,7 +131,7 @@ namespace GitOut.Features.Git.Diff
                             (Brush)Application.Current.Resources["MaterialLightDividers"],
                             (Brush)Application.Current.Resources["MaterialGray400"]
                         );
-                    var vm = GitDiffViewModel.ParseDiff(result.Hunks, display);
+                    var vm = GitDiffViewModel.ParseDiff(result.Hunks, new CSharpSyntaxHighlighter(), display);
                     control.Document = vm.Document;
                     control.LineNumbers = vm.LineNumbers;
                     control.viewModel = vm;
@@ -140,13 +141,12 @@ namespace GitOut.Features.Git.Diff
 
         private class GitDiffViewModel
         {
-            private static readonly Brush RemovedLineBackground = new SolidColorBrush(Color.FromArgb(128, 200, 90, 90));
-            private static readonly Brush AddedLineBackground = new SolidColorBrush(Color.FromArgb(128, 90, 200, 90));
+            private const string FontFamilyName = "Consolas sans-serif";
 
             private GitDiffViewModel(
                 FlowDocument document,
                 IEnumerable<LineNumberViewModel> lineNumbers,
-                List<(Run, HunkLine)> diffContexts
+                List<(Paragraph, HunkLine)> diffContexts
             )
             {
                 DiffContexts = diffContexts;
@@ -157,19 +157,19 @@ namespace GitOut.Features.Git.Diff
             public FlowDocument Document { get; }
             public IEnumerable<LineNumberViewModel> LineNumbers { get; }
 
-            public List<(Run, HunkLine)> DiffContexts { get; }
+            public List<(Paragraph, HunkLine)> DiffContexts { get; }
 
-            public static GitDiffViewModel ParseDiff(IEnumerable<GitDiffHunk> result, DiffDisplayOptions display)
+            public static GitDiffViewModel ParseDiff(IEnumerable<GitDiffHunk> result, ISyntaxHighlighter parser, DiffDisplayOptions display)
             {
                 var document = new FlowDocument
                 {
-                    FontFamily = new FontFamily("Consolas sans-serif"),
+                    FontFamily = new FontFamily(FontFamilyName),
                     FontSize = 12,
                     PagePadding = new Thickness(0)
                 };
                 var lineNumbers = new List<LineNumberViewModel>();
                 double maxWidth = 0;
-                var diffContexts = new List<(Run, HunkLine)>();
+                var diffContexts = new List<(Paragraph, HunkLine)>();
                 foreach (GitDiffHunk hunk in result)
                 {
                     var section = new Section
@@ -177,34 +177,34 @@ namespace GitOut.Features.Git.Diff
                         BorderBrush = display.DividerBrush,
                         BorderThickness = new Thickness(0, 0, 0, 1)
                     };
-                    foreach (HunkLine text in hunk.Lines)
+                    Paragraph header = CreateHeaderParagraph(hunk.Header.StrippedLine, display.HeaderForeground);
+                    section.Blocks.Add(header);
+                    diffContexts.Add((header, hunk.Header));
+                    IEnumerable<HunkLine> lines = hunk.Lines;
+                    IEnumerable<Paragraph> highlighted = parser.Highlight(lines.Select(line => line.StrippedLine), new DiffLineHighlighter(lines));
+                    foreach ((Paragraph line, HunkLine text) in highlighted.Zip(lines))
                     {
-                        lineNumbers.Add(new LineNumberViewModel(text.FromIndex, text.ToIndex));
-                        Paragraph p = text.Type switch
-                        {
-                            DiffLineType.Added => CreateAddedParagraph(display.Transform.Transform(text.StrippedLine)),
-                            DiffLineType.Removed => CreateRemovedParagraph(display.Transform.Transform(text.StrippedLine)),
-                            DiffLineType.Header => CreateHeaderParagraph(text.StrippedLine, display.HeaderForeground),
-                            DiffLineType.Control => CreateHeaderParagraph(text.StrippedLine, display.HeaderForeground),
-                            _ => CreateDefaultParagraph(display.Transform.Transform(text.StrippedLine))
-                        };
                         double width = new FormattedText(
-                            display.Transform.Transform(text.StrippedLine), CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, display.PixelsPerDip).Width;
+                            display.Transform.Transform(text.StrippedLine),
+                            CultureInfo.InvariantCulture,
+                            FlowDirection.LeftToRight,
+                            new Typeface(FontFamilyName),
+                            12,
+                            Brushes.White,
+                            display.PixelsPerDip
+                        ).Width;
                         maxWidth = Math.Max(maxWidth, width);
-                        section.Blocks.Add(p);
-
-                        diffContexts.Add(((Run)p.Inlines.FirstInline, text));
+                        foreach (Run subitem in line.Inlines.OfType<Run>().ToList())
+                        {
+                            subitem.Text = display.Transform.Transform(subitem.Text);
+                        }
+                        section.Blocks.Add(line);
+                        diffContexts.Add((line, text));
                     }
                     document.Blocks.Add(section);
                 }
                 document.PageWidth = maxWidth + 20;
                 return new GitDiffViewModel(document, lineNumbers, diffContexts);
-
-                static Paragraph CreateDefaultParagraph(string text) =>
-                    new Paragraph(new Run(text))
-                    {
-                        Margin = new Thickness(0)
-                    };
 
                 static Paragraph CreateHeaderParagraph(string text, Brush foreground) => new Paragraph(new Run(text))
                 {
@@ -213,52 +213,24 @@ namespace GitOut.Features.Git.Diff
                     FontSize = 11,
                     Margin = new Thickness(0)
                 };
-
-                static Paragraph CreateRemovedParagraph(string text) => new Paragraph(new Run(text))
-                {
-                    Background = RemovedLineBackground,
-                    Margin = new Thickness(0)
-                };
-
-                static Paragraph CreateAddedParagraph(string text) => new Paragraph(new Run(text))
-                {
-                    Background = AddedLineBackground,
-                    Margin = new Thickness(0)
-                };
             }
+        }
 
-            public static GitDiffViewModel ParseFileContent(string[] result, double pixelsPerDip)
+        private class DiffLineHighlighter : ILineDecorator
+        {
+            private static readonly Brush RemovedLineBackground = new SolidColorBrush(Color.FromArgb(128, 200, 90, 90));
+            private static readonly Brush AddedLineBackground = new SolidColorBrush(Color.FromArgb(90, 90, 200, 90));
+
+            private readonly IReadOnlyList<HunkLine> lines;
+
+            public DiffLineHighlighter(IEnumerable<HunkLine> lines) => this.lines = lines.ToList().AsReadOnly();
+
+            public void Decorate(Paragraph paragraph, int lineNumber) => paragraph.Background = lines[lineNumber].Type switch
             {
-                var document = new FlowDocument
-                {
-                    FontFamily = new FontFamily("Consolas sans-serif"),
-                    FontSize = 12,
-                    PagePadding = new Thickness(0)
-                };
-                var lineNumbers = new List<LineNumberViewModel>();
-                double maxWidth = 0;
-                int lineNumber = 0;
-                var content = new Paragraph
-                {
-                    Margin = new Thickness(0)
-                };
-                var diffContexts = new List<(Run, HunkLine)>();
-                for (int i = 0; i < result.Length; i++)
-                {
-                    string line = result[i];
-                    lineNumbers.Add(new LineNumberViewModel(lineNumber++, null));
-                    double width = new FormattedText(line, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Consolas sans-serif"), 12, Brushes.White, pixelsPerDip).Width;
-                    maxWidth = Math.Max(maxWidth, width);
-                    var run = new Run(line);
-                    content.Inlines.Add(run);
-                    content.Inlines.Add(new LineBreak());
-                    diffContexts.Add((run, HunkLine.AsAdded("+" + line, i + 1)));
-                }
-
-                document.Blocks.Add(content);
-                document.PageWidth = maxWidth + 20;
-                return new GitDiffViewModel(document, lineNumbers, diffContexts);
-            }
+                DiffLineType.Added => AddedLineBackground,
+                DiffLineType.Removed => RemovedLineBackground,
+                _ => Brushes.Transparent
+            };
         }
     }
 }
