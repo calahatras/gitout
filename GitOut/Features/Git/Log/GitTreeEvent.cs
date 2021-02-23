@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
 namespace GitOut.Features.Git.Log
@@ -44,13 +45,7 @@ namespace GitOut.Features.Git.Log
         public bool IsSelected
         {
             get => isSelected;
-            set
-            {
-                if (isSelected == value) return;
-
-                isSelected = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
-            }
+            set => SetProperty(ref isSelected, value);
         }
 
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
@@ -173,6 +168,18 @@ namespace GitOut.Features.Git.Log
                 availableColor.Available = true;
             }
         }
+
+        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (!ReferenceEquals(prop, value))
+            {
+                prop = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+            return false;
+        }
+
 
         private class AvailableColor
         {
