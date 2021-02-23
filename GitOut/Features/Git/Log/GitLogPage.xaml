@@ -404,11 +404,11 @@
             <GridSplitter
                 Grid.Column="3" 
                 Style="{StaticResource SplitVerticalStyle}"
-                Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                Visibility="{Binding FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
             />
             <Grid
                 Grid.Column="4"
-                Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                Visibility="{Binding FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
             >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
