@@ -184,6 +184,7 @@ namespace GitOut.Features.Git.Diff
                     IEnumerable<Paragraph> highlighted = parser.Highlight(lines.Select(line => line.StrippedLine), new DiffLineHighlighter(lines));
                     foreach ((Paragraph line, HunkLine text) in highlighted.Zip(lines))
                     {
+                        lineNumbers.Add(new LineNumberViewModel(text.FromIndex, text.ToIndex));
                         double width = new FormattedText(
                             display.Transform.Transform(text.StrippedLine),
                             CultureInfo.InvariantCulture,
