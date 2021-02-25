@@ -432,7 +432,7 @@ namespace GitOut.Features.Git.Stage
                 {
                     index = FindSortedIndex(workspaceFiles, item => selectedChange.Path.CompareTo(item.Path));
                 }
-                if (workspaceFiles[index].Path == selectedChange.Path)
+                if (index < workspaceFiles.Count && workspaceFiles[index].Path == selectedChange.Path)
                 {
                     await ExecuteDiffAsync();
                 }
