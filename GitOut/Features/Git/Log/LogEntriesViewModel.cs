@@ -44,6 +44,8 @@ namespace GitOut.Features.Git.Log
             };
             rootView = currentSource.View;
 
+            Branches = root.Event.Branches.Select(BranchNameViewModel.FromModel);
+
             SelectFileCommand = new CallbackCommand<IGitFileEntryViewModel>(SelectItem);
         }
 
@@ -58,6 +60,8 @@ namespace GitOut.Features.Git.Log
             get => rootView;
             private set => SetProperty(ref rootView, value);
         }
+
+        public IEnumerable<BranchNameViewModel> Branches { get; }
 
         public IGitFileEntryViewModel? SelectedItem
         {

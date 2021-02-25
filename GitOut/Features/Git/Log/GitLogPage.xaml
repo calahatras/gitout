@@ -28,6 +28,25 @@
         <ContextMenu x:Key="LogEventMenu">
             <MenuItem Header="Copy commit hash" Command="{Binding CopyCommitHashCommand}" CommandParameter="{Binding SelectedContext.Root.Event}" />
             <MenuItem Header="Copy subject" Command="{Binding CopySubjectCommand}" CommandParameter="{Binding SelectedContext}" />
+            <Separator />
+            <MenuItem Header="Copy branch name" ItemsSource="{Binding SelectedContext.Branches}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="{x:Type MenuItem}">
+                        <Setter Property="Header" Value="{Binding Name}"/>
+                        <Setter Property="Icon">
+                            <Setter.Value>
+                                <Canvas Width="24" Height="24">
+                                    <Canvas.LayoutTransform>
+                                        <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                                    </Canvas.LayoutTransform>
+                                    <Path Fill="{DynamicResource MaterialForegroundIcon}" Data="{Binding IconResource, Converter={converters:StaticResourceConverter}}" />
+                                </Canvas>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Command" Value="{Binding CopyBranchNameCommand}"/>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
         </ContextMenu>
         <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
             <Setter Property="Background" Value="Transparent" />

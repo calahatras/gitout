@@ -1657,6 +1657,135 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
+                    <ControlTemplate.Resources>
+                        <!-- Separator -->
+                        <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
+                            <Setter Property="Height" Value="1" />
+                            <Setter Property="Background" Value="{DynamicResource MaterialGray800}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Separator}">
+                                        <Rectangle Height="{TemplateBinding Height}" Fill="{DynamicResource MaterialLightDividers}" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <!-- SubmenuItem -->
+                        <ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type MenuItem}">
+                            <Border Padding="12" Name="Border">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
+                                        <ColumnDefinition Width="13" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon" />
+                                    <Border
+                                        Name="Check"
+                                        Width="13"
+                                        Height="20"
+                                        Visibility="Collapsed"
+                                        Background="{DynamicResource MaterialGray800}"
+                                        BorderThickness="1"
+                                        BorderBrush="{DynamicResource MaterialGray200}"
+                                    >
+                                        <Path
+                                            Name="CheckMark"
+                                            Width="7"
+                                            Height="7"
+                                            Visibility="Hidden"
+                                            SnapsToDevicePixels="False"
+                                            Stroke="{DynamicResource MaterialGray200}"
+                                            StrokeThickness="2"
+                                            Data="{StaticResource CheckBold}"
+                                        />
+                                    </Border>
+                                    <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
+                                    <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Icon" Value="{x:Null}">
+                                    <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="true">
+                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                                </Trigger>
+                                <Trigger Property="IsCheckable" Value="true">
+                                    <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+                                </Trigger>
+                                <Trigger Property="IsHighlighted" Value="true">
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialGray700}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+
+                        <!-- SubmenuHeader -->
+                        <ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
+                            <Border Name="Border" Padding="12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
+                                        <ColumnDefinition Width="24" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Name="Icon" VerticalAlignment="Center" ContentSource="Icon" />
+                                    <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
+                                    <TextBlock
+                                        x:Name="InputGestureText"
+                                        Grid.Column="2"
+                                        Text="{TemplateBinding InputGestureText}"
+                                    />
+                                    <Path
+                                        Grid.Column="3"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        Data="M10,12L15,7L10,2V12Z"
+                                        Fill="{DynamicResource MaterialForegroundIcon}"
+                                    />
+                                    <Popup
+                                        Name="Popup"
+                                        Placement="Right"
+                                        HorizontalOffset="-4"
+                                        IsOpen="{TemplateBinding IsSubmenuOpen}"
+                                        AllowsTransparency="True"
+                                        Focusable="False"
+                                        PopupAnimation="Fade"
+                                    >
+                                        <Border
+                                            Name="SubmenuBorder"
+                                            SnapsToDevicePixels="True"
+                                            Background="{DynamicResource MaterialGray800}"
+                                            BorderBrush="{DynamicResource MaterialGray800}"
+                                            BorderThickness="1"
+                                        >
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                                        </Border>
+                                    </Popup>
+                                </Grid>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Icon" Value="{x:Null}">
+                                    <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
+                                </Trigger>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialGray700}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ControlTemplate.Resources>
+
                     <Border
                         x:Name="Border"
                         Background="{DynamicResource MaterialGray800}"
