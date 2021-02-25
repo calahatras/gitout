@@ -180,7 +180,6 @@ namespace GitOut.Features.Git.Log
             return false;
         }
 
-
         private class AvailableColor
         {
             public AvailableColor(Color color) => Color = color;
