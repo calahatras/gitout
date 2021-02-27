@@ -84,19 +84,33 @@ namespace GitOut.Features.Git.Log
                 text => snack.ShowSuccess("Copied path to clipboard")
             );
 
-            CopyCommitHashCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
-                gte => gte!.Root.Event.Id.Hash,
-                gte => !(gte is null),
-                TextDataFormat.Text,
-                data => snack.ShowSuccess("Copied hash to clipboard")
+            CopyCommitHashCommand = new CopyTextToClipBoardCommand<GitHistoryEvent?>(
+                ghe => ghe!.Id.Hash,
+                ghe => !(ghe is null),
+                TextDataFormat.UnicodeText,
+                data => snack.ShowSuccess("Copied hash to clipboard"),
+                data => snack.ShowError(data.Message, data)
             );
 
             CopySubjectCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
                 gte => gte!.Subject,
                 gte => !(gte is null),
-                TextDataFormat.Text,
-                data => snack.ShowSuccess("Copied subject to clipboard")
+                TextDataFormat.UnicodeText,
+                data => snack.ShowSuccess("Copied subject to clipboard"),
+                data => snack.ShowError(data.Message, data)
             );
+
+            SelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit =>
+            {
+                foreach (GitTreeEvent? entry in entries)
+                {
+                    entry.IsSelected = false;
+                }
+                GitTreeEvent gitTreeEvent = entries.First(e => e.Event.Id == commit.Id);
+                gitTreeEvent.IsSelected = true;
+            });
+
+            AppendSelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit => entries.First(e => e.Event.Id == commit.Id).IsSelected = true);
         }
 
         public bool IncludeRemotes
@@ -193,6 +207,8 @@ namespace GitOut.Features.Git.Log
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
+        public ICommand SelectCommitCommand { get; }
+        public ICommand AppendSelectCommitCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

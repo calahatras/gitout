@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
     xmlns:git="clr-namespace:GitOut.Features.Git"
+    xmlns:details="clr-namespace:GitOut.Features.Git.Details"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
@@ -25,7 +26,7 @@
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
         <lc:TreeNodePathDataConverter x:Key="TreeNodePathDataConverter" />
         <ContextMenu x:Key="LogEventMenu">
-            <MenuItem Header="Copy commit hash" Command="{Binding CopyCommitHashCommand}" CommandParameter="{Binding SelectedContext}" />
+            <MenuItem Header="Copy commit hash" Command="{Binding CopyCommitHashCommand}" CommandParameter="{Binding SelectedContext.Root.Event}" />
             <MenuItem Header="Copy subject" Command="{Binding CopySubjectCommand}" CommandParameter="{Binding SelectedContext}" />
         </ContextMenu>
         <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
@@ -306,6 +307,15 @@
                     Style="{StaticResource GitLogListStyle}"
                     attached:BindableSelectedItems.SelectedItems="{Binding SelectedLogEntries}"
                 >
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate DataType="{x:Type local:GitTreeEvent}">
                             <Grid x:Name="outerGrid" Height="28">
@@ -412,6 +422,7 @@
             >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid Style="{StaticResource MaterialToolbarStyle}">
@@ -432,9 +443,28 @@
                         </ToggleButton>
                     </StackPanel>
                 </Grid>
+                <ItemsControl
+                    Grid.Row="1"
+                    ItemsSource="{Binding SelectedLogEntries}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type git:GitHistoryEvent}">
+                            <details:GitHistoryEventDetails
+                                GitHistoryEvent="{Binding Event}"
+                                CopyHashCommand="{Binding DataContext.CopyCommitHashCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                                SelectCommitCommand="{Binding DataContext.SelectCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                                AppendSelectCommitCommand="{Binding DataContext.AppendSelectCommitCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                            />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
                 <local:GitFileTree
                     x:Name="FileTree"
-                    Grid.Row="1"
+                    Grid.Row="2"
                     RootFiles="{Binding SelectedContext.RootFiles}"
                 />
             </Grid>
