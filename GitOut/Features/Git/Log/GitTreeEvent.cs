@@ -169,15 +169,13 @@ namespace GitOut.Features.Git.Log
             }
         }
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
             if (!ReferenceEquals(prop, value))
             {
                 prop = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                return true;
             }
-            return false;
         }
 
         private class AvailableColor
