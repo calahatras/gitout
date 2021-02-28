@@ -6,6 +6,7 @@ namespace GitOut.Features.Material.Snackbar
 {
     public class SnackbarService : ISnackbarService
     {
+        private static readonly TimeSpan DefaultDuration = TimeSpan.FromSeconds(3);
         public event EventHandler<SnackEventArgs>? SnackReceived;
 
         public void Show(string message) => SendSnack(new Snack
@@ -13,20 +14,21 @@ namespace GitOut.Features.Material.Snackbar
             Message = message
         });
 
-        public void ShowError(string message, Exception error, int duration = 3000) => SendSnack(new Snack
+        public void ShowError(string message, Exception error, TimeSpan? duration = null) => SendSnack(new Snack
         {
             Message = message,
-            Duration = duration,
+            Duration = duration.GetValueOrDefault(DefaultDuration),
             Error = error
         });
 
-        public void ShowSuccess(string message, int duration = 3000, string? actionText = null, Action? onAction = null)
+        public void ShowSuccess(string message, TimeSpan? duration = null, string? actionText = null, Action? onAction = null)
         {
-            var token = new CancellationTokenSource(duration);
+            TimeSpan delay = duration.GetValueOrDefault(DefaultDuration);
+            var token = new CancellationTokenSource(delay);
             SendSnack(new Snack
             {
                 Message = message,
-                Duration = duration,
+                Duration = delay,
                 ActionText = actionText,
                 Canceled = token.Token,
                 ActionCommand = onAction == null ? null : new CallbackCommand(() =>

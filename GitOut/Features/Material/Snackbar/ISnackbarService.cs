@@ -7,7 +7,7 @@ namespace GitOut.Features.Material.Snackbar
         event EventHandler<SnackEventArgs> SnackReceived;
 
         void Show(string message);
-        void ShowError(string message, Exception error, int duration = 3000);
-        void ShowSuccess(string message, int duration = 3000, string? actionText = null, Action? onAction = null);
+        void ShowError(string message, Exception error, TimeSpan? duration = null);
+        void ShowSuccess(string message, TimeSpan? duration = null, string? actionText = null, Action? onAction = null);
     }
 }
