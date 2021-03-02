@@ -4,9 +4,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
+    xmlns:process="clr-namespace:GitOut.Features.Diagnostics"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
     xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d"
@@ -60,37 +62,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
-    </UserControl.Resources>
-    <Grid Style="{StaticResource LayoutRootGridStyle}">
-        <DockPanel>
-            <Grid
-                DockPanel.Dock="Left"
-                Style="{StaticResource BackstageMenuStyle}"
-            >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid
-                    Margin="16"
-                    HorizontalAlignment="Left"
-                >
-                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{x:Static wpfcommands:Navigate.Back}" />
-                </Grid>
-
-                <ListBox
-                    x:Name="MenuItems"
-                    Grid.Row="1"
-                    ItemsSource="{Binding MenuItems}"
-                    MinWidth="160"
-                    Style="{StaticResource MaterialNavListStyle}"
-                />
-            </Grid>
+        <DataTemplate DataType="{x:Type local:GeneralSettingsViewModel}">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="1">
                 <Grid Margin="0 0 0 32">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
                     <StackPanel>
                         <Border Style="{StaticResource CardPanelStyle}">
                             <StackPanel>
@@ -161,6 +135,18 @@
                         </Border>
                         <Border Style="{StaticResource CardPanelStyle}">
                             <StackPanel>
+                                <TextBlock Style="{StaticResource Header6TextStyle}" Text="Test" />
+
+                                <CheckBox
+                                    Style="{StaticResource MaterialCheckBoxStyle}"
+                                    Margin="0 16 0 0"
+                                    IsChecked="{Binding UseTransparentBackground}"
+                                    Content="Use transparent background"
+                                />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource CardPanelStyle}">
+                            <StackPanel>
                                 <TextBlock Style="{StaticResource Header6TextStyle}" Text="Staging" />
                                 <staging:StageSettings />
                             </StackPanel>
@@ -170,14 +156,103 @@
                             <StackPanel>
                                 <TextBlock Text="Theme" Style="{StaticResource Header6TextStyle}" />
                                 <themes:ThemeSettingsPicker
-                                    SelectThemeCommand="{Binding SelectThemeCommand}"
-                                    ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}"
+                                    SelectThemeCommand="{Binding ChangeThemeCommand}"
                                 />
                             </StackPanel>
                         </Border>
                     </StackPanel>
                 </Grid>
             </ScrollViewer>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ProcessSettingsViewModel}">
+            <ListView
+                Style="{StaticResource MaterialListStyle}"
+                SelectionMode="Single"
+                ItemsSource="{Binding Reports}"
+            >
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type process:ProcessEventArgs}">
+                        <Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource MonoSpacedTextStyle}">
+                                    <Run Text="{Binding ProcessName, Mode=OneWay}" Foreground="Yellow"/>
+                                    <Run Text="{Binding Options.Arguments, Mode=OneWay}"/>
+                                    <LineBreak />
+                                    <Run Text="{Binding WorkingDirectory.Directory, Mode=OneWay}"/>
+                                </TextBlock>
+                                <TextBlock Grid.Column="1" Style="{StaticResource NormalTextStyle}">
+                                    <Run Text="{Binding StartTime, StringFormat={}{0:H:mm:ss}, Mode=OneWay}"/>
+                                    <Run Text="{Binding Duration, StringFormat={}{0:s\\.fff}s, Mode=OneWay}"/>
+                                </TextBlock>
+                            </Grid>
+
+                            <Popup
+                                StaysOpen="False"
+                                AllowsTransparency="True"
+                                IsOpen="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListViewItem}}"
+                                PopupAnimation="Fade"
+                                Placement="Bottom"
+                            >
+                                <Grid>
+                                    <Border
+                                        Style="{StaticResource CardPanelStyle}"
+                                        MinWidth="200"
+                                        MaxWidth="800"
+                                        Margin="16 8"
+                                        Padding="0"
+                                        TextElement.Foreground="{DynamicResource MaterialForegroundBase}"
+                                    >
+                                        <StackPanel Margin="16">
+                                            <ItemsControl ItemsSource="{Binding Output, Mode=OneWay}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="{x:Type system:String}">
+                                                        <TextBlock Style="{StaticResource MonoSpacedTextStyle}" Text="{Binding}"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <ItemsControl ItemsSource="{Binding Error, Mode=OneWay}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="{x:Type system:String}">
+                                                        <TextBlock Style="{StaticResource MonoSpacedTextStyle}" Text="{Binding}" Foreground="#FF9999"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid Style="{StaticResource LayoutRootGridStyle}">
+        <DockPanel>
+            <Grid
+                DockPanel.Dock="Left"
+                Style="{StaticResource BackstageMenuStyle}"
+            >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Margin="16" HorizontalAlignment="Left">
+                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{x:Static wpfcommands:Navigate.Back}" />
+                </Grid>
+                <ListBox
+                    x:Name="MenuItems"
+                    Grid.Row="1"
+                    ItemsSource="{Binding MenuItems}"
+                    MinWidth="160"
+                    Style="{StaticResource MaterialNavListStyle}"
+                />
+            </Grid>
+            <ContentControl Content="{Binding CurrentContent}" />
         </DockPanel>
     </Grid>
 </UserControl>

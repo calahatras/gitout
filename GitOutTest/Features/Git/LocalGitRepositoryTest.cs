@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.IO;
@@ -17,11 +18,11 @@ namespace GitOut.Features.Git
         {
             var path = DirectoryPath.Create("c:\\path\\to\\repo");
 
-            var processFactory = new Mock<IGitProcessFactory>();
+            var processFactory = new Mock<IProcessFactory<IGitProcess>>();
             var process = new Mock<IGitProcess>();
             string[] output = Array.Empty<string>();
             process.Setup(m => m.ReadLinesAsync(It.IsAny<CancellationToken>())).Returns(output.ToAsyncEnumerable());
-            processFactory.Setup(m => m.Create(path, It.IsAny<GitProcessOptions>())).Returns(process.Object);
+            processFactory.Setup(m => m.Create(path, It.IsAny<ProcessOptions>())).Returns(process.Object);
 
             var actor = LocalGitRepository.InitializeFromPath(path, processFactory.Object);
 
@@ -31,7 +32,7 @@ namespace GitOut.Features.Git
             IAsyncEnumerable<GitDiffFileEntry> result = actor.ExecuteListDiffChangesAsync(change1, change2, null);
             await foreach (GitDiffFileEntry item in result) { }
 
-            processFactory.Verify(m => m.Create(path, It.Is<GitProcessOptions>(m => m.Arguments == "--no-optional-locks diff-tree --no-color -z cccccccccccccccccccccccccccccccccccccccc bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")), Times.Once);
+            processFactory.Verify(m => m.Create(path, It.Is<ProcessOptions>(m => m.Arguments == "--no-optional-locks diff-tree --no-color -z cccccccccccccccccccccccccccccccccccccccc bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")), Times.Once);
         }
     }
 }
