@@ -37,6 +37,7 @@ namespace GitOut.Features.Git.Log
         private bool showSpacesAsDots;
         private bool isStashesVisible = false;
         private bool isSearchDisplayed = false;
+        private bool isCheckoutBranchVisible = false;
         private LogViewMode viewMode = LogViewMode.None;
 
         private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
@@ -82,6 +83,24 @@ namespace GitOut.Features.Git.Log
             };
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
+            CheckoutBranchCommand = new AsyncCallbackCommand<string>(
+                async name =>
+                {
+                    IsCheckoutBranchVisible = false;
+                    try
+                    {
+                        var branchName = GitBranchName.CreateLocal(name);
+                        await Repository.ExecuteCheckoutBranchAsync(branchName);
+                        await CheckRepositoryStatusAsync();
+                        snack.ShowSuccess($"Branch {branchName.Name} created");
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        snack.ShowError($"Could not create branch", e, TimeSpan.FromSeconds(10));
+                    }
+                },
+                name => GitBranchName.IsValid(name)
+            );
 
             CopyContentCommand = new CopyTextToClipBoardCommand<object>(
                 d => Repository.WorkingDirectory.Directory,
@@ -142,6 +161,12 @@ namespace GitOut.Features.Git.Log
         {
             get => isSearchDisplayed;
             set => SetProperty(ref isSearchDisplayed, value);
+        }
+
+        public bool IsCheckoutBranchVisible
+        {
+            get => isCheckoutBranchVisible;
+            set => SetProperty(ref isCheckoutBranchVisible, value);
         }
 
         public int ChangesCount
@@ -223,6 +248,7 @@ namespace GitOut.Features.Git.Log
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
         public ICommand FetchRemotesCommand { get; }
+        public ICommand CheckoutBranchCommand { get; }
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
