@@ -31,6 +31,7 @@ namespace GitOut.Features.Git
         Task ExecuteResetAllAsync();
         Task ExecuteAddAsync(GitStatusChange change);
         Task ExecuteCheckoutAsync(GitStatusChange change);
+        Task ExecuteCheckoutBranchAsync(GitBranchName name);
         Task ExecuteResetAsync(GitStatusChange change);
 
         Task ExecuteApplyAsync(GitPatch patch);

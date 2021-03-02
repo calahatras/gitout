@@ -362,6 +362,15 @@ namespace GitOut.Features.Git
 
         public Task ExecuteCheckoutAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
 
+        public async Task ExecuteCheckoutBranchAsync(GitBranchName name)
+        {
+            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"checkout -b {name.Name}")).ExecuteAsync();
+            if (args.Error.Count > 0)
+            {
+                throw new InvalidOperationException($"Could not create branch: {string.Join("\r\n", args.Error)}");
+            }
+        }
+
         public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
 
         public Task ExecuteCommitAsync(GitCommitOptions options)
