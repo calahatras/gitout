@@ -40,7 +40,7 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <ItemsControl ItemsSource="{Binding Themes}" Focusable="False">
+    <ItemsControl ItemsSource="{Binding Themes, RelativeSource={RelativeSource AncestorType={x:Type local:ThemeSettingsPicker}}}" Focusable="False">
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
                 <WrapPanel/>
@@ -51,7 +51,7 @@
                 <Button
                     Style="{StaticResource ThemeColorButtonStyle}"
                     ToolTip="{Binding Name}"
-                    Command="{Binding SelectThemeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding SelectThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:ThemeSettingsPicker}}}"
                     CommandParameter="{Binding}"
                 >
                     <Button.Background>
