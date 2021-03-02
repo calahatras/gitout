@@ -338,7 +338,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 2, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -405,7 +405,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 0, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -471,7 +471,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 2, 3));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 3));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -537,7 +537,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 0, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -603,7 +603,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 0, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -672,7 +672,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 0, 7));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -745,7 +745,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 0, 7));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -813,7 +813,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 2, 2));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 2));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -883,7 +883,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 5, 7));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 5, 7));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -971,7 +971,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 17, 23));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 17, 23));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1048,7 +1048,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1127,7 +1127,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetIndex, result.Hunks.SelectMany(hunk => hunk.Lines), 13, 15));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 13, 15));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1202,10 +1202,10 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1278,10 +1278,10 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1355,10 +1355,10 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => hunk.Lines), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
 
             var actor = new GitStageViewModel(
                 navigation.Object,

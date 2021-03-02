@@ -24,7 +24,7 @@ namespace GitOut.Features.Git
         }
 
         public DirectoryPath WorkingDirectory { get; }
-        public string? Name => Path.GetFileName(WorkingDirectory.Directory);
+        public string Name => Path.GetFileName(WorkingDirectory.Directory)!;
 
         public GitStatusResult? CachedStatus { get; private set; }
 
@@ -244,9 +244,11 @@ namespace GitOut.Features.Git
                 diffArguments.AppendRange(options.GetArguments());
             }
 
+            bool shouldSkip = false;
             if (parent is null)
             {
-                diffArguments.AppendRange(change.ToString(), "-root");
+                diffArguments.AppendRange(change.ToString(), "--root");
+                shouldSkip = true;
             }
             else
             {
@@ -257,6 +259,11 @@ namespace GitOut.Features.Git
             await foreach (string line in diff.ReadLinesAsync())
             {
                 string[] diffLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                if (shouldSkip)
+                {
+                    shouldSkip = false;
+                    diffLines = diffLines[1..];
+                }
                 for (int i = 0; i < diffLines.Length; ++i)
                 {
                     string fileLine = diffLines[i++];
@@ -327,9 +334,15 @@ namespace GitOut.Features.Git
             return builder.Build();
         }
 
-        public async IAsyncEnumerable<GitFileEntry> ExecuteListFilesAsync(GitObjectId id)
+        public async IAsyncEnumerable<GitFileEntry> ExecuteListTreeAsync(GitObjectId id, DiffOptions? options)
         {
-            IGitProcess process = CreateProcess(GitProcessOptions.FromArguments($"ls-tree -z {id.Hash}"));
+            IGitProcessOptionsBuilder builder = GitProcessOptions.Builder().AppendRange("ls-tree", "-z");
+            if (!(options is null))
+            {
+                builder.AppendRange(options.GetArguments());
+            }
+            builder.Append(id.Hash);
+            IGitProcess process = CreateProcess(builder.Build());
             await foreach (string line in process.ReadLinesAsync())
             {
                 string[] fileLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);

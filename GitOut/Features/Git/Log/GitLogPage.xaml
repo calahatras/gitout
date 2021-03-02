@@ -140,7 +140,7 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid>
+    <Grid x:Name="Root">
         <Grid
             Grid.Row="1"
             Style="{StaticResource LayoutRootGridStyle}"
@@ -432,15 +432,26 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding SelectedContext.Subject}"/>
                     <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
-                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowRevisionAtCurrent}" ToolTip="Show code at revision">
-                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CodeTags}"/>
+                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowSpacesAsDots}" ToolTip="Show spaces as dots">
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CircleSmall}"/>
                         </ToggleButton>
-                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowRevisionDiff}" ToolTip="Show diff">
-                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource VectorDifference}"/>
-                        </ToggleButton>
-                        <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowRevisionDiffInline}" ToolTip="Show diff inline">
-                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FormatListBullet}"/>
-                        </ToggleButton>
+                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                        <TextBlock Style="{StaticResource ToolbarSecondaryTextStyle}" VerticalAlignment="Center" Text="Files" />
+                        <ItemsControl Style="{StaticResource MaterialToggleButtonGroupStyle}">
+                            <ToggleButton IsChecked="{Binding ShowRevisionAtCurrent}" ToolTip="Show current files as tree">
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileTree}"/>
+                            </ToggleButton>
+                        </ItemsControl>
+                        <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                        <TextBlock Style="{StaticResource ToolbarSecondaryTextStyle}" VerticalAlignment="Center" Text="Diff" />
+                        <ItemsControl Style="{StaticResource MaterialToggleButtonGroupStyle}">
+                            <ToggleButton IsChecked="{Binding ShowRevisionDiff}" ToolTip="Show diff as tree">
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileTree}"/>
+                            </ToggleButton>
+                            <ToggleButton IsChecked="{Binding ShowRevisionDiffInline}" ToolTip="Show diff as list">
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FormatListBullet}"/>
+                            </ToggleButton>
+                        </ItemsControl>
                     </StackPanel>
                 </Grid>
                 <ItemsControl
@@ -465,7 +476,8 @@
                 <local:GitFileTree
                     x:Name="FileTree"
                     Grid.Row="2"
-                    RootFiles="{Binding SelectedContext.RootFiles}"
+                    RootFiles="{Binding SelectedContext.RootFiles, Mode=OneWay}"
+                    SelectedItem="{Binding SelectedContext.SelectedItem, Mode=TwoWay}"
                 />
             </Grid>
             <GridSplitter Grid.Column="5" Style="{StaticResource SplitVerticalStyle}" />
@@ -484,12 +496,12 @@
                                 <diff:GitDiffControl
                                     Grid.Row="1"
                                     Diff="{Binding DiffResult}"
-                                    ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
+                                    ShowSpacesAsDots="{Binding DataContext.ShowSpacesAsDots, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
                                     HorizontalAlignment="Stretch"
                                 />
                             </Grid>
                         </DataTemplate>
-                        <DataTemplate DataType="{x:Type files:GitDiffFileViewModel}">
+                        <DataTemplate DataType="{x:Type files:GitDirectoryViewModel}">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -498,11 +510,6 @@
                                 <Grid Style="{StaticResource MaterialToolbarStyle}">
                                     <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding FileName}" />
                                 </Grid>
-                                <diff:GitDiffControl
-                                    Grid.Row="1"
-                                    Diff="{Binding DiffResult}"
-                                    ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
-                                />
                             </Grid>
                         </DataTemplate>
                     </ContentPresenter.Resources>

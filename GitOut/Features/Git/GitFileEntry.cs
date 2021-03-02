@@ -11,9 +11,14 @@ namespace GitOut.Features.Git
             Id = id;
             Type = type;
             FileModes = fileModes;
-            FileName = FileName.Create(fileName);
+            int lastPos = fileName.LastIndexOf(RelativeDirectoryPath.GitDirectorySeparatorChar);
+            Directory = lastPos != -1
+                ? RelativeDirectoryPath.Create(fileName[0..lastPos])
+                : RelativeDirectoryPath.Root;
+            FileName = FileName.Create(fileName[(lastPos + 1)..]);
         }
 
+        public RelativeDirectoryPath Directory { get; }
         public GitFileId Id { get; }
 
         public FileName FileName { get; }

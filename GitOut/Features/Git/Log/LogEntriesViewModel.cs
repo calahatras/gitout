@@ -1,26 +1,50 @@
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Threading;
+using GitOut.Features.Collections;
 using GitOut.Features.Git.Files;
+using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Git.Log
 {
-    public class LogEntriesViewModel
+    public class LogEntriesViewModel : INotifyPropertyChanged
     {
         private readonly GitTreeEvent? diff;
-        private readonly IGitRepository repository;
 
-        private readonly object rootFilesLock = new object();
-        private readonly ObservableCollection<IGitFileEntryViewModel> rootFiles = new ObservableCollection<IGitFileEntryViewModel>();
+        private readonly CollectionViewSource currentSource;
+        private readonly IEnumerable<IGitFileEntryViewModel> diffFiles;
+        private readonly IEnumerable<IGitFileEntryViewModel> flattenedDiffFiles;
+
+        private readonly IEnumerable<IGitFileEntryViewModel> logFiles;
+
+        private ICollectionView rootView;
+        private IGitFileEntryViewModel? selectedItem;
+        private LogRevisionViewMode viewMode = LogRevisionViewMode.CurrentRevision;
 
         public LogEntriesViewModel(GitTreeEvent root, IGitRepository repository)
         {
             Root = root;
-            this.repository = repository;
-            BindingOperations.EnableCollectionSynchronization(rootFiles, rootFilesLock);
-            RootFiles = CollectionViewSource.GetDefaultView(rootFiles);
+
+            var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.ListIdAsync(root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
+            _ = logFiles.MaterializeAsync();
+            this.logFiles = logFiles;
+            diffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
+            flattenedDiffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
+
+            currentSource = new CollectionViewSource
+            {
+                Source = logFiles
+            };
+            rootView = currentSource.View;
+
+            SelectFileCommand = new CallbackCommand<IGitFileEntryViewModel>(SelectItem);
         }
 
         public LogEntriesViewModel(GitTreeEvent root, GitTreeEvent diff, IGitRepository repository)
@@ -28,15 +52,57 @@ namespace GitOut.Features.Git.Log
 
         public GitTreeEvent Root { get; }
         public string Subject => Root.Event.Subject;
-        public ICollectionView RootFiles { get; }
 
-        public Task SwitchViewAsync(LogRevisionViewMode mode) => mode switch
+        public ICollectionView RootFiles
         {
-            LogRevisionViewMode.CurrentRevision => ListLogFilesAsync(),
-            LogRevisionViewMode.Diff => ListDiffFilesAsync(),
-            LogRevisionViewMode.DiffInline => ListDiffInlineFilesAsync(),
-            _ => Task.CompletedTask,
-        };
+            get => rootView;
+            private set => SetProperty(ref rootView, value);
+        }
+
+        public IGitFileEntryViewModel? SelectedItem
+        {
+            get => selectedItem;
+            set => SetProperty(ref selectedItem, value);
+        }
+        public ICommand SelectFileCommand { get; }
+
+        public LogRevisionViewMode ViewMode
+        {
+            get => viewMode;
+            set
+            {
+                if (SetProperty(ref viewMode, value))
+                {
+                    IGitFileEntryViewModel? previousSelection = selectedItem;
+                    IEnumerable<IGitFileEntryViewModel> source = value switch
+                    {
+                        LogRevisionViewMode.CurrentRevision => logFiles,
+                        LogRevisionViewMode.Diff => diffFiles,
+                        LogRevisionViewMode.DiffInline => flattenedDiffFiles,
+                        _ => throw new InvalidOperationException($"Invalid view mode: {value}")
+                    };
+                    if (source is ILazyAsyncEnumerable<object> lazy)
+                    {
+                        SynchronizationContext? context = SynchronizationContext.Current;
+                        ValueTask t = lazy.MaterializeAsync();
+                        t.AsTask().ContinueWith(task => context!.Post(d =>
+                        {
+                            currentSource.Source = source;
+                            RootFiles = currentSource.View;
+                            SelectItem(previousSelection);
+                        }, null));
+                    }
+                    else
+                    {
+                        currentSource.Source = source;
+                        RootFiles = currentSource.View;
+                        SelectItem(previousSelection);
+                    }
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public static LogEntriesViewModel? CreateContext(IList<GitTreeEvent> entries, IGitRepository repository, LogRevisionViewMode mode)
         {
@@ -54,56 +120,38 @@ namespace GitOut.Features.Git.Log
             {
                 context = new LogEntriesViewModel(entries[0], entries[1], repository);
             }
-            context.SwitchViewAsync(mode);
+            context.ViewMode = mode;
             return context;
         }
 
-        private async Task ListLogFilesAsync()
+        private void SelectItem(IGitFileEntryViewModel? entry)
         {
-            lock (rootFilesLock)
+            if (entry is null || !(currentSource.Source is IEnumerable<IGitFileEntryViewModel> items))
             {
-                rootFiles.Clear();
+                return;
             }
-            IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.ListIdAsync(Root.Event.Id, repository);
-            await foreach (IGitFileEntryViewModel viewmodel in entries)
+            IEnumerable<IGitDirectoryEntryViewModel> current = items.OfType<IGitDirectoryEntryViewModel>();
+            foreach (string segment in entry.Path.Segments)
             {
-                lock (rootFilesLock)
+                IGitDirectoryEntryViewModel? child = current.FirstOrDefault(directory => directory.FileName == segment);
+                if (!(child is null))
                 {
-                    rootFiles.Add(viewmodel);
+                    child.IsExpanded = true;
+                    current = child.OfType<IGitDirectoryEntryViewModel>();
                 }
             }
+            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => SelectedItem = entry));
         }
 
-        private async Task ListDiffFilesAsync()
+        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
-            lock (rootFilesLock)
+            if (!ReferenceEquals(prop, value))
             {
-                rootFiles.Clear();
+                prop = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
             }
-            IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? Root.Event.Parent?.Id, Root.Event.Id, repository);
-            await foreach (IGitFileEntryViewModel viewmodel in entries)
-            {
-                lock (rootFilesLock)
-                {
-                    rootFiles.Add(viewmodel);
-                }
-            }
-        }
-
-        private async Task ListDiffInlineFilesAsync()
-        {
-            lock (rootFilesLock)
-            {
-                rootFiles.Clear();
-            }
-            IAsyncEnumerable<IGitFileEntryViewModel> entries = GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? Root.Event.Parent?.Id, Root.Event.Id, repository);
-            await foreach (IGitFileEntryViewModel viewmodel in entries)
-            {
-                lock (rootFilesLock)
-                {
-                    rootFiles.Add(viewmodel);
-                }
-            }
+            return false;
         }
     }
 }
