@@ -8,7 +8,7 @@ namespace GitOut.Features.Material.Snackbar
     {
         public DateTime DateAddedUtc { get; } = DateTime.UtcNow;
 
-        public int Duration { get; set; } = 3000;
+        public TimeSpan Duration { get; set; } = TimeSpan.FromSeconds(3);
         public string? Message { get; set; }
 
         public string? ActionText { get; set; }

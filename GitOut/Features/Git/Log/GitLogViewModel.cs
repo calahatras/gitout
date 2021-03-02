@@ -243,7 +243,7 @@ namespace GitOut.Features.Git.Log
                     await Repository.ExecuteFetchAsync(remote.Model);
                 }
             }
-            snack.ShowSuccess("Fetched all selected remotes", 8000);
+            snack.ShowSuccess("Fetched all selected remotes", TimeSpan.FromSeconds(8));
             await CheckRepositoryStatusAsync();
         }
 
