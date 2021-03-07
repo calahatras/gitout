@@ -18,6 +18,8 @@ namespace GitOut.Features.Text
             "private",
             "internal",
             "partial",
+            "abstract",
+            "virtual",
             "override",
             "static",
             "sealed",
@@ -54,6 +56,7 @@ namespace GitOut.Features.Text
             "int",
             "double",
             "short",
+            "byte",
             "var",
             "where"
         };
