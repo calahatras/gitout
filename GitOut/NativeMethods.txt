@@ -1,0 +1,3 @@
+GetMonitorInfo
+MonitorFromWindow
+MINMAXINFO

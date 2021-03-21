@@ -13,7 +13,6 @@
     Width="1280"
     Height="800"
     MinHeight="300"
-    MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
     MinWidth="320"
     WindowStyle="None"
     AllowsTransparency="True"
