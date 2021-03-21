@@ -4,7 +4,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:system="clr-namespace:System;assembly=mscorlib"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
@@ -18,6 +17,32 @@
     x:Name="Root"
 >
     <UserControl.Resources>
+        <Style x:Key="InputTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MonoSpacedTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialGray300}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Input.Length}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="OutputTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MonoSpacedTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Output.Length}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ErrorTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MonoSpacedTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Foreground" Value="{DynamicResource Removed}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Error.Length}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="BackstageMenuStyle" TargetType="{x:Type Grid}">
             <Setter Property="MinWidth" Value="280" />
             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
@@ -166,66 +191,53 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ProcessSettingsViewModel}">
             <ListView
-                Style="{StaticResource MaterialListStyle}"
+                Style="{StaticResource MaterialExpansionListStyle}"
                 SelectionMode="Single"
                 ItemsSource="{Binding Reports}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             >
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type process:ProcessEventArgs}">
-                        <Grid>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Style="{StaticResource MonoSpacedTextStyle}">
-                                    <Run Text="{Binding ProcessName, Mode=OneWay}" Foreground="Yellow"/>
-                                    <Run Text="{Binding Options.Arguments, Mode=OneWay}"/>
-                                    <LineBreak />
-                                    <Run Text="{Binding WorkingDirectory.Directory, Mode=OneWay}"/>
-                                </TextBlock>
-                                <TextBlock Grid.Column="1" Style="{StaticResource NormalTextStyle}">
-                                    <Run Text="{Binding StartTime, StringFormat={}{0:H:mm:ss}, Mode=OneWay}"/>
-                                    <Run Text="{Binding Duration, StringFormat={}{0:s\\.fff}s, Mode=OneWay}"/>
-                                </TextBlock>
-                            </Grid>
-
-                            <Popup
-                                StaysOpen="False"
-                                AllowsTransparency="True"
-                                IsOpen="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListViewItem}}"
-                                PopupAnimation="Fade"
-                                Placement="Bottom"
-                            >
+                        <Expander Style="{StaticResource MaterialExpansionStyle}">
+                            <Expander.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource MonoSpacedTextStyle}">
+                                        <Run Text="{Binding ProcessName, Mode=OneWay}" Foreground="{DynamicResource Changed}"/>
+                                        <Run Text="{Binding Options.Arguments, Mode=OneWay}"/>
+                                        <LineBreak />
+                                        <Run Text="{Binding WorkingDirectory.Directory, Mode=OneWay}" Foreground="{DynamicResource MaterialGray400}" FontSize="10"/>
+                                    </TextBlock>
+                                    <TextBlock Grid.Column="1" Style="{StaticResource SmallTextStyle}" VerticalAlignment="Center">
+                                        <Run Text="{Binding StartTime, StringFormat={}{0:H:mm:ss}, Mode=OneWay}"/>
+                                        <Run Text="{Binding Duration, StringFormat={}{0:s\\.fff}s, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Grid>
+                            </Expander.Header>
+                            <Expander.Content>
                                 <Grid>
                                     <Border
                                         Style="{StaticResource CardPanelStyle}"
                                         MinWidth="200"
-                                        MaxWidth="800"
-                                        Margin="16 8"
+                                        MaxHeight="600"
+                                        Margin="0"
                                         Padding="0"
                                         TextElement.Foreground="{DynamicResource MaterialForegroundBase}"
                                     >
-                                        <StackPanel Margin="16">
-                                            <ItemsControl ItemsSource="{Binding Output, Mode=OneWay}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate DataType="{x:Type system:String}">
-                                                        <TextBlock Style="{StaticResource MonoSpacedTextStyle}" Text="{Binding}"/>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                            <ItemsControl ItemsSource="{Binding Error, Mode=OneWay}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate DataType="{x:Type system:String}">
-                                                        <TextBlock Style="{StaticResource MonoSpacedTextStyle}" Text="{Binding}" Foreground="#FF9999"/>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <StackPanel Margin="16">
+                                                <TextBox Style="{StaticResource InputTextBoxStyle}" Text="{Binding Input, Mode=OneWay}"/>
+                                                <TextBox Style="{StaticResource OutputTextBoxStyle}" Text="{Binding Output, Mode=OneWay}"/>
+                                                <TextBox Style="{StaticResource ErrorTextBoxStyle}" Text="{Binding Error, Mode=OneWay}"/>
+                                            </StackPanel>
+                                        </ScrollViewer>
                                     </Border>
                                 </Grid>
-                            </Popup>
-                        </Grid>
+                            </Expander.Content>
+                        </Expander>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

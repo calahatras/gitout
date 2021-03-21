@@ -92,7 +92,7 @@ namespace GitOut.Features.Git.Diagnostics
                 string? data = e.Data;
                 if (!(data is null))
                 {
-                    output.Add(data);
+                    output.AddRange(data.Split('\0'));
                     Trace.WriteLine($"{data}");
                 }
             }
@@ -163,7 +163,7 @@ namespace GitOut.Features.Git.Diagnostics
                 }
                 else
                 {
-                    output.Add(data);
+                    output.AddRange(data.Split('\0'));
                     queue.Post(data);
                 }
                 dataReceivedEvent.Set();
