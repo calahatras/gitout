@@ -159,18 +159,6 @@
                         </Border>
                         <Border Style="{StaticResource CardPanelStyle}">
                             <StackPanel>
-                                <TextBlock Style="{StaticResource Header6TextStyle}" Text="Test" />
-
-                                <CheckBox
-                                    Style="{StaticResource MaterialCheckBoxStyle}"
-                                    Margin="0 16 0 0"
-                                    IsChecked="{Binding UseTransparentBackground}"
-                                    Content="Use transparent background"
-                                />
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource CardPanelStyle}">
-                            <StackPanel>
                                 <TextBlock Style="{StaticResource Header6TextStyle}" Text="Staging" />
                                 <staging:StageSettings />
                             </StackPanel>
