@@ -180,20 +180,15 @@ namespace GitOut.Features.Git.Diff
                     Paragraph header = CreateHeaderParagraph(hunk.Header.StrippedLine, display.HeaderForeground);
                     section.Blocks.Add(header);
                     diffContexts.Add((header, hunk.Header));
+                    double width = CalculateLineWidth(hunk.Header.StrippedLine);
+                    maxWidth = Math.Max(maxWidth, width);
+                    lineNumbers.Add(new LineNumberViewModel(null, null));
                     IEnumerable<HunkLine> lines = hunk.Lines;
                     IEnumerable<Paragraph> highlighted = parser.Highlight(lines.Select(line => line.StrippedLine), new DiffLineHighlighter(lines));
                     foreach ((Paragraph line, HunkLine text) in highlighted.Zip(lines))
                     {
                         lineNumbers.Add(new LineNumberViewModel(text.FromIndex, text.ToIndex));
-                        double width = new FormattedText(
-                            display.Transform.Transform(text.StrippedLine),
-                            CultureInfo.InvariantCulture,
-                            FlowDirection.LeftToRight,
-                            new Typeface(FontFamilyName),
-                            12,
-                            Brushes.White,
-                            display.PixelsPerDip
-                        ).Width;
+                        width = CalculateLineWidth(text.StrippedLine);
                         maxWidth = Math.Max(maxWidth, width);
                         foreach (Run subitem in line.Inlines.OfType<Run>().ToList())
                         {
@@ -206,6 +201,17 @@ namespace GitOut.Features.Git.Diff
                 }
                 document.PageWidth = maxWidth + 20;
                 return new GitDiffViewModel(document, lineNumbers, diffContexts);
+
+                double CalculateLineWidth(string text) =>
+                    new FormattedText(
+                    display.Transform.Transform(text),
+                    CultureInfo.InvariantCulture,
+                    FlowDirection.LeftToRight,
+                    new Typeface(FontFamilyName),
+                    12,
+                    Brushes.White,
+                    display.PixelsPerDip
+                ).Width;
 
                 static Paragraph CreateHeaderParagraph(string text, Brush foreground) => new Paragraph(new Run(text))
                 {
