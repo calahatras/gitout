@@ -121,8 +121,7 @@
                         <Grid Name="Inactive">
                             <Border
                                 Name="InactiveBorder"
-                                CornerRadius="2"
-                                Padding="2"
+                                CornerRadius="0"
                                 BorderThickness="0 0 0 1"
                                 BorderBrush="{DynamicResource MaterialLightDividers}"
                             />
@@ -140,8 +139,7 @@
                         <Grid Name="Active">
                             <Border
                                 Name="ActiveBorder"
-                                CornerRadius="2"
-                                Padding="2"
+                                CornerRadius="0"
                                 BorderThickness="0 0 0 1"
                                 BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                             />
@@ -173,9 +171,15 @@
                                 </VisualState>
                                 <VisualState x:Name="ReadOnly">
                                     <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="InactiveBorder" Storyboard.TargetProperty="(Border.BorderBrush)">
-                                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{StaticResource MaterialDarkDisabledText}"/>
-                                        </ObjectAnimationUsingKeyFrames>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="InactiveBorder"
+                                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                        >
+                                            <ColorAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </ColorAnimation.EasingFunction>
+                                        </ColorAnimation>
                                     </Storyboard>
                                 </VisualState>
                                 <VisualState x:Name="MouseOver"/>

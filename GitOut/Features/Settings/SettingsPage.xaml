@@ -7,7 +7,6 @@
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
-    xmlns:process="clr-namespace:GitOut.Features.Diagnostics"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
     xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d"
@@ -197,45 +196,59 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             >
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type process:ProcessEventArgs}">
+                    <DataTemplate DataType="{x:Type local:ProcessEventArgsViewModel}">
                         <Expander Style="{StaticResource MaterialExpansionStyle}">
                             <Expander.Header>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Style="{StaticResource MonoSpacedTextStyle}">
                                         <Run Text="{Binding ProcessName, Mode=OneWay}" Foreground="{DynamicResource Changed}"/>
-                                        <Run Text="{Binding Options.Arguments, Mode=OneWay}"/>
+                                        <Run Text="{Binding Arguments, Mode=OneWay}"/>
                                         <LineBreak />
-                                        <Run Text="{Binding WorkingDirectory.Directory, Mode=OneWay}" Foreground="{DynamicResource MaterialGray400}" FontSize="10"/>
+                                        <Run Text="{Binding WorkingDirectory, Mode=OneWay}" Foreground="{DynamicResource MaterialGray400}" FontSize="10"/>
                                     </TextBlock>
                                     <TextBlock Grid.Column="1" Style="{StaticResource SmallTextStyle}" VerticalAlignment="Center">
                                         <Run Text="{Binding StartTime, StringFormat={}{0:H:mm:ss}, Mode=OneWay}"/>
+                                        <LineBreak />
                                         <Run Text="{Binding Duration, StringFormat={}{0:s\\.fff}s, Mode=OneWay}"/>
                                     </TextBlock>
+                                    <Button
+                                        Margin="12 0 0 0"
+                                        Grid.Column="2"
+                                        Style="{StaticResource MaterialIconButtonStyle}"
+                                        Command="{Binding CopyCommand}"
+                                        ToolTip="Copy command"
+                                    >
+                                        <Canvas Width="24" Height="24">
+                                            <Canvas.LayoutTransform>
+                                                <ScaleTransform ScaleX=".75" ScaleY=".75" />
+                                            </Canvas.LayoutTransform>
+                                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                        </Canvas>
+                                    </Button>
                                 </Grid>
                             </Expander.Header>
                             <Expander.Content>
-                                <Grid>
-                                    <Border
-                                        Style="{StaticResource CardPanelStyle}"
-                                        MinWidth="200"
-                                        MaxHeight="600"
-                                        Margin="0"
-                                        Padding="0"
-                                        TextElement.Foreground="{DynamicResource MaterialForegroundBase}"
-                                    >
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                            <StackPanel Margin="16">
-                                                <TextBox Style="{StaticResource InputTextBoxStyle}" Text="{Binding Input, Mode=OneWay}"/>
-                                                <TextBox Style="{StaticResource OutputTextBoxStyle}" Text="{Binding Output, Mode=OneWay}"/>
-                                                <TextBox Style="{StaticResource ErrorTextBoxStyle}" Text="{Binding Error, Mode=OneWay}"/>
-                                            </StackPanel>
-                                        </ScrollViewer>
-                                    </Border>
-                                </Grid>
+                                <Border
+                                    Style="{StaticResource CardPanelStyle}"
+                                    MinWidth="200"
+                                    MaxHeight="600"
+                                    Margin="0"
+                                    Padding="0"
+                                    TextElement.Foreground="{DynamicResource MaterialForegroundBase}"
+                                >
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <StackPanel Margin="16" Background="Transparent">
+                                            <TextBox Style="{StaticResource InputTextBoxStyle}" AutomationProperties.HelpText="Input" Text="{Binding Input, Mode=OneWay}"/>
+                                            <TextBox Style="{StaticResource OutputTextBoxStyle}" AutomationProperties.HelpText="Output" Text="{Binding Output, Mode=OneWay}"/>
+                                            <TextBox Style="{StaticResource ErrorTextBoxStyle}" AutomationProperties.HelpText="Error" Text="{Binding Error, Mode=OneWay}"/>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Border>
                             </Expander.Content>
                         </Expander>
                     </DataTemplate>

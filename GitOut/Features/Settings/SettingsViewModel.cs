@@ -54,7 +54,7 @@ namespace GitOut.Features.Settings
                 },
                 new MenuItem
                 {
-                    Command = new CallbackCommand(() => CurrentContent = (process ??= new ProcessSettingsViewModel(telemetry))),
+                    Command = new CallbackCommand(() => CurrentContent = (process ??= new ProcessSettingsViewModel(telemetry, snacks))),
                     IconResourceKey = "Git",
                     Name = "Git execution log"
                 }
