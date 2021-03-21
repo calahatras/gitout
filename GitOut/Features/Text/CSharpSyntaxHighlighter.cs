@@ -21,6 +21,7 @@ namespace GitOut.Features.Text
             "abstract",
             "virtual",
             "override",
+            "base",
             "static",
             "sealed",
             "namespace",
