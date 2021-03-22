@@ -84,6 +84,7 @@ namespace GitOut.Features.Text
             "throw",
         };
 
+        private static readonly Regex CommentRegex = new Regex($"//.*$", RegexOptions.Compiled);
         private static readonly Regex KeywordRegex = new Regex($"\\b({string.Join("|", Keywords)})\\b", RegexOptions.Compiled);
         private static readonly Regex ControlKeywordRegex = new Regex($"\\b({string.Join("|", ControlKeywords)})\\b", RegexOptions.Compiled);
         private static readonly Regex StringRegex = new Regex("\"(.)+?(?<!\\\\)\"", RegexOptions.Compiled);
@@ -102,6 +103,7 @@ namespace GitOut.Features.Text
             {
                 yield return new Run();
             }
+            IReadOnlyCollection<Match> commentMatch = CommentRegex.Matches(line);
             IReadOnlyCollection<Match> keywordMatch = KeywordRegex.Matches(line);
             IReadOnlyCollection<Match> controlKeywordMatch = ControlKeywordRegex.Matches(line);
             IReadOnlyCollection<Match> stringMatch = StringRegex.Matches(line);
@@ -109,6 +111,7 @@ namespace GitOut.Features.Text
             // join collections and remove invalid (e.g. keywords in string)
             IEnumerable<IDecoratedMatch> matches = Join(
                 line.Length,
+                commentMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.CommentForegroundColor)),
                 keywordMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.KeywordForegroundColor)),
                 controlKeywordMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.ControlKeywordForegroundColor)),
                 stringMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.StringForegroundColor))
