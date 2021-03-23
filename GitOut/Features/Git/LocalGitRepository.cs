@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
@@ -12,11 +13,11 @@ namespace GitOut.Features.Git
 {
     public sealed class LocalGitRepository : IGitRepository
     {
-        private readonly IGitProcessFactory processFactory;
+        private readonly IProcessFactory<IGitProcess> processFactory;
 
         private LocalGitRepository(
             DirectoryPath repositoryPath,
-            IGitProcessFactory processFactory
+            IProcessFactory<IGitProcess> processFactory
         )
         {
             WorkingDirectory = repositoryPath;
@@ -30,7 +31,7 @@ namespace GitOut.Features.Git
 
         public async Task<GitHistoryEvent> GetHeadAsync()
         {
-            IGitProcess log = CreateProcess(GitProcessOptions.FromArguments("-c log.showSignature=false log -n1 -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" HEAD"));
+            IGitProcess log = CreateProcess(ProcessOptions.FromArguments("-c log.showSignature=false log -n1 -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" HEAD"));
             int state = 0;
             IGitHistoryEventBuilder builder = GitHistoryEvent.Builder();
             await foreach (string line in log.ReadLinesAsync())
@@ -75,14 +76,14 @@ namespace GitOut.Features.Git
 
         public async IAsyncEnumerable<GitRemote> GetRemotesAsync()
         {
-            IGitProcess remotes = CreateProcess(GitProcessOptions.FromArguments("remote"));
+            IGitProcess remotes = CreateProcess(ProcessOptions.FromArguments("remote"));
             await foreach (string line in remotes.ReadLinesAsync())
             {
                 yield return new GitRemote(line);
             }
         }
 
-        public Task ExecuteFetchAsync(GitRemote remote) => CreateProcess(GitProcessOptions.FromArguments($"fetch {remote.Name}")).ExecuteAsync();
+        public Task ExecuteFetchAsync(GitRemote remote) => CreateProcess(ProcessOptions.FromArguments($"fetch {remote.Name}")).ExecuteAsync();
 
         public async Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options)
         {
@@ -95,7 +96,7 @@ namespace GitOut.Features.Git
             {
                 argumentBuilder.Append(" --remotes");
             }
-            IGitProcess log = CreateProcess(GitProcessOptions.FromArguments(argumentBuilder.ToString()));
+            IGitProcess log = CreateProcess(ProcessOptions.FromArguments(argumentBuilder.ToString()));
             await foreach (string line in log.ReadLinesAsync())
             {
                 switch (state)
@@ -152,7 +153,7 @@ namespace GitOut.Features.Git
                 children.ResolveParents(historyByCommitId);
             }
 
-            IGitProcess branches = CreateProcess(GitProcessOptions.FromArguments("for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname)\""));
+            IGitProcess branches = CreateProcess(ProcessOptions.FromArguments("for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname)\""));
             await foreach (string line in branches.ReadLinesAsync())
             {
                 var id = GitCommitId.FromHash(line.Substring(0, 40));
@@ -163,7 +164,7 @@ namespace GitOut.Features.Git
                 }
             }
 
-            IGitProcess head = CreateProcess(GitProcessOptions.FromArguments("rev-parse HEAD"));
+            IGitProcess head = CreateProcess(ProcessOptions.FromArguments("rev-parse HEAD"));
             await foreach (string line in head.ReadLinesAsync())
             {
                 var id = GitCommitId.FromHash(line);
@@ -175,14 +176,14 @@ namespace GitOut.Features.Git
 
         public async IAsyncEnumerable<GitStash> ExecuteStashListAsync()
         {
-            IGitProcess stashes = CreateProcess(GitProcessOptions.FromArguments("stash list -z"));
+            IGitProcess stashes = CreateProcess(ProcessOptions.FromArguments("stash list -z"));
             await foreach (string line in stashes.ReadLinesAsync())
             {
                 string[] stashEntries = line.Split('\0', StringSplitOptions.RemoveEmptyEntries);
                 foreach (string stashLine in stashEntries)
                 {
                     IGitStashBuilder stash = GitStash.Parse(stashLine);
-                    IGitProcess getParentId = CreateProcess(GitProcessOptions.FromArguments($"rev-parse \"{stash.Name}~\""));
+                    IGitProcess getParentId = CreateProcess(ProcessOptions.FromArguments($"rev-parse \"{stash.Name}~\""));
                     await foreach (string parentId in getParentId.ReadLinesAsync())
                     {
                         stash.UseParent(parentId);
@@ -195,7 +196,7 @@ namespace GitOut.Features.Git
         public async Task<GitStatusResult> ExecuteStatusAsync()
         {
             IList<GitStatusChange> statusChanges = new List<GitStatusChange>();
-            IGitProcess status = CreateProcess(GitProcessOptions.FromArguments("--no-optional-locks status --porcelain=2 -z --untracked-files=all --ignore-submodules=none"));
+            IGitProcess status = CreateProcess(ProcessOptions.FromArguments("--no-optional-locks status --porcelain=2 -z --untracked-files=all --ignore-submodules=none"));
             await foreach (string line in status.ReadLinesAsync())
             {
                 string[] statusLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
@@ -216,7 +217,7 @@ namespace GitOut.Features.Git
 
         public async Task<GitDiffResult> GetFileContentsAsync(GitFileId file)
         {
-            var args = GitProcessOptions.FromArguments($"cat-file blob \"{file}\"");
+            var args = ProcessOptions.FromArguments($"cat-file blob \"{file}\"");
 
             IGitProcess diff = CreateProcess(args);
             IGitDiffBuilder builder = GitDiffResult.Builder();
@@ -235,7 +236,7 @@ namespace GitOut.Features.Git
 
         public async IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options)
         {
-            IGitProcessOptionsBuilder diffArguments = GitProcessOptions
+            IProcessOptionsBuilder diffArguments = ProcessOptions
                 .Builder()
                 .AppendRange("--no-optional-locks", "diff-tree", "--no-color", "-z");
 
@@ -297,7 +298,7 @@ namespace GitOut.Features.Git
                 throw new ArgumentException("Source and target is the same object, must diff different id's", nameof(target));
             }
             string argumentBuilder = $"--no-optional-locks diff --no-color {string.Join(" ", options.GetArguments(false))} {source} {target}";
-            var args = GitProcessOptions.FromArguments(argumentBuilder.ToString());
+            var args = ProcessOptions.FromArguments(argumentBuilder.ToString());
 
             IGitProcess diff = CreateProcess(args);
             IGitDiffBuilder builder = GitDiffResult.Builder();
@@ -311,7 +312,7 @@ namespace GitOut.Features.Git
         public async Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options)
         {
             string argumentBuilder = $"--no-optional-locks diff --no-color {string.Join(" ", options.GetArguments())} -- {file}";
-            var args = GitProcessOptions.FromArguments(argumentBuilder);
+            var args = ProcessOptions.FromArguments(argumentBuilder);
 
             IGitProcess diff = CreateProcess(args);
             IGitDiffBuilder builder = GitDiffResult.Builder();
@@ -336,7 +337,7 @@ namespace GitOut.Features.Git
 
         public async IAsyncEnumerable<GitFileEntry> ExecuteListTreeAsync(GitObjectId id, DiffOptions? options)
         {
-            IGitProcessOptionsBuilder builder = GitProcessOptions.Builder().AppendRange("ls-tree", "-z");
+            IProcessOptionsBuilder builder = ProcessOptions.Builder().AppendRange("ls-tree", "-z");
             if (!(options is null))
             {
                 builder.AppendRange(options.GetArguments());
@@ -353,15 +354,15 @@ namespace GitOut.Features.Git
             }
         }
 
-        public Task ExecuteAddAllAsync() => CreateProcess(GitProcessOptions.FromArguments("add --all")).ExecuteAsync();
+        public Task ExecuteAddAllAsync() => CreateProcess(ProcessOptions.FromArguments("add --all")).ExecuteAsync();
 
-        public Task ExecuteResetAllAsync() => CreateProcess(GitProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();
+        public Task ExecuteResetAllAsync() => CreateProcess(ProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();
 
-        public Task ExecuteAddAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"add {change.Path}")).ExecuteAsync();
+        public Task ExecuteAddAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"add {change.Path}")).ExecuteAsync();
 
-        public Task ExecuteCheckoutAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
+        public Task ExecuteCheckoutAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
 
-        public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(GitProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
+        public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
 
         public Task ExecuteCommitAsync(GitCommitOptions options)
         {
@@ -371,7 +372,7 @@ namespace GitOut.Features.Git
                 argumentsBuilder.Append(" --amend");
             }
             argumentsBuilder.Append($" -m \"{options.Message.Replace("\"", "\\\"")}\"");
-            return CreateProcess(GitProcessOptions.FromArguments(argumentsBuilder.ToString())).ExecuteAsync();
+            return CreateProcess(ProcessOptions.FromArguments(argumentsBuilder.ToString())).ExecuteAsync();
         }
 
         public Task ExecuteApplyAsync(GitPatch patch)
@@ -385,16 +386,15 @@ namespace GitOut.Features.Git
                     break;
             }
 
-            IGitProcess apply = CreateProcess(GitProcessOptions.FromArguments(argumentsBuilder.ToString()));
+            IGitProcess apply = CreateProcess(ProcessOptions.FromArguments(argumentsBuilder.ToString()));
             return apply.ExecuteAsync(patch.Writer);
         }
 
         public static LocalGitRepository InitializeFromPath(
             DirectoryPath path,
-            IGitProcessFactory processFactory
-        )
-            => new LocalGitRepository(path, processFactory);
+            IProcessFactory<IGitProcess> processFactory
+        ) => new LocalGitRepository(path, processFactory);
 
-        private IGitProcess CreateProcess(GitProcessOptions arguments) => processFactory.Create(WorkingDirectory, arguments);
+        private IGitProcess CreateProcess(ProcessOptions arguments) => processFactory.Create(WorkingDirectory, arguments);
     }
 }

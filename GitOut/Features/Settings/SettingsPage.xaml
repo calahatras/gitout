@@ -16,6 +16,32 @@
     x:Name="Root"
 >
     <UserControl.Resources>
+        <Style x:Key="InputTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MonoSpacedTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialGray300}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Input.Length}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="OutputTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MonoSpacedTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Output.Length}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ErrorTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MonoSpacedTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Foreground" Value="{DynamicResource Removed}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Error.Length}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="BackstageMenuStyle" TargetType="{x:Type Grid}">
             <Setter Property="MinWidth" Value="280" />
             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
@@ -60,37 +86,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
-    </UserControl.Resources>
-    <Grid Style="{StaticResource LayoutRootGridStyle}">
-        <DockPanel>
-            <Grid
-                DockPanel.Dock="Left"
-                Style="{StaticResource BackstageMenuStyle}"
-            >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid
-                    Margin="16"
-                    HorizontalAlignment="Left"
-                >
-                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{x:Static wpfcommands:Navigate.Back}" />
-                </Grid>
-
-                <ListBox
-                    x:Name="MenuItems"
-                    Grid.Row="1"
-                    ItemsSource="{Binding MenuItems}"
-                    MinWidth="160"
-                    Style="{StaticResource MaterialNavListStyle}"
-                />
-            </Grid>
+        <DataTemplate DataType="{x:Type local:GeneralSettingsViewModel}">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="1">
                 <Grid Margin="0 0 0 32">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
                     <StackPanel>
                         <Border Style="{StaticResource CardPanelStyle}">
                             <StackPanel>
@@ -170,14 +168,104 @@
                             <StackPanel>
                                 <TextBlock Text="Theme" Style="{StaticResource Header6TextStyle}" />
                                 <themes:ThemeSettingsPicker
-                                    SelectThemeCommand="{Binding SelectThemeCommand}"
-                                    ThemeSelected="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SettingsPage}}}"
+                                    SelectThemeCommand="{Binding ChangeThemeCommand}"
                                 />
                             </StackPanel>
                         </Border>
                     </StackPanel>
                 </Grid>
             </ScrollViewer>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ProcessSettingsViewModel}">
+            <ListView
+                Style="{StaticResource MaterialExpansionListStyle}"
+                SelectionMode="Single"
+                ItemsSource="{Binding Reports}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            >
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:ProcessEventArgsViewModel}">
+                        <Expander Style="{StaticResource MaterialExpansionStyle}">
+                            <Expander.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource MonoSpacedTextStyle}">
+                                        <Run Text="{Binding ProcessName, Mode=OneWay}" Foreground="{DynamicResource Changed}"/>
+                                        <Run Text="{Binding Arguments, Mode=OneWay}"/>
+                                        <LineBreak />
+                                        <Run Text="{Binding WorkingDirectory, Mode=OneWay}" Foreground="{DynamicResource MaterialGray400}" FontSize="10"/>
+                                    </TextBlock>
+                                    <TextBlock Grid.Column="1" Style="{StaticResource SmallTextStyle}" VerticalAlignment="Center">
+                                        <Run Text="{Binding StartTime, StringFormat={}{0:H:mm:ss}, Mode=OneWay}"/>
+                                        <LineBreak />
+                                        <Run Text="{Binding Duration, StringFormat={}{0:s\\.fff}s, Mode=OneWay}"/>
+                                    </TextBlock>
+                                    <Button
+                                        Margin="12 0 0 0"
+                                        Grid.Column="2"
+                                        Style="{StaticResource MaterialIconButtonStyle}"
+                                        Command="{Binding CopyCommand}"
+                                        ToolTip="Copy command"
+                                    >
+                                        <Canvas Width="24" Height="24">
+                                            <Canvas.LayoutTransform>
+                                                <ScaleTransform ScaleX=".75" ScaleY=".75" />
+                                            </Canvas.LayoutTransform>
+                                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                        </Canvas>
+                                    </Button>
+                                </Grid>
+                            </Expander.Header>
+                            <Expander.Content>
+                                <Border
+                                    Style="{StaticResource CardPanelStyle}"
+                                    MinWidth="200"
+                                    MaxHeight="600"
+                                    Margin="0"
+                                    Padding="0"
+                                    TextElement.Foreground="{DynamicResource MaterialForegroundBase}"
+                                >
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <StackPanel Margin="16" Background="Transparent">
+                                            <TextBox Style="{StaticResource InputTextBoxStyle}" AutomationProperties.HelpText="Input" Text="{Binding Input, Mode=OneWay}"/>
+                                            <TextBox Style="{StaticResource OutputTextBoxStyle}" AutomationProperties.HelpText="Output" Text="{Binding Output, Mode=OneWay}"/>
+                                            <TextBox Style="{StaticResource ErrorTextBoxStyle}" AutomationProperties.HelpText="Error" Text="{Binding Error, Mode=OneWay}"/>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Border>
+                            </Expander.Content>
+                        </Expander>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid Style="{StaticResource LayoutRootGridStyle}">
+        <DockPanel>
+            <Grid
+                DockPanel.Dock="Left"
+                Style="{StaticResource BackstageMenuStyle}"
+            >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Margin="16" HorizontalAlignment="Left">
+                    <Button Style="{StaticResource NavigateBackButtonStyle}" Command="{x:Static wpfcommands:Navigate.Back}" />
+                </Grid>
+                <ListBox
+                    x:Name="MenuItems"
+                    Grid.Row="1"
+                    ItemsSource="{Binding MenuItems}"
+                    MinWidth="160"
+                    Style="{StaticResource MaterialNavListStyle}"
+                />
+            </Grid>
+            <ContentControl Content="{Binding CurrentContent}" />
         </DockPanel>
     </Grid>
 </UserControl>

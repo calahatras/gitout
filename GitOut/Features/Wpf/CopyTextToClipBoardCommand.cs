@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -17,7 +16,7 @@ namespace GitOut.Features.Wpf
         public CopyTextToClipBoardCommand(Func<TArg, string> gettext)
             : this(gettext, o => true, null) { }
         public CopyTextToClipBoardCommand(Func<TArg, string> gettext, Func<TArg, bool> canexecute, Action<string>? onCopied)
-            : this(gettext, canexecute, TextDataFormat.Text, onCopied, null) { }
+            : this(gettext, canexecute, TextDataFormat.UnicodeText, onCopied, null) { }
         public CopyTextToClipBoardCommand(Func<TArg, string> gettext, Func<TArg, bool> canexecute, TextDataFormat format)
             : this(gettext, canexecute, format, null, null) { }
 

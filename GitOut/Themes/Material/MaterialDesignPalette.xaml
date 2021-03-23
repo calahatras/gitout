@@ -10,6 +10,7 @@
     <Color x:Key="MaterialGray500Color" A="255" R="158" G="158" B="158"/>
     <Color x:Key="MaterialGray800Color" A="255" R="66" G="66" B="66"/>
     <Color x:Key="MaterialGray900Color" A="255" R="33" G="33" B="33"/>
+    <Color x:Key="MaterialBackgroundDisabledColor" A="12" R="255" G="255" B="255"/>
     <Color x:Key="MaterialBackgroundHoverColor" A="16" R="255" G="255" B="255"/>
     <Color x:Key="MaterialBackgroundPressedColor" A="32" R="255" G="255" B="255"/>
 
