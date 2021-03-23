@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using GitOut.Features.Collections;
 using GitOut.Features.Git.Files;
+using GitOut.Features.IO;
 using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Git.Log
@@ -17,12 +19,14 @@ namespace GitOut.Features.Git.Log
     public class LogEntriesViewModel : INotifyPropertyChanged
     {
         private readonly GitTreeEvent? diff;
+        private readonly IGitRepository repository;
 
         private readonly CollectionViewSource currentSource;
+
+        private IEnumerable<IGitFileEntryViewModel> logFiles;
+        private readonly ILazyAsyncEnumerable<IGitFileEntryViewModel> allFiles;
         private readonly IEnumerable<IGitFileEntryViewModel> diffFiles;
         private readonly IEnumerable<IGitFileEntryViewModel> flattenedDiffFiles;
-
-        private readonly IEnumerable<IGitFileEntryViewModel> logFiles;
 
         private ICollectionView rootView;
         private IGitFileEntryViewModel? selectedItem;
@@ -31,7 +35,9 @@ namespace GitOut.Features.Git.Log
         public LogEntriesViewModel(GitTreeEvent root, IGitRepository repository)
         {
             Root = root;
+            this.repository = repository;
 
+            allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => ListAllFilesAsync(), IGitDirectoryEntryViewModel.CompareItems);
             var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.ListIdAsync(root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
             _ = logFiles.MaterializeAsync();
             this.logFiles = logFiles;
@@ -53,7 +59,10 @@ namespace GitOut.Features.Git.Log
             : this(root, repository) => this.diff = diff;
 
         public GitTreeEvent Root { get; }
+
         public string Subject => Root.Event.Subject;
+
+        public ILazyAsyncEnumerable<IGitFileEntryViewModel> AllFiles => allFiles;
 
         public ICollectionView RootFiles
         {
@@ -128,6 +137,59 @@ namespace GitOut.Features.Git.Log
             return context;
         }
 
+        private async IAsyncEnumerable<IGitFileEntryViewModel> ListAllFilesAsync()
+        {
+            IGitFileEntryViewModel? currentSelection = selectedItem;
+            IDictionary<string, DirectoryScaffold> tree = new Dictionary<string, DirectoryScaffold>();
+            int max = 0;
+            await foreach (GitFileEntry item in repository.ExecuteListTreeAsync(Root.Event.Id, DiffOptions.Builder().Recursive().Build()))
+            {
+                var viewModel = GitFileViewModel.Wrap(repository, item);
+                if (!tree.TryGetValue(item.Directory.Directory, out DirectoryScaffold? directory))
+                {
+                    directory = new DirectoryScaffold(item.Directory);
+                    tree.Add(item.Directory.Directory, directory);
+                    DirectoryScaffold current = directory;
+                    while (!current.IsRoot)
+                    {
+                        RelativeDirectoryPath parent = current.Path.Parent;
+                        if (tree.TryGetValue(parent.Directory, out DirectoryScaffold? parentDirectory))
+                        {
+                            parentDirectory.Add(current);
+                            break;
+                        }
+
+                        parentDirectory = new DirectoryScaffold(parent) { current };
+                        tree.Add(parent.Directory, parentDirectory);
+                        current = parentDirectory;
+                    }
+                    max = Math.Max(max, item.Directory.Segments.Count);
+                }
+                directory.Add(viewModel);
+                yield return viewModel;
+            }
+
+            // create directories
+            IEnumerable<DirectoryScaffold> available = tree.Values;
+            IGitDirectoryEntryViewModel root = NormalizeScaffold(available.Single(directory => directory.IsRoot));
+
+            currentSource.Source = logFiles = root;
+            RootFiles = currentSource.View;
+            SelectItem(currentSelection);
+
+            static IGitDirectoryEntryViewModel NormalizeScaffold(DirectoryScaffold scaffold) => new GitDirectoryViewModel(
+                scaffold.FileName,
+                scaffold.Path,
+                scaffold
+                    .OfType<DirectoryScaffold>()
+                    .Select(NormalizeScaffold)
+                    .Concat(scaffold
+                        .OfType<GitFileViewModel>()
+                        .Cast<IGitFileEntryViewModel>()
+                    )
+            );
+        }
+
         private void SelectItem(IGitFileEntryViewModel? entry)
         {
             if (entry is null || !(currentSource.Source is IEnumerable<IGitFileEntryViewModel> items))
@@ -156,6 +218,35 @@ namespace GitOut.Features.Git.Log
                 return true;
             }
             return false;
+        }
+
+        private class DirectoryScaffold : IGitDirectoryEntryViewModel
+        {
+            private readonly ICollection<IGitFileEntryViewModel> entries = new List<IGitFileEntryViewModel>();
+
+            public DirectoryScaffold(RelativeDirectoryPath directory)
+            {
+                Path = directory;
+                IsRoot = directory == RelativeDirectoryPath.Root;
+                Count = directory.Segments.Count;
+                FileName = directory.Name;
+            }
+
+            public RelativeDirectoryPath Path { get; }
+
+            public bool IsRoot { get; }
+
+            public int Count { get; }
+
+            public bool IsExpanded { get; set; }
+
+            public string FileName { get; }
+
+            public string IconResourceKey => throw new InvalidOperationException("Scaffold does not hold an icon");
+
+            public IEnumerator<IGitFileEntryViewModel> GetEnumerator() => entries.GetEnumerator();
+            internal void Add(IGitFileEntryViewModel entry) => entries.Add(entry);
+            IEnumerator IEnumerable.GetEnumerator() => entries.GetEnumerator();
         }
     }
 }

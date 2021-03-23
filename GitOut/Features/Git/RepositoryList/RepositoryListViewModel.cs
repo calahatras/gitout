@@ -1,33 +1,24 @@
 using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Collections;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Storage;
-using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 
 namespace GitOut.Features.Git.RepositoryList
 {
     public class RepositoryListViewModel : INavigationListener
     {
-        private readonly object repositoriesLock = new object();
-        private readonly ObservableCollection<IGitRepository> repositories = new ObservableCollection<IGitRepository>();
-
+        private readonly ICollection<IGitRepository> repositories = new SortedObservableCollection<IGitRepository>((a, b) => string.Compare(a.Name, b.Name, true));
         private readonly IDisposable subscription;
 
         public RepositoryListViewModel(
             INavigationService navigation,
-            IGitRepositoryStorage storage,
-            ISnackbarService snacks
+            IGitRepositoryStorage storage
         )
         {
-            BindingOperations.EnableCollectionSynchronization(repositories, repositoriesLock);
-            Repositories = CollectionViewSource.GetDefaultView(repositories);
-            Repositories.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
-
             NavigateToLogCommand = new NavigateLocalCommand<IGitRepository>(
                 navigation,
                 typeof(GitLogPage).FullName!,
@@ -37,28 +28,22 @@ namespace GitOut.Features.Git.RepositoryList
 
             subscription = storage.Repositories.Subscribe(finalList =>
             {
-                lock (repositoriesLock)
+                foreach (IGitRepository repo in finalList)
                 {
-                    foreach (IGitRepository repo in finalList)
+                    if (!repositories.Any(item => item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory)))
                     {
-                        if (!repositories.Any(item => item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory)))
-                        {
-                            repositories.Add(repo);
-                        }
+                        repositories.Add(repo);
                     }
-                    for (int i = 0; i < repositories.Count; ++i)
-                    {
-                        if (finalList.All(item => !item.WorkingDirectory.Directory.Equals(repositories[i].WorkingDirectory.Directory)))
-                        {
-                            repositories.RemoveAt(i--);
-                        }
-                    }
-                };
+                }
+                foreach (IGitRepository repo in repositories.Where(repo => finalList.All(item => !item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory))).ToList())
+                {
+                    repositories.Remove(repo);
+                }
             });
         }
 
-        public ICollectionView Repositories { get; }
         public ICommand NavigateToLogCommand { get; }
+        public IEnumerable<IGitRepository> Repositories => repositories;
 
         public void Navigated(NavigationType type)
         {
