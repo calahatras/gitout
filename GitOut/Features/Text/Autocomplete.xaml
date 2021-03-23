@@ -20,10 +20,25 @@
                 AutomationProperties.HelpText="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}"
             >
                 <TextBox.InputBindings>
-                    <KeyBinding Key="Enter" Command="{Binding OpenRecordCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}" CommandParameter="{Binding SelectedValue, ElementName=RecordsList}"/>
-                    <KeyBinding Key="Up" Command="{Binding DecreaseSelectionIndexCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}" CommandParameter="{Binding ElementName=RecordsList}"/>
-                    <KeyBinding Key="Down" Command="{Binding IncreaseSelectionIndexCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}" CommandParameter="{Binding ElementName=RecordsList}"/>
-                    <KeyBinding Key="Escape" Command="{Binding CancelCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}"/>
+                    <KeyBinding
+                        Key="Enter"
+                        Command="{Binding OpenRecordCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}"
+                        CommandParameter="{Binding SelectedValue, ElementName=RecordsList}"
+                    />
+                    <KeyBinding
+                        Key="Up"
+                        Command="{Binding DecreaseSelectionIndexCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}"
+                        CommandParameter="{Binding ElementName=RecordsList}"
+                    />
+                    <KeyBinding
+                        Key="Down"
+                        Command="{Binding IncreaseSelectionIndexCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}"
+                        CommandParameter="{Binding ElementName=RecordsList}"
+                    />
+                    <KeyBinding
+                        Key="Escape"
+                        Command="{Binding CancelCommand, RelativeSource={RelativeSource AncestorType={x:Type local:Autocomplete}}}"
+                    />
                 </TextBox.InputBindings>
             </TextBox>
         </Grid>
