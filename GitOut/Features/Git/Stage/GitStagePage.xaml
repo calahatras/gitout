@@ -239,7 +239,7 @@
                             Style="{StaticResource MaterialFormAreaStyle}"
                             Text="{Binding CommitMessage, UpdateSourceTrigger=PropertyChanged}"
                             FontSize="12"
-                            AutomationProperties.HelpText="Commit subject"
+                            AutomationProperties.HelpText="Commit message"
                         >
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Return" Modifiers="Shift" Command="{Binding CommitCommand}" />

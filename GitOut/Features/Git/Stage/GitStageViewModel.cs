@@ -64,7 +64,7 @@ namespace GitOut.Features.Git.Stage
             IndexFiles = CollectionViewSource.GetDefaultView(indexFiles);
 
             RefreshStatusCommand = new AsyncCallbackCommand(GetRepositoryStatusAsync);
-            CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage) && indexFiles.Count > 0);
+            CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage) && (indexFiles.Count > 0 || amendLastCommit));
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
             ResetWorkspaceFilesCommand = new AsyncCallbackCommand(ResetWorkspaceFilesAsync);
@@ -205,7 +205,9 @@ namespace GitOut.Features.Git.Stage
             try
             {
                 GitHistoryEvent head = await Repository.GetHeadAsync();
-                CommitMessage = head.Subject;
+                CommitMessage = string.IsNullOrEmpty(head.Body)
+                    ? head.Subject
+                    : $"{head.Subject}{Environment.NewLine}{Environment.NewLine}{head.Body}";
             }
             catch (InvalidOperationException) { }
         }
