@@ -358,9 +358,9 @@
                     <Button
                         Style="{StaticResource MaterialIconButtonStyle}"
                         Command="{Binding RefreshStatusCommand}"
-                        ToolTip="Refresh"
+                        ToolTip="Refresh log tree"
                     >
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderRefresh}"/>
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Refresh}"/>
                     </Button>
                     <Border Style="{StaticResource MaterialVerticalDivider}"/>
                     <Button
