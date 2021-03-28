@@ -55,8 +55,10 @@
             </StackPanel>
             <text:Autocomplete
                 Header="Search repository name"
+                SearchQuery="{Binding SearchQuery}"
                 ItemsSource="{Binding Repositories}"
                 QueryMatcher="{StaticResource RepositoryMatcher}"
+                CancelCommand="{Binding ClearCommand}"
                 ItemSelectedCommand="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
             >
                 <text:Autocomplete.Style>
