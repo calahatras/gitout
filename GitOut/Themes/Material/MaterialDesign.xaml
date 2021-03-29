@@ -974,7 +974,14 @@
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
+    <Storyboard x:Key="FlyInExitAnimation">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+            <DiscreteDoubleKeyFrame Value="0"/>
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
     <Style x:Key="FlyInOptionsPanelStyle" TargetType="{x:Type StackPanel}" BasedOn="{StaticResource OptionsPanelStyle}">
+        <Setter Property="Visibility" Value="Visible"/>
         <Setter Property="Opacity" Value="0" />
         <Setter Property="RenderTransform">
             <Setter.Value>
@@ -1013,14 +1020,45 @@
                 </EventTrigger.Actions>
             </EventTrigger>
             <EventTrigger RoutedEvent="FrameworkElement.Unloaded">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
-                            <DiscreteDoubleKeyFrame Value="0"/>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </BeginStoryboard>
+                <BeginStoryboard Storyboard="{StaticResource FlyInExitAnimation}"/>
             </EventTrigger>
+            <Trigger Property="Visibility" Value="Visible">
+                <Setter Property="Opacity" Value="0"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <TranslateTransform/>
+                    </Setter.Value>
+                </Setter>
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                Duration="0:0:0.3"
+                                From="0"
+                                To="1"
+                            >
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseIn"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(FrameworkElement.RenderTransform).(TranslateTransform.X)"
+                                Duration="0:0:0.3"
+                                From="24"
+                                To="0"
+                            >
+                                <DoubleAnimation.EasingFunction>
+                                    <ExponentialEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard Storyboard="{StaticResource FlyInExitAnimation}"/>
+                </Trigger.ExitActions>
+            </Trigger>
         </Style.Triggers>
     </Style>
 
