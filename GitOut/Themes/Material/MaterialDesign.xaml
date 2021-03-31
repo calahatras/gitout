@@ -12,6 +12,19 @@
     <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
 
+    <Style x:Key="MaterialVerticalDivider" TargetType="{x:Type Separator}">
+        <Setter Property="Margin" Value="4 4" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Separator}">
+                    <Grid Margin="{TemplateBinding Margin}">
+                        <Rectangle Width="1" Height="24" Fill="{DynamicResource MaterialLightDividers}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="MaterialToolbarHeaderStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="Margin" Value="8"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -899,12 +912,6 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="MaterialVerticalDivider" TargetType="{x:Type Border}">
-        <Setter Property="BorderThickness" Value="1 0" />
-        <Setter Property="BorderBrush" Value="{DynamicResource MaterialLightDividers}" />
-        <Setter Property="Margin" Value="8 4" />
-    </Style>
-
     <Style x:Key="MaterialHorizontalDivider" TargetType="{x:Type Border}">
         <Setter Property="BorderThickness" Value="0 1" />
         <Setter Property="BorderBrush" Value="{DynamicResource MaterialLightDividers}" />
@@ -973,99 +980,6 @@
                 />
             </Setter.Value>
         </Setter>
-    </Style>
-
-    <Style x:Key="OptionsPanelStyle" TargetType="{x:Type StackPanel}">
-        <Setter Property="Orientation" Value="Horizontal" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-
-    <Storyboard x:Key="FlyInExitAnimation">
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
-            <DiscreteDoubleKeyFrame Value="0"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
-
-    <Style x:Key="FlyInOptionsPanelStyle" TargetType="{x:Type StackPanel}" BasedOn="{StaticResource OptionsPanelStyle}">
-        <Setter Property="Visibility" Value="Visible"/>
-        <Setter Property="Opacity" Value="0" />
-        <Setter Property="RenderTransform">
-            <Setter.Value>
-                <TranslateTransform/>
-            </Setter.Value>
-        </Setter>
-        <Style.Triggers>
-            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                <EventTrigger.Actions>
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="Opacity"
-                                BeginTime="0:0:0.3"
-                                Duration="0:0:0.1"
-                                From="0.4"
-                                To="1"
-                            >
-                                <DoubleAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseOut"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="(FrameworkElement.RenderTransform).(TranslateTransform.X)"
-                                BeginTime="0:0:0.3"
-                                Duration="0:0:0.1"
-                                From="15"
-                                To="0"
-                            >
-                                <DoubleAnimation.EasingFunction>
-                                    <ExponentialEase EasingMode="EaseOut"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger.Actions>
-            </EventTrigger>
-            <EventTrigger RoutedEvent="FrameworkElement.Unloaded">
-                <BeginStoryboard Storyboard="{StaticResource FlyInExitAnimation}"/>
-            </EventTrigger>
-            <Trigger Property="Visibility" Value="Visible">
-                <Setter Property="Opacity" Value="0"/>
-                <Setter Property="RenderTransform">
-                    <Setter.Value>
-                        <TranslateTransform/>
-                    </Setter.Value>
-                </Setter>
-                <Trigger.EnterActions>
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="Opacity"
-                                Duration="0:0:0.3"
-                                From="0"
-                                To="1"
-                            >
-                                <DoubleAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseIn"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="(FrameworkElement.RenderTransform).(TranslateTransform.X)"
-                                Duration="0:0:0.3"
-                                From="24"
-                                To="0"
-                            >
-                                <DoubleAnimation.EasingFunction>
-                                    <ExponentialEase EasingMode="EaseOut"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </Trigger.EnterActions>
-                <Trigger.ExitActions>
-                    <BeginStoryboard Storyboard="{StaticResource FlyInExitAnimation}"/>
-                </Trigger.ExitActions>
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <ControlTemplate x:Key="ExpanderToggleButton" TargetType="{x:Type ToggleButton}">
@@ -1394,12 +1308,6 @@
                 <Setter Property="Height" Value="32"/>
             </Style>
         </Style.Resources>
-    </Style>
-
-    <Style x:Key="MaterialToolbarOptionsStyle" TargetType="{x:Type StackPanel}" BasedOn="{StaticResource FlyInOptionsPanelStyle}">
-        <Setter Property="Grid.Column" Value="1"/>
-        <Setter Property="Background" Value="#00000000"/>
-        <Setter Property="Margin" Value="16 10"/>
     </Style>
 
     <Style x:Key="MaterialCheckBoxStyle" TargetType="{x:Type CheckBox}">
@@ -2000,141 +1908,321 @@
         </Setter>
     </Style>
 
+    <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}">
+        <Setter Property="Background" Value="{DynamicResource MaterialGray800}" />
+        <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+        <Setter Property="FontFamily" Value="Roboto" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Padding" Value="0,8" />
+        <Setter Property="Grid.IsSharedSizeScope" Value="True" />
+    </Style>
+
+    <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Separator}">
+                    <Grid Margin="0 4">
+                        <Rectangle Height="1" Fill="{DynamicResource MaterialLightDividers}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <ControlTemplate x:Key="{x:Static MenuItem.TopLevelHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
+        <Border
+            x:Name="Bd"
+            Background="Transparent"
+            CornerRadius="3"
+            BorderThickness="1"
+            TextElement.Foreground="{DynamicResource MaterialForegroundBase}"
+            TextElement.FontSize="{TemplateBinding FontSize}"
+            TextElement.FontFamily="{TemplateBinding FontFamily}"
+            Height="32"
+            MinWidth="32"
+            MinHeight="32"
+        >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="32"  SharedSizeGroup="Icon" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
+                </Grid.ColumnDefinitions>
+                <ContentPresenter
+                    Name="Icon"
+                    ContentSource="Icon"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                />
+                <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
+                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" />
+                <Popup
+                    StaysOpen="True"
+                    x:Name="Popup"
+                    Placement="Bottom"
+                    IsOpen="{TemplateBinding IsSubmenuOpen}"
+                    AllowsTransparency="True"
+                    Focusable="False"
+                    PopupAnimation="Fade"
+                >
+                    <Grid>
+                        <Border
+                            x:Name="SubmenuBorder"
+                            Style="{StaticResource CardPanelStyle}"
+                            Margin="0 2"
+                            Padding="0 4"
+                            SnapsToDevicePixels="True"
+                        >
+                            <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </Popup>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialBackgroundHover}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource MaterialLightDisabledText}"/>
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="{DynamicResource MaterialBackgroundBackground}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="{x:Static MenuItem.TopLevelItemTemplateKey}" TargetType="{x:Type MenuItem}">
+        <Border Padding="12" Name="Border">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
+                    <ColumnDefinition Width="24" />
+                </Grid.ColumnDefinitions>
+                <Canvas Margin="6 0" Name="Icon" Width="24">
+                    <Canvas.RenderTransform>
+                        <ScaleTransform ScaleX=".75" ScaleY=".75"/>
+                    </Canvas.RenderTransform>
+                    <ContentPresenter VerticalAlignment="Center" ContentSource="Icon" />
+                </Canvas>
+                <Border
+                    Name="Check"
+                    Width="13"
+                    Height="24"
+                    Visibility="Collapsed"
+                    Background="{DynamicResource MaterialGray800}"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource MaterialGray200}"
+                >
+                    <Path
+                        Name="CheckMark"
+                        Visibility="Hidden"
+                        SnapsToDevicePixels="False"
+                        Stroke="{DynamicResource MaterialGray200}"
+                        StrokeThickness="2"
+                        Data="{StaticResource CheckBold}"
+                    />
+                </Border>
+                <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
+                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" />
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsCheckable" Value="True">
+                <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialGray700}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
+        <Border Padding="12" Name="Border">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+                    <ColumnDefinition Width="24" />
+                </Grid.ColumnDefinitions>
+                <Canvas Margin="6 0" Name="Icon" Width="24">
+                    <Canvas.RenderTransform>
+                        <ScaleTransform ScaleX=".75" ScaleY=".75"/>
+                    </Canvas.RenderTransform>
+                    <ContentPresenter VerticalAlignment="Center" ContentSource="Icon" />
+                </Canvas>
+                <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center"/>
+                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}"/>
+                <Canvas Grid.Column="3" Margin="6 0" Width="24">
+                    <Canvas.RenderTransform>
+                        <ScaleTransform ScaleX=".75" ScaleY=".75"/>
+                    </Canvas.RenderTransform>
+                    <Path Data="M10,17L15,12L10,7V17Z" Fill="{DynamicResource MaterialForegroundIcon}"/>
+                </Canvas>
+                <Popup
+                    Name="Popup"
+                    Placement="Right"
+                    HorizontalOffset="7"
+                    VerticalOffset="-17"
+                    IsOpen="{TemplateBinding IsSubmenuOpen}"
+                    AllowsTransparency="True"
+                    Focusable="False"
+                    PopupAnimation="Fade"
+                >
+                    <Grid>
+                        <Border
+                            x:Name="SubmenuBorder"
+                            Style="{StaticResource CardPanelStyle}"
+                            Margin="5 2"
+                            Padding="0 4"
+                            SnapsToDevicePixels="True"
+                        >
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Border>
+                    </Grid>
+                </Popup>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialBackgroundHover}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type MenuItem}">
+        <Border Padding="12" Name="Border">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
+                    <ColumnDefinition Width="24" />
+                </Grid.ColumnDefinitions>
+                <Canvas Margin="6 0" Name="Icon" Width="24">
+                    <Canvas.RenderTransform>
+                        <ScaleTransform ScaleX=".75" ScaleY=".75"/>
+                    </Canvas.RenderTransform>
+                    <ContentPresenter VerticalAlignment="Center" ContentSource="Icon" />
+                </Canvas>
+                <Border
+                    Name="Check"
+                    Width="13"
+                    Height="24"
+                    Visibility="Collapsed"
+                    Background="{DynamicResource MaterialGray800}"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource MaterialGray200}"
+                >
+                    <Path
+                        Name="CheckMark"
+                        Visibility="Hidden"
+                        SnapsToDevicePixels="False"
+                        Stroke="{DynamicResource MaterialGray200}"
+                        StrokeThickness="2"
+                        Data="{StaticResource CheckBold}"
+                    />
+                </Border>
+                <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
+                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" />
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsCheckable" Value="True">
+                <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialGray700}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="{x:Type Menu}" TargetType="{x:Type Menu}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Foreground" Value="{DynamicResource MaterialLightPrimaryText}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontFamily" Value="Roboto"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Menu}">
+                    <Border
+                        x:Name="Border"
+                        Margin="0 12"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource MaterialLightDividers}"
+                    >
+                        <StackPanel ClipToBounds="True" Orientation="Horizontal" IsItemsHost="True" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Resources>
+            <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                <Setter Property="OverridesDefaultStyle" Value="True" />
+                <Style.Triggers>
+                    <Trigger Property="Role" Value="TopLevelHeader">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelHeaderTemplateKey}}" />
+                    </Trigger>
+                    <Trigger Property="Role" Value="TopLevelItem">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelItemTemplateKey}}" />
+                    </Trigger>
+                    <Trigger Property="Role" Value="SubmenuHeader">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuHeaderTemplateKey}}" />
+                    </Trigger>
+                    <Trigger Property="Role" Value="SubmenuItem">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuItemTemplateKey}}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Style.Resources>
+    </Style>
+
     <Style x:Key="{x:Type ContextMenu}" TargetType="{x:Type ContextMenu}">
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="OverridesDefaultStyle" Value="True" />
-        <Setter Property="Grid.IsSharedSizeScope" Value="true" />
+        <Setter Property="Grid.IsSharedSizeScope" Value="True" />
         <Setter Property="HasDropShadow" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
                     <ControlTemplate.Resources>
-                        <!-- Separator -->
-                        <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
-                            <Setter Property="Height" Value="1" />
-                            <Setter Property="Background" Value="{DynamicResource MaterialGray800}" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type Separator}">
-                                        <Rectangle Height="{TemplateBinding Height}" Fill="{DynamicResource MaterialLightDividers}" />
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-
-                        <!-- SubmenuItem -->
-                        <ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type MenuItem}">
-                            <Border Padding="12" Name="Border">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
-                                        <ColumnDefinition Width="13" />
-                                    </Grid.ColumnDefinitions>
-                                    <ContentPresenter Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon" />
-                                    <Border
-                                        Name="Check"
-                                        Width="13"
-                                        Height="20"
-                                        Visibility="Collapsed"
-                                        Background="{DynamicResource MaterialGray800}"
-                                        BorderThickness="1"
-                                        BorderBrush="{DynamicResource MaterialGray200}"
-                                    >
-                                        <Path
-                                            Name="CheckMark"
-                                            Width="7"
-                                            Height="7"
-                                            Visibility="Hidden"
-                                            SnapsToDevicePixels="False"
-                                            Stroke="{DynamicResource MaterialGray200}"
-                                            StrokeThickness="2"
-                                            Data="{StaticResource CheckBold}"
-                                        />
-                                    </Border>
-                                    <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
-                                    <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" />
-                                </Grid>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="Icon" Value="{x:Null}">
-                                    <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="true">
-                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
-                                </Trigger>
-                                <Trigger Property="IsCheckable" Value="true">
-                                    <Setter TargetName="Check" Property="Visibility" Value="Visible" />
-                                    <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
-                                </Trigger>
-                                <Trigger Property="IsHighlighted" Value="true">
-                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialGray700}" />
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="false">
-                                    <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-
-                        <!-- SubmenuHeader -->
-                        <ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
-                            <Border Name="Border" Padding="12">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
-                                        <ColumnDefinition Width="24" />
-                                    </Grid.ColumnDefinitions>
-                                    <ContentPresenter Name="Icon" VerticalAlignment="Center" ContentSource="Icon" />
-                                    <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
-                                    <TextBlock
-                                        x:Name="InputGestureText"
-                                        Grid.Column="2"
-                                        Text="{TemplateBinding InputGestureText}"
-                                    />
-                                    <Path
-                                        Grid.Column="3"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Top"
-                                        Data="M10,12L15,7L10,2V12Z"
-                                        Fill="{DynamicResource MaterialForegroundIcon}"
-                                    />
-                                    <Popup
-                                        Name="Popup"
-                                        Placement="Right"
-                                        HorizontalOffset="-4"
-                                        IsOpen="{TemplateBinding IsSubmenuOpen}"
-                                        AllowsTransparency="True"
-                                        Focusable="False"
-                                        PopupAnimation="Fade"
-                                    >
-                                        <Border
-                                            Name="SubmenuBorder"
-                                            SnapsToDevicePixels="True"
-                                            Background="{DynamicResource MaterialGray800}"
-                                            BorderBrush="{DynamicResource MaterialGray800}"
-                                            BorderThickness="1"
-                                        >
-                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
-                                        </Border>
-                                    </Popup>
-                                </Grid>
-                            </Border>
-
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="Icon" Value="{x:Null}">
-                                    <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
-                                </Trigger>
-                                <Trigger Property="IsHighlighted" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialGray700}" />
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
                     </ControlTemplate.Resources>
 
                     <Border
@@ -2164,15 +2252,219 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Resources>
+            <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                <Setter Property="OverridesDefaultStyle" Value="True" />
+                <Style.Triggers>
+                    <Trigger Property="Role" Value="TopLevelHeader">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelHeaderTemplateKey}}" />
+                    </Trigger>
+                    <Trigger Property="Role" Value="TopLevelItem">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelItemTemplateKey}}" />
+                    </Trigger>
+                    <Trigger Property="Role" Value="SubmenuHeader">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuHeaderTemplateKey}}" />
+                    </Trigger>
+                    <Trigger Property="Role" Value="SubmenuItem">
+                        <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuItemTemplateKey}}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Style.Resources>
     </Style>
 
-    <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}">
-        <Setter Property="Background" Value="{DynamicResource MaterialGray800}" />
-        <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
-        <Setter Property="FontFamily" Value="Roboto" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Margin" Value="0" />
-        <Setter Property="Padding" Value="0,8" />
+    <Style x:Key="ToolBarThumbStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Cursor" Value="SizeAll" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border
+                        Background="Transparent"
+                        SnapsToDevicePixels="True"
+                        VerticalAlignment="Center"
+                        IsHitTestVisible="True"
+                    >
+                        <Canvas Width="24" Height="24">
+                            <Rectangle Fill="Transparent" Width="24" Height="24"/>
+                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource DragVertical}"/>
+                        </Canvas>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Storyboard x:Key="FlyInExitAnimation">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+            <DiscreteDoubleKeyFrame Value="0"/>
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <Style x:Key="MaterialToolBarStyle" TargetType="{x:Type ToolBar}">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToolBar}">
+                    <DockPanel>
+                        <Thumb x:Name="ToolBarThumb" Style="{StaticResource ToolBarThumbStyle}" DockPanel.Dock="Left" ToolTip="Drag to move" />
+                        <ToggleButton
+                            x:Name="Overflow"
+                            DockPanel.Dock="Right"
+                            ClickMode="Press"
+                            IsChecked="{Binding IsOverflowOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                            Style="{StaticResource MaterialIconToggleButtonStyle}"
+                        >
+                            <Grid Width="22">
+                                <Path
+                                    x:Name="Arrow"
+                                    Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource AncestorType={x:Type ContentPresenter}}}"
+                                    Data="{StaticResource DotsVertical}"
+                                />
+                                <Popup
+                                    x:Name="OverflowPopup"
+                                    AllowsTransparency="True"
+                                    Placement="Bottom"
+                                    StaysOpen="False"
+                                    Focusable="False"
+                                    PopupAnimation="Slide"
+                                    IsOpen="{Binding IsOverflowOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                >
+                                    <Border
+                                        x:Name="DropDownBorder"
+                                        CornerRadius="3"
+                                        BorderThickness="1"
+                                        BorderBrush="{DynamicResource MaterialDarkDividers}"
+                                    >
+                                        <ToolBarOverflowPanel
+                                            x:Name="PART_ToolBarOverflowPanel"
+                                            Margin="2"
+                                            WrapWidth="200"
+                                            Focusable="true"
+                                            FocusVisualStyle="{x:Null}"
+                                            KeyboardNavigation.TabNavigation="Cycle"
+                                            KeyboardNavigation.DirectionalNavigation="Cycle"
+                                        />
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </ToggleButton>
+                        <ToolBarPanel x:Name="PART_ToolBarPanel" IsItemsHost="True"/>
+                    </DockPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsOverflowOpen" Value="True">
+                            <Setter TargetName="ToolBarThumb" Property="IsEnabled" Value="False" />
+                        </Trigger>
+                        <Trigger Property="HasOverflowItems" Value="False">
+                            <Setter TargetName="Overflow" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="ToolBarTray.IsLocked" Value="True">
+                            <Setter TargetName="ToolBarThumb" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Resources>
+            <Style x:Key="{x:Static ToolBar.SeparatorStyleKey}" TargetType="{x:Type Separator}" BasedOn="{StaticResource MaterialVerticalDivider}"/>
+            <Style x:Key="{x:Static ToolBar.ButtonStyleKey}" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}"/>
+            <Style x:Key="{x:Static ToolBar.ToggleButtonStyleKey}" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialIconToggleButtonStyle}"/>
+            <Style x:Key="{x:Static ToolBar.MenuStyleKey}" TargetType="{x:Type Menu}" BasedOn="{StaticResource {x:Type Menu}}"/>
+        </Style.Resources>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                <EventTrigger.Actions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                BeginTime="0:0:0.3"
+                                Duration="0:0:0.1"
+                                From="0.4"
+                                To="1"
+                            >
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(FrameworkElement.RenderTransform).(TranslateTransform.X)"
+                                BeginTime="0:0:0.3"
+                                Duration="0:0:0.1"
+                                From="15"
+                                To="0"
+                            >
+                                <DoubleAnimation.EasingFunction>
+                                    <ExponentialEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger.Actions>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="FrameworkElement.Unloaded">
+                <BeginStoryboard Storyboard="{StaticResource FlyInExitAnimation}"/>
+            </EventTrigger>
+            <Trigger Property="Visibility" Value="Visible">
+                <Setter Property="Opacity" Value="0"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <TranslateTransform/>
+                    </Setter.Value>
+                </Setter>
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                Duration="0:0:0.3"
+                                From="0"
+                                To="1"
+                            >
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseIn"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(FrameworkElement.RenderTransform).(TranslateTransform.X)"
+                                Duration="0:0:0.3"
+                                From="24"
+                                To="0"
+                            >
+                                <DoubleAnimation.EasingFunction>
+                                    <ExponentialEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard Storyboard="{StaticResource FlyInExitAnimation}"/>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MaterialToolbarTrayStyle" TargetType="{x:Type ToolBarTray}">
+        <Setter Property="Grid.Column" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="IsLocked" Value="False"/>
+        <Setter Property="Margin" Value="16 0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Style.Resources>
+            <Style x:Key="{x:Type ToolBar}" TargetType="{x:Type ToolBar}" BasedOn="{StaticResource MaterialToolBarStyle}"/>
+        </Style.Resources>
     </Style>
 
     <Style x:Key="{x:Type ToolTip}" TargetType="ToolTip">

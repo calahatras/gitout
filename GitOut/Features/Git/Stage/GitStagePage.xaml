@@ -73,31 +73,38 @@
         </Grid.RowDefinitions>
         <Grid Style="{StaticResource MaterialToolbarStyle}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button
-                Style="{StaticResource MaterialButtonStyle}"
-                Command="{x:Static wpfcommands:Navigate.Back}"
-                ToolTip="Back"
-            >
-                <Path Height="24" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowLeft}"/>
-            </Button>
-            <TextBlock Grid.Column="1" Text="Stage" Style="{StaticResource MaterialToolbarHeaderStyle}"/>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Style="{StaticResource MaterialToolbarOptionsStyle}">
-                <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding UndoPatchCommand}" ToolTip="Undo patch">
-                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource UndoVariant}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button
+                    Style="{StaticResource MaterialButtonStyle}"
+                    Command="{x:Static wpfcommands:Navigate.Back}"
+                    ToolTip="Back"
+                >
+                    <Path Height="24" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowLeft}"/>
                 </Button>
-                <Border Style="{StaticResource MaterialVerticalDivider}"/>
-                <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
-                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
-                </ToggleButton>
-                <Border Style="{StaticResource MaterialVerticalDivider}"/>
-                <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
-                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileRefresh}"/>
-                </Button>
-            </StackPanel>
+                <TextBlock Grid.Column="1" Text="Stage" Style="{StaticResource MaterialToolbarHeaderStyle}"/>
+            </Grid>
+            <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
+                <ToolBar>
+                    <Button Command="{Binding UndoPatchCommand}" ToolTip="Undo patch">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource UndoVariant}"/>
+                    </Button>
+                    <Separator/>
+                    <ToggleButton IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
+                    </ToggleButton>
+                    <Separator/>
+                    <Button Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileRefresh}"/>
+                    </Button>
+                </ToolBar>
+            </ToolBarTray>
         </Grid>
         <Grid
             Grid.Row="2"
