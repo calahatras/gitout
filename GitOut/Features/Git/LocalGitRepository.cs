@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GitOut.Features.Diagnostics;
@@ -361,6 +362,15 @@ namespace GitOut.Features.Git
         public Task ExecuteAddAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"add {change.Path}")).ExecuteAsync();
 
         public Task ExecuteCheckoutAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
+
+        public async Task ExecuteCheckoutBranchAsync(GitBranchName name)
+        {
+            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"checkout -b {name.Name}")).ExecuteAsync();
+            if (args.ErrorLines.Count > 0 && !args.ErrorLines.First().StartsWith("Switched to a new branch"))
+            {
+                throw new InvalidOperationException($"Could not create branch: {args.Error}");
+            }
+        }
 
         public Task ExecuteResetAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
 

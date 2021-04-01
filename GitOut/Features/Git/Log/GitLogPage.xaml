@@ -310,6 +310,45 @@
                             </Border>
                         </Grid>
                     </Popup>
+                    <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsCheckoutBranchVisible}" ToolTip="Checkout branch">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource SourceBranchPlus}"/>
+                    </ToggleButton>
+                    <Popup
+                        StaysOpen="False"
+                        AllowsTransparency="True"
+                        IsOpen="{Binding IsCheckoutBranchVisible}"
+                        PopupAnimation="Fade"
+                        Placement="Bottom"
+                    >
+                        <Grid>
+                            <Border Style="{StaticResource CardPanelStyle}" MinWidth="400" Margin="16 8" Padding="16">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox
+                                        Style="{StaticResource MaterialInputStyle}"
+                                        AutomationProperties.HelpText="Branch name"
+                                        x:Name="BranchName"
+                                    />
+                                    <StackPanel VerticalAlignment="Top" Grid.Column="1" Style="{StaticResource FlyInOptionsPanelStyle}">
+                                        <Button
+                                            Style="{StaticResource MaterialButtonStyle}"
+                                            Content="SWITCH"
+                                            Command="{Binding CheckoutBranchCommand}"
+                                            CommandParameter="{Binding Text, ElementName=BranchName}"
+                                        />
+                                    </StackPanel>
+                                    <TextBlock Grid.Row="1" Style="{StaticResource HintTextStyle}" Text="Branch will be created from HEAD"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Popup>
                     <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
                     </ToggleButton>
