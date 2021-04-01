@@ -92,12 +92,15 @@ namespace GitOut.Features.Git
             IList<GitHistoryEvent> history = new List<GitHistoryEvent>();
             IGitHistoryEventBuilder builder = GitHistoryEvent.Builder();
             int state = 0;
-            var argumentBuilder = new StringBuilder("-c log.showSignature=false log -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" --branches");
+            IProcessOptionsBuilder processOptionsBuilder = ProcessOptions
+                .Builder()
+                .AppendRange("-c", "log.showSignature=false", "log", "-z", "--date-order", "--pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\"", "--branches");
+
             if (options.IncludeRemotes)
             {
-                argumentBuilder.Append(" --remotes");
+                processOptionsBuilder.Append(" --remotes");
             }
-            IGitProcess log = CreateProcess(ProcessOptions.FromArguments(argumentBuilder.ToString()));
+            IGitProcess log = CreateProcess(processOptionsBuilder.Build());
             await foreach (string line in log.ReadLinesAsync())
             {
                 switch (state)
