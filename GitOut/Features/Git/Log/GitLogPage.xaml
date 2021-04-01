@@ -170,10 +170,10 @@
             </Grid.ColumnDefinitions>
             <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
 
-            <StackPanel Style="{StaticResource MaterialToolbarOptionsStyle}">
-                <StackPanel>
-                    <StackPanel.Style>
-                        <Style TargetType="{x:Type StackPanel}" BasedOn="{StaticResource FlyInOptionsPanelStyle}">
+            <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
+                <ToolBar>
+                    <ToolBar.Style>
+                        <Style TargetType="{x:Type ToolBar}" BasedOn="{StaticResource MaterialToolBarStyle}">
                             <Setter Property="Visibility" Value="Hidden"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ViewMode}" Value="Files">
@@ -181,21 +181,21 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </StackPanel.Style>
-                    <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsSearchDisplayed}" ToolTip="Search file">
+                    </ToolBar.Style>
+                    <ToggleButton IsChecked="{Binding IsSearchDisplayed}" ToolTip="Search file">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileSearch}"/>
                     </ToggleButton>
-                    <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding ShowSpacesAsDots}" ToolTip="Show spaces as dots">
+                    <ToggleButton IsChecked="{Binding ShowSpacesAsDots}" ToolTip="Show spaces as dots">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CircleSmall}"/>
                     </ToggleButton>
-                    <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                    <Separator Style="{StaticResource MaterialVerticalDivider}"/>
                     <TextBlock Style="{StaticResource ToolbarSecondaryTextStyle}" VerticalAlignment="Center" Text="Files" />
                     <ItemsControl Style="{StaticResource MaterialToggleButtonGroupStyle}">
                         <ToggleButton IsChecked="{Binding ShowRevisionAtCurrent}" ToolTip="Show current files as tree">
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileTree}"/>
                         </ToggleButton>
                     </ItemsControl>
-                    <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                    <Separator Style="{StaticResource MaterialVerticalDivider}"/>
                     <TextBlock Style="{StaticResource ToolbarSecondaryTextStyle}" VerticalAlignment="Center" Text="Diff" />
                     <ItemsControl Style="{StaticResource MaterialToggleButtonGroupStyle}">
                         <ToggleButton IsChecked="{Binding ShowRevisionDiff}" ToolTip="Show diff as tree">
@@ -205,44 +205,20 @@
                             <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FormatListBullet}"/>
                         </ToggleButton>
                     </ItemsControl>
-                </StackPanel>
-                <Popup
-                    AllowsTransparency="True"
-                    IsOpen="{Binding IsSearchDisplayed}"
-                    PopupAnimation="None"
-                    Placement="Left"
-                    VerticalOffset="56"
-                >
-                    <Border Style="{StaticResource CardPanelStyle}" Margin="16" MinWidth="280" MaxHeight="800">
-                        <text:Autocomplete
-                            Header="Filename"
-                            ItemsSource="{Binding SelectedContext.AllFiles}"
-                            QueryMatcher="{StaticResource FileNameQueryMatcher}"
-                            CancelCommand="{Binding CloseAutocompleteCommand}"
-                            ItemSelectedCommand="{Binding SelectedContext.SelectFileCommand}"
-                        >
-                            <text:Autocomplete.ItemTemplate>
-                                <DataTemplate DataType="{x:Type git:GitFileEntry}">
-                                    <TextBlock Text="{Binding FileName}" Style="{StaticResource NormalTextStyle}" />
-                                </DataTemplate>
-                            </text:Autocomplete.ItemTemplate>
-                        </text:Autocomplete>
-                    </Border>
-                </Popup>
-
-                <StackPanel Orientation="Horizontal">
+                </ToolBar>
+                <ToolBar>
                     <Button
-                        Style="{StaticResource MaterialIconButtonStyle}"
                         Command="{Binding CopyContentCommand}"
                         ToolTip="Copy path"
                     >
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
                     </Button>
-                    <Border Style="{StaticResource MaterialVerticalDivider}"/>
-                    <ToggleButton x:Name="Remotes" Style="{StaticResource MaterialIconToggleButtonStyle}" ToolTip="Remotes">
+                    <Separator />
+                    <ToggleButton x:Name="Remotes" ToolBar.OverflowMode="Never" ToolTip="Remotes">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource DownloadNetworkOutline}"/>
                     </ToggleButton>
                     <Popup
+                        ToolBar.OverflowMode="Never"
                         StaysOpen="False"
                         AllowsTransparency="True"
                         IsOpen="{Binding IsChecked, ElementName=Remotes}"
@@ -310,7 +286,7 @@
                             </Border>
                         </Grid>
                     </Popup>
-                    <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsCheckoutBranchVisible}" ToolTip="Checkout branch">
+                    <ToggleButton IsChecked="{Binding IsCheckoutBranchVisible}" ToolTip="Checkout branch">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource SourceBranchPlus}"/>
                     </ToggleButton>
                     <Popup
@@ -336,7 +312,7 @@
                                         AutomationProperties.HelpText="Branch name"
                                         x:Name="BranchName"
                                     />
-                                    <StackPanel VerticalAlignment="Top" Grid.Column="1" Style="{StaticResource FlyInOptionsPanelStyle}">
+                                    <StackPanel VerticalAlignment="Top" Grid.Column="1">
                                         <Button
                                             Style="{StaticResource MaterialButtonStyle}"
                                             Content="SWITCH"
@@ -349,22 +325,22 @@
                             </Border>
                         </Grid>
                     </Popup>
-                    <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
+                    <ToggleButton ToolBar.OverflowMode="AsNeeded" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
                     </ToggleButton>
-                    <ToggleButton Style="{StaticResource MaterialIconToggleButtonStyle}" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
+                    <ToggleButton ToolBar.OverflowMode="AsNeeded" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
                     </ToggleButton>
                     <Button
-                        Style="{StaticResource MaterialIconButtonStyle}"
+                        ToolBar.OverflowMode="Never"
                         Command="{Binding RefreshStatusCommand}"
                         ToolTip="Refresh log tree"
                     >
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Refresh}"/>
                     </Button>
-                    <Border Style="{StaticResource MaterialVerticalDivider}"/>
+                    <Separator Style="{StaticResource MaterialVerticalDivider}"/>
                     <Button
-                        Style="{StaticResource MaterialIconButtonStyle}"
+                        ToolBar.OverflowMode="Never"
                         Command="{Binding NavigateToStageAreaCommand}"
                         ToolTip="Open stage area"
                     >
@@ -375,8 +351,8 @@
                             </Border>
                         </Grid>
                     </Button>
-                </StackPanel>
-            </StackPanel>
+                </ToolBar>
+            </ToolBarTray>
         </Grid>
         <Grid
             Grid.Row="1"
@@ -565,6 +541,28 @@
                     RootFiles="{Binding SelectedContext.RootFiles, Mode=OneWay}"
                     SelectedItem="{Binding SelectedContext.SelectedItem, Mode=TwoWay}"
                 />
+                <Popup
+                    AllowsTransparency="True"
+                    IsOpen="{Binding IsSearchDisplayed}"
+                    PopupAnimation="None"
+                    Placement="Left"
+                >
+                    <Border Style="{StaticResource CardPanelStyle}" Margin="16" MinWidth="280" MaxHeight="800">
+                        <text:Autocomplete
+                            Header="Filename"
+                            ItemsSource="{Binding SelectedContext.AllFiles}"
+                            QueryMatcher="{StaticResource FileNameQueryMatcher}"
+                            CancelCommand="{Binding CloseAutocompleteCommand}"
+                            ItemSelectedCommand="{Binding SelectedContext.SelectFileCommand}"
+                        >
+                            <text:Autocomplete.ItemTemplate>
+                                <DataTemplate DataType="{x:Type git:GitFileEntry}">
+                                    <TextBlock Text="{Binding FileName}" Style="{StaticResource NormalTextStyle}" />
+                                </DataTemplate>
+                            </text:Autocomplete.ItemTemplate>
+                        </text:Autocomplete>
+                    </Border>
+                </Popup>
             </Grid>
             <GridSplitter Grid.Column="5" Style="{StaticResource SplitVerticalStyle}" />
             <Grid Grid.Column="6">
