@@ -14,6 +14,7 @@
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:attached="clr-namespace:GitOut.Features.Wpf.AttachedProperties"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d" 
     d:DataContext="{d:DesignInstance Type={x:Type local:GitLogViewModel}}"
     d:DesignHeight="450"
@@ -168,7 +169,20 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button
+                    Style="{StaticResource MaterialButtonStyle}"
+                    Command="{x:Static wpfcommands:Navigate.Back}"
+                    ToolTip="Back"
+                >
+                    <Path Height="24" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowLeft}"/>
+                </Button>
+                <TextBlock Grid.Column="1" Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
+            </Grid>
 
             <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
                 <ToolBar>
