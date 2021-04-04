@@ -102,6 +102,7 @@ namespace GitOut.Features.Git.Log
                 name => GitBranchName.IsValid(name)
             );
 
+            RevealInExplorerCommand = new CallbackCommand(() => Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose());
             CopyContentCommand = new CopyTextToClipBoardCommand<object>(
                 d => Repository.WorkingDirectory.Directory,
                 d => true,
@@ -249,6 +250,7 @@ namespace GitOut.Features.Git.Log
         public ICommand RefreshStatusCommand { get; }
         public ICommand FetchRemotesCommand { get; }
         public ICommand CheckoutBranchCommand { get; }
+        public ICommand RevealInExplorerCommand { get; }
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }

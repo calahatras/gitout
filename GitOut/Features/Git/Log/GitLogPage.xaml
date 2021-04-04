@@ -207,12 +207,26 @@
                     </ItemsControl>
                 </ToolBar>
                 <ToolBar>
-                    <Button
-                        Command="{Binding CopyContentCommand}"
-                        ToolTip="Copy path"
-                    >
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                    </Button>
+                    <Menu ToolBar.OverflowMode="AsNeeded">
+                        <MenuItem ToolTip="Explorer">
+                            <MenuItem.Icon>
+                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Folder}"/>
+                            </MenuItem.Icon>
+                            <MenuItem.Items>
+                                <MenuItem Header="Reveal in Explorer" Command="{Binding RevealInExplorerCommand}">
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Folder}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator/>
+                                <MenuItem Header="Copy path" Command="{Binding CopyContentCommand}">
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuItem.Items>
+                        </MenuItem>
+                    </Menu>
                     <Separator />
                     <ToggleButton x:Name="Remotes" ToolBar.OverflowMode="Never" ToolTip="Remotes">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource DownloadNetworkOutline}"/>

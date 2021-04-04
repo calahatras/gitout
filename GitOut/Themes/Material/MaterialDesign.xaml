@@ -2185,6 +2185,7 @@
                     <Border
                         x:Name="Border"
                         Margin="0 12"
+                        CornerRadius="4"
                         BorderThickness="1"
                         BorderBrush="{DynamicResource MaterialLightDividers}"
                     >
