@@ -5,6 +5,8 @@ namespace GitOut.Features.Navigation
         None,
         Initial,
         NavigatedBack,
-        NavigatedLeave
+        NavigatedLeave,
+        Activated,
+        Deactivated,
     }
 }

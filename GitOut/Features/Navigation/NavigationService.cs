@@ -131,6 +131,26 @@ namespace GitOut.Features.Navigation
                         {
                             currentWindow.Left = cachedValues.Left.Value;
                         }
+                        currentWindow.Activated += (sender, args) =>
+                        {
+                            if (pageStack.Count == 0)
+                            {
+                                return;
+                            }
+                            (ContentControl current, string? title, IServiceScope _) = pageStack.Peek();
+                            if (current.DataContext is INavigationListener listener)
+                            {
+                                listener.Navigated(NavigationType.Activated);
+                            }
+                        };
+                        currentWindow.Deactivated += (sender, args) =>
+                        {
+                            (ContentControl current, string? title, IServiceScope _) = pageStack.Peek();
+                            if (current.DataContext is INavigationListener listener)
+                            {
+                                listener.Navigated(NavigationType.Deactivated);
+                            }
+                        };
                         currentWindow.Closing += (sender, args) =>
                         {
                             if (currentWindow.WindowState == WindowState.Normal)

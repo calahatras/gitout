@@ -23,6 +23,7 @@ namespace GitOut.Features.Git.Stage
     {
         private readonly ISnackbarService snack;
         private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
+        private readonly FileSystemWatcher repositoryWatcher;
 
         private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
         private readonly object workspaceFilesLock = new();
@@ -37,6 +38,8 @@ namespace GitOut.Features.Git.Stage
 
         private bool diffWhitespace;
         private bool amendLastCommit;
+        private bool hasChanges = false;
+        private bool selectedFileHasChanges = false;
 
         private string commitMessage = string.Empty;
         private string cachedCommitMessage = string.Empty;
@@ -57,6 +60,17 @@ namespace GitOut.Features.Git.Stage
             this.stagingOptions = stagingOptions;
             Repository = options.Repository;
             ShowSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
+
+            repositoryWatcher = new FileSystemWatcher(Repository.WorkingDirectory.Directory)
+            {
+                IncludeSubdirectories = true,
+                NotifyFilter = NotifyFilters.LastWrite
+                    | NotifyFilters.CreationTime
+                    | NotifyFilters.FileName
+            };
+            repositoryWatcher.Changed += OnFileSystemChanges;
+            repositoryWatcher.Created += OnFileSystemChanges;
+            repositoryWatcher.Deleted += OnFileSystemChanges;
 
             BindingOperations.EnableCollectionSynchronization(workspaceFiles, workspaceFilesLock);
             WorkspaceFiles = CollectionViewSource.GetDefaultView(workspaceFiles);
@@ -185,10 +199,43 @@ namespace GitOut.Features.Git.Stage
 
         public async void Navigated(NavigationType type)
         {
-            if (type == NavigationType.Initial)
+            switch (type)
             {
-                await GetRepositoryStatusAsync();
+                case NavigationType.Initial:
+                    await GetRepositoryStatusAsync();
+                    break;
+                case NavigationType.NavigatedLeave:
+                    repositoryWatcher.Changed -= OnFileSystemChanges;
+                    repositoryWatcher.Created -= OnFileSystemChanges;
+                    repositoryWatcher.Deleted -= OnFileSystemChanges;
+                    repositoryWatcher.Dispose();
+                    break;
+                case NavigationType.Deactivated:
+                    repositoryWatcher.EnableRaisingEvents = true;
+                    break;
+                case NavigationType.Activated:
+                    {
+                        repositoryWatcher.EnableRaisingEvents = false;
+                        if (hasChanges)
+                        {
+                            ParseStatus(await Repository.ExecuteStatusAsync());
+                        }
+                        if (selectedFileHasChanges)
+                        {
+                            await ExecuteDiffAsync();
+                        }
+                        hasChanges = selectedFileHasChanges = false;
+                    }
+                    break;
             }
+        }
+
+        private void OnFileSystemChanges(object sender, FileSystemEventArgs args)
+        {
+            hasChanges = true;
+            selectedFileHasChanges |= !(SelectedChange is null)
+                && SelectedChange.Location == StatusChangeLocation.Workspace
+                && args.Name.Replace("\\", "/") == SelectedChange.Path;
         }
 
         private async Task GetRepositoryStatusAsync()
