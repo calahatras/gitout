@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace GitOut.Features.Material.Snackbar
 {
@@ -6,8 +7,9 @@ namespace GitOut.Features.Material.Snackbar
     {
         event EventHandler<SnackEventArgs> SnackReceived;
 
+        Task<SnackAction?> ShowAsync(ISnackBuilder snack);
         void Show(string message);
         void ShowError(string message, Exception error, TimeSpan? duration = null);
-        void ShowSuccess(string message, TimeSpan? duration = null, string? actionText = null, Action? onAction = null);
+        void ShowSuccess(string message);
     }
 }

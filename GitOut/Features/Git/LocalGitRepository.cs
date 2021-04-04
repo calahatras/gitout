@@ -30,6 +30,16 @@ namespace GitOut.Features.Git
 
         public GitStatusResult? CachedStatus { get; private set; }
 
+        public async Task<bool> IsInsideGitFolder()
+        {
+            IGitProcess proc = CreateProcess(ProcessOptions.Builder().AppendRange("rev-parse", "--is-inside-work-tree").Build());
+            await foreach (string line in proc.ReadLinesAsync())
+            {
+                return line == "true";
+            }
+            return false;
+        }
+
         public async Task<GitHistoryEvent> GetHeadAsync()
         {
             IGitProcess log = CreateProcess(ProcessOptions.FromArguments("-c log.showSignature=false log -n1 -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" HEAD"));

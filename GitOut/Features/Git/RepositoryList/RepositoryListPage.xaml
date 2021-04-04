@@ -25,15 +25,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="Repositories"/>
-            <StackPanel Grid.Column="1" Style="{StaticResource MaterialToolbarOptionsStyle}">
-                <Button
-                    Style="{StaticResource MaterialIconButtonStyle}"
-                    Command="{Binding AddRepositoryCommand}"
-                    ToolTip="Add repository"
-                >
-                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource DatabasePlus}"/>
-                </Button>
-            </StackPanel>
+            <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
+                <ToolBar>
+                    <Button
+                        Style="{StaticResource MaterialIconButtonStyle}"
+                        Command="{Binding AddRepositoryCommand}"
+                        ToolTip="Add repository"
+                    >
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource DatabasePlus}"/>
+                    </Button>
+                </ToolBar>
+            </ToolBarTray>
         </Grid>
         <Grid Grid.Row="1" Margin="32">
             <Grid.Resources>

@@ -1,20 +1,119 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
-using System.Windows.Input;
+using System.Threading.Tasks;
+using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Material.Snackbar
 {
     public class Snack
     {
+        private static readonly TimeSpan DefaultDuration = TimeSpan.FromSeconds(3);
+
+        private Snack(
+            string message,
+            TimeSpan duration,
+            Exception? error,
+            IEnumerable<SnackAction> actions,
+            CancellationToken token
+        )
+        {
+            Message = message;
+            Duration = duration;
+            Canceled = token;
+            Error = error;
+            Actions = actions;
+        }
+
         public DateTime DateAddedUtc { get; } = DateTime.UtcNow;
 
-        public TimeSpan Duration { get; set; } = TimeSpan.FromSeconds(3);
-        public string? Message { get; set; }
+        public TimeSpan Duration { get; }
+        public string Message { get; }
+        public IEnumerable<SnackAction> Actions { get; }
 
-        public string? ActionText { get; set; }
-        public ICommand? ActionCommand { get; set; }
+        public CancellationToken Canceled { get; }
+        public Exception? Error { get; }
 
-        public CancellationToken Canceled { get; set; }
-        public Exception? Error { get; set; }
+        public static ISnackBuilder Builder() => new SnackBuilder();
+
+        private class SnackBuilder : ISnackBuilder
+        {
+            private readonly IList<string> actions = new List<string>();
+            private TimeSpan? duration;
+            private string? message;
+            private Exception? error;
+
+            public Snack Build()
+            {
+                if (actions.Count > 0)
+                {
+                    throw new InvalidOperationException("Must call Build with action handler if actions are available");
+                }
+                return new Snack(
+                    message ?? throw new InvalidOperationException("Snack message cannot be empty"),
+                    duration ?? DefaultDuration,
+                    error,
+                    Array.Empty<SnackAction>(),
+                    default
+                );
+            }
+
+            public Snack Build(Action<SnackAction?> commandHandler)
+            {
+                TimeSpan delay = duration ?? DefaultDuration;
+                var token = new CancellationTokenSource(delay);
+                var snack = new Snack(
+                    message ?? throw new InvalidOperationException("Snack message cannot be empty"),
+                    duration ?? DefaultDuration,
+                    error,
+                    actions
+                        .Select(actionText =>
+                        {
+                            var action = new SnackAction(actionText);
+                            action.Command = new CallbackCommand(() =>
+                            {
+                                token.Cancel();
+                                commandHandler(action);
+                            });
+                            return action;
+                        })
+                        .ToList(),
+                    token.Token
+                );
+                _ = Task.Delay(delay, token.Token).ContinueWith(task =>
+                {
+                    if (task.IsCompletedSuccessfully)
+                    {
+                        commandHandler(null);
+                    }
+                });
+                return snack;
+            }
+
+            public ISnackBuilder WithMessage(string message)
+            {
+                this.message = message;
+                return this;
+            }
+
+            public ISnackBuilder WithDuration(TimeSpan duration)
+            {
+                this.duration = duration;
+                return this;
+            }
+
+            public ISnackBuilder WithError(Exception error)
+            {
+                this.error = error;
+                return this;
+            }
+
+            public ISnackBuilder AddAction(string text)
+            {
+                actions.Add(text);
+                return this;
+            }
+        }
     }
 }

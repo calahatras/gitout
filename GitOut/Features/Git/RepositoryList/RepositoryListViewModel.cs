@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -9,6 +10,7 @@ using GitOut.Features.Collections;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
+using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
 
@@ -23,7 +25,8 @@ namespace GitOut.Features.Git.RepositoryList
         public RepositoryListViewModel(
             INavigationService navigation,
             IGitRepositoryStorage storage,
-            IGitRepositoryFactory repositoryFactory
+            IGitRepositoryFactory repositoryFactory,
+            ISnackbarService snack
         )
         {
             NavigateToLogCommand = new NavigateLocalCommand<IGitRepository>(
@@ -33,12 +36,30 @@ namespace GitOut.Features.Git.RepositoryList
                 repository => repository != null
             );
 
-            AddRepositoryCommand = new CallbackCommand(() =>
+            AddRepositoryCommand = new AsyncCallbackCommand(async () =>
             {
                 var dialog = new FolderBrowserDialog();
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    storage.Add(repositoryFactory.Create(DirectoryPath.Create(dialog.SelectedPath)));
+                    IGitRepository repository = repositoryFactory.Create(DirectoryPath.Create(dialog.SelectedPath));
+                    if (!await repository.IsInsideGitFolder())
+                    {
+                        SnackAction? action = await snack.ShowAsync(Snack.Builder()
+                            .WithMessage($"{Path.GetFileName(dialog.SelectedPath)} is not a valid git repository, do you want to add the folder anyway?")
+                            .WithDuration(TimeSpan.FromSeconds(30))
+                            .AddAction("YES")
+                            .AddAction("CANCEL"));
+                        if (action?.Text == "YES")
+                        {
+                            storage.Add(repository);
+                            snack.ShowSuccess("Added repository");
+                        }
+                    }
+                    else
+                    {
+                        storage.Add(repository);
+                        snack.ShowSuccess("Added repository");
+                    }
                 }
             });
 
