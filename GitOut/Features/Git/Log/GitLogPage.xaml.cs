@@ -12,9 +12,6 @@ namespace GitOut.Features.Git.Log
             Loaded += OnLoaded;
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            Root.Focus();
-        }
+        private void OnLoaded(object sender, RoutedEventArgs e) => Root.Focus();
     }
 }
