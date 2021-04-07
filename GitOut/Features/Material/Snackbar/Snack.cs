@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Material.Snackbar
@@ -21,7 +22,9 @@ namespace GitOut.Features.Material.Snackbar
         {
             Message = message;
             Duration = duration;
-            Canceled = token;
+            var source = CancellationTokenSource.CreateLinkedTokenSource(token);
+            Canceled = source.Token;
+            CloseSnackCommand = new CallbackCommand(source.Cancel);
             Error = error;
             Actions = actions;
         }
@@ -30,6 +33,7 @@ namespace GitOut.Features.Material.Snackbar
 
         public TimeSpan Duration { get; }
         public string Message { get; }
+        public ICommand CloseSnackCommand { get; }
         public IEnumerable<SnackAction> Actions { get; }
 
         public CancellationToken Canceled { get; }

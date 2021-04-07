@@ -361,15 +361,16 @@ namespace GitOut.Features.Git.Stage
                     visitor
                 );
                 string filename = Path.GetFileName(selectedChange.Path);
+                const string undoText = "UNDO";
                 await Repository.ExecuteApplyAsync(patch);
                 _ = snack.ShowAsync(Snack.Builder()
                     .WithMessage($"Changes reset in {filename}")
                     .WithDuration(TimeSpan.FromSeconds(5))
-                    .AddAction("UNDO"))
+                    .AddAction(undoText))
                     .ContinueWith(async task =>
                     {
                         SnackAction? action = task.Result;
-                        if (action?.Text == "UNDO")
+                        if (action?.Text == undoText)
                         {
                             await UndoPatchAsync();
                         }

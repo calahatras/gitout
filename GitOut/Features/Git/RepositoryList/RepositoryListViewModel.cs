@@ -44,12 +44,12 @@ namespace GitOut.Features.Git.RepositoryList
                     IGitRepository repository = repositoryFactory.Create(DirectoryPath.Create(dialog.SelectedPath));
                     if (!await repository.IsInsideGitFolder())
                     {
+                        const string approveText = "YES";
                         SnackAction? action = await snack.ShowAsync(Snack.Builder()
                             .WithMessage($"{Path.GetFileName(dialog.SelectedPath)} is not a valid git repository, do you want to add the folder anyway?")
-                            .WithDuration(TimeSpan.FromSeconds(30))
-                            .AddAction("YES")
-                            .AddAction("CANCEL"));
-                        if (action?.Text == "YES")
+                            .WithDuration(TimeSpan.FromSeconds(300))
+                            .AddAction(approveText));
+                        if (action?.Text == approveText)
                         {
                             storage.Add(repository);
                             snack.ShowSuccess("Added repository");

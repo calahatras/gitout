@@ -1621,6 +1621,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding Message}" VerticalAlignment="Center"/>
                         <ItemsControl Grid.Column="1" ItemsSource="{Binding Actions}">
@@ -1639,6 +1640,15 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <Button
+                                Style="{StaticResource MaterialDarkButtonStyle}"
+                                Command="{Binding CloseSnackCommand}"
+                                ToolTip="Dismiss"
+                            >
+                                <Path Fill="{DynamicResource MaterialDarkDisabledText}" Data="{StaticResource Close}"/>
+                            </Button>
+                        </StackPanel>
                     </Grid>
                 </DataTemplate>
             </Setter.Value>
