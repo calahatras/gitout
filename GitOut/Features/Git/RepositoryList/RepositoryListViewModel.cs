@@ -42,7 +42,7 @@ namespace GitOut.Features.Git.RepositoryList
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     IGitRepository repository = repositoryFactory.Create(DirectoryPath.Create(dialog.SelectedPath));
-                    if (!await repository.IsInsideGitFolder())
+                    if (!await repository.IsInsideWorkTree())
                     {
                         const string approveText = "YES";
                         SnackAction? action = await snack.ShowAsync(Snack.Builder()

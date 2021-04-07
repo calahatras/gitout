@@ -30,7 +30,7 @@ namespace GitOut.Features.Git
 
         public GitStatusResult? CachedStatus { get; private set; }
 
-        public async Task<bool> IsInsideGitFolder()
+        public async Task<bool> IsInsideWorkTree()
         {
             IGitProcess proc = CreateProcess(ProcessOptions.Builder().AppendRange("rev-parse", "--is-inside-work-tree").Build());
             await foreach (string line in proc.ReadLinesAsync())

@@ -13,7 +13,7 @@ namespace GitOut.Features.Git
 
         GitStatusResult? CachedStatus { get; }
 
-        Task<bool> IsInsideGitFolder();
+        Task<bool> IsInsideWorkTree();
         Task<GitHistoryEvent> GetHeadAsync();
         IAsyncEnumerable<GitRemote> GetRemotesAsync();
 
