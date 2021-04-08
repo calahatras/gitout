@@ -43,6 +43,7 @@ namespace GitOut.Features.Git.Stage
         private CancellationTokenSource? previousCancellation;
         private bool hasChanges = false;
         private bool selectedFileHasChanges = false;
+        private bool refreshAutomatically = false;
 
         private string commitMessage = string.Empty;
         private string cachedCommitMessage = string.Empty;
@@ -93,6 +94,12 @@ namespace GitOut.Features.Git.Stage
         public IGitRepository Repository { get; }
 
         public bool ShowSpacesAsDots { get; }
+
+        public bool RefreshAutomatically
+        {
+            get => refreshAutomatically;
+            set => SetProperty(ref refreshAutomatically, value);
+        }
 
         public bool DiffWhitespace
         {
@@ -212,37 +219,55 @@ namespace GitOut.Features.Git.Stage
                         repositoryWatcher.EnableRaisingEvents = false;
                         if (hasChanges || selectedFileHasChanges)
                         {
-                            if (!(previousCancellation is null))
+                            if (refreshAutomatically)
                             {
-                                previousCancellation.Cancel();
+                                if (hasChanges)
+                                {
+                                    ParseStatus(await Repository.ExecuteStatusAsync());
+                                    _ = snack.ShowAsync(Snack.Builder()
+                                        .WithMessage("git out detected file changes and refreshed automatically")
+                                        .WithDuration(TimeSpan.FromSeconds(3))
+                                    );
+                                }
+                                if (selectedFileHasChanges)
+                                {
+                                    await ExecuteDiffAsync();
+                                }
                             }
-                            previousCancellation = new CancellationTokenSource();
-                            string refreshText = "REFRESH";
-                            _ = snack.ShowAsync(Snack.Builder()
-                                .WithMessage("git out detected file changes while window was inactive")
-                                .WithDuration(TimeSpan.FromMinutes(1))
-                                .WithCancellation(previousCancellation.Token)
-                                .AddAction(refreshText)
-                            ).ContinueWith(async (task, state) =>
+                            else
                             {
-                                SnackAction? selectedAction = task.Result;
+                                if (!(previousCancellation is null))
+                                {
+                                    previousCancellation.Cancel();
+                                }
+                                previousCancellation = new CancellationTokenSource();
+                                string refreshText = "REFRESH";
+                                _ = snack.ShowAsync(Snack.Builder()
+                                    .WithMessage("git out detected file changes while window was inactive")
+                                    .WithDuration(TimeSpan.FromMinutes(1))
+                                    .WithCancellation(previousCancellation.Token)
+                                    .AddAction(refreshText)
+                                ).ContinueWith(async (task, state) =>
+                                {
+                                    SnackAction? selectedAction = task.Result;
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning disable CS8604 // Possible null reference argument.
-                                (bool hc, bool sfhc) = (Tuple<bool, bool>)state;
+                                    (bool hc, bool sfhc) = (Tuple<bool, bool>)state;
 #pragma warning restore CS8604 // Possible null reference argument.
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-                                if (selectedAction?.Text == refreshText)
-                                {
-                                    if (hc)
+                                    if (selectedAction?.Text == refreshText)
                                     {
-                                        ParseStatus(await Repository.ExecuteStatusAsync());
+                                        if (hc)
+                                        {
+                                            ParseStatus(await Repository.ExecuteStatusAsync());
+                                        }
+                                        if (sfhc)
+                                        {
+                                            await ExecuteDiffAsync();
+                                        }
                                     }
-                                    if (sfhc)
-                                    {
-                                        await ExecuteDiffAsync();
-                                    }
-                                }
-                            }, new Tuple<bool, bool>(hasChanges, selectedFileHasChanges));
+                                }, new Tuple<bool, bool>(hasChanges, selectedFileHasChanges));
+                            }
                         }
                         hasChanges = selectedFileHasChanges = false;
                     }

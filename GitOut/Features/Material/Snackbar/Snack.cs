@@ -55,12 +55,14 @@ namespace GitOut.Features.Material.Snackbar
                 {
                     throw new InvalidOperationException("Must call Build with action handler if actions are available");
                 }
+                TimeSpan delay = duration ?? DefaultDuration;
+                var token = new CancellationTokenSource(delay);
                 return new Snack(
                     message ?? throw new InvalidOperationException("Snack message cannot be empty"),
                     duration ?? DefaultDuration,
                     error,
                     Array.Empty<SnackAction>(),
-                    default
+                    token.Token
                 );
             }
 
