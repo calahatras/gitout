@@ -39,6 +39,8 @@ namespace GitOut.Features.Git.Stage
 
         private bool diffWhitespace;
         private bool amendLastCommit;
+
+        private CancellationTokenSource? previousCancellation;
         private bool hasChanges = false;
         private bool selectedFileHasChanges = false;
 
@@ -208,13 +210,39 @@ namespace GitOut.Features.Git.Stage
                 case NavigationType.Activated:
                     {
                         repositoryWatcher.EnableRaisingEvents = false;
-                        if (hasChanges)
+                        if (hasChanges || selectedFileHasChanges)
                         {
-                            ParseStatus(await Repository.ExecuteStatusAsync());
-                        }
-                        if (selectedFileHasChanges)
-                        {
-                            await ExecuteDiffAsync();
+                            if (!(previousCancellation is null))
+                            {
+                                previousCancellation.Cancel();
+                            }
+                            previousCancellation = new CancellationTokenSource();
+                            string refreshText = "REFRESH";
+                            _ = snack.ShowAsync(Snack.Builder()
+                                .WithMessage("git out detected file changes while window was inactive")
+                                .WithDuration(TimeSpan.FromMinutes(1))
+                                .WithCancellation(previousCancellation.Token)
+                                .AddAction(refreshText)
+                            ).ContinueWith(async (task, state) =>
+                            {
+                                SnackAction? selectedAction = task.Result;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8604 // Possible null reference argument.
+                                (bool hc, bool sfhc) = (Tuple<bool, bool>)state;
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                                if (selectedAction?.Text == refreshText)
+                                {
+                                    if (hc)
+                                    {
+                                        ParseStatus(await Repository.ExecuteStatusAsync());
+                                    }
+                                    if (sfhc)
+                                    {
+                                        await ExecuteDiffAsync();
+                                    }
+                                }
+                            }, new Tuple<bool, bool>(hasChanges, selectedFileHasChanges));
                         }
                         hasChanges = selectedFileHasChanges = false;
                     }
@@ -248,7 +276,9 @@ namespace GitOut.Features.Git.Stage
                     ? head.Subject
                     : $"{head.Subject}{Environment.NewLine}{Environment.NewLine}{head.Body}";
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (InvalidOperationException) { }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private async Task ExecuteDiffAsync()
