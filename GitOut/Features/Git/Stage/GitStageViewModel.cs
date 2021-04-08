@@ -361,8 +361,20 @@ namespace GitOut.Features.Git.Stage
                     visitor
                 );
                 string filename = Path.GetFileName(selectedChange.Path);
+                const string undoText = "UNDO";
                 await Repository.ExecuteApplyAsync(patch);
-                snack.ShowSuccess($"Changes reset in {filename}", TimeSpan.FromSeconds(5), "UNDO", async () => await UndoPatchAsync());
+                _ = snack.ShowAsync(Snack.Builder()
+                    .WithMessage($"Changes reset in {filename}")
+                    .WithDuration(TimeSpan.FromSeconds(5))
+                    .AddAction(undoText))
+                    .ContinueWith(async task =>
+                    {
+                        SnackAction? action = task.Result;
+                        if (action?.Text == undoText)
+                        {
+                            await UndoPatchAsync();
+                        }
+                    });
             }
             else
             {
@@ -488,7 +500,7 @@ namespace GitOut.Features.Git.Stage
 
             await Repository.ExecuteApplyAsync(patch);
             EditHunk = null;
-            snack.ShowSuccess("Staged edit", TimeSpan.FromSeconds(5));
+            snack.ShowSuccess("Staged edit");
             await GetRepositoryStatusAsync();
         }
 

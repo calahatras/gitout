@@ -1,43 +1,32 @@
 using System;
-using System.Threading;
-using GitOut.Features.Wpf;
+using System.Threading.Tasks;
 
 namespace GitOut.Features.Material.Snackbar
 {
     public class SnackbarService : ISnackbarService
     {
-        private static readonly TimeSpan DefaultDuration = TimeSpan.FromSeconds(3);
         public event EventHandler<SnackEventArgs>? SnackReceived;
 
-        public void Show(string message) => SendSnack(new Snack
+        public Task<SnackAction?> ShowAsync(ISnackBuilder snack)
         {
-            Message = message
-        });
-
-        public void ShowError(string message, Exception error, TimeSpan? duration = null) => SendSnack(new Snack
-        {
-            Message = message,
-            Duration = duration.GetValueOrDefault(DefaultDuration),
-            Error = error
-        });
-
-        public void ShowSuccess(string message, TimeSpan? duration = null, string? actionText = null, Action? onAction = null)
-        {
-            TimeSpan delay = duration.GetValueOrDefault(DefaultDuration);
-            var token = new CancellationTokenSource(delay);
-            SendSnack(new Snack
-            {
-                Message = message,
-                Duration = delay,
-                ActionText = actionText,
-                Canceled = token.Token,
-                ActionCommand = onAction == null ? null : new CallbackCommand(() =>
-                {
-                    token.Cancel();
-                    onAction();
-                })
-            });
+            var source = new TaskCompletionSource<SnackAction?>();
+            SendSnack(snack.Build(action => source.SetResult(action)));
+            return source.Task;
         }
+
+        public void ShowError(string message, Exception error, TimeSpan? duration = null)
+        {
+            ISnackBuilder? builder = Snack.Builder();
+            builder.WithMessage(message).WithError(error);
+            if (duration.HasValue)
+            {
+                builder.WithDuration(duration.Value);
+            }
+            SendSnack(builder.Build());
+        }
+
+        public void Show(string message) => SendSnack(Snack.Builder().WithMessage(message).Build());
+        public void ShowSuccess(string message) => SendSnack(Snack.Builder().WithMessage(message).Build());
 
         private void SendSnack(Snack snack) => SnackReceived?.Invoke(this, new SnackEventArgs(snack));
     }

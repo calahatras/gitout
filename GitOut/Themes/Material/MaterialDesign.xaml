@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:snack="GitOut.Features.Material.Snackbar"
+    xmlns:snack="clr-namespace:GitOut.Features.Material.Snackbar"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
 >
     <ResourceDictionary.MergedDictionaries>
@@ -1616,22 +1616,38 @@
         <Setter Property="Margin" Value="22"/>
         <Setter Property="ItemTemplate">
             <Setter.Value>
-                <DataTemplate DataType="snack:Snack">
+                <DataTemplate DataType="{x:Type snack:Snack}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding Message}" VerticalAlignment="Center"/>
-                        <StackPanel
-                            Grid.Column="1"
-                            Visibility="{Binding ActionText, Converter={StaticResource NullToVisibilityConverter}}"
-                        >
+                        <ItemsControl Grid.Column="1" ItemsSource="{Binding Actions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type snack:SnackAction}">
+                                    <Button
+                                        Style="{StaticResource MaterialDarkButtonStyle}"
+                                        Command="{Binding Command}"
+                                        Content="{Binding Text}"
+                                    />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
                             <Button
                                 Style="{StaticResource MaterialDarkButtonStyle}"
-                                Command="{Binding ActionCommand}"
-                                Content="{Binding ActionText}"
-                            />
+                                Command="{Binding CloseSnackCommand}"
+                                ToolTip="Dismiss"
+                            >
+                                <Path Fill="{DynamicResource MaterialDarkDisabledText}" Data="{StaticResource Close}"/>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>
