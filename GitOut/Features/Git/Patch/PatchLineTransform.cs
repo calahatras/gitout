@@ -4,7 +4,7 @@ namespace GitOut.Features.Git.Patch
 {
     public struct PatchLineTransform : ITextTransform
     {
-        public static readonly PatchLineTransform None = new PatchLineTransform();
+        public static readonly PatchLineTransform None = new();
 
         private readonly bool trimLineEndings;
         private readonly bool convertToSpaces;

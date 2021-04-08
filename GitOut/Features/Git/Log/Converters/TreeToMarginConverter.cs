@@ -12,7 +12,7 @@ namespace GitOut.Features.Git.Log.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is GitTreeEvent gitTreeEvent))
+            if (value is not GitTreeEvent gitTreeEvent)
             {
                 return DependencyProperty.UnsetValue;
             }

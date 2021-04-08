@@ -6,7 +6,7 @@ namespace GitOut.Features.Git
 
         public bool IncludeRemotes { get; }
 
-        public static LogOptions OnlyLocalBranches() => new LogOptions(false);
-        public static LogOptions WithRemoteBranches() => new LogOptions(true);
+        public static LogOptions OnlyLocalBranches() => new(false);
+        public static LogOptions WithRemoteBranches() => new(true);
     }
 }

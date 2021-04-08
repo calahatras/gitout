@@ -213,7 +213,7 @@ namespace GitOut.Features.Git.Diff
                     display.PixelsPerDip
                 ).Width;
 
-                static Paragraph CreateHeaderParagraph(string text, Brush foreground) => new Paragraph(new Run(text))
+                static Paragraph CreateHeaderParagraph(string text, Brush foreground) => new(new Run(text))
                 {
                     Background = Brushes.Transparent,
                     Foreground = foreground,

@@ -9,7 +9,7 @@ namespace GitOut.Features.Text
 {
     public class CSharpSyntaxHighlighter : ISyntaxHighlighter
     {
-        private static readonly Thickness ZeroThickness = new Thickness(0);
+        private static readonly Thickness ZeroThickness = new(0);
 
         private static readonly string[] Keywords = new[]
         {
@@ -84,10 +84,10 @@ namespace GitOut.Features.Text
             "throw",
         };
 
-        private static readonly Regex CommentRegex = new Regex($"//.*$", RegexOptions.Compiled);
-        private static readonly Regex KeywordRegex = new Regex($"\\b({string.Join("|", Keywords)})\\b", RegexOptions.Compiled);
-        private static readonly Regex ControlKeywordRegex = new Regex($"\\b({string.Join("|", ControlKeywords)})\\b", RegexOptions.Compiled);
-        private static readonly Regex StringRegex = new Regex("\"(.)+?(?<!\\\\)\"", RegexOptions.Compiled);
+        private static readonly Regex CommentRegex = new($"//.*$", RegexOptions.Compiled);
+        private static readonly Regex KeywordRegex = new($"\\b({string.Join("|", Keywords)})\\b", RegexOptions.Compiled);
+        private static readonly Regex ControlKeywordRegex = new($"\\b({string.Join("|", ControlKeywords)})\\b", RegexOptions.Compiled);
+        private static readonly Regex StringRegex = new("\"(.)+?(?<!\\\\)\"", RegexOptions.Compiled);
 
         public IEnumerable<Paragraph> Highlight(IEnumerable<string> document, ILineDecorator decorator) => document.Select((line, index) =>
         {
@@ -158,7 +158,7 @@ namespace GitOut.Features.Text
 
             public int Offset { get; }
             public int EndIndex { get; }
-            public Run Apply(string line) => new Run(line[Offset..EndIndex]);
+            public Run Apply(string line) => new(line[Offset..EndIndex]);
         }
 
         private class ColorAppliedMatch : IDecoratedMatch
@@ -175,7 +175,7 @@ namespace GitOut.Features.Text
             public int Index { get; }
             public int Length { get; }
 
-            public Run Apply(string line) => new Run(line[Index..(Index + Length)])
+            public Run Apply(string line) => new(line[Index..(Index + Length)])
             {
                 Foreground = color
             };

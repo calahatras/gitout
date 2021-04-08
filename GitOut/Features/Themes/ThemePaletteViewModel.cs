@@ -46,7 +46,7 @@ namespace GitOut.Features.Themes
         public Brush SecondaryAccentBrush { get; }
         public Brush SecondaryAccentForegroundBrush { get; }
 
-        public static ThemePaletteViewModel CreateDefaultTheme() => new ThemePaletteViewModel(
+        public static ThemePaletteViewModel CreateDefaultTheme() => new(
             "Default",
             SystemParameters.WindowGlassColor,
             Colors.White,

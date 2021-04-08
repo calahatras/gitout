@@ -97,7 +97,7 @@ namespace GitOut.Features.Git.Patch
                     if (lines[^1].Type != DiffLineType.None)
                     {
                         HunkLine? postline = visitor.FindPostpositionHunk();
-                        if (!(postline is null))
+                        if (postline is not null)
                         {
                             if (postline.Type == DiffLineType.Control)
                             {
@@ -125,7 +125,7 @@ namespace GitOut.Features.Git.Patch
 
         private class GitPatchBuilder
         {
-            private readonly StringBuilder patchBuilder = new StringBuilder();
+            private readonly StringBuilder patchBuilder = new();
             private int hunkOffset;
             private PatchMode mode;
 

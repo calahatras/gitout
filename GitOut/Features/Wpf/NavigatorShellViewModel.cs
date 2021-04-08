@@ -48,10 +48,10 @@ namespace GitOut.Features.Wpf
             );
         }
 
-        public ICommand MinimizeCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Minimized);
-        public ICommand MaximizeCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Maximized);
-        public ICommand RestoreCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = WindowState.Normal);
-        public ICommand ToggleWindowStateCommand { get; } = new CallbackCommand<Window>(window => window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized);
+        public ICommand MinimizeCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = WindowState.Minimized);
+        public ICommand MaximizeCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = WindowState.Maximized);
+        public ICommand RestoreCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = WindowState.Normal);
+        public ICommand ToggleWindowStateCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized);
         public ICommand CloseCommand { get; }
 
         public ICommand OpenSettingsCommand { get; }

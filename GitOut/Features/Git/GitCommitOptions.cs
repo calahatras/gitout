@@ -17,7 +17,7 @@ namespace GitOut.Features.Git
         public bool Amend { get; }
         public string Message { get; }
 
-        public static GitCommitOptions AmendLatest(string message) => new GitCommitOptions(true, message);
-        public static GitCommitOptions CreateCommit(string message) => new GitCommitOptions(false, message);
+        public static GitCommitOptions AmendLatest(string message) => new(true, message);
+        public static GitCommitOptions CreateCommit(string message) => new(false, message);
     }
 }

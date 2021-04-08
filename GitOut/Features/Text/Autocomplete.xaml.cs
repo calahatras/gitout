@@ -68,8 +68,8 @@ namespace GitOut.Features.Text
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSearchQueryChanged)
         );
 
-        private readonly object localItemsLock = new object();
-        private readonly ObservableCollection<object?> localItems = new ObservableCollection<object?>();
+        private readonly object localItemsLock = new();
+        private readonly ObservableCollection<object?> localItems = new();
         private readonly ICollectionView localView;
 
         private ILazyAsyncEnumerable<object>? deferredSource;
@@ -81,17 +81,22 @@ namespace GitOut.Features.Text
             localView = CollectionViewSource.GetDefaultView(localItems);
             OpenRecordCommand = new CallbackCommand<object?>(selection =>
             {
-                if (!(ItemSelectedCommand is null) && ItemSelectedCommand.CanExecute(selection))
+                if (ItemSelectedCommand is not null && ItemSelectedCommand.CanExecute(selection))
                 {
                     ItemSelectedCommand.Execute(selection);
                 }
-                if (!(CancelCommand is null) && CancelCommand.CanExecute(null))
+                if (CancelCommand is not null && CancelCommand.CanExecute(null))
                 {
                     CancelCommand.Execute(null);
                 }
             });
             DecreaseSelectionIndexCommand = new CallbackCommand<ListView>(view =>
             {
+                if (view is null)
+                {
+                    return;
+                }
+
                 if (SelectedIndex > 0)
                 {
                     --SelectedIndex;
@@ -100,6 +105,11 @@ namespace GitOut.Features.Text
             });
             IncreaseSelectionIndexCommand = new CallbackCommand<ListView>(view =>
             {
+                if (view is null)
+                {
+                    return;
+                }
+
                 if (SelectedIndex < localItems.Count - 1)
                 {
                     ++SelectedIndex;
@@ -164,15 +174,15 @@ namespace GitOut.Features.Text
             set => SetValue(QueryMatcherProperty, value);
         }
 
-        private void OnVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private async void OnVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool visible && visible)
             {
                 if (deferredSource is ILazyAsyncEnumerable<object> lazy)
                 {
-                    _ = lazy.MaterializeAsync();
+                    await lazy.MaterializeAsync();
                 }
-                Dispatcher.BeginInvoke(new Action(() => SearchInput.Focus()));
+                await Dispatcher.BeginInvoke(new Action(() => SearchInput.Focus()));
             }
         }
 
@@ -180,7 +190,7 @@ namespace GitOut.Features.Text
         {
             if (items is ILazyAsyncEnumerable<object> lazy)
             {
-                this.deferredSource = lazy;
+                deferredSource = lazy;
             }
             lock (localItemsLock)
             {
@@ -192,7 +202,7 @@ namespace GitOut.Features.Text
             }
         }
 
-        private void OnSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -200,6 +210,11 @@ namespace GitOut.Features.Text
                     {
                         lock (localItemsLock)
                         {
+                            if (e.NewItems is null)
+                            {
+                                return;
+                            }
+
                             for (int index = e.NewStartingIndex, i = 0; i < e.NewItems.Count; ++i, ++index)
                             {
                                 localItems.Insert(index, e.NewItems[i]);
@@ -211,6 +226,11 @@ namespace GitOut.Features.Text
                     {
                         lock (localItemsLock)
                         {
+                            if (e.OldItems is null)
+                            {
+                                return;
+                            }
+
                             foreach (object? item in e.OldItems)
                             {
                                 localItems.Remove(item);
@@ -227,7 +247,7 @@ namespace GitOut.Features.Text
                     }
                     break;
                 default:
-                    throw new ArgumentException(nameof(e), $"Invalid collection action {e.Action}");
+                    throw new ArgumentException($"Invalid collection action {e.Action}", nameof(e));
             }
         }
 
@@ -236,7 +256,7 @@ namespace GitOut.Features.Text
             if (d is Autocomplete control)
             {
                 control.localView.Filter = item =>
-                    !(e.NewValue is IValueConverter converter)
+                    e.NewValue is not IValueConverter converter
                     || control.SearchQuery is null
                     || (bool)converter.Convert(item, typeof(bool), control.SearchQuery.ToUpperInvariant(), CultureInfo.CurrentCulture);
             }

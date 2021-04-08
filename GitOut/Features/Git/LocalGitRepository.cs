@@ -254,7 +254,7 @@ namespace GitOut.Features.Git
                 .Builder()
                 .AppendRange("--no-optional-locks", "diff-tree", "--no-color", "-z");
 
-            if (!(options is null))
+            if (options is not null)
             {
                 diffArguments.AppendRange(options.GetArguments());
             }
@@ -283,7 +283,7 @@ namespace GitOut.Features.Git
                 {
                     string fileLine = diffLines[i++];
                     string path = diffLines[i];
-                    IGitDiffFileEntryBuilder builder = GitDiffFileEntry.Parse(fileLine);
+                    IGitDiffFileEntryBuilder builder = GitDiffFileEntry.Parse(fileLine.AsSpan());
                     if (builder.Type == GitDiffType.CopyEdit || builder.Type == GitDiffType.RenameEdit)
                     {
                         yield return builder.Build(path, diffLines[i + 1]);
@@ -352,7 +352,7 @@ namespace GitOut.Features.Git
         public async IAsyncEnumerable<GitFileEntry> ExecuteListTreeAsync(GitObjectId id, DiffOptions? options)
         {
             IProcessOptionsBuilder builder = ProcessOptions.Builder().AppendRange("ls-tree", "-z");
-            if (!(options is null))
+            if (options is not null)
             {
                 builder.AppendRange(options.GetArguments());
             }
@@ -416,7 +416,7 @@ namespace GitOut.Features.Git
         public static LocalGitRepository InitializeFromPath(
             DirectoryPath path,
             IProcessFactory<IGitProcess> processFactory
-        ) => new LocalGitRepository(path, processFactory);
+        ) => new(path, processFactory);
 
         private IGitProcess CreateProcess(ProcessOptions arguments) => processFactory.Create(WorkingDirectory, arguments);
     }

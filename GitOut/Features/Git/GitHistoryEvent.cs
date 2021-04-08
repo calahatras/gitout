@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -46,12 +46,12 @@ namespace GitOut.Features.Git
 
         public void ResolveParents(IDictionary<GitCommitId, GitHistoryEvent> commits)
         {
-            if (!(parent is null) && commits.TryGetValue(parent, out GitHistoryEvent? commit))
+            if (parent is not null && commits.TryGetValue(parent, out GitHistoryEvent? commit))
             {
                 Parent = commit;
                 Parent.Children.Add(this);
             }
-            if (!(mergeParent is null) && commits.TryGetValue(mergeParent, out GitHistoryEvent? mergeCommit))
+            if (mergeParent is not null && commits.TryGetValue(mergeParent, out GitHistoryEvent? mergeCommit))
             {
                 MergedParent = mergeCommit;
                 MergedParent.Children.Add(this);
@@ -60,7 +60,7 @@ namespace GitOut.Features.Git
 
         private class GitHistoryEventBuilder : IGitHistoryEventBuilder
         {
-            private readonly StringBuilder bodyBuilder = new StringBuilder();
+            private readonly StringBuilder bodyBuilder = new();
 
             private GitCommitId? hash;
             private GitCommitId? parent;
@@ -70,7 +70,7 @@ namespace GitOut.Features.Git
             private string? authorEmail;
             private string? subject;
 
-            public GitHistoryEvent Build() => new GitHistoryEvent(
+            public GitHistoryEvent Build() => new(
                 hash ?? throw new ArgumentNullException(nameof(hash), "Hash must not be null"),
                 parent,
                 mergeParent,

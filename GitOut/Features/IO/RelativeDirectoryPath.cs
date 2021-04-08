@@ -8,7 +8,7 @@ namespace GitOut.Features.IO
     public class RelativeDirectoryPath
     {
         public const char GitDirectorySeparatorChar = '/';
-        public static readonly RelativeDirectoryPath Root = new RelativeDirectoryPath(string.Empty);
+        public static readonly RelativeDirectoryPath Root = new(string.Empty);
 
         private readonly Lazy<RelativeDirectoryPath> parent;
 
@@ -38,6 +38,6 @@ namespace GitOut.Features.IO
 
         public override string ToString() => Directory;
 
-        public static RelativeDirectoryPath Create(string path) => new RelativeDirectoryPath(path);
+        public static RelativeDirectoryPath Create(string path) => new(path);
     }
 }

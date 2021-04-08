@@ -8,8 +8,8 @@ namespace GitOut.Features.Wpf
 {
     public class CompositeCommand : ICommand
     {
-        private readonly List<(Action action, Func<bool> canAction)> actions = new List<(Action action, Func<bool> canAction)>();
-        private readonly List<(Func<Task> asyncAction, Func<bool> canAction)> tasks = new List<(Func<Task> asyncAction, Func<bool> canAction)>();
+        private readonly List<(Action action, Func<bool> canAction)> actions = new();
+        private readonly List<(Func<Task> asyncAction, Func<bool> canAction)> tasks = new();
 
         public CompositeCommand() { }
 
@@ -17,7 +17,7 @@ namespace GitOut.Features.Wpf
 
         public CompositeCommand(Action action, Func<bool> canAction) => Add(action, canAction);
 
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
@@ -29,9 +29,9 @@ namespace GitOut.Features.Wpf
 
         public void Add(Action action, Func<bool> canAction) => actions.Add((action, canAction));
 
-        public bool CanExecute(object parameter) => actions.Any(a => a.canAction());
+        public bool CanExecute(object? parameter) => actions.Any(a => a.canAction());
 
-        public async void Execute(object parameter)
+        public async void Execute(object? parameter)
         {
             foreach ((Action action, Func<bool> canAction) in actions)
             {
@@ -54,37 +54,37 @@ namespace GitOut.Features.Wpf
             }
         }
 
-        public void RaiseExecuteChanged() => CommandManager.InvalidateRequerySuggested();
+        public static void RaiseExecuteChanged() => CommandManager.InvalidateRequerySuggested();
     }
 
     public class CompositeCommand<T> : ICommand
     {
-        private readonly List<(Action<T> action, Func<T, bool> canAction)> actions = new List<(Action<T> action, Func<T, bool> canAction)>();
-        private readonly List<(Func<T, Task> actionAsync, Func<T, bool> canAction)> tasks = new List<(Func<T, Task> actionAsync, Func<T, bool> canAction)>();
+        private readonly List<(Action<T?> action, Func<T?, bool> canAction)> actions = new();
+        private readonly List<(Func<T?, Task> actionAsync, Func<T?, bool> canAction)> tasks = new();
 
         public CompositeCommand() { }
 
-        public CompositeCommand(Action<T> action) : this() => Add(action);
+        public CompositeCommand(Action<T?> action) : this() => Add(action);
 
-        public CompositeCommand(Action<T> action, Func<T, bool> canAction) : this() => Add(action, canAction);
+        public CompositeCommand(Action<T?> action, Func<T?, bool> canAction) : this() => Add(action, canAction);
 
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public void Add(Action<T> action) => actions.Add((action, _ => true));
+        public void Add(Action<T?> action) => actions.Add((action, _ => true));
 
-        public void Add(Action<T> action, Func<T, bool> canAction) => actions.Add((action, canAction));
+        public void Add(Action<T?> action, Func<T?, bool> canAction) => actions.Add((action, canAction));
 
-        public void AddAsync(Func<T, Task> asyncaction, Func<T, bool> canAction) => tasks.Add((asyncaction, canAction));
+        public void AddAsync(Func<T?, Task> asyncaction, Func<T?, bool> canAction) => tasks.Add((asyncaction, canAction));
 
-        public bool CanExecute(object parameter) => actions.Any(a => a.canAction((T)parameter)) || tasks.Any(a => a.canAction((T)parameter));
+        public bool CanExecute(object? parameter) => actions.Any(a => a.canAction((T?)parameter)) || tasks.Any(a => a.canAction((T?)parameter));
 
-        public async void Execute(object parameter)
+        public async void Execute(object? parameter)
         {
-            if (!(parameter is T arg)) throw new ArgumentException(nameof(parameter));
+            if (parameter is not T arg) throw new ArgumentException($"Parameter is not of expected type {typeof(T).FullName}", nameof(parameter));
 
             await ExecuteAsync(arg);
         }

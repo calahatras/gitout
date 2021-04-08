@@ -18,7 +18,7 @@ namespace GitOut.Features.Wpf
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            if (!(PresentationSource.FromVisual(this) is HwndSource source))
+            if (PresentationSource.FromVisual(this) is not HwndSource source)
             {
                 throw new InvalidOperationException("Cannot register hook on window without hwnd");
             }

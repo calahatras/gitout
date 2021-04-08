@@ -4,7 +4,7 @@ namespace GitOut.Features.Git.Files
 {
     public class LoadingViewModel : IGitFileEntryViewModel
     {
-        public static readonly LoadingViewModel Proxy = new LoadingViewModel();
+        public static readonly LoadingViewModel Proxy = new();
         private LoadingViewModel() { }
 
         // Note: used by xaml binding

@@ -30,7 +30,7 @@ namespace GitOut.Features.Wpf.AttachedProperties
 
         private static void OnViewSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!(sender is ListBox listBox))
+            if (sender is not ListBox listBox)
             {
                 return;
             }

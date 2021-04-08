@@ -10,7 +10,7 @@ namespace GitOut.Features.Wpf.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is DateTimeOffset utc))
+            if (value is not DateTimeOffset utc)
             {
                 return DependencyProperty.UnsetValue;
             }
@@ -20,7 +20,7 @@ namespace GitOut.Features.Wpf.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is DateTimeOffset localtime))
+            if (value is not DateTimeOffset localtime)
             {
                 return DependencyProperty.UnsetValue;
             }

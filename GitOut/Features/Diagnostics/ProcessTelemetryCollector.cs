@@ -4,7 +4,7 @@ namespace GitOut.Features.Diagnostics
 {
     public class ProcessTelemetryCollector : IProcessTelemetryCollector
     {
-        private readonly List<ProcessEventArgs> events = new List<ProcessEventArgs>();
+        private readonly List<ProcessEventArgs> events = new();
 
         public IReadOnlyCollection<ProcessEventArgs> Events => events.AsReadOnly();
 

@@ -16,7 +16,7 @@ namespace GitOut.Features.Wpf
             }
         }
 
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object? parameter)
         {
             foreach (ICommand command in commands)
             {
@@ -28,7 +28,7 @@ namespace GitOut.Features.Wpf
             return true;
         }
 
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
             if (!CanExecute(parameter))
             {

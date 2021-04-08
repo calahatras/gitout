@@ -90,7 +90,7 @@ namespace GitOut.Features.Git.Diagnostics
             void OnHandleOutputData(object sender, DataReceivedEventArgs e)
             {
                 string? data = e.Data;
-                if (!(data is null))
+                if (data is not null)
                 {
                     output.AddRange(data.Split('\0'));
                     Trace.WriteLine($"{data}");
@@ -99,7 +99,7 @@ namespace GitOut.Features.Git.Diagnostics
             void OnHandleErrorData(object sender, DataReceivedEventArgs e)
             {
                 string? data = e.Data;
-                if (!(data is null))
+                if (data is not null)
                 {
                     error.Add(data);
                     Trace.WriteLine($"{data}");
@@ -140,7 +140,7 @@ namespace GitOut.Features.Git.Diagnostics
             while (!dataCounter.IsSet || queue.Count > 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (queue.TryReceive(out string item))
+                if (queue.TryReceive(out string? item))
                 {
                     yield return item;
                 }

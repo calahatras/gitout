@@ -39,7 +39,7 @@ namespace GitOut.Features.Git.Log
 
             allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => ListAllFilesAsync(), IGitDirectoryEntryViewModel.CompareItems);
             var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.ListIdAsync(root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
-            _ = logFiles.MaterializeAsync();
+            _ = logFiles.MaterializeAsync().AsTask();
             this.logFiles = logFiles;
             diffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
             flattenedDiffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
@@ -192,7 +192,7 @@ namespace GitOut.Features.Git.Log
 
         private void SelectItem(IGitFileEntryViewModel? entry)
         {
-            if (entry is null || !(currentSource.Source is IEnumerable<IGitFileEntryViewModel> items))
+            if (entry is null || currentSource.Source is not IEnumerable<IGitFileEntryViewModel> items)
             {
                 return;
             }
@@ -200,7 +200,7 @@ namespace GitOut.Features.Git.Log
             foreach (string segment in entry.Path.Segments)
             {
                 IGitDirectoryEntryViewModel? child = current.FirstOrDefault(directory => directory.FileName == segment);
-                if (!(child is null))
+                if (child is not null)
                 {
                     child.IsExpanded = true;
                     current = child.OfType<IGitDirectoryEntryViewModel>();

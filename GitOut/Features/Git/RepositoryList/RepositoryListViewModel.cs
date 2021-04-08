@@ -32,8 +32,8 @@ namespace GitOut.Features.Git.RepositoryList
             NavigateToLogCommand = new NavigateLocalCommand<IGitRepository>(
                 navigation,
                 typeof(GitLogPage).FullName!,
-                repository => GitLogPageOptions.OpenRepository(repository),
-                repository => repository != null
+                repository => GitLogPageOptions.OpenRepository(repository!),
+                repository => repository is not null
             );
 
             AddRepositoryCommand = new AsyncCallbackCommand(async () =>
@@ -63,7 +63,7 @@ namespace GitOut.Features.Git.RepositoryList
                 }
             });
 
-            RemoveRepositoryCommand = new CallbackCommand<IGitRepository>(repository => storage.Remove(repository));
+            RemoveRepositoryCommand = new NotNullCallbackCommand<IGitRepository>(repository => storage.Remove(repository));
 
             subscription = storage.Repositories.Subscribe(finalList =>
             {

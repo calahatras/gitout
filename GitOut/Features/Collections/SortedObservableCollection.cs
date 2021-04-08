@@ -50,7 +50,7 @@ namespace GitOut.Features.Collections
         public bool Remove(T item)
         {
             int index = FindSortedIndex(item);
-            if (backingCollection.Count < index || !(backingCollection[index] is T t) || !t.Equals(item))
+            if (backingCollection.Count < index || backingCollection[index] is not T t || !t.Equals(item))
             {
                 return false;
             }

@@ -24,10 +24,10 @@ namespace GitOut.Features.Git.Stage
         private readonly ISnackbarService snack;
         private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
 
-        private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new ObservableCollection<StatusChangeViewModel>();
-        private readonly object workspaceFilesLock = new object();
-        private readonly ObservableCollection<StatusChangeViewModel> indexFiles = new ObservableCollection<StatusChangeViewModel>();
-        private readonly object indexFilesLock = new object();
+        private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
+        private readonly object workspaceFilesLock = new();
+        private readonly ObservableCollection<StatusChangeViewModel> indexFiles = new();
+        private readonly object indexFilesLock = new();
 
         private StatusChangeViewModel? selectedChange;
         private GitDiffResult? selectedDiffResult;
@@ -72,12 +72,12 @@ namespace GitOut.Features.Git.Stage
             ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(StageSelectionAsync);
             EditSelectedTextCommand = new CallbackCommand<IHunkLineVisitorProvider>(PrepareEditSelection);
-            UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => !(undoPatch is null));
+            UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => undoPatch is not null);
             AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync);
             ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync);
 
             CancelEditTextCommand = new CallbackCommand(() => EditHunk = null);
-            PatchEditTextCommand = new AsyncCallbackCommand(PatchEditSelectionAsync, () => !(editHunk is null));
+            PatchEditTextCommand = new AsyncCallbackCommand(PatchEditSelectionAsync, () => editHunk is not null);
         }
 
         public IGitRepository Repository { get; }
@@ -91,7 +91,7 @@ namespace GitOut.Features.Git.Stage
             {
                 if (SetProperty(ref diffWhitespace, value))
                 {
-                    if (selectedChange != null)
+                    if (selectedChange is not null)
                     {
                         _ = ExecuteDiffAsync();
                     }
@@ -143,7 +143,7 @@ namespace GitOut.Features.Git.Stage
                 if (SetProperty(ref selectedChange, value))
                 {
                     SelectedDiffResult = null;
-                    if (selectedChange != null)
+                    if (selectedChange is not null)
                     {
                         _ = ExecuteDiffAsync();
                     }
@@ -194,7 +194,7 @@ namespace GitOut.Features.Git.Stage
         private async Task GetRepositoryStatusAsync()
         {
             ParseStatus(await Repository.ExecuteStatusAsync());
-            if (!(selectedChange is null))
+            if (selectedChange is not null)
             {
                 await ExecuteDiffAsync();
             }
@@ -265,8 +265,10 @@ namespace GitOut.Features.Git.Stage
             await GetRepositoryStatusAsync();
         }
 
-        private async Task StageFileAsync(StatusChangeViewModel model)
+        private async Task StageFileAsync(StatusChangeViewModel? model)
         {
+            if (model is null) return;
+
             if (model.Location == StatusChangeLocation.Index)
             {
                 int previousIndex = SelectedIndexIndex;
@@ -328,8 +330,9 @@ namespace GitOut.Features.Git.Stage
             SelectedIndexIndex = previousIndex >= indexFiles.Count ? indexFiles.Count - 1 : previousIndex;
         }
 
-        private async Task ResetSelectionAsync(IHunkLineVisitorProvider viewer)
+        private async Task ResetSelectionAsync(IHunkLineVisitorProvider? viewer)
         {
+            if (viewer is null) return;
             if (selectedChange is null)
             {
                 throw new ArgumentNullException(nameof(selectedChange), "No change is selected");
@@ -396,8 +399,10 @@ namespace GitOut.Features.Git.Stage
             await GetRepositoryStatusAsync();
         }
 
-        private async Task StageSelectionAsync(IHunkLineVisitorProvider viewer)
+        private async Task StageSelectionAsync(IHunkLineVisitorProvider? viewer)
         {
+            if (viewer is null) return;
+
             if (selectedChange is null)
             {
                 throw new ArgumentNullException(nameof(selectedChange), "No change is selected");
@@ -464,8 +469,10 @@ namespace GitOut.Features.Git.Stage
             undoPatch = null;
         }
 
-        private void PrepareEditSelection(IHunkLineVisitorProvider viewer)
+        private void PrepareEditSelection(IHunkLineVisitorProvider? viewer)
         {
+            if (viewer is null) return;
+
             if (selectedChange is null)
             {
                 return;

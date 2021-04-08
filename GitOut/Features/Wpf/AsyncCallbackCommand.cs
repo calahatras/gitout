@@ -13,30 +13,30 @@ namespace GitOut.Features.Wpf
 
     public class AsyncCallbackCommand<TArg> : ICommand
     {
-        private readonly Func<TArg, Task> execute;
-        private readonly Func<TArg, bool> canExecute;
+        private readonly Func<TArg?, Task> execute;
+        private readonly Func<TArg?, bool> canExecute;
 
-        public AsyncCallbackCommand(Func<TArg, Task> execute) : this(execute, o => true) { }
+        public AsyncCallbackCommand(Func<TArg?, Task> execute) : this(execute, o => true) { }
 
-        public AsyncCallbackCommand(Func<TArg, Task> execute, Func<TArg, bool> canExecute)
+        public AsyncCallbackCommand(Func<TArg?, Task> execute, Func<TArg?, bool> canExecute)
         {
             this.execute = execute;
             this.canExecute = canExecute;
         }
 
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public bool CanExecute(object parameter) => canExecute((TArg)parameter);
+        public bool CanExecute(object? parameter) => canExecute((TArg?)parameter);
 
-        public async void Execute(object parameter)
+        public async void Execute(object? parameter)
         {
             if (CanExecute(parameter))
             {
-                await execute((TArg)parameter);
+                await execute((TArg?)parameter);
             }
         }
     }
