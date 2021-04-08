@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace GitOut.Features.Git
 {
@@ -8,10 +8,10 @@ namespace GitOut.Features.Git
 
         public override int GetHashCode() => base.GetHashCode();
 
-        public bool Equals(GitFileId? obj) => !(obj is null) && Hash.Equals(obj.Hash);
+        public bool Equals(GitFileId? obj) => obj is not null && Hash.Equals(obj.Hash);
 
         public override bool Equals(object? obj) => obj is GitFileId other && Equals(other);
 
-        public static GitFileId FromHash(ReadOnlySpan<char> hash) => new GitFileId(hash.ToString());
+        public static GitFileId FromHash(ReadOnlySpan<char> hash) => new(hash.ToString());
     }
 }

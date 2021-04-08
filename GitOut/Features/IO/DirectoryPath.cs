@@ -25,6 +25,6 @@ namespace GitOut.Features.IO
 
         public override string ToString() => Directory;
 
-        public static DirectoryPath Create(string path) => new DirectoryPath(path);
+        public static DirectoryPath Create(string path) => new(path);
     }
 }

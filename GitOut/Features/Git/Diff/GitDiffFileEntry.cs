@@ -39,25 +39,25 @@ namespace GitOut.Features.Git.Diff
 
         public GitDiffType Type { get; }
 
-        public static IGitDiffFileEntryBuilder Parse(string line)
+        public static IGitDiffFileEntryBuilder Parse(ReadOnlySpan<char> line)
         {
             if (line.Length < 98)
             {
                 throw new ArgumentException($"Line must be longer than 100 chars, was {line.Length}", nameof(line));
             }
 
-            Enum.TryParse(line[4..5], out PosixFileModes sourceUser);
-            Enum.TryParse(line[5..6], out PosixFileModes sourceGroup);
-            Enum.TryParse(line[6..7], out PosixFileModes sourceOther);
+            _ = Enum.TryParse(new string(line[4..5]), out PosixFileModes sourceUser);
+            _ = Enum.TryParse(new string(line[5..6]), out PosixFileModes sourceGroup);
+            _ = Enum.TryParse(new string(line[6..7]), out PosixFileModes sourceOther);
 
-            Enum.TryParse(line[11..12], out PosixFileModes destinationUser);
-            Enum.TryParse(line[12..13], out PosixFileModes destinationGroup);
-            Enum.TryParse(line[13..14], out PosixFileModes destinationOther);
+            _ = Enum.TryParse(new string(line[11..12]), out PosixFileModes destinationUser);
+            _ = Enum.TryParse(new string(line[12..13]), out PosixFileModes destinationGroup);
+            _ = Enum.TryParse(new string(line[13..14]), out PosixFileModes destinationOther);
 
             var sourceId = GitFileId.FromHash(line[15..55]);
             var destinationId = GitFileId.FromHash(line[56..96]);
 
-            GitDiffType type = line[97..98] switch
+            GitDiffType type = new string(line[97..98]) switch
             {
                 "M" => GitDiffType.InPlaceEdit,
                 "C" => GitDiffType.CopyEdit,
@@ -68,7 +68,7 @@ namespace GitOut.Features.Git.Diff
                 _ => GitDiffType.None
             };
 
-            GitFileType fileType = (type == GitDiffType.Create ? line[8..11] : line[1..4]) switch
+            GitFileType fileType = (new string(type == GitDiffType.Create ? line[8..11] : line[1..4])) switch
             {
                 "100" => GitFileType.Blob,
                 "040" => GitFileType.Tree,

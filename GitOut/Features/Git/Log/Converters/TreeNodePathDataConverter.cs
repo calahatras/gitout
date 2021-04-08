@@ -11,13 +11,13 @@ namespace GitOut.Features.Git.Log.Converters
     {
         private const int XDistance = 15;
         private const int XOffset = 10;
-        private static readonly Size Size = new Size(6, 6);
+        private static readonly Size Size = new(6, 6);
 
         public object Convert(object[] value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value.Length != 2
-                || !(value[0] is GitTreeNode node)
-                || !(value[1] is double height))
+                || value[0] is not GitTreeNode node
+                || value[1] is not double height)
             {
                 return DependencyProperty.UnsetValue;
             }
@@ -46,7 +46,7 @@ namespace GitOut.Features.Git.Log.Converters
 
         private void DrawBottom(PathGeometry geometry, GitTreeNode node, double height)
         {
-            if (!(node.Bottom is Line line))
+            if (node.Bottom is not Line line)
             {
                 return;
             }
@@ -89,7 +89,7 @@ namespace GitOut.Features.Git.Log.Converters
 
         private void DrawTop(PathGeometry geometry, GitTreeNode node, double height)
         {
-            if (!(node.Top is Line line))
+            if (node.Top is not Line line)
             {
                 return;
             }
@@ -130,12 +130,12 @@ namespace GitOut.Features.Git.Log.Converters
 
         private PathGeometry DrawBoth(GitTreeNode node, double height)
         {
-            if (!(node.Top is Line topLayer))
+            if (node.Top is not Line topLayer)
             {
                 throw new ArgumentException("no top layer when commit is missing", nameof(node));
             }
 
-            if (!(node.Bottom is Line bottomLayer))
+            if (node.Bottom is not Line bottomLayer)
             {
                 throw new ArgumentException("no bottom layer when commit is missing", nameof(node));
             }

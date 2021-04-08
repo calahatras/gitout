@@ -11,6 +11,6 @@ namespace GitOut.Features.Git.Patch
         public DiffLineType Type { get; }
         public string Line { get; }
 
-        public static PatchLine CreateLine(DiffLineType type, string line) => new PatchLine(type, line);
+        public static PatchLine CreateLine(DiffLineType type, string line) => new(type, line);
     }
 }

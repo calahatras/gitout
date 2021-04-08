@@ -21,6 +21,6 @@ namespace GitOut.Features.IO
 
         public override string ToString() => Name;
 
-        public static FileName Create(string path) => new FileName(path);
+        public static FileName Create(string path) => new(path);
     }
 }

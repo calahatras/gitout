@@ -21,6 +21,6 @@ namespace GitOut.Features.Git.Log
 
         public ICommand CopyBranchNameCommand { get; }
 
-        public static BranchNameViewModel FromModel(GitBranchName model) => new BranchNameViewModel(model.Name, model.IconResource);
+        public static BranchNameViewModel FromModel(GitBranchName model) => new(model.Name, model.IconResource);
     }
 }

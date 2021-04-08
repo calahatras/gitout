@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
@@ -28,7 +28,7 @@ namespace GitOut.Features.Themes
             UpdateTheme();
         }
 
-        private void OnSystemParameterChanged(object sender, PropertyChangedEventArgs e) => UpdateTheme();
+        private void OnSystemParameterChanged(object? sender, PropertyChangedEventArgs e) => UpdateTheme();
 
         private void UpdateTheme()
         {

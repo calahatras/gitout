@@ -5,8 +5,8 @@ namespace GitOut.Features.Git
 {
     public class GitObjectId : IEquatable<GitObjectId>
     {
-        private static readonly Regex ValidHash = new Regex("[0-9a-f]{40}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
-        private static readonly Regex EmptyHash = new Regex("[0]{40}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        private static readonly Regex ValidHash = new("[0-9a-f]{40}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        private static readonly Regex EmptyHash = new("[0]{40}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
         protected GitObjectId(string hash)
         {
@@ -28,7 +28,7 @@ namespace GitOut.Features.Git
 
         public override string ToString() => Hash;
 
-        public bool Equals(GitObjectId? obj) => !(obj is null) && Hash.Equals(obj.Hash);
+        public bool Equals(GitObjectId? obj) => obj is not null && Hash.Equals(obj.Hash);
 
         public override bool Equals(object? obj) => obj is GitObjectId other && Equals(other);
 

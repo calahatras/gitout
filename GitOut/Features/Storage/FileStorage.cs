@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using GitOut.Features.Settings;
@@ -10,13 +10,16 @@ namespace GitOut.Features.Storage
         public void Write(string key, object value)
         {
             string configFile = SettingsOptions.GetSettingsPath();
-            Directory.CreateDirectory(Directory.GetParent(configFile).FullName);
+            if (Directory.GetParent(configFile) is DirectoryInfo existing)
+            {
+                Directory.CreateDirectory(existing.FullName);
+            }
 
             IDictionary<string, object> sections;
             try
             {
                 string text = File.ReadAllText(configFile);
-                sections = JsonSerializer.Deserialize<IDictionary<string, object>>(text);
+                sections = JsonSerializer.Deserialize<IDictionary<string, object>>(text)!;
             }
             catch (IOException)
             {

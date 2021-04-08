@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 namespace GitOut.Features.Settings
 {
@@ -6,13 +6,13 @@ namespace GitOut.Features.Settings
     {
         private ValidGitRepositoryPathViewModel(DirectoryInfo dir)
         {
-            Name = dir.Parent.Name;
-            WorkingDirectory = dir.Parent.FullName;
+            Name = dir.Parent?.Name ?? string.Empty;
+            WorkingDirectory = dir.Parent?.FullName ?? string.Empty;
         }
 
         public string Name { get; }
         public string WorkingDirectory { get; }
 
-        public static ValidGitRepositoryPathViewModel FromGitFolder(DirectoryInfo dir) => new ValidGitRepositoryPathViewModel(dir);
+        public static ValidGitRepositoryPathViewModel FromGitFolder(DirectoryInfo dir) => new(dir);
     }
 }

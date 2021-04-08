@@ -24,7 +24,7 @@ namespace GitOut.Features.Git.Log
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static GitRemoteViewModel From(GitRemote model) => new GitRemoteViewModel(model, isSelected: true);
+        public static GitRemoteViewModel From(GitRemote model) => new(model, isSelected: true);
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

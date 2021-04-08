@@ -55,9 +55,9 @@ namespace GitOut.Features.Git.Stage
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static StatusChangeViewModel AsStaged(GitStatusChange change) => new StatusChangeViewModel(change, StatusChangeLocation.Index);
+        public static StatusChangeViewModel AsStaged(GitStatusChange change) => new(change, StatusChangeLocation.Index);
 
-        public static StatusChangeViewModel AsWorkspace(GitStatusChange change) => new StatusChangeViewModel(change, StatusChangeLocation.Workspace);
+        public static StatusChangeViewModel AsWorkspace(GitStatusChange change) => new(change, StatusChangeLocation.Workspace);
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

@@ -6,6 +6,6 @@
 
         public IGitRepository Repository { get; }
 
-        public static GitStagePageOptions Stage(IGitRepository repository) => new GitStagePageOptions(repository);
+        public static GitStagePageOptions Stage(IGitRepository repository) => new(repository);
     }
 }

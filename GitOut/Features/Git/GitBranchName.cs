@@ -8,7 +8,7 @@ namespace GitOut.Features.Git
         private const string LocalBranchType = "heads";
         private const string RemoteBranchType = "remotes";
 
-        private static readonly Regex ValidBranchName = new Regex("");
+        private static readonly Regex ValidBranchName = new("");
         private GitBranchName(string type, string name)
         {
             if (name.Length <= 1)
@@ -34,7 +34,7 @@ namespace GitOut.Features.Git
 
         public string IconResource { get; }
 
-        public static bool IsValid(string name) => ValidBranchName.IsMatch(name);
+        public static bool IsValid(string? name) => name is not null && ValidBranchName.IsMatch(name);
 
         public static GitBranchName Create(string name)
         {
@@ -48,6 +48,6 @@ namespace GitOut.Features.Git
                 : new GitBranchName(parts[1], parts[1]);
         }
 
-        public static GitBranchName CreateLocal(string name) => new GitBranchName(LocalBranchType, name);
+        public static GitBranchName CreateLocal(string name) => new(LocalBranchType, name);
     }
 }

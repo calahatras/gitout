@@ -43,7 +43,7 @@ namespace GitOut.Features.Git
             private bool ignoreAllSpace;
             private bool recursive;
 
-            public DiffOptions Build() => new DiffOptions(cached, ignoreAllSpace, recursive);
+            public DiffOptions Build() => new(cached, ignoreAllSpace, recursive);
 
             public IDiffOptionsBuilder Cached()
             {

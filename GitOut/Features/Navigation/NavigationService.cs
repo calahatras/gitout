@@ -21,7 +21,7 @@ namespace GitOut.Features.Navigation
         private readonly IOptions<NavigationWindowOptions> windowOptions;
         private readonly IWritableStorage storage;
         private readonly ILogger<NavigationService> logger;
-        private readonly Stack<Tuple<ContentControl, string?, IServiceScope>> pageStack = new Stack<Tuple<ContentControl, string?, IServiceScope>>();
+        private readonly Stack<Tuple<ContentControl, string?, IServiceScope>> pageStack = new();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
 
         private Window? currentWindow;
@@ -44,7 +44,7 @@ namespace GitOut.Features.Navigation
             this.logger = logger;
             life.ApplicationStopping.Register(() =>
             {
-                if (currentWindow != null)
+                if (currentWindow is not null)
                 {
                     try
                     {
@@ -56,9 +56,7 @@ namespace GitOut.Features.Navigation
                             }
                         });
                     }
-#pragma warning disable CA1031 // Do not catch general exception types
                     catch { }
-#pragma warning restore CA1031 // Do not catch general exception types
                 }
             });
 
@@ -98,8 +96,8 @@ namespace GitOut.Features.Navigation
         {
             Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), "Invalid page name " + pageName);
             IServiceScope scope = provider.CreateScope();
-            object service;
-            if (options != null)
+            object? service;
+            if (options is not null)
             {
                 if (pageOptions.ContainsKey(pageName))
                 {
@@ -156,7 +154,7 @@ namespace GitOut.Features.Navigation
                         logger.LogInformation(LogEventId.Navigation, "Navigating to control " + pageName);
                         OnNavigationRequested(page);
                         pageStack.Push(new Tuple<ContentControl, string?, IServiceScope>(page, currentTitle, scope));
-                        Wpf.ApplicationCommands.Navigate.Back.RaiseExecuteChanged();
+                        CompositeCommand.RaiseExecuteChanged();
                         CurrentPage = pageName;
                         if (page.DataContext is INavigationListener listener)
                         {
@@ -164,7 +162,7 @@ namespace GitOut.Features.Navigation
                         }
                     }
                     break;
-                default: throw new ArgumentOutOfRangeException("Invalid navigational type: " + service != null ? service.ToString() : pageName);
+                default: throw new ArgumentOutOfRangeException("Invalid navigational type: " + (service is not null ? service.ToString() : pageName));
             }
         }
 

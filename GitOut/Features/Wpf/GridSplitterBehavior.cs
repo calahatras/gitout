@@ -30,7 +30,7 @@ namespace GitOut.Features.Wpf
             {
                 return;
             }
-            if (!(Window.GetWindow(element) is NavigatorShell window))
+            if (Window.GetWindow(element) is not NavigatorShell window)
             {
                 throw new InvalidOperationException("Parent must be a NavigatorShell for frozen panel to work");
             }
@@ -60,11 +60,11 @@ namespace GitOut.Features.Wpf
             {
                 if (!resizing)
                 {
-                    if (frozenColumn != null)
+                    if (frozenColumn is not null)
                     {
                         frozenColumn.Width = new GridLength(frozenColumn.ActualWidth);
                     }
-                    if (frozenRow != null)
+                    if (frozenRow is not null)
                     {
                         frozenRow.Height = new GridLength(frozenRow.ActualHeight);
                     }

@@ -19,16 +19,16 @@ namespace GitOut.Features.Git.Log
 {
     public class GitLogViewModel : INotifyPropertyChanged, INavigationListener
     {
-        private readonly object activeStashesLock = new object();
-        private readonly ObservableCollection<GitStash> activeStashes = new ObservableCollection<GitStash>();
+        private readonly object activeStashesLock = new();
+        private readonly ObservableCollection<GitStash> activeStashes = new();
 
-        private readonly object entriesLock = new object();
-        private readonly ObservableCollection<GitTreeEvent> entries = new ObservableCollection<GitTreeEvent>();
+        private readonly object entriesLock = new();
+        private readonly ObservableCollection<GitTreeEvent> entries = new();
 
-        private readonly object remotesLock = new object();
-        private readonly ObservableCollection<GitRemoteViewModel> remotes = new ObservableCollection<GitRemoteViewModel>();
+        private readonly object remotesLock = new();
+        private readonly ObservableCollection<GitRemoteViewModel> remotes = new();
 
-        private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new ObservableCollection<GitTreeEvent>();
+        private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new();
 
         private readonly ISnackbarService snack;
 
@@ -89,7 +89,7 @@ namespace GitOut.Features.Git.Log
                     IsCheckoutBranchVisible = false;
                     try
                     {
-                        var branchName = GitBranchName.CreateLocal(name);
+                        var branchName = GitBranchName.CreateLocal(name!); // name is validated by the canExecute callback
                         await Repository.ExecuteCheckoutBranchAsync(branchName);
                         await CheckRepositoryStatusAsync();
                         snack.ShowSuccess($"Branch {branchName.Name} created");
@@ -111,7 +111,7 @@ namespace GitOut.Features.Git.Log
 
             CopyCommitHashCommand = new CopyTextToClipBoardCommand<GitHistoryEvent?>(
                 ghe => ghe!.Id.Hash,
-                ghe => !(ghe is null),
+                ghe => ghe is not null,
                 TextDataFormat.UnicodeText,
                 data => snack.ShowSuccess("Copied hash to clipboard"),
                 data => snack.ShowError(data.Message, data)
@@ -119,13 +119,13 @@ namespace GitOut.Features.Git.Log
 
             CopySubjectCommand = new CopyTextToClipBoardCommand<LogEntriesViewModel?>(
                 gte => gte!.Subject,
-                gte => !(gte is null),
+                gte => gte is not null,
                 TextDataFormat.UnicodeText,
                 data => snack.ShowSuccess("Copied subject to clipboard"),
                 data => snack.ShowError(data.Message, data)
             );
 
-            SelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit =>
+            SelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
             {
                 foreach (GitTreeEvent? entry in entries)
                 {
@@ -135,7 +135,7 @@ namespace GitOut.Features.Git.Log
                 gitTreeEvent.IsSelected = true;
             });
 
-            AppendSelectCommitCommand = new CallbackCommand<GitHistoryEvent>(commit => entries.First(e => e.Event.Id == commit.Id).IsSelected = true);
+            AppendSelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit => entries.First(e => e.Event.Id == commit.Id).IsSelected = true);
             CloseAutocompleteCommand = new CallbackCommand(() => IsSearchDisplayed = false);
             ShowSearchFilesCommand = new CallbackCommand(() => IsSearchDisplayed = true);
         }
@@ -220,7 +220,7 @@ namespace GitOut.Features.Git.Log
             {
                 if (SetProperty(ref revisionViewMode, value))
                 {
-                    if (!(selectedContext is null))
+                    if (selectedContext is not null)
                     {
                         selectedContext.ViewMode = revisionViewMode;
                     }
@@ -337,7 +337,7 @@ namespace GitOut.Features.Git.Log
             }
         }
 
-        private IEnumerable<GitTreeEvent> BuildTree(IEnumerable<GitHistoryEvent> log)
+        private static IEnumerable<GitTreeEvent> BuildTree(IEnumerable<GitHistoryEvent> log)
         {
             var stopwatch = Stopwatch.StartNew();
             var events = new List<GitTreeEvent>();

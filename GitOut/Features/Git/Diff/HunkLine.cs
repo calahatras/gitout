@@ -4,7 +4,7 @@ namespace GitOut.Features.Git.Diff
 {
     public class HunkLine
     {
-        public static readonly HunkLine Empty = new HunkLine(DiffLineType.None, string.Empty, null, null);
+        public static readonly HunkLine Empty = new(DiffLineType.None, string.Empty, null, null);
 
         private HunkLine(DiffLineType type, string line, int? fromIndex, int? toIndex)
         {
@@ -57,10 +57,10 @@ namespace GitOut.Features.Git.Diff
         public string StrippedLine { get; }
         public DiffLineType Type { get; }
 
-        public static HunkLine AsHead(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.Header, line, fromIndex, toIndex);
-        public static HunkLine AsLine(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.None, line, fromIndex, toIndex);
-        public static HunkLine AsControl(string line, int fromIndex, int toIndex) => new HunkLine(DiffLineType.Control, line, fromIndex, toIndex);
-        public static HunkLine AsAdded(string line, int toIndex) => new HunkLine(DiffLineType.Added, line, null, toIndex);
-        public static HunkLine AsRemoved(string line, int fromIndex) => new HunkLine(DiffLineType.Removed, line, fromIndex, null);
+        public static HunkLine AsHead(string line, int fromIndex, int toIndex) => new(DiffLineType.Header, line, fromIndex, toIndex);
+        public static HunkLine AsLine(string line, int fromIndex, int toIndex) => new(DiffLineType.None, line, fromIndex, toIndex);
+        public static HunkLine AsControl(string line, int fromIndex, int toIndex) => new(DiffLineType.Control, line, fromIndex, toIndex);
+        public static HunkLine AsAdded(string line, int toIndex) => new(DiffLineType.Added, line, null, toIndex);
+        public static HunkLine AsRemoved(string line, int fromIndex) => new(DiffLineType.Removed, line, fromIndex, null);
     }
 }

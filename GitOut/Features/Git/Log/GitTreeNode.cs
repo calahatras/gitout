@@ -35,7 +35,7 @@ namespace GitOut.Features.Git.Log
             }
         }
 
-        public static GitTreeNode WithTopLine(Line top, Color color, bool commit) => new GitTreeNode(top, null, color, commit);
-        public static GitTreeNode WithBottomLine(Line bottom, Color color, bool commit) => new GitTreeNode(null, bottom, color, commit);
+        public static GitTreeNode WithTopLine(Line top, Color color, bool commit) => new(top, null, color, commit);
+        public static GitTreeNode WithBottomLine(Line bottom, Color color, bool commit) => new(null, bottom, color, commit);
     }
 }

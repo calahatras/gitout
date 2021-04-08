@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -14,7 +14,7 @@ namespace GitOut.Features.Wpf.Converters
                 throw new InvalidOperationException("The target type must be of type Visibility");
             }
             bool visible = (bool)value;
-            bool invert = parameter != null && bool.Parse((string)parameter);
+            bool invert = parameter is not null && bool.Parse((string)parameter);
             return invert ^ visible ? Visibility.Visible : Visibility.Collapsed;
         }
 

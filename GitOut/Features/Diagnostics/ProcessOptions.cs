@@ -8,13 +8,13 @@ namespace GitOut.Features.Diagnostics
 
         public string Arguments { get; }
 
-        public static ProcessOptions FromArguments(string arguments) => new ProcessOptions(arguments);
+        public static ProcessOptions FromArguments(string arguments) => new(arguments);
 
         public static IProcessOptionsBuilder Builder() => new ProcessOptionsBuilder();
 
         private class ProcessOptionsBuilder : IProcessOptionsBuilder
         {
-            private readonly List<string> arguments = new List<string>();
+            private readonly List<string> arguments = new();
 
             public IProcessOptionsBuilder Append(string argument)
             {
@@ -34,7 +34,7 @@ namespace GitOut.Features.Diagnostics
                 return this;
             }
 
-            public ProcessOptions Build() => new ProcessOptions(string.Join(" ", arguments));
+            public ProcessOptions Build() => new(string.Join(" ", arguments));
         }
     }
 }

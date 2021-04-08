@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
 
@@ -17,11 +17,12 @@ namespace GitOut.Features.Logging
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             string content = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] {logLevel}\t{eventId.Id}\t{formatter(state, exception)}\r\n";
-            if (exception != null)
+            if (exception is not null)
             {
                 content += $"{exception}\r\n";
             }
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
             File.AppendAllText(filePath, content);
         }
     }

@@ -44,7 +44,7 @@ namespace GitOut.Features.Settings
             ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
             OpenSettingsFolderCommand = new NavigateExternalCommand(new Uri("file://" + Directory.GetParent(SettingsOptions.GetSettingsPath())));
-            SearchRootFolderCommand = new CallbackCommand<string>(
+            SearchRootFolderCommand = new NotNullCallbackCommand<string>(
                 folder =>
                 {
                     var info = new DirectoryInfo(folder);
@@ -69,7 +69,7 @@ namespace GitOut.Features.Settings
                 },
                 folder => !string.IsNullOrEmpty(folder)
             );
-            AddRepositoryCommand = new CallbackCommand<ValidGitRepositoryPathViewModel>(
+            AddRepositoryCommand = new NotNullCallbackCommand<ValidGitRepositoryPathViewModel>(
                 repository =>
                 {
                     IGitRepository localrepo = gitFactory.Create(DirectoryPath.Create(repository.WorkingDirectory));
@@ -79,6 +79,11 @@ namespace GitOut.Features.Settings
             ChangeThemeCommand = new CallbackCommand<ThemePaletteViewModel>(
                 theme =>
                 {
+                    if (theme is null)
+                    {
+                        return;
+                    }
+
                     themes.ChangeTheme(theme);
                     snacks.ShowSuccess($"Changed theme to {theme.Name}");
                 });

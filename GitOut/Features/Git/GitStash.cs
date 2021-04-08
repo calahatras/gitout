@@ -5,7 +5,7 @@ namespace GitOut.Features.Git
 {
     public class GitStash
     {
-        private static readonly Regex stashIndexMatcher = new Regex("(?:stash@\\{)(\\d+)(?:\\})", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+        private static readonly Regex stashIndexMatcher = new("(?:stash@\\{)(\\d+)(?:\\})", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
         public GitStash(
             string name,
             int stashIndex,
@@ -72,7 +72,7 @@ namespace GitOut.Features.Git
                 return this;
             }
 
-            public GitStash Build() => new GitStash(
+            public GitStash Build() => new(
                 Name,
                 stashIndex,
                 fromNode,

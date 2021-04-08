@@ -10,7 +10,7 @@
 
         public GitHistoryEvent? LookingFor { get; }
         public GitTreeNode Current { get; }
-        public static TreeBuildingLeaf WithoutParent(GitTreeNode node) => new TreeBuildingLeaf(null, node);
-        public static TreeBuildingLeaf WithParent(GitHistoryEvent parent, GitTreeNode node) => new TreeBuildingLeaf(parent, node);
+        public static TreeBuildingLeaf WithoutParent(GitTreeNode node) => new(null, node);
+        public static TreeBuildingLeaf WithParent(GitHistoryEvent parent, GitTreeNode node) => new(parent, node);
     }
 }

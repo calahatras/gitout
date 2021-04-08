@@ -86,8 +86,8 @@ namespace GitOut.Features.Git
                     indexFileModes = GetFileModes(change[17..23]);
                     worktreeFileModes = GetFileModes(change[24..30]);
 
-                    sourceId = GitFileId.FromHash(change[31..71]);
-                    destinationId = GitFileId.FromHash(change[72..112]);
+                    sourceId = GitFileId.FromHash(change.AsSpan()[31..71]);
+                    destinationId = GitFileId.FromHash(change.AsSpan()[72..112]);
 
                     path = Type == GitStatusChangeType.RenamedOrCopied
                         ? RelativeDirectoryPath.Create(change[(change.IndexOf(' ', 113) + 1)..])
@@ -97,7 +97,7 @@ namespace GitOut.Features.Git
 
             public GitStatusChangeType Type { get; }
 
-            public GitStatusChange Build() => new GitStatusChange(
+            public GitStatusChange Build() => new(
                 Type,
                 stagedStatus,
                 unstagedStatus,
@@ -143,9 +143,9 @@ namespace GitOut.Features.Git
                 {
                     throw new ArgumentException($"Modes must be of length 6 but was {modes.Length}", nameof(modes));
                 }
-                Enum.TryParse(modes.Substring(3, 1), out PosixFileModes user);
-                Enum.TryParse(modes.Substring(4, 1), out PosixFileModes group);
-                Enum.TryParse(modes.Substring(5, 1), out PosixFileModes other);
+                _ = Enum.TryParse(modes.Substring(3, 1), out PosixFileModes user);
+                _ = Enum.TryParse(modes.Substring(4, 1), out PosixFileModes group);
+                _ = Enum.TryParse(modes.Substring(5, 1), out PosixFileModes other);
                 return new[]
                 {
                     user, group, other

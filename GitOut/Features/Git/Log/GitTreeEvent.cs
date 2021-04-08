@@ -9,7 +9,7 @@ namespace GitOut.Features.Git.Log
 {
     public class GitTreeEvent : INotifyPropertyChanged
     {
-        private static readonly List<AvailableColor> colors = new List<AvailableColor>
+        private static readonly List<AvailableColor> colors = new()
         {
             new AvailableColor(Color.FromRgb(255, 255, 0)),
             new AvailableColor(Color.FromRgb(255, 200, 100)),
@@ -21,7 +21,7 @@ namespace GitOut.Features.Git.Log
             new AvailableColor(Color.FromRgb(50, 50, 50))
         };
 
-        private readonly List<GitTreeNode> nodes = new List<GitTreeNode>();
+        private readonly List<GitTreeNode> nodes = new();
         private int commitIndex = -1;
         private bool isSelected;
 
@@ -64,11 +64,11 @@ namespace GitOut.Features.Git.Log
                 {
                     processedCommit = true;
 
-                    if (Event.Parent != null)
+                    if (Event.Parent is not null)
                     {
                         leaf.Current.Bottom = new Line(from, to++);
                         bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, leaf.Current));
-                        if (Event.MergedParent != null)
+                        if (Event.MergedParent is not null)
                         {
                             var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
                             nodes.Add(node);
@@ -87,10 +87,10 @@ namespace GitOut.Features.Git.Log
             {
                 var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
                 nodes.Add(node);
-                if (Event.Parent != null)
+                if (Event.Parent is not null)
                 {
                     bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, node));
-                    if (Event.MergedParent != null)
+                    if (Event.MergedParent is not null)
                     {
                         var mergedNode = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
                         nodes.Add(mergedNode);
@@ -148,9 +148,9 @@ namespace GitOut.Features.Git.Log
             return topLeafs;
         }
 
-        private Color GetNextAvailableColor()
+        private static Color GetNextAvailableColor()
         {
-            AvailableColor nextColor = colors.FirstOrDefault(ac => ac.Available);
+            AvailableColor? nextColor = colors.FirstOrDefault(ac => ac.Available);
             if (nextColor is null)
             {
                 colors.ForEach(ac => ac.Available = true);
@@ -160,10 +160,10 @@ namespace GitOut.Features.Git.Log
             return nextColor.Color;
         }
 
-        private void SetColorAvailable(Color color)
+        private static void SetColorAvailable(Color color)
         {
-            AvailableColor availableColor = colors.FirstOrDefault(ac => ac.Color == color);
-            if (availableColor != null)
+            AvailableColor? availableColor = colors.FirstOrDefault(ac => ac.Color == color);
+            if (availableColor is not null)
             {
                 availableColor.Available = true;
             }
