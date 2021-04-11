@@ -42,8 +42,13 @@ namespace GitOut.Features.IO
                 watcher.Dispose();
             }
 
-            private void OnFileSystemChanges(object sender, FileSystemEventArgs args) =>
-                Events?.Invoke(this, new RepositoryWatcherEventArgs(args.Name.Replace("\\", "/")));
+            private void OnFileSystemChanges(object sender, FileSystemEventArgs args)
+            {
+                if (args.Name is not null)
+                {
+                    Events?.Invoke(this, new RepositoryWatcherEventArgs(args.Name.Replace("\\", "/")));
+                }
+            }
         }
     }
 }
