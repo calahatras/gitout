@@ -47,7 +47,7 @@ namespace GitOut.Features.Material.Snackbar
             private TimeSpan? duration;
             private string? message;
             private Exception? error;
-            private CancellationToken cancelToken;
+            private CancellationToken cancellationToken;
 
             public Snack Build()
             {
@@ -68,7 +68,7 @@ namespace GitOut.Features.Material.Snackbar
 
             public Snack Build(Action<SnackAction?> commandHandler)
             {
-                var token = CancellationTokenSource.CreateLinkedTokenSource(cancelToken);
+                var token = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 var snack = new Snack(
                     message ?? throw new InvalidOperationException("Snack message cannot be empty"),
                     duration ?? DefaultDuration,
@@ -93,9 +93,9 @@ namespace GitOut.Features.Material.Snackbar
                 return snack;
             }
 
-            public ISnackBuilder WithCancellation(CancellationToken cancelToken)
+            public ISnackBuilder WithCancellation(CancellationToken token)
             {
-                this.cancelToken = cancelToken;
+                cancellationToken = token;
                 return this;
             }
 

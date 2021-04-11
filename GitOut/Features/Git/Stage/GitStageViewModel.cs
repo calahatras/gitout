@@ -236,7 +236,7 @@ namespace GitOut.Features.Git.Stage
                             }
                             else
                             {
-                                if (!(previousCancellation is null))
+                                if (previousCancellation is not null)
                                 {
                                     previousCancellation.Cancel();
                                 }
