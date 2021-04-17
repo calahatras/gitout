@@ -14,55 +14,6 @@
                 <ResourceDictionary Source="pack://application:,,,/Themes/Material/MaterialDesign.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Themes/Material/Dark.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- https://stackoverflow.com/questions/44190041/show-default-window-buttons-on-wpf-window-using-windowchrome -->
-            <Style x:Key="CaptionButtonStyle" TargetType="Button">
-                <Setter Property="Focusable" Value="False"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Grid x:Name="LayoutRoot" Background="Transparent" Width="36" Height="20">
-                                <TextBlock
-                                    x:Name="txt"
-                                    Text="{TemplateBinding Content}"
-                                    FontFamily="Segoe MDL2 Assets"
-                                    FontSize="9"
-                                    Foreground="#FFFFFF"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    RenderOptions.ClearTypeHint="Auto"
-                                    TextOptions.TextRenderingMode="Aliased"
-                                    TextOptions.TextFormattingMode="Display"
-                                />
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="LayoutRoot" Property="Background" Value="#E5E5E5"/>
-                                    <Setter TargetName="txt" Property="Foreground" Value="#000000"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <Style x:Key="MinimizeButtonStyle" TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
-                <Setter Property="Content" Value="&#xE949;"/>
-            </Style>
-
-            <Style x:Key="MaximizeButtonStyle" TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
-                <Setter Property="Content" Value="&#xE739;"/>
-            </Style>
-
-            <Style x:Key="RestoreButtonStyle" TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
-                <Setter Property="Content" Value="&#xE923;"/>
-            </Style>
-
-            <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
-                <Setter Property="Content" Value="&#xE106;"/>
-            </Style>
-            <!-- Caption buttons -->
-
         </ResourceDictionary>
     </Application.Resources>
 </Application>

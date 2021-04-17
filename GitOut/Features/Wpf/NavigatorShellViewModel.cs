@@ -39,7 +39,6 @@ namespace GitOut.Features.Wpf
             Snacks.SortDescriptions.Add(new SortDescription("DateAddedUtc", ListSortDirection.Ascending));
             snack.SnackReceived += (sender, args) => ShowSnackAsync(args.Snack, snacks).ConfigureAwait(false);
 
-            CloseCommand = new CallbackCommand(life.StopApplication);
             OpenSettingsCommand = new NavigateLocalCommand<object>(
                 navigation,
                 typeof(SettingsPage).FullName!,
@@ -47,12 +46,6 @@ namespace GitOut.Features.Wpf
                 _ => navigation.CurrentPage != typeof(SettingsPage).FullName
             );
         }
-
-        public ICommand MinimizeCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = WindowState.Minimized);
-        public ICommand MaximizeCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = WindowState.Maximized);
-        public ICommand RestoreCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = WindowState.Normal);
-        public ICommand ToggleWindowStateCommand { get; } = new NotNullCallbackCommand<Window>(window => window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized);
-        public ICommand CloseCommand { get; }
 
         public ICommand OpenSettingsCommand { get; }
 

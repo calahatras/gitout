@@ -23,7 +23,6 @@ namespace GitOut.Features.Wpf
                 throw new InvalidOperationException("Cannot register hook on window without hwnd");
             }
             source.AddHook(WindowResizedHook);
-            GlassHelper.EnableBlur(this);
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)

@@ -15,8 +15,7 @@
     MinHeight="300"
     MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
     MinWidth="320"
-    WindowStyle="None"
-    AllowsTransparency="True"
+    WindowStyle="SingleBorderWindow"
     WindowStartupLocation="Manual"
     Background="{DynamicResource MaterialBackgroundBackground}"
     TextElement.Foreground="{DynamicResource MaterialLightPrimaryText}"
@@ -28,14 +27,6 @@
     Language="sv"
     d:DataContext="{d:DesignInstance Type={x:Type local:NavigatorShellViewModel}}"
 >
-    <WindowChrome.WindowChrome>
-        <WindowChrome
-            CaptionHeight="0"
-            CornerRadius="0"
-            ResizeBorderThickness="5"
-            GlassFrameThickness="0"
-        />
-    </WindowChrome.WindowChrome>
     <Window.InputBindings>
         <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding OpenSettingsCommand}" />
         <KeyBinding Key="Left" Modifiers="Alt" Command="{x:Static wpfcommands:Navigate.Back}" />
@@ -45,12 +36,6 @@
             <Setter Property="Height" Value="20"/>
             <Setter Property="Background" Value="#212225"/>
             <Setter Property="TextElement.Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
-        </Style>
-        <Style x:Key="NavigationTitleStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="FontFamily" Value="Roboto light" />
-            <Setter Property="FontSize" Value="10" />
-            <Setter Property="Foreground" Value="#cccccc" />
-            <Setter Property="Margin" Value="6 4" />
         </Style>
         <Style x:Key="MenuButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}">
             <Setter Property="Content">
@@ -114,31 +99,12 @@
                 Margin="1 1 1 0"
                 Style="{StaticResource NavigationToolbarStyle}"
             >
-                <Grid.InputBindings>
-                    <MouseBinding
-                        MouseAction="LeftDoubleClick"
-                        Command="{Binding ToggleWindowStateCommand}"
-                        CommandParameter="{Binding ElementName=window}"
-                    />
-                </Grid.InputBindings>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="1" Text="git out" Style="{StaticResource NavigationTitleStyle}" />
                 <StackPanel
-                    Grid.Column="2"
+                    Grid.Column="0"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                 >
                     <Button Style="{StaticResource MenuButtonStyle}" Command="{Binding OpenSettingsCommand}" ToolTip="Settings"/>
-                    <Border BorderThickness="1 0 0 0" BorderBrush="{DynamicResource MaterialLightDividers}" Margin="8 4"/>
-
-                    <Button Style="{StaticResource MinimizeButtonStyle}" Command="{Binding MinimizeCommand}" CommandParameter="{Binding ElementName=window}"/>
-                    <Button Visibility="{Binding WindowState, ElementName=window, Converter={StaticResource WindowStateToVisibilityConverter}, ConverterParameter=Normal}" Style="{StaticResource MaximizeButtonStyle}" Command="{Binding MaximizeCommand}" CommandParameter="{Binding ElementName=window}"/>
-                    <Button Visibility="{Binding WindowState, ElementName=window, Converter={StaticResource WindowStateToVisibilityConverter}, ConverterParameter=Maximized}" Style="{StaticResource RestoreButtonStyle}" Command="{Binding RestoreCommand}" CommandParameter="{Binding ElementName=window}"/>
-                    <Button Style="{StaticResource CloseButtonStyle}" Command="{Binding CloseCommand}" CommandParameter="{Binding ElementName=window}"/>
                 </StackPanel>
             </Grid>
             <Grid>
