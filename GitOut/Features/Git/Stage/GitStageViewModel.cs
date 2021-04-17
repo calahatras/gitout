@@ -217,22 +217,24 @@ namespace GitOut.Features.Git.Stage
                 case NavigationType.Activated:
                     {
                         repositoryWatcher.EnableRaisingEvents = false;
-                        if (hasChanges || selectedFileHasChanges)
+                        if (hasChanges && !(selectedFileHasChanges && !refreshAutomatically))
+                        {
+                            const string RefreshedMessage = "git out detected file changes and refreshed automatically";
+                            _ = snack.ShowAsync(Snack.Builder()
+                                .WithMessage(RefreshedMessage)
+                                .WithDuration(TimeSpan.FromSeconds(4))
+                            );
+                        }
+                        if (hasChanges)
+                        {
+                            ParseStatus(await Repository.ExecuteStatusAsync());
+                        }
+
+                        if (selectedFileHasChanges)
                         {
                             if (refreshAutomatically)
                             {
-                                if (hasChanges)
-                                {
-                                    ParseStatus(await Repository.ExecuteStatusAsync());
-                                    _ = snack.ShowAsync(Snack.Builder()
-                                        .WithMessage("git out detected file changes and refreshed automatically")
-                                        .WithDuration(TimeSpan.FromSeconds(3))
-                                    );
-                                }
-                                if (selectedFileHasChanges)
-                                {
-                                    await ExecuteDiffAsync();
-                                }
+                                await ExecuteDiffAsync();
                             }
                             else
                             {
@@ -243,30 +245,18 @@ namespace GitOut.Features.Git.Stage
                                 previousCancellation = new CancellationTokenSource();
                                 string refreshText = "REFRESH";
                                 _ = snack.ShowAsync(Snack.Builder()
-                                    .WithMessage("git out detected file changes while window was inactive")
+                                    .WithMessage("git out detected changes to selected file while window was inactive")
                                     .WithDuration(TimeSpan.FromMinutes(1))
                                     .WithCancellation(previousCancellation.Token)
                                     .AddAction(refreshText)
-                                ).ContinueWith(async (task, state) =>
+                                ).ContinueWith(async (task) =>
                                 {
                                     SnackAction? selectedAction = task.Result;
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning disable CS8604 // Possible null reference argument.
-                                    (bool hc, bool sfhc) = (Tuple<bool, bool>)state;
-#pragma warning restore CS8604 // Possible null reference argument.
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                                     if (selectedAction?.Text == refreshText)
                                     {
-                                        if (hc)
-                                        {
-                                            ParseStatus(await Repository.ExecuteStatusAsync());
-                                        }
-                                        if (sfhc)
-                                        {
-                                            await ExecuteDiffAsync();
-                                        }
+                                        await ExecuteDiffAsync();
                                     }
-                                }, new Tuple<bool, bool>(hasChanges, selectedFileHasChanges));
+                                });
                             }
                         }
                         hasChanges = selectedFileHasChanges = false;
