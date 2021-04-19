@@ -4,6 +4,7 @@ using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.IO;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GitOut.Features.Git
@@ -16,6 +17,7 @@ namespace GitOut.Features.Git
             services.AddSingleton<IProcessTelemetryCollector, ProcessTelemetryCollector>();
             services.AddScoped<IProcessFactory<IGitProcess>, GitProcessFactory>();
             services.AddScoped<IGitRepositoryFactory, GitRepositoryFactory>();
+            services.AddScoped<IGitRepositoryWatcherProvider, GitRepositoryFileSystemWatcherProvider>();
             services.AddScoped<GitLogPage>();
             services.AddScoped<GitLogViewModel>();
             services.AddScoped<GitStagePage>();

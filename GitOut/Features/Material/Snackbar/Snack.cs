@@ -47,6 +47,7 @@ namespace GitOut.Features.Material.Snackbar
             private TimeSpan? duration;
             private string? message;
             private Exception? error;
+            private CancellationToken cancellationToken;
 
             public Snack Build()
             {
@@ -54,19 +55,20 @@ namespace GitOut.Features.Material.Snackbar
                 {
                     throw new InvalidOperationException("Must call Build with action handler if actions are available");
                 }
+                TimeSpan delay = duration ?? DefaultDuration;
+                var token = new CancellationTokenSource(delay);
                 return new Snack(
                     message ?? throw new InvalidOperationException("Snack message cannot be empty"),
                     duration ?? DefaultDuration,
                     error,
                     Array.Empty<SnackAction>(),
-                    default
+                    token.Token
                 );
             }
 
             public Snack Build(Action<SnackAction?> commandHandler)
             {
-                TimeSpan delay = duration ?? DefaultDuration;
-                var token = new CancellationTokenSource(delay);
+                var token = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 var snack = new Snack(
                     message ?? throw new InvalidOperationException("Snack message cannot be empty"),
                     duration ?? DefaultDuration,
@@ -85,14 +87,16 @@ namespace GitOut.Features.Material.Snackbar
                         .ToList(),
                     token.Token
                 );
-                _ = Task.Delay(delay, token.Token).ContinueWith(task =>
-                {
-                    if (task.IsCompletedSuccessfully)
-                    {
-                        commandHandler(null);
-                    }
-                });
+                TimeSpan delay = duration ?? DefaultDuration;
+                _ = Task.Delay(delay, token.Token).ContinueWith(task => commandHandler(null), TaskContinuationOptions.OnlyOnRanToCompletion);
+                token.CancelAfter(delay);
                 return snack;
+            }
+
+            public ISnackBuilder WithCancellation(CancellationToken token)
+            {
+                cancellationToken = token;
+                return this;
             }
 
             public ISnackBuilder WithMessage(string message)

@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -37,7 +35,7 @@ namespace GitOut.Features.Wpf
             var snacks = new ObservableCollection<Snack>();
             Snacks = CollectionViewSource.GetDefaultView(snacks);
             Snacks.SortDescriptions.Add(new SortDescription("DateAddedUtc", ListSortDirection.Ascending));
-            snack.SnackReceived += (sender, args) => ShowSnackAsync(args.Snack, snacks).ConfigureAwait(false);
+            snack.SnackReceived += (sender, args) => ShowSnack(args.Snack, snacks);
 
             CloseCommand = new CallbackCommand(life.StopApplication);
             OpenSettingsCommand = new NavigateLocalCommand<object>(
@@ -81,15 +79,10 @@ namespace GitOut.Features.Wpf
             }
         }
 
-        private static async Task ShowSnackAsync(Snack snack, ICollection<Snack> snackStack)
+        private static void ShowSnack(Snack snack, ICollection<Snack> snackStack)
         {
             Application.Current.Dispatcher.Invoke(() => snackStack.Add(snack));
-            try
-            {
-                await Task.Delay(snack.Duration, snack.Canceled).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) { }
-            Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack));
+            snack.Canceled.Register(() => Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack)));
         }
     }
 }

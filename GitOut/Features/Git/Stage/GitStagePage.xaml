@@ -96,6 +96,9 @@
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource UndoVariant}"/>
                     </Button>
                     <Separator/>
+                    <ToggleButton IsChecked="{Binding RefreshAutomatically}" ToolTip="Auto renew file changes">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource AutoRenew}"/>
+                    </ToggleButton>
                     <ToggleButton IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
                     </ToggleButton>

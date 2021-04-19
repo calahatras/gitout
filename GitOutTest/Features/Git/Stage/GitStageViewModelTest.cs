@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
+using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
@@ -28,6 +29,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -38,6 +44,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -73,6 +80,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -83,6 +95,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -113,6 +126,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -123,6 +141,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -156,6 +175,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -166,6 +190,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -209,6 +234,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -219,6 +249,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -261,6 +292,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -271,6 +307,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -328,6 +365,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -343,6 +385,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -394,6 +437,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -410,6 +458,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -461,6 +510,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -476,6 +530,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -527,6 +582,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -542,6 +602,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -593,6 +654,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -608,6 +674,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -662,6 +729,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -677,6 +749,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -735,6 +808,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -750,6 +828,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -803,6 +882,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -818,6 +902,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -873,6 +958,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -888,6 +978,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -961,6 +1052,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -976,6 +1072,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -1038,6 +1135,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -1053,6 +1155,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -1117,6 +1220,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -1132,6 +1240,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -1192,6 +1301,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -1210,6 +1324,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -1268,6 +1383,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -1286,6 +1406,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );
@@ -1345,6 +1466,11 @@ namespace GitOut.Features.Git.Stage
             var navigation = new Mock<INavigationService>();
             navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
+            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
+            var watch = new Mock<IRepositoryWatcher>();
+            watchProvider
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
             options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
@@ -1363,6 +1489,7 @@ namespace GitOut.Features.Git.Stage
             var actor = new GitStageViewModel(
                 navigation.Object,
                 title.Object,
+                watchProvider.Object,
                 snack.Object,
                 options.Object
             );

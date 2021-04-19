@@ -11,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
+using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Text;
@@ -23,6 +24,7 @@ namespace GitOut.Features.Git.Stage
     {
         private readonly ISnackbarService snack;
         private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
+        private readonly IRepositoryWatcher repositoryWatcher;
 
         private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
         private readonly object workspaceFilesLock = new();
@@ -38,6 +40,11 @@ namespace GitOut.Features.Git.Stage
         private bool diffWhitespace;
         private bool amendLastCommit;
 
+        private CancellationTokenSource? previousCancellation;
+        private bool hasChanges = false;
+        private bool selectedFileHasChanges = false;
+        private bool refreshAutomatically = false;
+
         private string commitMessage = string.Empty;
         private string cachedCommitMessage = string.Empty;
         private EditPatchViewModel? editHunk = null;
@@ -46,6 +53,7 @@ namespace GitOut.Features.Git.Stage
         public GitStageViewModel(
             INavigationService navigation,
             ITitleService title,
+            IGitRepositoryWatcherProvider watchProvider,
             ISnackbarService snack,
             IOptionsMonitor<GitStageOptions> stagingOptions
         )
@@ -57,6 +65,9 @@ namespace GitOut.Features.Git.Stage
             this.stagingOptions = stagingOptions;
             Repository = options.Repository;
             ShowSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
+
+            repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository);
+            repositoryWatcher.Events += OnFileSystemChanges;
 
             BindingOperations.EnableCollectionSynchronization(workspaceFiles, workspaceFilesLock);
             WorkspaceFiles = CollectionViewSource.GetDefaultView(workspaceFiles);
@@ -83,6 +94,12 @@ namespace GitOut.Features.Git.Stage
         public IGitRepository Repository { get; }
 
         public bool ShowSpacesAsDots { get; }
+
+        public bool RefreshAutomatically
+        {
+            get => refreshAutomatically;
+            set => SetProperty(ref refreshAutomatically, value);
+        }
 
         public bool DiffWhitespace
         {
@@ -185,10 +202,75 @@ namespace GitOut.Features.Git.Stage
 
         public async void Navigated(NavigationType type)
         {
-            if (type == NavigationType.Initial)
+            switch (type)
             {
-                await GetRepositoryStatusAsync();
+                case NavigationType.Initial:
+                    await GetRepositoryStatusAsync();
+                    break;
+                case NavigationType.NavigatedLeave:
+                    repositoryWatcher.Events -= OnFileSystemChanges;
+                    repositoryWatcher.Dispose();
+                    break;
+                case NavigationType.Deactivated:
+                    repositoryWatcher.EnableRaisingEvents = true;
+                    break;
+                case NavigationType.Activated:
+                    {
+                        repositoryWatcher.EnableRaisingEvents = false;
+                        if (hasChanges && !(selectedFileHasChanges && !refreshAutomatically))
+                        {
+                            const string RefreshedMessage = "git out detected file changes and refreshed automatically";
+                            _ = snack.ShowAsync(Snack.Builder()
+                                .WithMessage(RefreshedMessage)
+                                .WithDuration(TimeSpan.FromSeconds(4))
+                            );
+                        }
+                        if (hasChanges)
+                        {
+                            ParseStatus(await Repository.ExecuteStatusAsync());
+                        }
+
+                        if (selectedFileHasChanges)
+                        {
+                            if (refreshAutomatically)
+                            {
+                                await ExecuteDiffAsync();
+                            }
+                            else
+                            {
+                                if (previousCancellation is not null)
+                                {
+                                    previousCancellation.Cancel();
+                                }
+                                previousCancellation = new CancellationTokenSource();
+                                string refreshText = "REFRESH";
+                                _ = snack.ShowAsync(Snack.Builder()
+                                    .WithMessage("git out detected changes to selected file while window was inactive")
+                                    .WithDuration(TimeSpan.FromMinutes(1))
+                                    .WithCancellation(previousCancellation.Token)
+                                    .AddAction(refreshText)
+                                ).ContinueWith(async (task) =>
+                                {
+                                    SnackAction? selectedAction = task.Result;
+                                    if (selectedAction?.Text == refreshText)
+                                    {
+                                        await ExecuteDiffAsync();
+                                    }
+                                });
+                            }
+                        }
+                        hasChanges = selectedFileHasChanges = false;
+                    }
+                    break;
             }
+        }
+
+        private void OnFileSystemChanges(object sender, RepositoryWatcherEventArgs args)
+        {
+            hasChanges = true;
+            selectedFileHasChanges |= !(SelectedChange is null)
+                && SelectedChange.Location == StatusChangeLocation.Workspace
+                && args.RepositoryPath == SelectedChange.Path;
         }
 
         private async Task GetRepositoryStatusAsync()
@@ -209,7 +291,9 @@ namespace GitOut.Features.Git.Stage
                     ? head.Subject
                     : $"{head.Subject}{Environment.NewLine}{Environment.NewLine}{head.Body}";
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (InvalidOperationException) { }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private async Task ExecuteDiffAsync()
