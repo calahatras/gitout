@@ -23,6 +23,7 @@ namespace GitOut.Features.Git.Log
 
         private readonly List<GitTreeNode> nodes = new();
         private int commitIndex = -1;
+        private int colorIndex = 0;
         private bool isSelected;
 
         public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
@@ -34,7 +35,7 @@ namespace GitOut.Features.Git.Log
         {
             get
             {
-                var commitBrush = new SolidColorBrush(colors[commitIndex % colors.Count].Color);
+                var commitBrush = new SolidColorBrush(colors[colorIndex % colors.Count].Color);
                 commitBrush.Freeze();
                 return commitBrush;
             }
@@ -63,7 +64,7 @@ namespace GitOut.Features.Git.Log
                 if (from == commitIndex)
                 {
                     processedCommit = true;
-
+                    colorIndex = colors.FindIndex(ac => ac.Color == leaf.Current.Color);
                     if (Event.Parent is not null)
                     {
                         leaf.Current.Bottom = new Line(from, to++);
@@ -85,6 +86,7 @@ namespace GitOut.Features.Git.Log
             }
             if (!processedCommit)
             {
+                colorIndex = commitIndex;
                 var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
                 nodes.Add(node);
                 if (Event.Parent is not null)
