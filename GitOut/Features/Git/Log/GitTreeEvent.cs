@@ -86,8 +86,10 @@ namespace GitOut.Features.Git.Log
             }
             if (!processedCommit)
             {
-                colorIndex = commitIndex;
-                var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
+                Color color = GetNextAvailableColor();
+                var node = GitTreeNode.WithBottomLine(new Line(from, to++), color, true);
+                colorIndex = colors.FindIndex(ac => ac.Color == color);
+
                 nodes.Add(node);
                 if (Event.Parent is not null)
                 {
