@@ -73,6 +73,29 @@ namespace GitOut.Features.Git
                 {
                     path = RelativeDirectoryPath.Create(change[2..]);
                 }
+                else if (Type == GitStatusChangeType.Unmerged)
+                {
+                    if (change.Length < 161)
+                    {
+                        throw new ArgumentException($"Change must be longer than 160 characters but was {change.Length}", nameof(change));
+                    }
+                    // u <xy> <sub> <m1> <m2> <m3> <mW> <h1> <h2> <h3> <path>
+                    stagedStatus = GetModifiedStatusType(change[2]);
+                    unstagedStatus = GetModifiedStatusType(change[3]);
+
+                    PosixFileModes[]? first = GetFileModes(change[10..16]);
+                    PosixFileModes[]? second = GetFileModes(change[17..23]);
+                    PosixFileModes[]? third = GetFileModes(change[24..30]);
+                    worktreeFileModes = GetFileModes(change[31..37]);
+
+                    var firstObjectId = GitFileId.FromHash(change.AsSpan()[38..78]);
+                    var secondObjectId = GitFileId.FromHash(change.AsSpan()[79..119]);
+                    var thirdObjectId = GitFileId.FromHash(change.AsSpan()[120..160]);
+
+                    path = Type == GitStatusChangeType.RenamedOrCopied
+                        ? RelativeDirectoryPath.Create(change[(change.IndexOf(' ', 161) + 1)..])
+                        : RelativeDirectoryPath.Create(change[161..]);
+                }
                 else
                 {
                     if (change.Length < 114)
