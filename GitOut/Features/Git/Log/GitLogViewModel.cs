@@ -125,9 +125,16 @@ namespace GitOut.Features.Git.Log
                 data => snack.ShowError(data.Message, data)
             );
 
+            CloseDetailsCommand = new CallbackCommand(() =>
+            {
+                foreach (GitTreeEvent entry in entries)
+                {
+                    entry.IsSelected = false;
+                }
+            });
             SelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
             {
-                foreach (GitTreeEvent? entry in entries)
+                foreach (GitTreeEvent entry in entries)
                 {
                     entry.IsSelected = false;
                 }
@@ -258,6 +265,7 @@ namespace GitOut.Features.Git.Log
         public ICommand AppendSelectCommitCommand { get; }
         public ICommand CloseAutocompleteCommand { get; }
         public ICommand ShowSearchFilesCommand { get; }
+        public ICommand CloseDetailsCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

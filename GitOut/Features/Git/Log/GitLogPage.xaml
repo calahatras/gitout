@@ -196,6 +196,9 @@
                             </Style.Triggers>
                         </Style>
                     </ToolBar.Style>
+                    <Button ToolTip="Close details" Command="{Binding CloseDetailsCommand}">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowCollapseRight}"/>
+                    </Button>
                     <ToggleButton IsChecked="{Binding IsSearchDisplayed}" ToolTip="Search file">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileSearch}"/>
                     </ToggleButton>
