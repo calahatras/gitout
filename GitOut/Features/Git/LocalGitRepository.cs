@@ -182,7 +182,10 @@ namespace GitOut.Features.Git
             await foreach (string line in head.ReadLinesAsync())
             {
                 var id = GitCommitId.FromHash(line);
-                historyByCommitId[id].IsHead = true;
+                if (historyByCommitId.ContainsKey(id))
+                {
+                    historyByCommitId[id].IsHead = true;
+                }
             }
 
             return history;
