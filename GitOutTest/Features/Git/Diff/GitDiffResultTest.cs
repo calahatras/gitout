@@ -57,5 +57,25 @@ namespace GitOut.Features.Git.Diff
             Assert.That(result.Header, Is.EqualTo("diff --git a/GitOut/gitout.ico b/GitOut/gitout.ico\r\nnew file mode 100644\r\nindex 0000000..fe6742d"));
             Assert.That(result.Hunks.Count(), Is.EqualTo(1));
         }
+
+        [Test]
+        public void ParseShouldParseEmptyFile()
+        {
+            string[] diff = new[]
+            {
+                "diff --git a/a.txt b/a.txt",
+                "new file mode 100644",
+                "index 0000000..ce01362"
+                /* there is no @@ or Binary files here, only the three header lines */
+            };
+            IGitDiffBuilder builder = GitDiffResult.Builder();
+            foreach (string line in diff)
+            {
+                builder.Feed(line);
+            }
+            GitDiffResult result = builder.Build();
+            Assert.That(result.Header, Is.EqualTo(string.Empty));
+            Assert.That(result.Hunks.Count(), Is.EqualTo(0));
+        }
     }
 }
