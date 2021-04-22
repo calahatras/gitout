@@ -372,7 +372,7 @@ namespace GitOut.Features.Git
 
         public Task ExecuteResetAllAsync() => CreateProcess(ProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();
 
-        public Task ExecuteAddAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"add {change.Path}")).ExecuteAsync();
+        public Task ExecuteAddAsync(GitStatusChange change, AddOptions options) => CreateProcess(ProcessOptions.FromArguments($"add {string.Join(" ", options.GetArguments())} -- {change.Path}")).ExecuteAsync();
 
         public Task ExecuteCheckoutAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
 

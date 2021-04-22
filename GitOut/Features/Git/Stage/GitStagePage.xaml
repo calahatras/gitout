@@ -137,6 +137,7 @@
                         <KeyBinding Key="Enter" Command="{Binding StageWorkspaceFilesCommand}" />
                         <KeyBinding Key="R" Command="{Binding ResetWorkspaceFilesCommand}" />
                         <KeyBinding Key="Delete" Command="{Binding ResetWorkspaceFilesCommand}" />
+                        <KeyBinding Key="I" Command="{Binding IntentToAddCommand}" />
                     </ListView.InputBindings>
                 </ListView>
                 <GridSplitter Grid.Row="1" Style="{StaticResource SplitHorizontalStyle}" />

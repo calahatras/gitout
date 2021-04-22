@@ -12,6 +12,7 @@ namespace GitOut.Features.Git.Stage
             => value is GitModifiedStatusType status
             ? status switch
             {
+                GitModifiedStatusType.Untracked => (Brush)Application.Current.Resources["Untracked"],
                 GitModifiedStatusType.Added => (Brush)Application.Current.Resources["Added"],
                 GitModifiedStatusType.Deleted => (Brush)Application.Current.Resources["Removed"],
                 GitModifiedStatusType.Modified => (Brush)Application.Current.Resources["Changed"],
