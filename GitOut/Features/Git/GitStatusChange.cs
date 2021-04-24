@@ -45,7 +45,7 @@ namespace GitOut.Features.Git
         public RelativeDirectoryPath Path { get; }
         public RelativeDirectoryPath? MergedPath { get; }
 
-        public static IGitStatusChangeBuilder Parse(string change) => new GitStatusChangeBuilder(change);
+        public static IGitStatusChangeBuilder Parse(ReadOnlySpan<char> change) => new GitStatusChangeBuilder(change);
 
         private class GitStatusChangeBuilder : IGitStatusChangeBuilder
         {
@@ -62,7 +62,7 @@ namespace GitOut.Features.Git
 
             private RelativeDirectoryPath? mergedPath;
 
-            public GitStatusChangeBuilder(string change)
+            public GitStatusChangeBuilder(ReadOnlySpan<char> change)
             {
                 if (change.Length < 3)
                 {
@@ -71,7 +71,7 @@ namespace GitOut.Features.Git
                 Type = GetStatusChangeType(change[0]);
                 if (Type == GitStatusChangeType.Untracked)
                 {
-                    path = RelativeDirectoryPath.Create(change[2..]);
+                    path = RelativeDirectoryPath.Create(change[2..].ToString());
                 }
                 else if (Type == GitStatusChangeType.Unmerged)
                 {
@@ -83,18 +83,18 @@ namespace GitOut.Features.Git
                     stagedStatus = GetModifiedStatusType(change[2]);
                     unstagedStatus = GetModifiedStatusType(change[3]);
 
-                    PosixFileModes[]? first = GetFileModes(change[10..16]);
-                    PosixFileModes[]? second = GetFileModes(change[17..23]);
-                    PosixFileModes[]? third = GetFileModes(change[24..30]);
-                    worktreeFileModes = GetFileModes(change[31..37]);
+                    PosixFileModes[]? first = GetFileModes(change[10..16].ToString());
+                    PosixFileModes[]? second = GetFileModes(change[17..23].ToString());
+                    PosixFileModes[]? third = GetFileModes(change[24..30].ToString());
+                    worktreeFileModes = GetFileModes(change[31..37].ToString());
 
-                    var firstObjectId = GitFileId.FromHash(change.AsSpan()[38..78]);
-                    var secondObjectId = GitFileId.FromHash(change.AsSpan()[79..119]);
-                    var thirdObjectId = GitFileId.FromHash(change.AsSpan()[120..160]);
+                    var firstObjectId = GitFileId.FromHash(change[38..78]);
+                    var secondObjectId = GitFileId.FromHash(change[79..119]);
+                    var thirdObjectId = GitFileId.FromHash(change[120..160]);
 
                     path = Type == GitStatusChangeType.RenamedOrCopied
-                        ? RelativeDirectoryPath.Create(change[(change.IndexOf(' ', 161) + 1)..])
-                        : RelativeDirectoryPath.Create(change[161..]);
+                        ? RelativeDirectoryPath.Create(change[(change[161..].IndexOf(' ') + 1)..].ToString())
+                        : RelativeDirectoryPath.Create(change[161..].ToString());
                 }
                 else
                 {
@@ -105,16 +105,16 @@ namespace GitOut.Features.Git
 
                     stagedStatus = GetModifiedStatusType(change[2]);
                     unstagedStatus = GetModifiedStatusType(change[3]);
-                    headFileModes = GetFileModes(change[10..16]);
-                    indexFileModes = GetFileModes(change[17..23]);
-                    worktreeFileModes = GetFileModes(change[24..30]);
+                    headFileModes = GetFileModes(change[10..16].ToString());
+                    indexFileModes = GetFileModes(change[17..23].ToString());
+                    worktreeFileModes = GetFileModes(change[24..30].ToString());
 
-                    sourceId = GitFileId.FromHash(change.AsSpan()[31..71]);
-                    destinationId = GitFileId.FromHash(change.AsSpan()[72..112]);
+                    sourceId = GitFileId.FromHash(change[31..71]);
+                    destinationId = GitFileId.FromHash(change[72..112]);
 
                     path = Type == GitStatusChangeType.RenamedOrCopied
-                        ? RelativeDirectoryPath.Create(change[(change.IndexOf(' ', 113) + 1)..])
-                        : RelativeDirectoryPath.Create(change[113..]);
+                        ? RelativeDirectoryPath.Create(change[(change[113..].IndexOf(' ') + 1)..].ToString())
+                        : RelativeDirectoryPath.Create(change[113..].ToString());
                 }
             }
 
