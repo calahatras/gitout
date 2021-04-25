@@ -48,6 +48,7 @@
     <Geometry x:Key="ArchiveArrowUp">
         M4 21H20V8H4M14 15V18H10V15H7L12 10L17 15M3 3H21V7H3
     </Geometry>
+    <Geometry x:Key="ArrowCollapseRight">M12.08,4.08L20,12L12.08,19.92L10.67,18.5L16.17,13H2V11H16.17L10.67,5.5L12.08,4.08M20,12V22H22V2H20V12Z</Geometry>
     <Geometry x:Key="ArrowLeft">
         M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z
     </Geometry>
