@@ -9,7 +9,6 @@ using System.Windows.Input;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Settings;
-using Microsoft.Extensions.Hosting;
 
 namespace GitOut.Features.Wpf
 {
@@ -23,7 +22,6 @@ namespace GitOut.Features.Wpf
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
         public NavigatorShellViewModel(
-            IHostApplicationLifetime life,
             INavigationService navigation,
             ISnackbarService snack,
             ITitleService titleService

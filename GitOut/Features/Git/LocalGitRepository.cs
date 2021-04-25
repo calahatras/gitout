@@ -9,6 +9,7 @@ using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
+using GitOut.Features.Memory;
 
 namespace GitOut.Features.Git
 {
@@ -216,14 +217,13 @@ namespace GitOut.Features.Git
             IGitProcess status = CreateProcess(ProcessOptions.FromArguments("--no-optional-locks status --porcelain=2 -z --untracked-files=all --ignore-submodules=none"));
             await foreach (string line in status.ReadLinesAsync())
             {
-                string[] statusLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < statusLines.Length; ++i)
+                Range[] ranges = line.AsSpan().Split('\0', StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < ranges.Length; ++i)
                 {
-                    string? statusChange = statusLines[i];
-                    IGitStatusChangeBuilder builder = GitStatusChange.Parse(statusChange);
+                    IGitStatusChangeBuilder builder = GitStatusChange.Parse(line[ranges[i]]);
                     if (builder.Type == GitStatusChangeType.RenamedOrCopied)
                     {
-                        builder.MergedFrom(statusLines[++i]);
+                        builder.MergedFrom(line[ranges[++i]]);
                     }
                     statusChanges.Add(builder.Build());
                 }
