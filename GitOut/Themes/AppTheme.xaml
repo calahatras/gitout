@@ -17,7 +17,8 @@
     <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF"/>
     
     <!-- stage -->
-    <SolidColorBrush x:Key="Added" Color="#FF5AC85A"/>
+    <SolidColorBrush x:Key="Added" Color="#FFF8F85A"/>
     <SolidColorBrush x:Key="Removed" Color="#FFC85A5A"/>
     <SolidColorBrush x:Key="Changed" Color="#FFF8F85A"/>
+    <SolidColorBrush x:Key="Untracked" Color="#FF5AC85A"/>
 </ResourceDictionary>

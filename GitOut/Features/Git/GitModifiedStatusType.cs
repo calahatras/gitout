@@ -1,4 +1,4 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git
 {
     public enum GitModifiedStatusType
     {
@@ -9,6 +9,7 @@
         Deleted,
         Renamed,
         Copied,
-        UpdatedButUnmerged
+        UpdatedButUnmerged,
+        Untracked
     }
 }

@@ -85,6 +85,7 @@ namespace GitOut.Features.Git.Stage
             EditSelectedTextCommand = new CallbackCommand<IHunkLineVisitorProvider>(PrepareEditSelection);
             UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => undoPatch is not null);
             AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync);
+            IntentToAddCommand = new AsyncCallbackCommand(IntentToAddAsync);
             ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync);
 
             CancelEditTextCommand = new CallbackCommand(() => EditHunk = null);
@@ -185,6 +186,7 @@ namespace GitOut.Features.Git.Stage
 
         public ICommand RefreshStatusCommand { get; }
         public ICommand AddAllCommand { get; }
+        public ICommand IntentToAddCommand { get; }
         public ICommand StageFileCommand { get; }
         public ICommand StageWorkspaceFilesCommand { get; }
         public ICommand ResetWorkspaceFilesCommand { get; }
@@ -343,6 +345,18 @@ namespace GitOut.Features.Git.Stage
             await GetRepositoryStatusAsync();
         }
 
+        private async Task IntentToAddAsync()
+        {
+            foreach (StatusChangeViewModel item in workspaceFiles)
+            {
+                if (item.IsSelected)
+                {
+                    await Repository.ExecuteAddAsync(item.Model, AddOptions.Builder().WithIntent().Build());
+                }
+            }
+            await GetRepositoryStatusAsync();
+        }
+
         private async Task ResetAllFilesAsync()
         {
             await Repository.ExecuteResetAllAsync();
@@ -363,7 +377,7 @@ namespace GitOut.Features.Git.Stage
             else
             {
                 int previousIndex = SelectedWorkspaceIndex;
-                await Repository.ExecuteAddAsync(model.Model);
+                await Repository.ExecuteAddAsync(model.Model, AddOptions.None);
                 await GetRepositoryStatusAsync();
                 SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
             }
@@ -377,7 +391,7 @@ namespace GitOut.Features.Git.Stage
             {
                 if (item.IsSelected)
                 {
-                    await Repository.ExecuteAddAsync(item.Model);
+                    await Repository.ExecuteAddAsync(item.Model, AddOptions.None);
                 }
             }
             await GetRepositoryStatusAsync();
