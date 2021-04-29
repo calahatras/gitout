@@ -251,7 +251,7 @@ namespace GitOut.Features.Git.Stage
                             ParseStatus(await Repository.StatusAsync());
                         }
 
-                        if (selectedFileHasChanges)
+                        if (selectedFileHasChanges && selectedChange is not null)
                         {
                             if (refreshAutomatically)
                             {
@@ -259,10 +259,7 @@ namespace GitOut.Features.Git.Stage
                             }
                             else
                             {
-                                if (cancelRefreshSnack is not null)
-                                {
-                                    cancelRefreshSnack.Cancel();
-                                }
+                                cancelRefreshSnack?.Cancel();
                                 cancelRefreshSnack = new CancellationTokenSource();
                                 string refreshText = "REFRESH";
                                 _ = snack.ShowAsync(Snack.Builder()
