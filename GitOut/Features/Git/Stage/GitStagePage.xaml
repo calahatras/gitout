@@ -66,6 +66,13 @@
             </Setter>
         </Style>
     </UserControl.Resources>
+    <UserControl.InputBindings>
+        <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
+        <KeyBinding Key="Period" Modifiers="Control" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
+        <KeyBinding Key="OemComma" Modifiers="Control+Shift" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
+        <KeyBinding Key="Period" Modifiers="Control+Shift" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
+        <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding SetFocusCommand}" CommandParameter="{Binding ElementName=CommitMessage}" />
+    </UserControl.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -126,6 +133,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <ListView
+                    x:Name="WorkspaceFiles"
                     Grid.Row="0"
                     Style="{StaticResource GitChangeListStyle}"
                     ItemsSource="{Binding WorkspaceFiles}"
@@ -167,6 +175,7 @@
                     </StackPanel>
                 </Grid>
                 <ListView
+                    x:Name="IndexFiles"
                     Grid.Row="2"
                     Style="{StaticResource GitChangeListStyle}"
                     ItemsSource="{Binding IndexFiles}"
@@ -208,6 +217,11 @@
                             Command="{Binding EditSelectedTextCommand}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
                         />
+                        <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding Source={x:Reference WorkspaceFiles}}" />
+                        <KeyBinding Key="Period" Modifiers="Control" Command="{Binding MoveNextCommand}" CommandParameter="{Binding Source={x:Reference WorkspaceFiles}}" />
+                        <KeyBinding Key="OemComma" Modifiers="Control+Shift" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding Source={x:Reference IndexFiles}}" />
+                        <KeyBinding Key="Period" Modifiers="Control+Shift" Command="{Binding MoveNextCommand}" CommandParameter="{Binding Source={x:Reference IndexFiles}}" />
+                        <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding SetFocusCommand}" CommandParameter="{Binding Source={x:Reference CommitMessage}}" />
                     </diff:GitDiffControl.DocumentInputBindings>
                 </diff:GitDiffControl>
                 <Popup
@@ -247,6 +261,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBox
+                            x:Name="CommitMessage"
                             Style="{StaticResource MaterialFormAreaStyle}"
                             Text="{Binding CommitMessage, UpdateSourceTrigger=PropertyChanged}"
                             FontSize="12"
@@ -254,6 +269,10 @@
                         >
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Return" Modifiers="Shift" Command="{Binding CommitCommand}" />
+                                <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
+                                <KeyBinding Key="Period" Modifiers="Control" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
+                                <KeyBinding Key="OemComma" Modifiers="Control+Shift" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
+                                <KeyBinding Key="Period" Modifiers="Control+Shift" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
                             </TextBox.InputBindings>
                         </TextBox>
                         <Grid
