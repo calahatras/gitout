@@ -55,8 +55,7 @@ namespace GitOut.Features.Git.Log
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             Repository = options.Repository;
-            title.Title = "Log";
-            Repository = options.Repository;
+            title.Title = $"{Repository.Name} (Log)";
 
             BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
             ActiveStashes = CollectionViewSource.GetDefaultView(activeStashes);

@@ -9,7 +9,7 @@
     xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d"
     x:Name="window"
-    Title="git out"
+    Title="{Binding Title, TargetNullValue='git out'}"
     Width="1280"
     Height="800"
     MinHeight="300"
