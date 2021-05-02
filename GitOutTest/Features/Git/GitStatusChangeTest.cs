@@ -49,5 +49,17 @@ namespace GitOut.Features.Git
             Assert.That(change.IndexStatus, Is.EqualTo(GitModifiedStatusType.Deleted));
             Assert.That(change.Path.ToString(), Is.EqualTo("appc.json"));
         }
+
+        [Test]
+        public void BuilderCanParseRename()
+        {
+            string line = "2 R. N... 100644 100644 100644 658a4a0d647bef74ec62be23a63a50108b25ec30 1d5a516939dc3f6e92409d614828e1d49a5f7842 R99 sub/path/File.Designer.cs";
+            GitStatusChange change = GitStatusChange.Parse(line).MergedFrom("sub/path/Other.Designer.cs").Build();
+
+            Assert.That(change.Type, Is.EqualTo(GitStatusChangeType.RenamedOrCopied));
+            Assert.That(change.WorkspaceStatus, Is.EqualTo(GitModifiedStatusType.Unmodified));
+            Assert.That(change.IndexStatus, Is.EqualTo(GitModifiedStatusType.Renamed));
+            Assert.That(change.Path.ToString(), Is.EqualTo("sub/path/File.Designer.cs"));
+        }
     }
 }
