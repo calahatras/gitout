@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Git.Stage;
@@ -82,23 +83,25 @@ namespace GitOut.Features.Git.Log
             };
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
-            CheckoutBranchCommand = new AsyncCallbackCommand<string>(
-                async name =>
+            CheckoutBranchCommand = new AsyncCallbackCommand<TextBox>(
+                async input =>
                 {
                     IsCheckoutBranchVisible = false;
                     try
                     {
+                        string name = input!.Text;
                         var branchName = GitBranchName.CreateLocal(name!); // name is validated by the canExecute callback
                         await Repository.CheckoutBranchAsync(branchName);
                         await CheckRepositoryStatusAsync();
                         snack.ShowSuccess($"Branch {branchName.Name} created");
+                        input.Text = string.Empty;
                     }
                     catch (InvalidOperationException e)
                     {
                         snack.ShowError($"Could not create branch", e, TimeSpan.FromSeconds(10));
                     }
                 },
-                name => GitBranchName.IsValid(name)
+                name => name is not null && GitBranchName.IsValid(name.Text)
             );
 
             RevealInExplorerCommand = new CallbackCommand(() => Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose());

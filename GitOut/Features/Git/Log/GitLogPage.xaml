@@ -348,7 +348,7 @@
                                             Style="{StaticResource MaterialButtonStyle}"
                                             Content="SWITCH"
                                             Command="{Binding CheckoutBranchCommand}"
-                                            CommandParameter="{Binding Text, ElementName=BranchName}"
+                                            CommandParameter="{Binding ElementName=BranchName}"
                                         />
                                     </StackPanel>
                                     <TextBlock Grid.Row="1" Style="{StaticResource HintTextStyle}" Text="Branch will be created from HEAD"/>
