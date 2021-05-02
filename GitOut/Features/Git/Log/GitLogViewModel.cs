@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Git.Stage;
+using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
@@ -31,6 +32,7 @@ namespace GitOut.Features.Git.Log
         private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new();
 
         private readonly ISnackbarService snack;
+        private readonly IRepositoryWatcher repositoryWatcher;
 
         private int changesCount;
         private bool includeRemotes = true;
@@ -45,10 +47,12 @@ namespace GitOut.Features.Git.Log
 
         private string? checkoutBranchName;
         private GitTreeEvent? entryInView;
+        private bool hasChanges;
 
         public GitLogViewModel(
             INavigationService navigation,
             ITitleService title,
+            IGitRepositoryWatcherProvider watchProvider,
             ISnackbarService snack,
             IOptionsMonitor<GitStageOptions> stagingOptions
         )
@@ -59,6 +63,9 @@ namespace GitOut.Features.Git.Log
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             Repository = options.Repository;
             title.Title = $"{Repository.Name} (Log)";
+
+            repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository);
+            repositoryWatcher.Events += OnFileSystemChanges;
 
             BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
             ActiveStashes = CollectionViewSource.GetDefaultView(activeStashes);
@@ -288,15 +295,41 @@ namespace GitOut.Features.Git.Log
 
         public void Navigated(NavigationType type)
         {
-            if (type is NavigationType.Initial or NavigationType.NavigatedBack)
+            switch (type)
             {
-                _ = CheckRepositoryStatusAsync();
-            }
-            if (type == NavigationType.Initial)
-            {
-                _ = PopulateRemotesAsync();
+                case NavigationType.Initial:
+                    _ = CheckRepositoryStatusAsync();
+                    _ = PopulateRemotesAsync();
+                    break;
+                case NavigationType.NavigatedBack:
+                    _ = CheckRepositoryStatusAsync();
+                    break;
+                case NavigationType.NavigatedLeave:
+                    repositoryWatcher.Events -= OnFileSystemChanges;
+                    repositoryWatcher.Dispose();
+                    break;
+                case NavigationType.Deactivated:
+                    repositoryWatcher.EnableRaisingEvents = true;
+                    break;
+                case NavigationType.Activated:
+                    {
+                        repositoryWatcher.EnableRaisingEvents = false;
+                        if (hasChanges)
+                        {
+                            _ = CheckRepositoryStatusAsync();
+                            const string RefreshedMessage = "git out detected file changes and refreshed automatically";
+                            _ = snack.ShowAsync(Snack.Builder()
+                                .WithMessage(RefreshedMessage)
+                                .WithDuration(TimeSpan.FromSeconds(4))
+                            );
+                        }
+                        hasChanges = false;
+                    }
+                    break;
             }
         }
+
+        private void OnFileSystemChanges(object sender, RepositoryWatcherEventArgs args) => hasChanges = true;
 
         private async Task FetchRemotesAsync()
         {
