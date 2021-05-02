@@ -31,7 +31,7 @@ namespace GitOut.Features.Git.Log
             };
 
             var repository = new Mock<IGitRepository>();
-            repository.Setup(m => m.ExecuteListTreeAsync(root.Event.Id, It.IsAny<DiffOptions>())).Returns(entries.ToAsyncEnumerable());
+            repository.Setup(m => m.ListTreeAsync(root.Event.Id, It.IsAny<DiffOptions>())).Returns(entries.ToAsyncEnumerable());
 
             var actor = new LogEntriesViewModel(root, repository.Object);
             await actor.AllFiles.MaterializeAsync();

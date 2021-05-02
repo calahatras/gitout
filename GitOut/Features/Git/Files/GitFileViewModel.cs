@@ -85,7 +85,7 @@ namespace GitOut.Features.Git.Files
             }
             else
             {
-                result = await repository.ExecuteDiffAsync(sourceId, destinationId, DiffOptions.Builder().Build());
+                result = await repository.DiffAsync(sourceId, destinationId, DiffOptions.Builder().Build());
             }
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
         }

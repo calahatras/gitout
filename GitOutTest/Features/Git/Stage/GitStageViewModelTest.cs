@@ -23,7 +23,7 @@ namespace GitOut.Features.Git.Stage
             {
                 GitStatusChange.Parse("? new.txt").Build()
             };
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(changes));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(changes));
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
@@ -72,7 +72,7 @@ namespace GitOut.Features.Git.Stage
             {
                 GitStatusChange.Parse("1 A. N... 000000 100644 100644 0000000000000000000000000000000000000000 abcb7caf7a6b8368b4ac4da17863bedbce945dab new.txt").Build()
             };
-            repository.SetupSequence(m => m.ExecuteStatusAsync())
+            repository.SetupSequence(m => m.StatusAsync())
                 .ReturnsAsync(new GitStatusResult(initial))
                 .ReturnsAsync(new GitStatusResult(staged));
             var stageOptions = new GitStagePageOptions(repository.Object);
@@ -120,7 +120,7 @@ namespace GitOut.Features.Git.Stage
             {
                 GitStatusChange.Parse("2 RM N... 100644 100644 100644 aea670e83087b8015c431146dc9812a04b818a79 aea670e83087b8015c431146dc9812a04b818a79 R100 node3.txt node2.txt").MergedFrom("node2.txt").Build()
             };
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(changes));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(changes));
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
@@ -167,7 +167,7 @@ namespace GitOut.Features.Git.Stage
             {
                 GitStatusChange.Parse("1 M. N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c ef498f7ce55ad80dfa295825fa2fb45bd55ed97f empty.txt").Build()
             };
-            repository.SetupSequence(m => m.ExecuteStatusAsync())
+            repository.SetupSequence(m => m.StatusAsync())
                 .ReturnsAsync(new GitStatusResult(initial))
                 .ReturnsAsync(new GitStatusResult(staged));
             var stageOptions = new GitStagePageOptions(repository.Object);
@@ -226,7 +226,7 @@ namespace GitOut.Features.Git.Stage
                 GitStatusChange.Parse("1 M. N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c ef498f7ce55ad80dfa295825fa2fb45bd55ed97f index.txt").Build()
             };
             GitStatusChange[] next = Array.Empty<GitStatusChange>();
-            repository.SetupSequence(m => m.ExecuteStatusAsync())
+            repository.SetupSequence(m => m.StatusAsync())
                 .ReturnsAsync(new GitStatusResult(initial))
                 .ReturnsAsync(new GitStatusResult(next));
             var stageOptions = new GitStagePageOptions(repository.Object);
@@ -284,7 +284,7 @@ namespace GitOut.Features.Git.Stage
                 GitStatusChange.Parse("1 .M N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c work1.txt").Build(),
                 GitStatusChange.Parse("1 M. N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c ef498f7ce55ad80dfa295825fa2fb45bd55ed97f index.txt").Build()
             };
-            repository.SetupSequence(m => m.ExecuteStatusAsync())
+            repository.SetupSequence(m => m.StatusAsync())
                 .ReturnsAsync(new GitStatusResult(initial))
                 .ReturnsAsync(new GitStatusResult(next));
             var stageOptions = new GitStagePageOptions(repository.Object);
@@ -352,14 +352,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -395,7 +395,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -424,14 +424,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line3 ");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -468,7 +468,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -497,14 +497,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -540,7 +540,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -569,14 +569,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -612,7 +612,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -641,14 +641,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -684,7 +684,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -716,14 +716,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e advanced.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -759,7 +759,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
 --- a/advanced.txt
 +++ b/advanced.txt
@@ -795,14 +795,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("\\ No newline at end of file");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e advanced.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -838,7 +838,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
 --- a/advanced.txt
 +++ b/advanced.txt
@@ -869,14 +869,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line  24");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -912,7 +912,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -945,14 +945,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line  24");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -988,7 +988,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1039,14 +1039,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -1082,7 +1082,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1122,14 +1122,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" }");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -1165,7 +1165,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1207,14 +1207,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 M. N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -1250,7 +1250,7 @@ namespace GitOut.Features.Git.Stage
             actor.IndexFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.IndexFiles.CurrentItem;
             actor.ResetSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1288,14 +1288,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -1334,7 +1334,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.ResetSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1370,14 +1370,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -1416,7 +1416,7 @@ namespace GitOut.Features.Git.Stage
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.ResetSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1453,14 +1453,14 @@ namespace GitOut.Features.Git.Stage
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
             repository
-                .Setup(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()))
+                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
                 .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
             GitStatusChange[] initial = new[] { change };
 
-            repository.Setup(m => m.ExecuteStatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
@@ -1500,7 +1500,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.ResetSelectedTextCommand.Execute(document.Object);
             actor.UndoPatchCommand.Execute(null);
-            repository.Verify(m => m.ExecuteApplyAsync(It.IsAny<GitPatch>()), Times.Exactly(2));
+            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Exactly(2));
             Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt

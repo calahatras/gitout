@@ -229,7 +229,7 @@ namespace GitOut.Features.Git.Stage
                         }
                         if (hasChanges)
                         {
-                            ParseStatus(await Repository.ExecuteStatusAsync());
+                            ParseStatus(await Repository.StatusAsync());
                         }
 
                         if (selectedFileHasChanges)
@@ -277,7 +277,7 @@ namespace GitOut.Features.Git.Stage
 
         private async Task GetRepositoryStatusAsync()
         {
-            ParseStatus(await Repository.ExecuteStatusAsync());
+            ParseStatus(await Repository.StatusAsync());
             if (selectedChange is not null)
             {
                 await ExecuteDiffAsync();
@@ -309,7 +309,7 @@ namespace GitOut.Features.Git.Stage
             StatusChangeLocation location = selectedChange.Location;
             if (change.Type == GitStatusChangeType.Untracked)
             {
-                GitDiffResult result = await Repository.ExecuteUntrackedDiffAsync(change.Path);
+                GitDiffResult result = await Repository.UntrackedDiffAsync(change.Path);
                 SelectedDiffResult = result;
             }
             else if (location == StatusChangeLocation.Index && (Monitor.IsEntered(indexFilesLock) || indexFiles.Count == 0))
@@ -333,15 +333,15 @@ namespace GitOut.Features.Git.Stage
                     optionsBuilder.Cached();
                 }
                 GitDiffResult result = change.Type == GitStatusChangeType.RenamedOrCopied && change.SourceId! != change.DestinationId!
-                    ? await Repository.ExecuteDiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
-                    : await Repository.ExecuteDiffAsync(change.Path, optionsBuilder.Build());
+                    ? await Repository.DiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
+                    : await Repository.DiffAsync(change.Path, optionsBuilder.Build());
                 SelectedDiffResult = result;
             }
         }
 
         private async Task StageAllFilesAsync()
         {
-            await Repository.ExecuteAddAllAsync();
+            await Repository.AddAllAsync();
             await GetRepositoryStatusAsync();
         }
 
@@ -351,7 +351,7 @@ namespace GitOut.Features.Git.Stage
             {
                 if (item.IsSelected)
                 {
-                    await Repository.ExecuteAddAsync(item.Model, AddOptions.Builder().WithIntent().Build());
+                    await Repository.AddAsync(item.Model, AddOptions.Builder().WithIntent().Build());
                 }
             }
             await GetRepositoryStatusAsync();
@@ -359,7 +359,7 @@ namespace GitOut.Features.Git.Stage
 
         private async Task ResetAllFilesAsync()
         {
-            await Repository.ExecuteResetAllAsync();
+            await Repository.ResetAllAsync();
             await GetRepositoryStatusAsync();
         }
 
@@ -370,14 +370,14 @@ namespace GitOut.Features.Git.Stage
             if (model.Location == StatusChangeLocation.Index)
             {
                 int previousIndex = SelectedIndexIndex;
-                await Repository.ExecuteResetAsync(model.Model);
+                await Repository.ResetAsync(model.Model);
                 await GetRepositoryStatusAsync();
                 SelectedIndexIndex = previousIndex >= indexFiles.Count ? indexFiles.Count - 1 : previousIndex;
             }
             else
             {
                 int previousIndex = SelectedWorkspaceIndex;
-                await Repository.ExecuteAddAsync(model.Model, AddOptions.None);
+                await Repository.AddAsync(model.Model, AddOptions.None);
                 await GetRepositoryStatusAsync();
                 SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
             }
@@ -391,7 +391,7 @@ namespace GitOut.Features.Git.Stage
             {
                 if (item.IsSelected)
                 {
-                    await Repository.ExecuteAddAsync(item.Model, AddOptions.None);
+                    await Repository.AddAsync(item.Model, AddOptions.None);
                 }
             }
             await GetRepositoryStatusAsync();
@@ -406,7 +406,7 @@ namespace GitOut.Features.Git.Stage
             {
                 if (item.IsSelected)
                 {
-                    await Repository.ExecuteCheckoutAsync(item.Model);
+                    await Repository.CheckoutAsync(item.Model);
                 }
             }
             await GetRepositoryStatusAsync();
@@ -421,7 +421,7 @@ namespace GitOut.Features.Git.Stage
             {
                 if (item.IsSelected)
                 {
-                    await Repository.ExecuteResetAsync(item.Model);
+                    await Repository.ResetAsync(item.Model);
                 }
             }
             await GetRepositoryStatusAsync();
@@ -463,7 +463,7 @@ namespace GitOut.Features.Git.Stage
                 );
                 string filename = Path.GetFileName(selectedChange.Path);
                 const string undoText = "UNDO";
-                await Repository.ExecuteApplyAsync(patch);
+                await Repository.ApplyAsync(patch);
                 _ = snack.ShowAsync(Snack.Builder()
                     .WithMessage($"Changes reset in {filename}")
                     .WithDuration(TimeSpan.FromSeconds(5))
@@ -492,7 +492,7 @@ namespace GitOut.Features.Git.Stage
                         : GitStatusChangeType.Ordinary,
                     visitor
                 );
-                await Repository.ExecuteApplyAsync(patch);
+                await Repository.ApplyAsync(patch);
             }
             await GetRepositoryStatusAsync();
         }
@@ -536,7 +536,7 @@ namespace GitOut.Features.Git.Stage
                 transform
             );
             int previousIndex = selectedWorkspaceIndex;
-            await Repository.ExecuteApplyAsync(patch);
+            await Repository.ApplyAsync(patch);
             await GetRepositoryStatusAsync();
             if (selectedChange is null)
             {
@@ -562,7 +562,7 @@ namespace GitOut.Features.Git.Stage
             {
                 return;
             }
-            await Repository.ExecuteApplyAsync(undoPatch);
+            await Repository.ApplyAsync(undoPatch);
             await GetRepositoryStatusAsync();
             undoPatch = null;
         }
@@ -603,7 +603,7 @@ namespace GitOut.Features.Git.Stage
                 editHunk.GetHunkVisitor(PatchMode.AddIndex)
             );
 
-            await Repository.ExecuteApplyAsync(patch);
+            await Repository.ApplyAsync(patch);
             EditHunk = null;
             snack.ShowSuccess("Staged edit");
             await GetRepositoryStatusAsync();
@@ -614,7 +614,7 @@ namespace GitOut.Features.Git.Stage
             GitCommitOptions options = amendLastCommit
                 ? GitCommitOptions.AmendLatest(commitMessage)
                 : GitCommitOptions.CreateCommit(commitMessage);
-            await Repository.ExecuteCommitAsync(options);
+            await Repository.CommitAsync(options);
             snack.ShowSuccess("Commited changes successfully");
             await GetRepositoryStatusAsync();
             if (!amendLastCommit)
