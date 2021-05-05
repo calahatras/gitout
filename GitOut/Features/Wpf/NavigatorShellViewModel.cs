@@ -28,7 +28,7 @@ namespace GitOut.Features.Wpf
         )
         {
             navigation.NavigationRequested += (sender, args) => Content = args.Control;
-            titleService.TitleChanged += (sender, args) => Title = args.Title;
+            titleService.TitleChanged += (sender, args) => Title = string.IsNullOrWhiteSpace(args.Title) ? "git out" : $"{args.Title} – git out";
 
             var snacks = new ObservableCollection<Snack>();
             Snacks = CollectionViewSource.GetDefaultView(snacks);

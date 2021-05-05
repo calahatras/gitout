@@ -60,10 +60,10 @@ namespace GitOut.Features.Git.Stage
         {
             GitStagePageOptions options = navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
-            title.Title = "Stage";
             this.snack = snack;
             this.stagingOptions = stagingOptions;
             Repository = options.Repository;
+            title.Title = $"{Repository.Name} (Stage)";
             ShowSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
 
             repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository);
