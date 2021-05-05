@@ -529,7 +529,7 @@ namespace GitOut.Features.Git.Stage
             var patch = GitPatch.Create(
                 PatchMode.AddIndex,
                 selectedChange.Model.Path,
-                selectedChange.Status == GitModifiedStatusType.Added
+                selectedChange.Status == GitModifiedStatusType.Untracked
                     ? GitStatusChangeType.Untracked
                     : GitStatusChangeType.Ordinary,
                 hunks,
