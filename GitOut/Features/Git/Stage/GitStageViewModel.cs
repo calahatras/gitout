@@ -210,6 +210,7 @@ namespace GitOut.Features.Git.Stage
                     await GetRepositoryStatusAsync();
                     break;
                 case NavigationType.NavigatedLeave:
+                    previousCancellation?.Cancel();
                     repositoryWatcher.Events -= OnFileSystemChanges;
                     repositoryWatcher.Dispose();
                     break;
