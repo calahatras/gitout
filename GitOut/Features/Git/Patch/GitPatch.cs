@@ -92,6 +92,10 @@ namespace GitOut.Features.Git.Patch
                             ? line.StrippedLine
                             : transform.Transform(line.StrippedLine)
                     )));
+                if (lines.Count == 0)
+                {
+                    throw new InvalidOperationException("Selection resulted in non-existant patch");
+                }
                 if (visitor.IsDone)
                 {
                     if (lines[^1].Type != DiffLineType.None)

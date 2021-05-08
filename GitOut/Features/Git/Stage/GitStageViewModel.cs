@@ -7,6 +7,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Git.Diff;
@@ -75,6 +77,17 @@ namespace GitOut.Features.Git.Stage
             IndexFiles = CollectionViewSource.GetDefaultView(indexFiles);
 
             RefreshStatusCommand = new AsyncCallbackCommand(GetRepositoryStatusAsync);
+
+            SetFocusCommand = new NotNullCallbackCommand<UIElement>(
+                control => control.Focus()
+            );
+            MovePreviousCommand = new NotNullCallbackCommand<ListBox>(
+                list => list.SelectedIndex = Math.Clamp(list.SelectedIndex - 1, 0, list.Items.Count)
+            );
+            MoveNextCommand = new NotNullCallbackCommand<ListBox>(
+                list => list.SelectedIndex = Math.Clamp(list.SelectedIndex + 1, 0, list.Items.Count)
+            );
+
             CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage) && (indexFiles.Count > 0 || amendLastCommit));
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
@@ -185,6 +198,10 @@ namespace GitOut.Features.Git.Stage
         public ICollectionView WorkspaceFiles { get; }
 
         public ICommand RefreshStatusCommand { get; }
+        public ICommand SetFocusCommand { get; }
+        public ICommand MovePreviousCommand { get; }
+        public ICommand MoveNextCommand { get; }
+
         public ICommand AddAllCommand { get; }
         public ICommand IntentToAddCommand { get; }
         public ICommand StageFileCommand { get; }
@@ -527,33 +544,40 @@ namespace GitOut.Features.Git.Stage
             }
             ITextTransform transform = transformBuilder.Build();
 
-            var patch = GitPatch.Create(
-                PatchMode.AddIndex,
-                selectedChange.Model.Path,
-                selectedChange.Status == GitModifiedStatusType.Untracked
-                    ? GitStatusChangeType.Untracked
-                    : GitStatusChangeType.Ordinary,
-                hunks,
-                transform
-            );
-            int previousIndex = selectedWorkspaceIndex;
-            await Repository.ApplyAsync(patch);
-            await GetRepositoryStatusAsync();
-            if (selectedChange is null)
+            try
             {
-                SelectedWorkspaceIndex = previousIndex;
+                var patch = GitPatch.Create(
+                    PatchMode.AddIndex,
+                    selectedChange.Model.Path,
+                    selectedChange.Status == GitModifiedStatusType.Untracked
+                        ? GitStatusChangeType.Untracked
+                        : GitStatusChangeType.Ordinary,
+                    hunks,
+                    transform
+                );
+                int previousIndex = selectedWorkspaceIndex;
+                await Repository.ApplyAsync(patch);
+                await GetRepositoryStatusAsync();
+                if (selectedChange is null)
+                {
+                    SelectedWorkspaceIndex = previousIndex;
+                }
+                else if (workspaceFiles.Count > 0)
+                {
+                    int index;
+                    lock (workspaceFilesLock)
+                    {
+                        index = FindSortedIndex(workspaceFiles, item => selectedChange.Path.CompareTo(item.Path));
+                    }
+                    if (index < workspaceFiles.Count && workspaceFiles[index].Path == selectedChange.Path)
+                    {
+                        await ExecuteDiffAsync();
+                    }
+                }
             }
-            else if (workspaceFiles.Count > 0)
+            catch (InvalidOperationException ioe)
             {
-                int index;
-                lock (workspaceFilesLock)
-                {
-                    index = FindSortedIndex(workspaceFiles, item => selectedChange.Path.CompareTo(item.Path));
-                }
-                if (index < workspaceFiles.Count && workspaceFiles[index].Path == selectedChange.Path)
-                {
-                    await ExecuteDiffAsync();
-                }
+                snack.ShowError("Could not create patch from selection", ioe);
             }
         }
 
