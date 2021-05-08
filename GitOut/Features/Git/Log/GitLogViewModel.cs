@@ -43,6 +43,8 @@ namespace GitOut.Features.Git.Log
         private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
         private LogEntriesViewModel? selectedContext;
 
+        private string? checkoutBranchName = null;
+
         public GitLogViewModel(
             INavigationService navigation,
             ITitleService title,
@@ -82,23 +84,24 @@ namespace GitOut.Features.Git.Log
             };
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
-            CheckoutBranchCommand = new AsyncCallbackCommand<string>(
-                async name =>
+            CheckoutBranchCommand = new AsyncCallbackCommand(
+               async () =>
                 {
                     IsCheckoutBranchVisible = false;
                     try
                     {
-                        var branchName = GitBranchName.CreateLocal(name!); // name is validated by the canExecute callback
+                        var branchName = GitBranchName.CreateLocal(checkoutBranchName!); // name is validated by the canExecute callback
                         await Repository.CheckoutBranchAsync(branchName);
                         await CheckRepositoryStatusAsync();
                         snack.ShowSuccess($"Branch {branchName.Name} created");
+                        checkoutBranchName = string.Empty;
                     }
                     catch (InvalidOperationException e)
                     {
                         snack.ShowError($"Could not create branch", e, TimeSpan.FromSeconds(10));
                     }
                 },
-                name => GitBranchName.IsValid(name)
+                () => checkoutBranchName is not null && GitBranchName.IsValid(checkoutBranchName)
             );
 
             RevealInExplorerCommand = new CallbackCommand(() => Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose());
@@ -250,6 +253,12 @@ namespace GitOut.Features.Git.Log
         {
             get => RevisionViewMode == LogRevisionViewMode.DiffInline;
             set { if (value) { RevisionViewMode = LogRevisionViewMode.DiffInline; } }
+        }
+
+        public string? CheckoutBranchName
+        {
+            get => checkoutBranchName;
+            set => SetProperty(ref checkoutBranchName, value);
         }
 
         public ICommand NavigateToStageAreaCommand { get; }
