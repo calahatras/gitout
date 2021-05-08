@@ -89,7 +89,7 @@ namespace GitOut.Features.Git.Log
                     try
                     {
                         var branchName = GitBranchName.CreateLocal(name!); // name is validated by the canExecute callback
-                        await Repository.ExecuteCheckoutBranchAsync(branchName);
+                        await Repository.CheckoutBranchAsync(branchName);
                         await CheckRepositoryStatusAsync();
                         snack.ShowSuccess($"Branch {branchName.Name} created");
                     }
@@ -286,7 +286,7 @@ namespace GitOut.Features.Git.Log
             {
                 if (remote.IsSelected)
                 {
-                    await Repository.ExecuteFetchAsync(remote.Model);
+                    await Repository.FetchAsync(remote.Model);
                 }
             }
             snack.ShowSuccess("Fetched all selected remotes");
@@ -306,7 +306,7 @@ namespace GitOut.Features.Git.Log
 
         private async Task CheckRepositoryStatusAsync()
         {
-            IEnumerable<GitHistoryEvent> tree = await Repository.ExecuteLogAsync(IncludeRemotes ? LogOptions.WithRemoteBranches() : LogOptions.OnlyLocalBranches()).ConfigureAwait(false);
+            IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(IncludeRemotes ? LogOptions.WithRemoteBranches() : LogOptions.OnlyLocalBranches()).ConfigureAwait(false);
             IEnumerable<GitTreeEvent> history = BuildTree(tree);
             lock (entriesLock)
             {
@@ -316,7 +316,7 @@ namespace GitOut.Features.Git.Log
                     entries.Add(item);
                 }
             }
-            GitStatusResult status = await Repository.ExecuteStatusAsync().ConfigureAwait(false);
+            GitStatusResult status = await Repository.StatusAsync().ConfigureAwait(false);
             ChangesCount = status.Changes.Count;
         }
 
@@ -326,7 +326,7 @@ namespace GitOut.Features.Git.Log
             {
                 activeStashes.Clear();
             }
-            await foreach (GitStash stashEntry in Repository.ExecuteStashListAsync())
+            await foreach (GitStash stashEntry in Repository.StashListAsync())
             {
                 for (int i = 0; i < entries.Count; ++i)
                 {

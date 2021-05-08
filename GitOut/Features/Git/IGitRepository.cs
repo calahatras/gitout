@@ -17,25 +17,25 @@ namespace GitOut.Features.Git
         Task<GitHistoryEvent> GetHeadAsync();
         IAsyncEnumerable<GitRemote> GetRemotesAsync();
 
-        Task ExecuteFetchAsync(GitRemote remote);
-        Task<IEnumerable<GitHistoryEvent>> ExecuteLogAsync(LogOptions options);
-        IAsyncEnumerable<GitStash> ExecuteStashListAsync();
-        Task<GitStatusResult> ExecuteStatusAsync();
-        IAsyncEnumerable<GitDiffFileEntry> ExecuteListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options = default);
-        Task<GitDiffResult> ExecuteDiffAsync(GitFileId source, GitFileId target, DiffOptions options);
-        Task<GitDiffResult> ExecuteDiffAsync(RelativeDirectoryPath file, DiffOptions options);
-        Task<GitDiffResult> ExecuteUntrackedDiffAsync(RelativeDirectoryPath path);
-        IAsyncEnumerable<GitFileEntry> ExecuteListTreeAsync(GitObjectId id, DiffOptions? options = default);
+        Task FetchAsync(GitRemote remote);
+        Task<IEnumerable<GitHistoryEvent>> LogAsync(LogOptions options);
+        IAsyncEnumerable<GitStash> StashListAsync();
+        Task<GitStatusResult> StatusAsync();
+        IAsyncEnumerable<GitDiffFileEntry> ListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options = default);
+        Task<GitDiffResult> DiffAsync(GitFileId source, GitFileId target, DiffOptions options);
+        Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options);
+        Task<GitDiffResult> UntrackedDiffAsync(RelativeDirectoryPath path);
+        IAsyncEnumerable<GitFileEntry> ListTreeAsync(GitObjectId id, DiffOptions? options = default);
         Task<GitDiffResult> GetFileContentsAsync(GitFileId file);
 
-        Task ExecuteAddAllAsync();
-        Task ExecuteResetAllAsync();
-        Task ExecuteAddAsync(GitStatusChange change, AddOptions options);
-        Task ExecuteCheckoutAsync(GitStatusChange change);
-        Task ExecuteCheckoutBranchAsync(GitBranchName name);
-        Task ExecuteResetAsync(GitStatusChange change);
+        Task AddAllAsync();
+        Task ResetAllAsync();
+        Task AddAsync(GitStatusChange change, AddOptions options);
+        Task CheckoutAsync(GitStatusChange change);
+        Task CheckoutBranchAsync(GitBranchName name);
+        Task ResetAsync(GitStatusChange change);
 
-        Task ExecuteApplyAsync(GitPatch patch);
-        Task ExecuteCommitAsync(GitCommitOptions options);
+        Task ApplyAsync(GitPatch patch);
+        Task CommitAsync(GitCommitOptions options);
     }
 }

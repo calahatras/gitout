@@ -29,7 +29,7 @@ namespace GitOut.Features.Git
             GitObjectId change1 = GitCommitId.FromHash(new string('b', 40));
             GitObjectId change2 = GitCommitId.FromHash(new string('c', 40));
 
-            IAsyncEnumerable<GitDiffFileEntry> result = actor.ExecuteListDiffChangesAsync(change1, change2, null);
+            IAsyncEnumerable<GitDiffFileEntry> result = actor.ListDiffChangesAsync(change1, change2, null);
             await foreach (GitDiffFileEntry item in result) { }
 
             processFactory.Verify(m => m.Create(path, It.Is<ProcessOptions>(m => m.Arguments == "--no-optional-locks diff-tree --no-color -z cccccccccccccccccccccccccccccccccccccccc bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")), Times.Once);

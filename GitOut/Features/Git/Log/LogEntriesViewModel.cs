@@ -142,7 +142,7 @@ namespace GitOut.Features.Git.Log
             IGitFileEntryViewModel? currentSelection = selectedItem;
             IDictionary<string, DirectoryScaffold> tree = new Dictionary<string, DirectoryScaffold>();
             int max = 0;
-            await foreach (GitFileEntry item in repository.ExecuteListTreeAsync(Root.Event.Id, DiffOptions.Builder().Recursive().Build()))
+            await foreach (GitFileEntry item in repository.ListTreeAsync(Root.Event.Id, DiffOptions.Builder().Recursive().Build()))
             {
                 var viewModel = GitFileViewModel.Wrap(repository, item);
                 if (!tree.TryGetValue(item.Directory.Directory, out DirectoryScaffold? directory))
