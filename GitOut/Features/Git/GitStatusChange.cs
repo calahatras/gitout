@@ -113,7 +113,7 @@ namespace GitOut.Features.Git
                     destinationId = GitFileId.FromHash(change[72..112]);
 
                     path = Type == GitStatusChangeType.RenamedOrCopied
-                        ? RelativeDirectoryPath.Create(change[(change[113..].IndexOf(' ') + 1)..].ToString())
+                        ? RelativeDirectoryPath.Create(change[(change[113..].IndexOf(' ') + 114)..].ToString())
                         : RelativeDirectoryPath.Create(change[113..].ToString());
                 }
             }
