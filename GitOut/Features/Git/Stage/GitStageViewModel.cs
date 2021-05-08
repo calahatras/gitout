@@ -42,7 +42,7 @@ namespace GitOut.Features.Git.Stage
         private bool diffWhitespace;
         private bool amendLastCommit;
 
-        private CancellationTokenSource? previousCancellation;
+        private CancellationTokenSource? cancelRefreshSnack;
         private bool hasChanges = false;
         private bool selectedFileHasChanges = false;
         private bool refreshAutomatically = false;
@@ -174,6 +174,7 @@ namespace GitOut.Features.Git.Stage
                 if (SetProperty(ref selectedChange, value))
                 {
                     SelectedDiffResult = null;
+                    cancelRefreshSnack?.Cancel();
                     if (selectedChange is not null)
                     {
                         _ = ExecuteDiffAsync();
@@ -227,7 +228,7 @@ namespace GitOut.Features.Git.Stage
                     await GetRepositoryStatusAsync();
                     break;
                 case NavigationType.NavigatedLeave:
-                    previousCancellation?.Cancel();
+                    cancelRefreshSnack?.Cancel();
                     repositoryWatcher.Events -= OnFileSystemChanges;
                     repositoryWatcher.Dispose();
                     break;
@@ -258,16 +259,16 @@ namespace GitOut.Features.Git.Stage
                             }
                             else
                             {
-                                if (previousCancellation is not null)
+                                if (cancelRefreshSnack is not null)
                                 {
-                                    previousCancellation.Cancel();
+                                    cancelRefreshSnack.Cancel();
                                 }
-                                previousCancellation = new CancellationTokenSource();
+                                cancelRefreshSnack = new CancellationTokenSource();
                                 string refreshText = "REFRESH";
                                 _ = snack.ShowAsync(Snack.Builder()
                                     .WithMessage("git out detected changes to selected file while window was inactive")
                                     .WithDuration(TimeSpan.FromMinutes(1))
-                                    .WithCancellation(previousCancellation.Token)
+                                    .WithCancellation(cancelRefreshSnack.Token)
                                     .AddAction(refreshText)
                                 ).ContinueWith(async (task) =>
                                 {
