@@ -306,7 +306,8 @@
                                                         <TextBlock
                                                             Grid.Column="1"
                                                             Text="{Binding Name}"
-                                                            Style="{StaticResource NormalTextStyle}" VerticalAlignment="Center"
+                                                            Style="{StaticResource NormalTextStyle}"
+                                                            VerticalAlignment="Center"
                                                         />
                                                     </Grid>
                                                 </ToggleButton>
@@ -341,14 +342,13 @@
                                     <TextBox
                                         Style="{StaticResource MaterialInputStyle}"
                                         AutomationProperties.HelpText="Branch name"
-                                        x:Name="BranchName"
+                                        Text="{Binding CheckoutBranchName, UpdateSourceTrigger=PropertyChanged}"
                                     />
                                     <StackPanel VerticalAlignment="Top" Grid.Column="1">
                                         <Button
                                             Style="{StaticResource MaterialButtonStyle}"
                                             Content="SWITCH"
                                             Command="{Binding CheckoutBranchCommand}"
-                                            CommandParameter="{Binding ElementName=BranchName}"
                                         />
                                     </StackPanel>
                                     <TextBlock Grid.Row="1" Style="{StaticResource HintTextStyle}" Text="Branch will be created from HEAD"/>
