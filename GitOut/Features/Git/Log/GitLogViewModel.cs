@@ -64,7 +64,7 @@ namespace GitOut.Features.Git.Log
             Repository = options.Repository;
             title.Title = $"{Repository.Name} (Log)";
 
-            repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository);
+            repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository, RepositoryWatcherOptions.Workspace);
             repositoryWatcher.Events += OnFileSystemChanges;
 
             BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
@@ -317,11 +317,6 @@ namespace GitOut.Features.Git.Log
                         if (hasChanges)
                         {
                             _ = CheckRepositoryStatusAsync();
-                            const string RefreshedMessage = "git out detected file changes and refreshed automatically";
-                            _ = snack.ShowAsync(Snack.Builder()
-                                .WithMessage(RefreshedMessage)
-                                .WithDuration(TimeSpan.FromSeconds(4))
-                            );
                         }
                         hasChanges = false;
                     }
