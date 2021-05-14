@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Data;
@@ -13,8 +14,9 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Settings
 {
-    public class SettingsViewModel : INotifyPropertyChanged
+    public sealed class SettingsViewModel : INotifyPropertyChanged, IDisposable
     {
+        private readonly GeneralSettingsViewModel general;
         private object content;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -34,7 +36,7 @@ namespace GitOut.Features.Settings
         {
             title.Title = "Settings";
 
-            var general = new GeneralSettingsViewModel(
+            general = new GeneralSettingsViewModel(
                 snacks,
                 themes,
                 repositories,
@@ -70,6 +72,8 @@ namespace GitOut.Features.Settings
         public ICollectionView MenuItems { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public void Dispose() => general.Dispose();
 
         private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
