@@ -22,9 +22,10 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Settings
 {
-    public class GeneralSettingsViewModel : INotifyPropertyChanged
+    public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposable
     {
         private readonly IWritableStorage storage;
+        private readonly IDisposable unsubscribeOptions;
         private bool useTransparentBackground = true;
         private bool trimLineEndings;
         private bool showSpacesAsDots;
@@ -91,7 +92,7 @@ namespace GitOut.Features.Settings
             trimLineEndings = stageOptions.CurrentValue.TrimLineEndings;
             tabTransformText = stageOptions.CurrentValue.TabTransformText;
             showSpacesAsDots = stageOptions.CurrentValue.ShowSpacesAsDots;
-            stageOptions.OnChange(value =>
+            unsubscribeOptions = stageOptions.OnChange(value =>
             {
                 SetProperty(ref trimLineEndings, value.TrimLineEndings);
                 SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots);
@@ -156,6 +157,8 @@ namespace GitOut.Features.Settings
         public ICommand ChangeThemeCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public void Dispose() => unsubscribeOptions.Dispose();
 
         private void PersistStorage() => storage.Write(GitStageOptions.SectionKey, new GitStageOptions
         {

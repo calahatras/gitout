@@ -82,6 +82,10 @@ namespace GitOut.Features.Navigation
             {
                 navigatedToContext.Navigated(NavigationType.NavigatedLeave);
             }
+            if (current.DataContext is IDisposable dispose)
+            {
+                dispose.Dispose();
+            }
             if (latest.DataContext is INavigationListener revisitedContext)
             {
                 revisitedContext.Navigated(NavigationType.NavigatedBack);
