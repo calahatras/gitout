@@ -10,7 +10,7 @@ namespace GitOut.Features.Git.Files
         // Note: used by xaml binding
         public bool IsExpanded { get; set; }
         public RelativeDirectoryPath Path => RelativeDirectoryPath.Root;
-        public string FileName => string.Empty;
+        public FileName FileName => FileName.Create(string.Empty);
         public string IconResourceKey => string.Empty;
     }
 }

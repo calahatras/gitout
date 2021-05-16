@@ -28,10 +28,10 @@ namespace GitOut.Features.IO
             string[] segments = Directory.Trim(GitDirectorySeparatorChar).Split(GitDirectorySeparatorChar);
             parent = new Lazy<RelativeDirectoryPath>(() => segments[..^1].Length == 0 ? Root : new RelativeDirectoryPath(string.Join(GitDirectorySeparatorChar, segments[..^1])));
             Segments = segments;
-            Name = segments[^1] ?? string.Empty;
+            Name = FileName.Create(segments[^1] ?? string.Empty);
         }
 
-        public string Name { get; }
+        public FileName Name { get; }
         public string Directory { get; }
         public IReadOnlyCollection<string> Segments { get; }
         public RelativeDirectoryPath Parent => parent.Value;

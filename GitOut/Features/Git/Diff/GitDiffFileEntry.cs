@@ -8,35 +8,21 @@ namespace GitOut.Features.Git.Diff
     {
         private GitDiffFileEntry(
             GitFileType fileType,
-            GitFileId sourceId,
-            GitFileId destinationId,
-            IEnumerable<PosixFileModes> sourceFileModes,
-            IEnumerable<PosixFileModes> destinationFileModes,
-            RelativeDirectoryPath sourceFileName,
-            RelativeDirectoryPath destinationFileName,
+            GitFileEntry source,
+            GitFileEntry destination,
             GitDiffType type
         )
         {
             FileType = fileType;
-            SourceId = sourceId;
-            DestinationId = destinationId;
-            SourceFileModes = sourceFileModes;
-            DestinationFileModes = destinationFileModes;
-            SourceFileName = sourceFileName;
-            DestinationFileName = destinationFileName;
+            Source = source;
+            Destination = destination;
             Type = type;
         }
 
+        public GitFileEntry Source { get; }
+        public GitFileEntry Destination { get; }
+
         public GitFileType FileType { get; }
-        public GitFileId SourceId { get; }
-        public GitFileId DestinationId { get; }
-
-        public RelativeDirectoryPath SourceFileName { get; }
-        public RelativeDirectoryPath DestinationFileName { get; }
-
-        public IEnumerable<PosixFileModes> SourceFileModes { get; }
-        public IEnumerable<PosixFileModes> DestinationFileModes { get; }
-
         public GitDiffType Type { get; }
 
         public static IGitDiffFileEntryBuilder Parse(ReadOnlySpan<char> line)
@@ -121,27 +107,20 @@ namespace GitOut.Features.Git.Diff
                 var path = RelativeDirectoryPath.Create(sourcePath);
                 return new GitDiffFileEntry(
                     fileType,
-                    sourceId,
-                    destinationId,
-                    sourceFileModes,
-                    destinationFileModes,
-                    path,
-                    path,
+                    new GitFileEntry(sourceId, fileType, sourceFileModes, path),
+                    new GitFileEntry(destinationId, fileType, destinationFileModes, path),
                     Type
                 );
             }
+
             public GitDiffFileEntry Build(string sourcePath, string destinationPath)
             {
                 var source = RelativeDirectoryPath.Create(sourcePath);
                 var destination = RelativeDirectoryPath.Create(destinationPath);
                 return new GitDiffFileEntry(
                     fileType,
-                    sourceId,
-                    destinationId,
-                    sourceFileModes,
-                    destinationFileModes,
-                    source,
-                    destination,
+                    new GitFileEntry(sourceId, fileType, sourceFileModes, source),
+                    new GitFileEntry(destinationId, fileType, destinationFileModes, destination),
                     Type
                 );
             }

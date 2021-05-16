@@ -15,7 +15,7 @@ namespace GitOut.Features.Git.Files
         private readonly ICollection<IGitFileEntryViewModel> entries;
         private bool isExpanded;
 
-        private GitDirectoryViewModel(string fileName, RelativeDirectoryPath parent, SortedObservableCollection<IGitFileEntryViewModel> entries)
+        private GitDirectoryViewModel(FileName fileName, RelativeDirectoryPath parent, SortedObservableCollection<IGitFileEntryViewModel> entries)
         {
             FileName = fileName;
             Path = parent;
@@ -23,14 +23,14 @@ namespace GitOut.Features.Git.Files
             entries.CollectionChanged += (o, e) => CollectionChanged?.Invoke(this, e);
         }
 
-        public GitDirectoryViewModel(string fileName, RelativeDirectoryPath parent, IEnumerable<IGitFileEntryViewModel> children)
+        public GitDirectoryViewModel(FileName fileName, RelativeDirectoryPath parent, IEnumerable<IGitFileEntryViewModel> children)
             : this(fileName, parent, new SortedObservableCollection<IGitFileEntryViewModel>(children, IGitDirectoryEntryViewModel.CompareItems)) { }
 
-        private GitDirectoryViewModel(string fileName, RelativeDirectoryPath parent, Func<IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
+        private GitDirectoryViewModel(FileName fileName, RelativeDirectoryPath parent, Func<IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
             : this(fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
 
         public RelativeDirectoryPath Path { get; }
-        public string FileName { get; }
+        public FileName FileName { get; }
         public string IconResourceKey => IsExpanded ? "FolderOpen" : "Folder";
         public bool IsExpanded
         {
@@ -62,11 +62,11 @@ namespace GitOut.Features.Git.Files
 
         public static GitDirectoryViewModel Wrap(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.Type != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitDirectoryViewModel(file.FileName.Name, file.Directory, () => lookup(file.Id));
+            : new GitDirectoryViewModel(file.FileName, file.Directory, () => lookup(file.Id));
 
         public static GitDirectoryViewModel Wrap(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.FileType != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitDirectoryViewModel(file.SourceFileName.ToString(), file.SourceFileName, () => lookup(file.SourceId, file.DestinationId));
+            : new GitDirectoryViewModel(file.Source.FileName, file.Source.Directory, () => lookup(file.Source.Id, file.Destination.Id));
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

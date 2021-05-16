@@ -1,3 +1,4 @@
+using GitOut.Features.IO;
 using NUnit.Framework;
 
 namespace GitOut.Features.Git.Diff
@@ -11,10 +12,11 @@ namespace GitOut.Features.Git.Diff
 
             GitDiffFileEntry result = GitDiffFileEntry.Parse(input).Build("GitOut/Features/Git/Files/GitDirectoryViewModel.cs");
 
-            Assert.That(result.SourceId, Is.EqualTo(GitFileId.FromHash("ac63bd40d6b5334e7637bd73cb482e5c531d4de6")));
-            Assert.That(result.DestinationId, Is.EqualTo(GitFileId.FromHash("60f288a26faabafe355d87d063f5eb16665f8cd2")));
+            Assert.That(result.Source.Id, Is.EqualTo(GitFileId.FromHash("ac63bd40d6b5334e7637bd73cb482e5c531d4de6")));
+            Assert.That(result.Destination.Id, Is.EqualTo(GitFileId.FromHash("60f288a26faabafe355d87d063f5eb16665f8cd2")));
             Assert.That(result.Type, Is.EqualTo(GitDiffType.InPlaceEdit));
-            Assert.That(result.SourceFileName.ToString(), Is.EqualTo("GitOut/Features/Git/Files/GitDirectoryViewModel.cs"));
+            Assert.That(result.Source.Directory.ToString(), Is.EqualTo("GitOut/Features/Git/Files"));
+            Assert.That(result.Source.FileName.ToString(), Is.EqualTo("GitDirectoryViewModel.cs"));
         }
 
         [Test]
@@ -24,11 +26,12 @@ namespace GitOut.Features.Git.Diff
 
             GitDiffFileEntry result = GitDiffFileEntry.Parse(input).Build("orig.txt", "something.txt");
 
-            Assert.That(result.SourceId, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
-            Assert.That(result.DestinationId, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
+            Assert.That(result.Source.Id, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
+            Assert.That(result.Destination.Id, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
             Assert.That(result.Type, Is.EqualTo(GitDiffType.CopyEdit));
-            Assert.That(result.SourceFileName.ToString(), Is.EqualTo("orig.txt"));
-            Assert.That(result.DestinationFileName.ToString(), Is.EqualTo("something.txt"));
+            Assert.That(result.Source.FileName.ToString(), Is.EqualTo("orig.txt"));
+            Assert.That(result.Destination.FileName.ToString(), Is.EqualTo("something.txt"));
+            Assert.That(result.Destination.Directory, Is.EqualTo(RelativeDirectoryPath.Root));
         }
 
         [Test]
@@ -38,11 +41,11 @@ namespace GitOut.Features.Git.Diff
 
             GitDiffFileEntry result = GitDiffFileEntry.Parse(input).Build("orig.txt", "something.txt");
 
-            Assert.That(result.SourceId, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
-            Assert.That(result.DestinationId, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
+            Assert.That(result.Source.Id, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
+            Assert.That(result.Destination.Id, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
             Assert.That(result.Type, Is.EqualTo(GitDiffType.RenameEdit));
-            Assert.That(result.SourceFileName.ToString(), Is.EqualTo("orig.txt"));
-            Assert.That(result.DestinationFileName.ToString(), Is.EqualTo("something.txt"));
+            Assert.That(result.Source.FileName.ToString(), Is.EqualTo("orig.txt"));
+            Assert.That(result.Destination.FileName.ToString(), Is.EqualTo("something.txt"));
         }
 
         [Test]
@@ -52,10 +55,10 @@ namespace GitOut.Features.Git.Diff
 
             GitDiffFileEntry result = GitDiffFileEntry.Parse(input).Build("something.txt");
 
-            Assert.That(result.SourceId, Is.EqualTo(GitFileId.FromHash("0000000000000000000000000000000000000000")));
-            Assert.That(result.DestinationId, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
+            Assert.That(result.Source.Id, Is.EqualTo(GitFileId.FromHash("0000000000000000000000000000000000000000")));
+            Assert.That(result.Destination.Id, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
             Assert.That(result.Type, Is.EqualTo(GitDiffType.Create));
-            Assert.That(result.SourceFileName.ToString(), Is.EqualTo("something.txt"));
+            Assert.That(result.Source.FileName.ToString(), Is.EqualTo("something.txt"));
         }
 
         [Test]
@@ -65,10 +68,10 @@ namespace GitOut.Features.Git.Diff
 
             GitDiffFileEntry result = GitDiffFileEntry.Parse(input).Build("orig.txt");
 
-            Assert.That(result.SourceId, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
-            Assert.That(result.DestinationId, Is.EqualTo(GitFileId.FromHash("0000000000000000000000000000000000000000")));
+            Assert.That(result.Source.Id, Is.EqualTo(GitFileId.FromHash("cb003f7d55054dda457f7eb8c2a1c9295ed04a51")));
+            Assert.That(result.Destination.Id, Is.EqualTo(GitFileId.FromHash("0000000000000000000000000000000000000000")));
             Assert.That(result.Type, Is.EqualTo(GitDiffType.Delete));
-            Assert.That(result.SourceFileName.ToString(), Is.EqualTo("orig.txt"));
+            Assert.That(result.Source.FileName.ToString(), Is.EqualTo("orig.txt"));
         }
     }
 }

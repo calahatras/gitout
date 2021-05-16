@@ -17,7 +17,7 @@ namespace GitOut.Features.Git.Files
         private GitFileViewModel(
             IGitRepository repository,
             RelativeDirectoryPath path,
-            string fileName,
+            FileName fileName,
             GitFileId sourceId,
             GitFileId? destinationId = null,
             GitDiffType diffType = GitDiffType.None
@@ -42,7 +42,7 @@ namespace GitOut.Features.Git.Files
         }
 
         public RelativeDirectoryPath Path { get; }
-        public string FileName { get; }
+        public FileName FileName { get; }
         public GitDiffType Status { get; }
         public string IconResourceKey { get; }
         // note: this viewmodel is used in tree view and as such requires IsExpanded property
@@ -68,7 +68,7 @@ namespace GitOut.Features.Git.Files
 
         public static GitFileViewModel Wrap(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
-            : new GitFileViewModel(repository, file.SourceFileName, file.SourceFileName, file.SourceId, file.DestinationId, file.Type);
+            : new GitFileViewModel(repository, file.Source.Directory, file.Source.FileName, file.Source.Id, file.Destination.Id, file.Type);
 
         private async Task RefreshDiffAsync()
         {
