@@ -68,7 +68,7 @@ namespace GitOut.Features.Git.Diff
                 _ => GitDiffType.None
             };
 
-            GitFileType fileType = (new string(type == GitDiffType.Create ? line[8..11] : line[1..4])) switch
+            GitFileType fileType = new string(type == GitDiffType.Create ? line[8..11] : line[1..4]) switch
             {
                 "100" => GitFileType.Blob,
                 "040" => GitFileType.Tree,

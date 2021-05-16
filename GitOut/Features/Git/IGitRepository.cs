@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
@@ -26,6 +27,7 @@ namespace GitOut.Features.Git
         Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options);
         Task<GitDiffResult> UntrackedDiffAsync(RelativeDirectoryPath path);
         IAsyncEnumerable<GitFileEntry> ListTreeAsync(GitObjectId id, DiffOptions? options = default);
+        Task<Stream> GetBlobStreamAsync(GitFileId file);
         Task<GitDiffResult> GetFileContentsAsync(GitFileId file);
 
         Task AddAllAsync();

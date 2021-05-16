@@ -20,13 +20,13 @@ namespace GitOut.Features.Git.Diff
         public static GitDiffHunk Parse(IEnumerable<string> lines)
         {
             IList<string> hunk = lines.ToList();
-            if (!hunk.Any())
+            if (hunk.Count == 0)
             {
-                throw new ArgumentException("Expected lines for hunk but was empty", nameof(hunk));
+                throw new ArgumentException("Expected lines for hunk but was empty", nameof(lines));
             }
 
             string head = hunk.First();
-            if (head.StartsWith($"{HunkIdentifier} "))
+            if (head.StartsWith($"{HunkIdentifier} ", StringComparison.Ordinal))
             {
                 string[] headParts = head.Split(' ');
                 string[] fromFileRange = headParts[1].Split(',');
@@ -48,12 +48,12 @@ namespace GitOut.Features.Git.Diff
                     .ToList();
                 return new GitDiffHunk(headLine, hunks);
             }
-            else if (head.StartsWith("Binary files "))
+            else if (head.StartsWith("Binary files ", StringComparison.Ordinal))
             {
                 return new GitDiffHunk(HunkLine.Empty, new[] { HunkLine.AsLine($" {head}", 0, 0) });
             }
 
-            throw new ArgumentException("Lines are not a valid diff hunk", nameof(hunk));
+            throw new ArgumentException("Lines are not a valid diff hunk", nameof(lines));
         }
     }
 }

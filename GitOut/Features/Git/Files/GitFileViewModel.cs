@@ -12,7 +12,7 @@ namespace GitOut.Features.Git.Files
         private readonly GitFileId sourceId;
         private readonly GitFileId? destinationId;
 
-        private GitDiffResult? result;
+        private DiffContext? result;
 
         private GitFileViewModel(
             IGitRepository repository,
@@ -48,7 +48,7 @@ namespace GitOut.Features.Git.Files
         // note: this viewmodel is used in tree view and as such requires IsExpanded property
         public bool IsExpanded { get; set; }
 
-        public GitDiffResult? DiffResult
+        public DiffContext? DiffResult
         {
             get
             {
@@ -63,18 +63,16 @@ namespace GitOut.Features.Git.Files
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public static GitFileViewModel Wrap(IGitRepository repository, GitFileEntry file) => file.Type != GitFileType.Blob
-            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitFileViewModel(repository, file.Directory, file.FileName.ToString(), file.Id);
+            ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
+            : new GitFileViewModel(repository, file.Directory, file.FileName, file.Id);
 
         public static GitFileViewModel Wrap(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
-            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitFileViewModel(repository, file.SourceFileName, file.SourceFileName.ToString(), file.SourceId, file.DestinationId, file.Type);
+            ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
+            : new GitFileViewModel(repository, file.SourceFileName, file.SourceFileName, file.SourceId, file.DestinationId, file.Type);
 
         private async Task RefreshDiffAsync()
         {
-            result = destinationId is null
-                ? await repository.GetFileContentsAsync(sourceId)
-                : await repository.DiffAsync(sourceId, destinationId, DiffOptions.Builder().Build());
+            result = await DiffContext.DiffFileAsync(repository, Path, FileName, sourceId, destinationId);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
         }
     }

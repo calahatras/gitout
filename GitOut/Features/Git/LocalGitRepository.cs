@@ -232,6 +232,8 @@ namespace GitOut.Features.Git
             return CachedStatus;
         }
 
+        public Task<Stream> GetBlobStreamAsync(GitFileId file) => CreateProcess(ProcessOptions.FromArguments($"cat-file blob \"{file}\"")).ReadStreamAsync();
+
         public async Task<GitDiffResult> GetFileContentsAsync(GitFileId file)
         {
             var args = ProcessOptions.FromArguments($"cat-file blob \"{file}\"");

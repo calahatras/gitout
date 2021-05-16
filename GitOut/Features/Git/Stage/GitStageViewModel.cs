@@ -34,7 +34,7 @@ namespace GitOut.Features.Git.Stage
         private readonly object indexFilesLock = new();
 
         private StatusChangeViewModel? selectedChange;
-        private GitDiffResult? selectedDiffResult;
+        private DiffContext? selectedDiffResult;
 
         private int selectedWorkspaceIndex;
         private int selectedIndexIndex;
@@ -208,7 +208,7 @@ namespace GitOut.Features.Git.Stage
             set => SetProperty(ref editHunk, value);
         }
 
-        public GitDiffResult? SelectedDiffResult
+        public DiffContext? SelectedDiffResult
         {
             get => selectedDiffResult;
             set => SetProperty(ref selectedDiffResult, value);
@@ -356,36 +356,26 @@ namespace GitOut.Features.Git.Stage
 
             GitStatusChange change = selectedChange.Model;
             StatusChangeLocation location = selectedChange.Location;
-            if (change.Type == GitStatusChangeType.Untracked)
-            {
-                GitDiffResult result = await Repository.UntrackedDiffAsync(change.Path);
-                SelectedDiffResult = result;
-            }
-            else if (location == StatusChangeLocation.Index && (Monitor.IsEntered(indexFilesLock) || indexFiles.Count == 0))
+            if (location == StatusChangeLocation.Index && (Monitor.IsEntered(indexFilesLock) || indexFiles.Count == 0))
             {
                 // we end up here if the selected index was changed while we are adding items to the list, so we ignore the request since it will be updated later
                 return;
             }
-            else if (location == StatusChangeLocation.Index && change.SourceId! == change.DestinationId!)
+            if (location == StatusChangeLocation.Index && change.SourceId! == change.DestinationId!)
             {
                 SelectedDiffResult = null;
+                return;
             }
-            else
+            IDiffOptionsBuilder optionsBuilder = DiffOptions.Builder();
+            if (diffWhitespace)
             {
-                IDiffOptionsBuilder optionsBuilder = DiffOptions.Builder();
-                if (diffWhitespace)
-                {
-                    optionsBuilder.IgnoreAllSpace();
-                }
-                if (location == StatusChangeLocation.Index)
-                {
-                    optionsBuilder.Cached();
-                }
-                GitDiffResult result = change.Type == GitStatusChangeType.RenamedOrCopied && change.SourceId! != change.DestinationId!
-                    ? await Repository.DiffAsync(change.SourceId!, change.DestinationId!, optionsBuilder.Build())
-                    : await Repository.DiffAsync(change.Path, optionsBuilder.Build());
-                SelectedDiffResult = result;
+                optionsBuilder.IgnoreAllSpace();
             }
+            if (location == StatusChangeLocation.Index)
+            {
+                optionsBuilder.Cached();
+            }
+            SelectedDiffResult = await DiffContext.DiffAsync(Repository, change, optionsBuilder);
         }
 
         private async Task StageAllFilesAsync()

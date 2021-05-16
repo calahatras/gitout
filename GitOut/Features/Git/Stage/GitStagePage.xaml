@@ -203,7 +203,7 @@
                     Diff="{Binding SelectedDiffResult}"
                     ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
                 >
-                    <diff:GitDiffControl.DocumentInputBindings>
+                    <diff:GitDiffControl.InputBindings>
                         <KeyBinding
                             Key="R"
                             Command="{Binding ResetSelectedTextCommand}"
@@ -224,7 +224,7 @@
                         <KeyBinding Key="OemComma" Modifiers="Control+Shift" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding Source={x:Reference IndexFiles}}" />
                         <KeyBinding Key="Period" Modifiers="Control+Shift" Command="{Binding MoveNextCommand}" CommandParameter="{Binding Source={x:Reference IndexFiles}}" />
                         <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding SetFocusCommand}" CommandParameter="{Binding Source={x:Reference CommitMessage}}" />
-                    </diff:GitDiffControl.DocumentInputBindings>
+                    </diff:GitDiffControl.InputBindings>
                 </diff:GitDiffControl>
                 <Popup
                     AllowsTransparency="True"
