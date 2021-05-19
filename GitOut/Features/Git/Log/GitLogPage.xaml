@@ -13,6 +13,7 @@
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:attached="clr-namespace:GitOut.Features.Wpf.AttachedProperties"
+    xmlns:scroll="clr-namespace:GitOut.Features.Wpf.Scrolling"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
     xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
     mc:Ignorable="d" 
@@ -431,6 +432,7 @@
                     ItemsSource="{Binding Entries}"
                     Style="{StaticResource GitLogListStyle}"
                     attached:BindableSelectedItems.SelectedItems="{Binding SelectedLogEntries}"
+                    scroll:ScrollBehavior.EnsureInView="{Binding EntryInView}"
                 >
                     <ListView.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}">
