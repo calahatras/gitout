@@ -72,8 +72,8 @@ namespace GitOut.Features.Git.Diff
                 builder.Feed(line);
             }
             GitDiffResult result = builder.Build();
-            Assert.That(result.Header, Is.EqualTo(string.Empty));
-            Assert.That(result.Hunks.Count(), Is.EqualTo(0));
+            Assert.That(result.Text!.Header, Is.EqualTo(string.Empty));
+            Assert.That(result.Text!.Hunks.Count(), Is.EqualTo(0));
         }
     }
 }

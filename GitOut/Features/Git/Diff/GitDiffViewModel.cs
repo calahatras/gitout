@@ -11,17 +11,6 @@ namespace GitOut.Features.Git.Diff
 {
     public class GitDiffViewModel : IDocumentSelectionViewModel
     {
-        //private static readonly ISyntaxHighlighter xmlHighlighter = new XmlSyntaxHighlighter();
-        private static readonly IDictionary<string, ISyntaxHighlighter> Highlighters = new Dictionary<string, ISyntaxHighlighter>
-            {
-                { ".cs", new CSharpSyntaxHighlighter() },
-                /*
-                { ".xaml", xmlHighlighter },
-                { ".xml", xmlHighlighter },
-                */
-            };
-        private static readonly ISyntaxHighlighter DefaultSyntaxHighlighter = new FundamentalSyntaxHighlighter();
-
         private const string FontFamilyName = "Consolas sans-serif";
 
         private GitDiffViewModel(
@@ -41,11 +30,9 @@ namespace GitOut.Features.Git.Diff
 
         public List<(Paragraph, HunkLine)> DiffContexts { get; }
 
-        public static GitDiffViewModel ParseDiff(IEnumerable<GitDiffHunk> result, string extension, DiffDisplayOptions display)
+        public static GitDiffViewModel ParseDiff(IEnumerable<GitDiffHunk> result, DiffDisplayOptions display)
         {
-            ISyntaxHighlighter highlighter = Highlighters.ContainsKey(extension)
-                ? Highlighters[extension]
-                : DefaultSyntaxHighlighter;
+            ISyntaxHighlighter highlighter = new CSharpSyntaxHighlighter();
 
             var document = new FlowDocument
             {

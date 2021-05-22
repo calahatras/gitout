@@ -127,7 +127,7 @@ namespace GitOut.Features.Git.Diff
                                 (Brush)Application.Current.Resources["MaterialLightDividers"],
                                 (Brush)Application.Current.Resources["MaterialGray400"]
                             );
-                        var vm = GitDiffViewModel.ParseDiff(context.Result.Text.Hunks, extension, display);
+                        var vm = GitDiffViewModel.ParseDiff(context.Result.Text.Hunks, display);
                         control.CurrentContent = vm;
                     }
                 }
