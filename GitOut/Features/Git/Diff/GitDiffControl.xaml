@@ -16,7 +16,10 @@
             />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ImageViewModel}">
-            <Image Source="{Binding Image}" />
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                <Image Source="{Binding SourceImage}"/>
+                <Image Source="{Binding TargetImage}"/>
+            </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
     <Grid Style="{StaticResource LayoutRootGridStyle}">

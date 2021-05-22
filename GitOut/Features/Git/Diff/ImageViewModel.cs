@@ -1,25 +1,34 @@
-using System;
+using System.IO;
 using System.Windows.Media.Imaging;
 
 namespace GitOut.Features.Git.Diff
 {
     public class ImageViewModel
     {
-        public ImageViewModel(DiffContext context)
+        public ImageViewModel(Stream imageStream)
         {
-            if (context.Stream is null)
-            {
-                throw new InvalidOperationException("Content stream must not be null");
-            }
             var image = new BitmapImage();
             image.BeginInit();
-            image.StreamSource = context.Stream;
+            image.StreamSource = imageStream;
             image.CacheOption = BitmapCacheOption.OnLoad;
             image.EndInit();
             image.Freeze();
-            Image = image;
+            SourceImage = image;
         }
 
-        public BitmapImage Image { get; }
+        public ImageViewModel(Stream imageStream, Stream previousImageStream)
+            : this(previousImageStream)
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.StreamSource = imageStream;
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.EndInit();
+            image.Freeze();
+            TargetImage = image;
+        }
+
+        public BitmapImage SourceImage { get; }
+        public BitmapImage? TargetImage { get; }
     }
 }

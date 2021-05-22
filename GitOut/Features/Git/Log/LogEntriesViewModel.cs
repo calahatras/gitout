@@ -144,7 +144,7 @@ namespace GitOut.Features.Git.Log
             int max = 0;
             await foreach (GitFileEntry item in repository.ListTreeAsync(Root.Event.Id, DiffOptions.Builder().Recursive().Build()))
             {
-                var viewModel = GitFileViewModel.Wrap(repository, item);
+                var viewModel = GitFileViewModel.Snapshot(repository, item);
                 if (!tree.TryGetValue(item.Directory.Directory, out DirectoryScaffold? directory))
                 {
                     directory = new DirectoryScaffold(item.Directory);

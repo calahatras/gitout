@@ -375,7 +375,7 @@ namespace GitOut.Features.Git.Stage
             {
                 optionsBuilder.Cached();
             }
-            SelectedDiffResult = await DiffContext.DiffAsync(Repository, change, optionsBuilder);
+            SelectedDiffResult = await DiffContext.DiffAsync(Repository, change, optionsBuilder.Build());
         }
 
         private async Task StageAllFilesAsync()

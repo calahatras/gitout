@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Diff;
@@ -232,26 +233,9 @@ namespace GitOut.Features.Git
             return CachedStatus;
         }
 
+        public Stream GetUntrackedBlobStream(RelativeDirectoryPath path) => File.OpenRead(Path.Combine(WorkingDirectory.Directory, path.ToString()));
+
         public Task<Stream> GetBlobStreamAsync(GitFileId file) => CreateProcess(ProcessOptions.FromArguments($"cat-file blob \"{file}\"")).ReadStreamAsync();
-
-        public async Task<GitDiffResult> GetFileContentsAsync(GitFileId file)
-        {
-            var args = ProcessOptions.FromArguments($"cat-file blob \"{file}\"");
-
-            IGitProcess diff = CreateProcess(args);
-            IGitDiffBuilder builder = GitDiffResult.Builder();
-            var content = new List<string>();
-            await foreach (string line in diff.ReadLinesAsync())
-            {
-                content.Add(line);
-            }
-            builder.Feed($"{GitDiffHunk.HunkIdentifier} -1,{content.Count} +1,{content.Count} {GitDiffHunk.HunkIdentifier}");
-            foreach (string line in content)
-            {
-                builder.Feed($" {line}");
-            }
-            return builder.Build();
-        }
 
         public async IAsyncEnumerable<GitDiffFileEntry> ListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options)
         {
@@ -304,13 +288,14 @@ namespace GitOut.Features.Git
 
         public async Task<GitDiffResult> DiffAsync(GitFileId source, GitFileId target, DiffOptions options)
         {
+            IGitDiffBuilder builder = GitDiffResult.Builder();
             if (source.IsEmpty)
             {
-                return await GetFileContentsAsync(target);
+                return builder.Feed(await GetBlobStreamAsync(target)).Build();
             }
             if (target.IsEmpty)
             {
-                return await GetFileContentsAsync(source);
+                return builder.Feed(await GetBlobStreamAsync(source)).Build();
             }
             if (target.Equals(source))
             {
@@ -320,10 +305,13 @@ namespace GitOut.Features.Git
             var args = ProcessOptions.FromArguments(argumentBuilder.ToString());
 
             IGitProcess diff = CreateProcess(args);
-            IGitDiffBuilder builder = GitDiffResult.Builder();
             await foreach (string line in diff.ReadLinesAsync())
             {
                 builder.Feed(line);
+            }
+            if (builder.IsBinaryFile)
+            {
+                builder.Feed(await GetBlobStreamAsync(target));
             }
             return builder.Build();
         }
@@ -339,17 +327,9 @@ namespace GitOut.Features.Git
             {
                 builder.Feed(line);
             }
-            return builder.Build();
-        }
-
-        public async Task<GitDiffResult> UntrackedDiffAsync(RelativeDirectoryPath path)
-        {
-            string[] result = await File.ReadAllLinesAsync(Path.Combine(WorkingDirectory.Directory, path.ToString()));
-            IGitDiffBuilder builder = GitDiffResult.Builder();
-            builder.Feed($"{GitDiffHunk.HunkIdentifier} -0,0 +1,{result.Length} {GitDiffHunk.HunkIdentifier}");
-            foreach (string line in result)
+            if (builder.IsBinaryFile)
             {
-                builder.Feed($"+{line}");
+                builder.Feed(GetUntrackedBlobStream(file));
             }
             return builder.Build();
         }

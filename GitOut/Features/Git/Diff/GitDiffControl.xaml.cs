@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -84,7 +86,7 @@ namespace GitOut.Features.Git.Diff
             return null;
         }
 
-        private static void OnDiffChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static async void OnDiffChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is GitDiffControl control)
             {
@@ -95,11 +97,22 @@ namespace GitOut.Features.Git.Diff
                 else if (e.NewValue is DiffContext context)
                 {
                     string extension = context.FileExtension;
-                    if (IsImageFile(extension))
+                    if (context.Result.Blob is not null)
                     {
-                        control.CurrentContent = new ImageViewModel(context);
+                        if (IsImageFile(extension))
+                        {
+                            if (context.SourceId is not null)
+                            {
+                                Stream sourceImage = await context.GetSourceStreamAsync();
+                                control.CurrentContent = new ImageViewModel(context.Result.Blob.Stream, sourceImage);
+                            }
+                            else
+                            {
+                                control.CurrentContent = new ImageViewModel(context.Result.Blob.Stream);
+                            }
+                        }
                     }
-                    else
+                    else if (context.Result.Text is not null)
                     {
                         double pixelsPerDip = VisualTreeHelper.GetDpi(control).PixelsPerDip;
                         DiffDisplayOptions display = control.ShowSpacesAsDots
@@ -114,7 +127,7 @@ namespace GitOut.Features.Git.Diff
                                 (Brush)Application.Current.Resources["MaterialLightDividers"],
                                 (Brush)Application.Current.Resources["MaterialGray400"]
                             );
-                        var vm = GitDiffViewModel.ParseDiff(context.Result.Hunks, extension, display);
+                        var vm = GitDiffViewModel.ParseDiff(context.Result.Text.Hunks, extension, display);
                         control.CurrentContent = vm;
                     }
                 }
@@ -123,7 +136,11 @@ namespace GitOut.Features.Git.Diff
 
         private static bool IsImageFile(string extension) => new[]
         {
-            ".jpg"
+            ".bmp",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".tiff"
         }
         .Contains(extension);
     }

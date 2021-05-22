@@ -60,11 +60,11 @@ namespace GitOut.Features.Git.Files
         public IEnumerator<IGitFileEntryViewModel> GetEnumerator() => entries.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => entries.GetEnumerator();
 
-        public static GitDirectoryViewModel Wrap(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.Type != GitFileType.Tree
+        public static GitDirectoryViewModel Snapshot(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.Type != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
             : new GitDirectoryViewModel(file.FileName, file.Directory, () => lookup(file.Id));
 
-        public static GitDirectoryViewModel Wrap(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.FileType != GitFileType.Tree
+        public static GitDirectoryViewModel Difference(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.FileType != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
             : new GitDirectoryViewModel(file.Source.FileName, file.Source.Directory, () => lookup(file.Source.Id, file.Destination.Id));
 

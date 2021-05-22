@@ -25,10 +25,9 @@ namespace GitOut.Features.Git
         IAsyncEnumerable<GitDiffFileEntry> ListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options = default);
         Task<GitDiffResult> DiffAsync(GitFileId source, GitFileId target, DiffOptions options);
         Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options);
-        Task<GitDiffResult> UntrackedDiffAsync(RelativeDirectoryPath path);
         IAsyncEnumerable<GitFileEntry> ListTreeAsync(GitObjectId id, DiffOptions? options = default);
+        Stream GetUntrackedBlobStream(RelativeDirectoryPath path);
         Task<Stream> GetBlobStreamAsync(GitFileId file);
-        Task<GitDiffResult> GetFileContentsAsync(GitFileId file);
 
         Task AddAllAsync();
         Task ResetAllAsync();

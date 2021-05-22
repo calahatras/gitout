@@ -62,17 +62,19 @@ namespace GitOut.Features.Git.Files
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static GitFileViewModel Wrap(IGitRepository repository, GitFileEntry file) => file.Type != GitFileType.Blob
+        public static GitFileViewModel Snapshot(IGitRepository repository, GitFileEntry file) => file.Type != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
             : new GitFileViewModel(repository, file.Directory, file.FileName, file.Id);
 
-        public static GitFileViewModel Wrap(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
+        public static GitFileViewModel Difference(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
             : new GitFileViewModel(repository, file.Source.Directory, file.Source.FileName, file.Source.Id, file.Destination.Id, file.Type);
 
         private async Task RefreshDiffAsync()
         {
-            result = await DiffContext.DiffFileAsync(repository, Path, FileName, sourceId, destinationId);
+            result = destinationId is null
+                ? await DiffContext.SnapshotFileAsync(repository, Path, FileName, sourceId)
+                : await DiffContext.DiffFileAsync(repository, Path, FileName, sourceId, destinationId);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
         }
     }
