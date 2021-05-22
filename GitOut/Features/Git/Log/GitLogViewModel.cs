@@ -44,6 +44,7 @@ namespace GitOut.Features.Git.Log
         private LogEntriesViewModel? selectedContext;
 
         private string? checkoutBranchName = null;
+        private GitTreeEvent? entryInView;
 
         public GitLogViewModel(
             INavigationService navigation,
@@ -136,11 +137,13 @@ namespace GitOut.Features.Git.Log
             });
             SelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
             {
+                EntryInView = null;
                 foreach (GitTreeEvent entry in entries)
                 {
                     entry.IsSelected = false;
                 }
                 GitTreeEvent gitTreeEvent = entries.First(e => e.Event.Id == commit.Id);
+                EntryInView = gitTreeEvent;
                 gitTreeEvent.IsSelected = true;
             });
 
@@ -191,6 +194,12 @@ namespace GitOut.Features.Git.Log
 
         public IGitRepository Repository { get; }
         public IList<GitTreeEvent> SelectedLogEntries => selectedLogEntries;
+
+        public GitTreeEvent? EntryInView
+        {
+            get => entryInView;
+            private set => SetProperty(ref entryInView, value);
+        }
 
         public LogEntriesViewModel? SelectedContext
         {
