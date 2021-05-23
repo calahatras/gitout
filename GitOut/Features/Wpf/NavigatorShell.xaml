@@ -7,6 +7,7 @@
     xmlns:local="clr-namespace:GitOut.Features.Wpf"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
+    xmlns:zoom="clr-namespace:GitOut.Features.Wpf.Zoom"
     mc:Ignorable="d"
     x:Name="window"
     Title="{Binding Title, TargetNullValue='git out'}"
@@ -49,7 +50,14 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid x:Name="PART_Root">
+    <Grid
+        x:Name="PART_Root"
+        zoom:ZoomBehavior.ZoomInKeyGesture="Ctrl+Plus"
+        zoom:ZoomBehavior.ZoomOutKeyGesture="Ctrl+Minus"
+        zoom:ZoomBehavior.ZoomResetKeyGesture="Ctrl+D0"
+        zoom:ZoomBehavior.ZoomInMouseWheelGesture="Ctrl+MouseWheelUp"
+        zoom:ZoomBehavior.ZoomOutMouseWheelGesture="Ctrl+MouseWheelDown"
+    >
         <Grid.Resources>
             <converters:WindowStateToVisibilityConverter x:Key="WindowStateToVisibilityConverter"/>
             <Storyboard x:Key="ColoredBorder" x:Shared="true">
