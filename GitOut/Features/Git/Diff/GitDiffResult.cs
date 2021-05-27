@@ -8,10 +8,10 @@ namespace GitOut.Features.Git.Diff
     {
         private GitDiffResult(TextDiffResult text) => Text = text;
 
-        private GitDiffResult(BinaryDiffResult blob) => Blob = blob;
+        private GitDiffResult(BlobDiffResult blob) => Blob = blob;
 
         public TextDiffResult? Text { get; }
-        public BinaryDiffResult? Blob { get; }
+        public BlobDiffResult? Blob { get; }
 
         public static IGitDiffBuilder Builder() => new GitDiffBuilder();
 
@@ -30,13 +30,13 @@ namespace GitOut.Features.Git.Diff
             {
                 if (IsBinaryFile)
                 {
-                    return new GitDiffResult(new BinaryDiffResult(stream ?? throw new InvalidOperationException("Cannot create binary diff without stream")));
+                    return new GitDiffResult(new BlobDiffResult(stream ?? throw new InvalidOperationException("Cannot create binary diff without stream")));
                 }
                 if (header is null)
                 {
                     // Note: if parts.Count is 3 then we have an empty file
                     return parts.Count > 3
-                        ? throw new ArgumentNullException(nameof(header), "Expected header and parts but none was found")
+                        ? throw new InvalidOperationException("Expected header and parts but none was found")
                         : new GitDiffResult(new TextDiffResult(string.Empty, Array.Empty<GitDiffHunk>()));
                 }
                 var lastHunk = GitDiffHunk.Parse(parts);

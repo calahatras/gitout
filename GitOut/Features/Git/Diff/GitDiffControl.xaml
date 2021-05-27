@@ -5,10 +5,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:GitOut.Features.Git.Diff"
+    xmlns:converter="clr-namespace:GitOut.Features.Wpf.Converters"
     mc:Ignorable="d" 
 >
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converter:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <DataTemplate DataType="{x:Type local:GitDiffViewModel}">
             <local:TextDiffControl
                 Document="{Binding Document}"
@@ -16,10 +17,27 @@
             />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ImageViewModel}">
-            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                <Image Source="{Binding SourceImage}"/>
-                <Image Source="{Binding TargetImage}"/>
-            </StackPanel>
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto"
+            >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Image
+                        Source="{Binding SourceImage}"
+                        Stretch="None"
+                   />
+                    <Image
+                        Grid.Row="1"
+                        Visibility="{Binding TargetImage, Converter={StaticResource NullToVisibilityConverter}}"
+                        Source="{Binding TargetImage}"
+                        Stretch="None"
+                    />
+                </Grid>
+            </ScrollViewer>
         </DataTemplate>
     </UserControl.Resources>
     <Grid Style="{StaticResource LayoutRootGridStyle}">

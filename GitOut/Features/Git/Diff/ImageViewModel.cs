@@ -3,7 +3,7 @@ using System.Windows.Media.Imaging;
 
 namespace GitOut.Features.Git.Diff
 {
-    public class ImageViewModel
+    public record ImageViewModel
     {
         public ImageViewModel(Stream imageStream)
         {
