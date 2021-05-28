@@ -132,7 +132,7 @@ namespace GitOut.Features.Git.Diff
                 }
             }
 
-            static bool IsImageFile(string extension) => new[]
+            static bool IsImageFile(string extension) => new HashSet<string>(new[]
             {
                 ".bmp",
                 ".gif",
@@ -140,7 +140,7 @@ namespace GitOut.Features.Git.Diff
                 ".jpg",
                 ".jpeg",
                 ".tiff"
-            }
+            })
             .Contains(extension);
         }
     }
