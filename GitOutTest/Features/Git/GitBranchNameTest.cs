@@ -20,6 +20,9 @@ namespace GitOut.Features.Git
         [TestCase("fix/go-1/test")]
         [TestCase("feature-1")]
         [TestCase("feature.1")]
+        [TestCase("feature_something")]
+        [TestCase("some-&-thing")]
+        [TestCase("some@name")]
         public void CreateLocalShouldAllowValidNames(string input)
         {
             bool isValid = GitBranchName.IsValid(input);
