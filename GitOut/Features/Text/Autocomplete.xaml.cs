@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Collections;
+using GitOut.Features.IO;
 using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Text
@@ -180,7 +181,7 @@ namespace GitOut.Features.Text
             {
                 if (deferredSource is ILazyAsyncEnumerable<object> lazy)
                 {
-                    await lazy.MaterializeAsync();
+                    await lazy.MaterializeAsync(RelativeDirectoryPath.Root);
                 }
                 await Dispatcher.BeginInvoke(new Action(() => SearchInput.Focus()));
             }

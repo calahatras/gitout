@@ -37,12 +37,23 @@ namespace GitOut.Features.Git.Log
             Root = root;
             this.repository = repository;
 
-            allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => ListAllFilesAsync(), IGitDirectoryEntryViewModel.CompareItems);
-            var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.ListIdAsync(root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
-            _ = logFiles.MaterializeAsync().AsTask();
+            allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(_ => ListAllFilesAsync(), IGitDirectoryEntryViewModel.CompareItems);
+            var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(relativePath =>
+                GitFileEntryViewModelFactory.ListIdAsync(root.Event.Id, repository, relativePath),
+                IGitDirectoryEntryViewModel.CompareItems
+            );
+
+            _ = logFiles.MaterializeAsync(RelativeDirectoryPath.Root).AsTask();
             this.logFiles = logFiles;
-            diffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
-            flattenedDiffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(() => GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository), IGitDirectoryEntryViewModel.CompareItems);
+            diffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(relativePath =>
+                GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository, RelativeDirectoryPath.Root),
+                IGitDirectoryEntryViewModel.CompareItems
+            );
+
+            flattenedDiffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel>(relativePath =>
+                GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository),
+                IGitDirectoryEntryViewModel.CompareItems
+            );
 
             currentSource = new CollectionViewSource
             {
@@ -97,7 +108,7 @@ namespace GitOut.Features.Git.Log
                     if (source is ILazyAsyncEnumerable<object> lazy)
                     {
                         SynchronizationContext? context = SynchronizationContext.Current;
-                        ValueTask t = lazy.MaterializeAsync();
+                        ValueTask t = lazy.MaterializeAsync(RelativeDirectoryPath.Root);
                         t.AsTask().ContinueWith(task => context!.Post(d =>
                         {
                             currentSource.Source = source;
@@ -144,7 +155,7 @@ namespace GitOut.Features.Git.Log
             int max = 0;
             await foreach (GitFileEntry item in repository.ListTreeAsync(Root.Event.Id, DiffOptions.Builder().Recursive().Build()))
             {
-                var viewModel = GitFileViewModel.Snapshot(repository, item);
+                var viewModel = GitFileViewModel.Snapshot(repository, item, RelativeDirectoryPath.Root);
                 if (!tree.TryGetValue(item.Directory.Directory, out DirectoryScaffold? directory))
                 {
                     directory = new DirectoryScaffold(item.Directory);

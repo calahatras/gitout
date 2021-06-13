@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Files;
+using GitOut.Features.IO;
 using Moq;
 using NUnit.Framework;
 
@@ -34,7 +35,7 @@ namespace GitOut.Features.Git.Log
             repository.Setup(m => m.ListTreeAsync(root.Event.Id, It.IsAny<DiffOptions>())).Returns(entries.ToAsyncEnumerable());
 
             var actor = new LogEntriesViewModel(root, repository.Object);
-            await actor.AllFiles.MaterializeAsync();
+            await actor.AllFiles.MaterializeAsync(RelativeDirectoryPath.Root);
 
             Assert.That(actor.RootFiles.OfType<IGitFileEntryViewModel>().Count(), Is.EqualTo(2));
             Assert.That(actor.RootFiles.OfType<IGitDirectoryEntryViewModel>().Count(), Is.EqualTo(1));

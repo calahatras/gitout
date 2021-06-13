@@ -44,6 +44,9 @@ namespace GitOut.Features.Git.Files
         }
 
         public RelativeDirectoryPath Path { get; }
+        public string RootPath => repository.WorkingDirectory.ToString();
+        public string RelativePath => System.IO.Path.Combine(repository.WorkingDirectory.ToString(), Path.ToString().Replace("/", "\\", StringComparison.InvariantCulture));
+        public string FullPath => System.IO.Path.Combine(repository.WorkingDirectory.ToString(), Path.ToString(), System.IO.Path.GetFileName(FileName.ToString().Replace("/", "\\", StringComparison.InvariantCulture)));
         public FileName FileName { get; }
         public GitDiffType Status { get; }
         public string DisplayName { get; }
@@ -65,21 +68,21 @@ namespace GitOut.Features.Git.Files
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static GitFileViewModel Snapshot(IGitRepository repository, GitFileEntry file) => file.Type != GitFileType.Blob
+        public static GitFileViewModel Snapshot(IGitRepository repository, GitFileEntry file, RelativeDirectoryPath relativePath) => file.Type != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
             : new GitFileViewModel(
                 repository,
-                file.Directory,
+                relativePath,
                 file.FileName,
                 file.FileName.ToString(),
                 file.Id
             );
 
-        public static GitFileViewModel Difference(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
+        public static GitFileViewModel Difference(IGitRepository repository, GitDiffFileEntry file, RelativeDirectoryPath relativePath) => file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
             : new GitFileViewModel(
                 repository,
-                file.Source.Directory,
+                relativePath,
                 file.Source.FileName,
                 file.Source.FileName.ToString(),
                 file.Source.Id,
