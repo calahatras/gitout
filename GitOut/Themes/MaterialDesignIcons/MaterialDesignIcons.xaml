@@ -132,6 +132,9 @@
     <Geometry x:Key="KeyboardSpace">
         M3 15H5V19H19V15H21V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V15Z
     </Geometry>
+    <Geometry x:Key="OpenInNew">
+        M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z
+    </Geometry>
     <Geometry x:Key="Menu">
         M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z
     </Geometry>
