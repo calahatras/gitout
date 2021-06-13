@@ -8,7 +8,7 @@
     xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
-    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
     Focusable="True"
     mc:Ignorable="d"
     d:DesignHeight="450"

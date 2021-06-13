@@ -1,4 +1,4 @@
-namespace GitOut.Features.Wpf.ApplicationCommands
+namespace GitOut.Features.Wpf.Commands
 {
     public static class Navigate
     {

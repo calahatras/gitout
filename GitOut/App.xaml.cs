@@ -8,6 +8,7 @@ using GitOut.Features.Git;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.GlobalCommands;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -41,6 +42,7 @@ namespace GitOut
 
             ILogger<App> logger = host.Services.GetRequiredService<ILogger<App>>();
             RegisterExceptionHandlers(logger);
+            _ = host.Services.GetServices<IGlobalCommandHandler>();
 
             IHostApplicationLifetime life = host.Services.GetRequiredService<IHostApplicationLifetime>();
             life.ApplicationStarted.Register(LogLifetimeEvent(logger, "Host started"));
@@ -79,6 +81,7 @@ namespace GitOut
             services.AddSettingsFeature();
             services.AddGitFeature();
             services.AddThemeFeature();
+            services.AddGlobalHandlersFeature();
 
             services.AddOptions();
             services.AddOptions<NavigationRegistrationOptions>().Configure(options =>

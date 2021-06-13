@@ -15,7 +15,7 @@
     xmlns:attached="clr-namespace:GitOut.Features.Wpf.AttachedProperties"
     xmlns:scroll="clr-namespace:GitOut.Features.Wpf.Scrolling"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
-    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type={x:Type local:GitLogViewModel}}"
     d:DesignHeight="450"
