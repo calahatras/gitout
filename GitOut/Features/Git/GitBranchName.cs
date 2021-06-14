@@ -8,7 +8,7 @@ namespace GitOut.Features.Git
         private const string LocalBranchType = "heads";
         private const string RemoteBranchType = "remotes";
 
-        private static readonly Regex ValidBranchName = new("^[\\w\\d](?:[\\w\\d-+\\/\\.]+)(?<![\\/\\.])$");
+        private static readonly Regex ValidBranchName = new("^[\\w\\d](?:[\\w\\d-+@&\\/\\.]+)(?<![\\/\\.])$");
         private GitBranchName(string type, string name)
         {
             if (name.Length <= 1)
