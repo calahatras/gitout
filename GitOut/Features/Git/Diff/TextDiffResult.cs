@@ -13,5 +13,4 @@ namespace GitOut.Features.Git.Diff
         public string Header { get; }
         public IEnumerable<GitDiffHunk> Hunks { get; }
     }
-
 }

@@ -28,8 +28,8 @@
                             HorizontalAlignment="Stretch"
                         >
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
                             </Grid.ColumnDefinitions>
                             <TextBlock
                                 TextAlignment="Right"
