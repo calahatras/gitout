@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using GitOut.Features.Collections;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.Text;
 
@@ -71,7 +72,7 @@ namespace GitOut.Features.Git.Diff
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectionPosition)));
                 Paragraph start = selection.Start.Paragraph;
                 Paragraph end = selection.End.Paragraph;
-                List<(Paragraph, HunkLine)> diffContexts = document.DiffContexts;
+                IReadOnlyCollection<(Paragraph, HunkLine)> diffContexts = document.DiffContexts;
 
                 int contextOffset = diffContexts.FindIndex(context => context.Item1 == start);
                 if (contextOffset == -1)

@@ -22,7 +22,7 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Git.Stage
 {
-    public class GitStageViewModel : INotifyPropertyChanged, INavigationListener
+    public class GitStageViewModel : INotifyPropertyChanged, INavigationListener, IDisposable
     {
         private readonly ISnackbarService snack;
         private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
@@ -43,13 +43,13 @@ namespace GitOut.Features.Git.Stage
         private bool amendLastCommit;
 
         private CancellationTokenSource? cancelRefreshSnack;
-        private bool hasChanges = false;
-        private bool selectedFileHasChanges = false;
-        private bool refreshAutomatically = false;
+        private bool hasChanges;
+        private bool selectedFileHasChanges;
+        private bool refreshAutomatically;
 
         private string commitMessage = string.Empty;
         private string cachedCommitMessage = string.Empty;
-        private EditPatchViewModel? editHunk = null;
+        private EditPatchViewModel? editHunk;
         private GitPatch? undoPatch;
 
         public GitStageViewModel(
@@ -230,7 +230,6 @@ namespace GitOut.Features.Git.Stage
                 case NavigationType.NavigatedLeave:
                     cancelRefreshSnack?.Cancel();
                     repositoryWatcher.Events -= OnFileSystemChanges;
-                    repositoryWatcher.Dispose();
                     break;
                 case NavigationType.Deactivated:
                     repositoryWatcher.EnableRaisingEvents = true;
@@ -280,6 +279,21 @@ namespace GitOut.Features.Git.Stage
                         hasChanges = selectedFileHasChanges = false;
                     }
                     break;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                cancelRefreshSnack?.Dispose();
+                repositoryWatcher.Dispose();
             }
         }
 

@@ -114,7 +114,7 @@ namespace GitOut.Features.Git.Diff
 
             public GitDiffFileEntry Build(string sourcePath)
             {
-                if (Type == GitDiffType.CopyEdit || Type == GitDiffType.RenameEdit)
+                if (Type is GitDiffType.CopyEdit or GitDiffType.RenameEdit)
                 {
                     throw new InvalidOperationException("Cannot build file entry for copy or rename without destination path");
                 }

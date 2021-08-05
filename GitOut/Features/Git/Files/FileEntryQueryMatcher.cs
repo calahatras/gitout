@@ -8,7 +8,7 @@ namespace GitOut.Features.Git.Files
     public class FileEntryQueryMatcher : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-            value is IGitFileEntryViewModel file && parameter is string query && file.FileName.ToUpperInvariant().Contains(query);
+            value is IGitFileEntryViewModel file && parameter is string query && file.FileName.Contains(query, StringComparison.OrdinalIgnoreCase);
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => DependencyProperty.UnsetValue;
     }
 }

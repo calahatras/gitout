@@ -35,15 +35,15 @@ namespace GitOut.Features.Git.Log
         private int changesCount;
         private bool includeRemotes = true;
         private bool showSpacesAsDots;
-        private bool isStashesVisible = false;
-        private bool isSearchDisplayed = false;
-        private bool isCheckoutBranchVisible = false;
+        private bool isStashesVisible;
+        private bool isSearchDisplayed;
+        private bool isCheckoutBranchVisible;
         private LogViewMode viewMode = LogViewMode.None;
 
         private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
         private LogEntriesViewModel? selectedContext;
 
-        private string? checkoutBranchName = null;
+        private string? checkoutBranchName;
         private GitTreeEvent? entryInView;
 
         public GitLogViewModel(
@@ -288,7 +288,7 @@ namespace GitOut.Features.Git.Log
 
         public void Navigated(NavigationType type)
         {
-            if (type == NavigationType.Initial || type == NavigationType.NavigatedBack)
+            if (type is NavigationType.Initial or NavigationType.NavigatedBack)
             {
                 _ = CheckRepositoryStatusAsync();
             }

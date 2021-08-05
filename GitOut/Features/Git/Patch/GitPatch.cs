@@ -43,7 +43,7 @@ namespace GitOut.Features.Git.Patch
             var lines = new List<PatchLine>();
             HunkLine preline = visitor.FindPrepositionHunk();
             int fromRangeIndex;
-            if (mode == PatchMode.AddIndex || mode == PatchMode.AddWorkspace)
+            if (mode is PatchMode.AddIndex or PatchMode.AddWorkspace)
             {
                 switch (preline.Type)
                 {
@@ -59,7 +59,7 @@ namespace GitOut.Features.Git.Patch
                         throw new InvalidOperationException("Preline is not of expected type");
                 }
             }
-            else if (mode == PatchMode.ResetIndex || mode == PatchMode.ResetWorkspace)
+            else if (mode is PatchMode.ResetIndex or PatchMode.ResetWorkspace)
             {
                 switch (preline.Type)
                 {
@@ -88,7 +88,7 @@ namespace GitOut.Features.Git.Patch
                     .TraverseSelectionHunks()
                     .Select(line => PatchLine.CreateLine(
                         line.Type,
-                        line.Type == DiffLineType.None || line.Type == DiffLineType.Removed
+                        line.Type is DiffLineType.None or DiffLineType.Removed
                             ? line.StrippedLine
                             : transform.Transform(line.StrippedLine)
                     )));
@@ -133,14 +133,9 @@ namespace GitOut.Features.Git.Patch
             private int hunkOffset;
             private PatchMode mode;
 
-            public GitPatch Build()
-            {
-                if (mode == PatchMode.None)
-                {
-                    throw new InvalidOperationException("Must set patch mode before building");
-                }
-                return new GitPatch(patchBuilder, mode);
-            }
+            public GitPatch Build() => mode == PatchMode.None
+                ? throw new InvalidOperationException("Must set patch mode before building")
+                : new GitPatch(patchBuilder, mode);
 
             public GitPatchBuilder CreateHunk(int fromFileRange, IEnumerable<PatchLine> lines)
             {
@@ -166,7 +161,7 @@ namespace GitOut.Features.Git.Patch
                     // user most likely selected unmodified lines or header, ignore
                     return this;
                 }
-                if (mode == PatchMode.AddIndex || mode == PatchMode.AddWorkspace)
+                if (mode is PatchMode.AddIndex or PatchMode.AddWorkspace)
                 {
                     patchBuilder.AppendLine($"@@ -{fromFileRange},{uneditedLines + removedLines} +{fromFileRange + hunkOffset},{uneditedLines + addedLines} @@");
 

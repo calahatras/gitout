@@ -8,7 +8,7 @@ namespace GitOut.Features.Git
 
         public override int GetHashCode() => base.GetHashCode();
 
-        public bool Equals(GitFileId? obj) => obj is not null && Hash.Equals(obj.Hash);
+        public bool Equals(GitFileId? obj) => obj is not null && Hash.Equals(obj.Hash, StringComparison.Ordinal);
 
         public override bool Equals(object? obj) => obj is GitFileId other && Equals(other);
 

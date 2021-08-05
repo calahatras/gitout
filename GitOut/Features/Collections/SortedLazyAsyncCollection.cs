@@ -7,7 +7,7 @@ namespace GitOut.Features.Collections
     public class SortedLazyAsyncCollection<T> : SortedObservableCollection<T>, ILazyAsyncEnumerable<T>
     {
         private readonly Func<IAsyncEnumerable<T>> factory;
-        private bool isMaterialized = false;
+        private bool isMaterialized;
 
         public SortedLazyAsyncCollection(
             Func<IAsyncEnumerable<T>> factory,

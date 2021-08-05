@@ -54,7 +54,9 @@ namespace GitOut.Features.Wpf
             }
         }
 
+#pragma warning disable CA1030 // Use events where appropriate
         public static void RaiseExecuteChanged() => CommandManager.InvalidateRequerySuggested();
+#pragma warning restore CA1030 // Use events where appropriate
     }
 
     public class CompositeCommand<T> : ICommand
@@ -102,6 +104,8 @@ namespace GitOut.Features.Wpf
             await Task.WhenAll(tasks.Where(t => t.canAction(parameter)).Select(t => t.actionAsync(parameter)));
         }
 
+#pragma warning disable CA1030 // Use events where appropriate
         public void RaiseExecuteChanged() => CommandManager.InvalidateRequerySuggested();
+#pragma warning restore CA1030 // Use events where appropriate
     }
 }

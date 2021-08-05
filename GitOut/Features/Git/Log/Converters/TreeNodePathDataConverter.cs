@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
@@ -44,7 +44,7 @@ namespace GitOut.Features.Git.Log.Converters
 
         public object[]? ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture) => null;
 
-        private void DrawBottom(PathGeometry geometry, GitTreeNode node, double height)
+        private static void DrawBottom(PathGeometry geometry, GitTreeNode node, double height)
         {
             if (node.Bottom is not Line line)
             {
@@ -87,7 +87,7 @@ namespace GitOut.Features.Git.Log.Converters
             }
         }
 
-        private void DrawTop(PathGeometry geometry, GitTreeNode node, double height)
+        private static void DrawTop(PathGeometry geometry, GitTreeNode node, double height)
         {
             if (node.Top is not Line line)
             {
@@ -107,28 +107,23 @@ namespace GitOut.Features.Git.Log.Converters
             BezierSegment bezierSegment;
             double offset = Size.Width / 2;
 
-            if (line.Up < line.Down)
-            {
-                bezierSegment = new BezierSegment(
+            bezierSegment = line.Up < line.Down
+                ? new BezierSegment(
                     new Point(upperXCoordinate, height / 4),
                     new Point(upperXCoordinate, height / 2),
                     new Point(XOffset + line.Down * XDistance - offset, height / 2),
                     true
-                );
-            }
-            else
-            {
-                bezierSegment = new BezierSegment(
+                )
+                : new BezierSegment(
                     new Point(upperXCoordinate, height / 4),
                     new Point(upperXCoordinate, height / 2),
                     new Point(XOffset + line.Down * XDistance + offset, height / 2),
                     true
                 );
-            }
             geometry.Figures.Add(new PathFigure(new Point(upperXCoordinate, 0), new[] { bezierSegment }, false));
         }
 
-        private PathGeometry DrawBoth(GitTreeNode node, double height)
+        private static PathGeometry DrawBoth(GitTreeNode node, double height)
         {
             if (node.Top is not Line topLayer)
             {

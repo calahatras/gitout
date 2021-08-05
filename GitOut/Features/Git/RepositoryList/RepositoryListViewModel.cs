@@ -18,7 +18,7 @@ namespace GitOut.Features.Git.RepositoryList
 {
     public class RepositoryListViewModel : INavigationListener, INotifyPropertyChanged
     {
-        private readonly ICollection<IGitRepository> repositories = new SortedObservableCollection<IGitRepository>((a, b) => string.Compare(a.Name, b.Name, true));
+        private readonly ICollection<IGitRepository> repositories = new SortedObservableCollection<IGitRepository>((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
         private readonly IDisposable subscription;
         private string searchQuery = string.Empty;
 
@@ -69,12 +69,12 @@ namespace GitOut.Features.Git.RepositoryList
             {
                 foreach (IGitRepository repo in finalList)
                 {
-                    if (!repositories.Any(item => item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory)))
+                    if (!repositories.Any(item => item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory, StringComparison.Ordinal)))
                     {
                         repositories.Add(repo);
                     }
                 }
-                foreach (IGitRepository repo in repositories.Where(repo => finalList.All(item => !item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory))).ToList())
+                foreach (IGitRepository repo in repositories.Where(repo => finalList.All(item => !item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory, StringComparison.Ordinal))).ToList())
                 {
                     repositories.Remove(repo);
                 }
