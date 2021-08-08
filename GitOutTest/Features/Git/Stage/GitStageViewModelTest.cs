@@ -27,7 +27,7 @@ namespace GitOut.Features.Git.Stage
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -78,7 +78,7 @@ namespace GitOut.Features.Git.Stage
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -124,7 +124,7 @@ namespace GitOut.Features.Git.Stage
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -173,7 +173,7 @@ namespace GitOut.Features.Git.Stage
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -232,7 +232,7 @@ namespace GitOut.Features.Git.Stage
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -290,7 +290,7 @@ namespace GitOut.Features.Git.Stage
             var stageOptions = new GitStagePageOptions(repository.Object);
 
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -338,7 +338,7 @@ namespace GitOut.Features.Git.Stage
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenStartHunkSelected()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -363,7 +363,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -396,7 +396,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -1,2 +1,4 @@
@@ -404,13 +404,13 @@ namespace GitOut.Features.Git.Stage
 +line1
 +line2
  line3
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldTrimLines()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -435,7 +435,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -469,21 +469,21 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -1,2 +1,4 @@
- line0 
+ line0
 +line1
 +
- line3 
-".Replace("\r\n", "\n")));
+ line3
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenOnlyAddedLinesSelected()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -508,7 +508,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -541,7 +541,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -1,2 +1,4 @@
@@ -549,13 +549,13 @@ namespace GitOut.Features.Git.Stage
 +line1
 +line2
  line3
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenEndHunkSelected()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -580,7 +580,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -613,7 +613,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -1,2 +1,4 @@
@@ -621,13 +621,13 @@ namespace GitOut.Features.Git.Stage
 +line1
 +line2
  line3
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenFullHunkSelected()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -652,7 +652,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -685,7 +685,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -1,2 +1,4 @@
@@ -693,13 +693,13 @@ namespace GitOut.Features.Git.Stage
 +line1
 +line2
  line3
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenCrossingHunks()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/advanced.txt b/advanced.txt");
@@ -727,7 +727,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -760,7 +760,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
 --- a/advanced.txt
 +++ b/advanced.txt
 @@ -12,2 +12,3 @@
@@ -771,13 +771,13 @@ namespace GitOut.Features.Git.Stage
  line1925
 +
  line
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenCrossingHunksAndEndIsOfTypeAdded()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/advanced.txt b/advanced.txt");
@@ -806,7 +806,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -839,7 +839,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
 --- a/advanced.txt
 +++ b/advanced.txt
 @@ -12,2 +12,3 @@
@@ -849,13 +849,13 @@ namespace GitOut.Features.Git.Stage
 @@ -19,1 +20,3 @@
  line1925
 +
-+line 12121".Replace("\r\n", "\n")));
++line 12121".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldNotTrimRemovedLines()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -880,7 +880,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -913,20 +913,20 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -18,3 +18,2 @@
  line1717
--line18  
+-line18
  line  24
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenAddedAndRemovedLines()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -956,7 +956,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -989,7 +989,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -20,2 +20,5 @@
@@ -998,13 +998,13 @@ namespace GitOut.Features.Git.Stage
 +line  21
 +line  22
  line  24
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldCreatePatchWhenMixedSelection()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -1050,7 +1050,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -1083,12 +1083,12 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -17,3 +17,8 @@
  line1717
--line18  
+-line18
 +line  18
 +line  19
 +line  20
@@ -1096,13 +1096,13 @@ namespace GitOut.Features.Git.Stage
 +line  22
 +line  23
  line1925
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void StageSelectedTextCommandShouldRemoveOneSelectedLine()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -1133,7 +1133,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -1166,20 +1166,20 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.StageSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -5,3 +5,2 @@
      ""line3"": {
 -      ""line4"": true,
        ""line5"": 50
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void ResetSelectedTextCommandShouldCreatePatchWhenMixedSelection()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -1218,7 +1218,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -1251,7 +1251,7 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.IndexFiles.CurrentItem;
             actor.ResetSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -20,5 +20,2 @@
@@ -1260,13 +1260,13 @@ namespace GitOut.Features.Git.Stage
 -line  21
 -line  22
  line  23
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void ResetSelectedTextCommandShouldResetRemovedLinesFromWorkspace()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -1299,7 +1299,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -1335,20 +1335,20 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.ResetSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -18,2 +18,3 @@
  line1717
-+line18  
++line18
  line  18
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void ResetSelectedTextCommandShouldResetRemovedAndAddedLines()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -1381,7 +1381,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -1417,21 +1417,21 @@ namespace GitOut.Features.Git.Stage
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
             actor.ResetSelectedTextCommand.Execute(document.Object);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -18,3 +18,3 @@
  line1717
-+line18  
++line18
 -line  18
  line  19
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
         [Test]
         public void ResetSelectedTextCommandShouldCreateUndoPatch()
         {
-            string patchText = null;
+            string? patchText = null;
             var repository = new Mock<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
@@ -1464,7 +1464,7 @@ namespace GitOut.Features.Git.Stage
 
             var stageOptions = new GitStagePageOptions(repository.Object);
             var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName)).Returns(stageOptions);
+            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
             var title = new Mock<ITitleService>();
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
@@ -1501,15 +1501,15 @@ namespace GitOut.Features.Git.Stage
             actor.ResetSelectedTextCommand.Execute(document.Object);
             actor.UndoPatchCommand.Execute(null);
             repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Exactly(2));
-            Assert.That(patchText.Replace("\r\n", "\n"), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
+            Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
 @@ -18,3 +18,3 @@
  line1717
--line18  
+-line18
 +line  18
  line  19
-".Replace("\r\n", "\n")));
+".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
     }
 }

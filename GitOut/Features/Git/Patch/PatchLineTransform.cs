@@ -1,10 +1,11 @@
+using System;
 using GitOut.Features.Text;
 
 namespace GitOut.Features.Git.Patch
 {
     public struct PatchLineTransform : ITextTransform
     {
-        public static readonly PatchLineTransform None = new();
+        public static readonly PatchLineTransform None;
 
         private readonly bool trimLineEndings;
         private readonly bool convertToSpaces;
@@ -38,7 +39,7 @@ namespace GitOut.Features.Git.Patch
             }
             if (convertToSpaces)
             {
-                input = input.Replace("\t", tabReplacement);
+                input = input.Replace("\t", tabReplacement, StringComparison.OrdinalIgnoreCase);
             }
             return input;
         }

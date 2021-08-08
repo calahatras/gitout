@@ -71,7 +71,7 @@ namespace GitOut.Features.Git
                         ++state;
                         break;
                     case 5:
-                        int zeroSeparator = line.IndexOf('\0');
+                        int zeroSeparator = line.IndexOf('\0', StringComparison.OrdinalIgnoreCase);
                         if (zeroSeparator != -1)
                         {
                             throw new InvalidOperationException("Multiple history events found but expected only 1");
@@ -137,7 +137,7 @@ namespace GitOut.Features.Git
                         ++state;
                         break;
                     case 5:
-                        int zeroSeparator = line.IndexOf('\0');
+                        int zeroSeparator = line.IndexOf('\0', StringComparison.OrdinalIgnoreCase);
                         if (zeroSeparator != -1)
                         {
                             string body = line[0..zeroSeparator];
@@ -287,7 +287,7 @@ namespace GitOut.Features.Git
                     string fileLine = diffLines[i++];
                     string path = diffLines[i];
                     IGitDiffFileEntryBuilder builder = GitDiffFileEntry.Parse(fileLine.AsSpan());
-                    if (builder.Type == GitDiffType.CopyEdit || builder.Type == GitDiffType.RenameEdit)
+                    if (builder.Type is GitDiffType.CopyEdit or GitDiffType.RenameEdit)
                     {
                         yield return builder.Build(path, diffLines[i + 1]);
                         ++i;
@@ -375,7 +375,7 @@ namespace GitOut.Features.Git
 
         public Task ResetAllAsync() => CreateProcess(ProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();
 
-        public Task AddAsync(GitStatusChange change, AddOptions options) => CreateProcess(ProcessOptions.FromArguments($"add {string.Join(" ", options.GetArguments())} -- {change.Path}")).ExecuteAsync();
+        public Task AddAsync(GitStatusChange change, AddOptions options) => CreateProcess(ProcessOptions.FromArguments($"add {string.Join(" ", options.BuildArguments())} -- {change.Path}")).ExecuteAsync();
 
         public Task CheckoutAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
 
@@ -397,7 +397,7 @@ namespace GitOut.Features.Git
             {
                 argumentsBuilder.Append(" --amend");
             }
-            argumentsBuilder.Append($" -m \"{options.Message.Replace("\"", "\\\"")}\"");
+            argumentsBuilder.Append($" -m \"{options.Message.Replace("\"", "\\\"", StringComparison.OrdinalIgnoreCase)}\"");
             return CreateProcess(ProcessOptions.FromArguments(argumentsBuilder.ToString())).ExecuteAsync();
         }
 

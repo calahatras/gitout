@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using GitOut.Features.Git;
 
@@ -46,7 +47,7 @@ namespace GitOut.Features.IO
             {
                 if (args.Name is not null)
                 {
-                    Events?.Invoke(this, new RepositoryWatcherEventArgs(args.Name.Replace("\\", "/")));
+                    Events?.Invoke(this, new RepositoryWatcherEventArgs(args.Name.Replace("\\", "/", StringComparison.Ordinal)));
                 }
             }
         }

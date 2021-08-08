@@ -22,18 +22,16 @@ namespace GitOut.Features.Git.Diff
             private readonly ICollection<string> parts = new List<string>();
             private string? header;
 
-            private bool hasCreatedHeader = false;
+            private bool hasCreatedHeader;
 
             public GitDiffResult Build()
             {
                 if (header is null)
                 {
                     // Note: if parts.Count is 3 then we have an empty file
-                    if (parts.Count > 3)
-                    {
-                        throw new ArgumentNullException(nameof(header), "Expected header and parts but none was found");
-                    }
-                    return new GitDiffResult(string.Empty, Array.Empty<GitDiffHunk>());
+                    return parts.Count > 3
+                        ? throw new ArgumentNullException(nameof(header), "Expected header and parts but none was found")
+                        : new GitDiffResult(string.Empty, Array.Empty<GitDiffHunk>());
                 }
                 var lastHunk = GitDiffHunk.Parse(parts);
                 hunks.Add(lastHunk);

@@ -8,7 +8,7 @@ namespace GitOut.Features.Git
 
         public bool IntentToAdd { get; }
 
-        public IEnumerable<string> GetArguments()
+        public IEnumerable<string> BuildArguments()
         {
             if (IntentToAdd)
             {

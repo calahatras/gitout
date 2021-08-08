@@ -92,9 +92,7 @@ namespace GitOut.Features.Git
                     var secondObjectId = GitFileId.FromHash(change[79..119]);
                     var thirdObjectId = GitFileId.FromHash(change[120..160]);
 
-                    path = Type == GitStatusChangeType.RenamedOrCopied
-                        ? RelativeDirectoryPath.Create(change[(change[161..].IndexOf(' ') + 1)..].ToString())
-                        : RelativeDirectoryPath.Create(change[161..].ToString());
+                    path = RelativeDirectoryPath.Create(change[161..].ToString());
                 }
                 else
                 {

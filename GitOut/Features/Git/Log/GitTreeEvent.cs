@@ -23,7 +23,7 @@ namespace GitOut.Features.Git.Log
 
         private readonly List<GitTreeNode> nodes = new();
         private int commitIndex = -1;
-        private int colorIndex = 0;
+        private int colorIndex;
         private bool isSelected;
 
         public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;

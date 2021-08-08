@@ -43,7 +43,7 @@ namespace GitOut.Features.Collections
         public bool Contains(T item)
         {
             int index = FindSortedIndex(item);
-            return backingCollection.Count >= index && backingCollection[index] is T t && t.Equals(item);
+            return backingCollection.Count >= index && backingCollection[index]!.Equals(item);
         }
         public int IndexOf(T item) => FindSortedIndex(item);
 

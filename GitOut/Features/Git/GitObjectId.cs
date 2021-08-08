@@ -24,11 +24,13 @@ namespace GitOut.Features.Git
         public string Hash { get; }
         public bool IsEmpty => EmptyHash.IsMatch(Hash);
 
+#pragma warning disable CA1307 // Specify StringComparison for clarity
         public override int GetHashCode() => Hash.GetHashCode();
+#pragma warning restore CA1307 // Specify StringComparison for clarity
 
         public override string ToString() => Hash;
 
-        public bool Equals(GitObjectId? obj) => obj is not null && Hash.Equals(obj.Hash);
+        public bool Equals(GitObjectId? obj) => obj is not null && Hash.Equals(obj.Hash, StringComparison.Ordinal);
 
         public override bool Equals(object? obj) => obj is GitObjectId other && Equals(other);
 

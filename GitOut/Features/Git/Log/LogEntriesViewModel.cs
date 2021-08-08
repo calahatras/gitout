@@ -119,7 +119,7 @@ namespace GitOut.Features.Git.Log
 
         public static LogEntriesViewModel? CreateContext(IList<GitTreeEvent> entries, IGitRepository repository, LogRevisionViewMode mode)
         {
-            if (entries.Count == 0 || entries.Count >= 3)
+            if (entries.Count is 0 or >= 3)
             {
                 return null;
             }

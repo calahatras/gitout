@@ -42,7 +42,9 @@ namespace GitOut.Features.Git.Files
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IconResourceKey)));
                     if (value && entries is ILazyAsyncEnumerable<IGitFileEntryViewModel> lazy && !lazy.IsMaterialized)
                     {
+#pragma warning disable CA2012 // Use ValueTasks correctly
                         _ = lazy.MaterializeAsync();
+#pragma warning restore CA2012 // Use ValueTasks correctly
                         entries.Remove(LoadingViewModel.Proxy);
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
                     }
@@ -58,23 +60,13 @@ namespace GitOut.Features.Git.Files
         public IEnumerator<IGitFileEntryViewModel> GetEnumerator() => entries.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => entries.GetEnumerator();
 
-        public static GitDirectoryViewModel Wrap(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
-        {
-            if (file.Type != GitFileType.Tree)
-            {
-                throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file));
-            }
-            return new GitDirectoryViewModel(file.FileName.Name, file.Directory, () => lookup(file.Id));
-        }
+        public static GitDirectoryViewModel Wrap(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.Type != GitFileType.Tree
+            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
+            : new GitDirectoryViewModel(file.FileName.Name, file.Directory, () => lookup(file.Id));
 
-        public static GitDirectoryViewModel Wrap(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
-        {
-            if (file.FileType != GitFileType.Tree)
-            {
-                throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file));
-            }
-            return new GitDirectoryViewModel(file.SourceFileName.ToString(), file.SourceFileName, () => lookup(file.SourceId, file.DestinationId));
-        }
+        public static GitDirectoryViewModel Wrap(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.FileType != GitFileType.Tree
+            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
+            : new GitDirectoryViewModel(file.SourceFileName.ToString(), file.SourceFileName, () => lookup(file.SourceId, file.DestinationId));
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

@@ -51,22 +51,13 @@ namespace GitOut.Features.Git.Files
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static GitFileViewModel Wrap(IGitRepository repository, GitFileEntry file)
-        {
-            if (file.Type != GitFileType.Blob)
-            {
-                throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file));
-            }
-            return new GitFileViewModel(repository, file.Directory, file.FileName.ToString(), file.Id);
-        }
+        public static GitFileViewModel Wrap(IGitRepository repository, GitFileEntry file) => file.Type != GitFileType.Blob
+            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
+            : new GitFileViewModel(repository, file.Directory, file.FileName.ToString(), file.Id);
 
-        public static GitFileViewModel Wrap(IGitRepository repository, GitDiffFileEntry file)
-        {
-            if (file.FileType != GitFileType.Blob)
-            {
-                throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file));
-            }
-            return new GitFileViewModel(repository, file.SourceFileName, file.SourceFileName.ToString(), file.SourceId, file.DestinationId, file.Type switch
+        public static GitFileViewModel Wrap(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
+            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
+            : new GitFileViewModel(repository, file.SourceFileName, file.SourceFileName.ToString(), file.SourceId, file.DestinationId, file.Type switch
             {
                 GitDiffType.Create => "FilePlus",
                 GitDiffType.Delete => "FileRemove",
@@ -75,18 +66,12 @@ namespace GitOut.Features.Git.Files
                 GitDiffType.CopyEdit => "FileReplace",
                 _ => "FileHidden"
             });
-        }
 
         private async Task RefreshDiffAsync()
         {
-            if (destinationId is null)
-            {
-                result = await repository.GetFileContentsAsync(sourceId);
-            }
-            else
-            {
-                result = await repository.DiffAsync(sourceId, destinationId, DiffOptions.Builder().Build());
-            }
+            result = destinationId is null
+                ? await repository.GetFileContentsAsync(sourceId)
+                : await repository.DiffAsync(sourceId, destinationId, DiffOptions.Builder().Build());
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
         }
     }
