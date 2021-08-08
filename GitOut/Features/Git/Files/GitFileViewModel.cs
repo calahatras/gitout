@@ -20,7 +20,7 @@ namespace GitOut.Features.Git.Files
             string fileName,
             GitFileId sourceId,
             GitFileId? destinationId = null,
-            string iconResourceKey = "File"
+            GitDiffType diffType = GitDiffType.None
         )
         {
             this.repository = repository;
@@ -28,11 +28,22 @@ namespace GitOut.Features.Git.Files
             FileName = fileName;
             this.sourceId = sourceId;
             this.destinationId = destinationId;
-            IconResourceKey = iconResourceKey;
+            Status = diffType;
+            IconResourceKey = diffType switch
+            {
+                GitDiffType.None => "File",
+                GitDiffType.Create => "FilePlus",
+                GitDiffType.Delete => "FileRemove",
+                GitDiffType.InPlaceEdit => "FileEdit",
+                GitDiffType.RenameEdit => "FileMove",
+                GitDiffType.CopyEdit => "FileReplace",
+                _ => "FileHidden"
+            };
         }
 
         public RelativeDirectoryPath Path { get; }
         public string FileName { get; }
+        public GitDiffType Status { get; }
         public string IconResourceKey { get; }
         // note: this viewmodel is used in tree view and as such requires IsExpanded property
         public bool IsExpanded { get; set; }
@@ -57,15 +68,7 @@ namespace GitOut.Features.Git.Files
 
         public static GitFileViewModel Wrap(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitFileViewModel(repository, file.SourceFileName, file.SourceFileName.ToString(), file.SourceId, file.DestinationId, file.Type switch
-            {
-                GitDiffType.Create => "FilePlus",
-                GitDiffType.Delete => "FileRemove",
-                GitDiffType.InPlaceEdit => "FileEdit",
-                GitDiffType.RenameEdit => "FileMove",
-                GitDiffType.CopyEdit => "FileReplace",
-                _ => "FileHidden"
-            });
+            : new GitFileViewModel(repository, file.SourceFileName, file.SourceFileName.ToString(), file.SourceId, file.DestinationId, file.Type);
 
         private async Task RefreshDiffAsync()
         {
