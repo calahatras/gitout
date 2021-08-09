@@ -15,6 +15,7 @@ namespace GitOut.Features.Collections
                 {
                     return index;
                 }
+                ++index;
             }
             return -1;
         }
@@ -28,6 +29,7 @@ namespace GitOut.Features.Collections
                 {
                     return index;
                 }
+                ++index;
             }
             return -1;
         }
