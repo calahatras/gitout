@@ -17,7 +17,7 @@
                 <ColumnDefinition Width="Auto" MinWidth="20"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ItemsControl ItemsSource="{Binding LineNumbers, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TextDiffControl}}}">
+            <ItemsControl ItemsSource="{Binding LineNumbers, RelativeSource={RelativeSource AncestorType={x:Type local:TextDiffControl}}}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:LineNumberViewModel}">
                         <Grid
