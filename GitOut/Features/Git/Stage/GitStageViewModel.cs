@@ -41,6 +41,7 @@ namespace GitOut.Features.Git.Stage
 
         private bool diffWhitespace;
         private bool amendLastCommit;
+        private bool checkoutBranchBeforeCommit;
 
         private CancellationTokenSource? cancelRefreshSnack;
         private bool hasChanges;
@@ -48,6 +49,7 @@ namespace GitOut.Features.Git.Stage
         private bool refreshAutomatically;
 
         private string commitMessage = string.Empty;
+        private string newBranchName = string.Empty;
         private string cachedCommitMessage = string.Empty;
         private EditPatchViewModel? editHunk;
         private GitPatch? undoPatch;
@@ -88,7 +90,12 @@ namespace GitOut.Features.Git.Stage
                 list => list.SelectedIndex = Math.Clamp(list.SelectedIndex + 1, 0, list.Items.Count)
             );
 
-            CommitCommand = new AsyncCallbackCommand(CommitChangesAsync, () => !string.IsNullOrEmpty(CommitMessage) && (indexFiles.Count > 0 || amendLastCommit));
+            CommitCommand = new AsyncCallbackCommand(
+                CommitChangesAsync,
+                () => !string.IsNullOrEmpty(CommitMessage)
+                    && (indexFiles.Count > 0 || amendLastCommit)
+                    && (!checkoutBranchBeforeCommit || GitBranchName.IsValid(newBranchName))
+            );
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
             ResetWorkspaceFilesCommand = new AsyncCallbackCommand(ResetWorkspaceFilesAsync);
@@ -148,10 +155,22 @@ namespace GitOut.Features.Git.Stage
             }
         }
 
+        public bool CheckoutBranchBeforeCommit
+        {
+            get => checkoutBranchBeforeCommit;
+            set => SetProperty(ref checkoutBranchBeforeCommit, value);
+        }
+
         public string CommitMessage
         {
             get => commitMessage;
             set => SetProperty(ref commitMessage, value);
+        }
+
+        public string NewBranchName
+        {
+            get => newBranchName;
+            set => SetProperty(ref newBranchName, value);
         }
 
         public int SelectedWorkspaceIndex
@@ -648,6 +667,13 @@ namespace GitOut.Features.Git.Stage
 
         private async Task CommitChangesAsync()
         {
+            if (CheckoutBranchBeforeCommit)
+            {
+                await Repository.CheckoutBranchAsync(GitBranchName.CreateLocal(NewBranchName));
+                NewBranchName = string.Empty;
+                snack.ShowSuccess("Created new branch");
+            }
+
             GitCommitOptions options = amendLastCommit
                 ? GitCommitOptions.AmendLatest(commitMessage)
                 : GitCommitOptions.CreateCommit(commitMessage);
