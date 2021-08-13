@@ -473,10 +473,10 @@ namespace GitOut.Features.Git.Stage
 --- a/filename.txt
 +++ b/filename.txt
 @@ -1,2 +1,4 @@
- line0
+ line0 
 +line1
 +
- line3
+ line3 
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
@@ -918,7 +918,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,3 +18,2 @@
  line1717
--line18
+-line18  
  line  24
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
@@ -1088,7 +1088,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -17,3 +17,8 @@
  line1717
--line18
+-line18  
 +line  18
 +line  19
 +line  20
@@ -1340,7 +1340,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,2 +18,3 @@
  line1717
-+line18
++line18  
  line  18
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
@@ -1422,7 +1422,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,3 +18,3 @@
  line1717
-+line18
++line18  
 -line  18
  line  19
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
@@ -1506,7 +1506,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,3 +18,3 @@
  line1717
--line18
+-line18  
 +line  18
  line  19
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
