@@ -6,22 +6,24 @@ namespace GitOut.Features.IO
 {
     public class GitRepositoryFileSystemWatcherProvider : IGitRepositoryWatcherProvider
     {
-        public IRepositoryWatcher PrepareWatchRepositoryChanges(IGitRepository repository)
+        public IRepositoryWatcher PrepareWatchRepositoryChanges(IGitRepository repository, RepositoryWatcherOptions options)
             => new RepositoryWatcher(new FileSystemWatcher(repository.WorkingDirectory.Directory)
             {
                 IncludeSubdirectories = true,
                 NotifyFilter = NotifyFilters.LastWrite
                     | NotifyFilters.CreationTime
                     | NotifyFilters.FileName
-            });
+            }, options);
 
         private class RepositoryWatcher : IRepositoryWatcher
         {
             private readonly FileSystemWatcher watcher;
+            private readonly RepositoryWatcherOptions options;
 
-            public RepositoryWatcher(FileSystemWatcher watcher)
+            public RepositoryWatcher(FileSystemWatcher watcher, RepositoryWatcherOptions options)
             {
                 this.watcher = watcher;
+                this.options = options;
                 watcher.Changed += OnFileSystemChanges;
                 watcher.Created += OnFileSystemChanges;
                 watcher.Deleted += OnFileSystemChanges;
@@ -45,7 +47,14 @@ namespace GitOut.Features.IO
 
             private void OnFileSystemChanges(object sender, FileSystemEventArgs args)
             {
-                if (args.Name is not null)
+                if (args.Name is null)
+                {
+                    return;
+                }
+
+                bool isGitFolder = args.Name.StartsWith(".git");
+                if (isGitFolder && options.HasFlag(RepositoryWatcherOptions.GitFolder)
+                    || (!isGitFolder && options.HasFlag(RepositoryWatcherOptions.Workspace)))
                 {
                     Events?.Invoke(this, new RepositoryWatcherEventArgs(args.Name.Replace("\\", "/", StringComparison.Ordinal)));
                 }
