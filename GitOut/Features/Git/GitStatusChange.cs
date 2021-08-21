@@ -16,7 +16,8 @@ namespace GitOut.Features.Git
             GitFileId? sourceId,
             GitFileId? destinationId,
             RelativeDirectoryPath path,
-            RelativeDirectoryPath? mergedPath
+            RelativeDirectoryPath? mergedPath,
+            DirectoryPath? workingDirectory
         )
         {
             Type = type;
@@ -29,6 +30,7 @@ namespace GitOut.Features.Git
             DestinationId = destinationId;
             Path = path;
             MergedPath = mergedPath;
+            WorkingDirectory = workingDirectory;
         }
 
         public GitStatusChangeType Type { get; }
@@ -44,6 +46,9 @@ namespace GitOut.Features.Git
 
         public RelativeDirectoryPath Path { get; }
         public RelativeDirectoryPath? MergedPath { get; }
+        public string FullPath => System.IO.Path.Combine(WorkingDirectory?.ToString() ?? string.Empty, Path.ToString().Replace("/", "\\", StringComparison.CurrentCulture));
+
+        public DirectoryPath? WorkingDirectory { get; }
 
         public static IGitStatusChangeBuilder Parse(ReadOnlySpan<char> change) => new GitStatusChangeBuilder(change);
 
@@ -61,6 +66,7 @@ namespace GitOut.Features.Git
             private readonly RelativeDirectoryPath path;
 
             private RelativeDirectoryPath? mergedPath;
+            private DirectoryPath? workingDirectory;
 
             public GitStatusChangeBuilder(ReadOnlySpan<char> change)
             {
@@ -118,6 +124,7 @@ namespace GitOut.Features.Git
 
             public GitStatusChangeType Type { get; }
 
+            public void WorkingDirectory(DirectoryPath workingDirectory) => this.workingDirectory = workingDirectory;
             public GitStatusChange Build() => new(
                 Type,
                 stagedStatus,
@@ -128,7 +135,9 @@ namespace GitOut.Features.Git
                 sourceId,
                 destinationId,
                 path,
-                mergedPath);
+                mergedPath,
+                workingDirectory
+            );
 
             public IGitStatusChangeBuilder MergedFrom(string path)
             {

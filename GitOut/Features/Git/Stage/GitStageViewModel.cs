@@ -98,6 +98,7 @@ namespace GitOut.Features.Git.Stage
             );
             StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
             StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
+            ResetWorkspaceFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(ResetWorkspaceFileAsync);
             ResetWorkspaceFilesCommand = new AsyncCallbackCommand(ResetWorkspaceFilesAsync);
             ResetIndexFilesCommand = new AsyncCallbackCommand(ResetIndexFilesAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync);
@@ -105,6 +106,7 @@ namespace GitOut.Features.Git.Stage
             EditSelectedTextCommand = new CallbackCommand<IHunkLineVisitorProvider>(PrepareEditSelection);
             UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => undoPatch is not null);
             AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync);
+            IntentToAddFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(IntentToAddFileAsync, CanIntentToAddFile);
             IntentToAddCommand = new AsyncCallbackCommand(IntentToAddAsync);
             ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync);
 
@@ -223,9 +225,11 @@ namespace GitOut.Features.Git.Stage
         public ICommand MoveNextCommand { get; }
 
         public ICommand AddAllCommand { get; }
+        public ICommand IntentToAddFileCommand { get; }
         public ICommand IntentToAddCommand { get; }
         public ICommand StageFileCommand { get; }
         public ICommand StageWorkspaceFilesCommand { get; }
+        public ICommand ResetWorkspaceFileCommand { get; }
         public ICommand ResetWorkspaceFilesCommand { get; }
         public ICommand ResetIndexFilesCommand { get; }
         public ICommand ResetSelectedTextCommand { get; }
@@ -384,6 +388,19 @@ namespace GitOut.Features.Git.Stage
             await GetRepositoryStatusAsync();
         }
 
+        private async Task IntentToAddFileAsync(StatusChangeViewModel? model)
+        {
+            if (model is null)
+            {
+                return;
+            }
+
+            await Repository.AddAsync(model.Model, AddOptions.Builder().WithIntent().Build());
+            await GetRepositoryStatusAsync();
+        }
+
+        private bool CanIntentToAddFile(StatusChangeViewModel? model) => model is not null && model.Model.Type == GitStatusChangeType.Untracked;
+
         private async Task IntentToAddAsync()
         {
             foreach (StatusChangeViewModel item in workspaceFiles)
@@ -404,7 +421,10 @@ namespace GitOut.Features.Git.Stage
 
         private async Task StageFileAsync(StatusChangeViewModel? model)
         {
-            if (model is null) return;
+            if (model is null)
+            {
+                return;
+            }
 
             if (model.Location == StatusChangeLocation.Index)
             {
@@ -435,6 +455,46 @@ namespace GitOut.Features.Git.Stage
             }
             await GetRepositoryStatusAsync();
             SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
+        }
+
+        private async Task ResetWorkspaceFileAsync(StatusChangeViewModel? model)
+        {
+            if (model is null)
+            {
+                return;
+            }
+
+            if (model.Location == StatusChangeLocation.Workspace)
+            {
+                int previousIndex = SelectedWorkspaceIndex;
+                if (model.Status == GitModifiedStatusType.Added)
+                {
+                    await Repository.RestoreAsync(model.Model);
+                }
+                else if (model.Status == GitModifiedStatusType.Untracked)
+                {
+                    cancelRefreshSnack?.Cancel();
+                    cancelRefreshSnack = new CancellationTokenSource();
+                    ISnackBuilder? builder = Snack.Builder();
+                    builder.AddAction("YES");
+                    builder.AddAction("NO");
+                    builder.WithMessage("This file is untracked. This will delete the file. Are you sure that you want to delete the file?");
+                    builder.WithDuration(Timeout.InfiniteTimeSpan);
+                    builder.WithCancellation(cancelRefreshSnack.Token);
+                    SnackAction? action = await snack.ShowAsync(builder);
+
+                    if (action?.Text == "YES")
+                    {
+                        File.Delete(model.FullPath);
+                    }
+                }
+                else
+                {
+                    await Repository.CheckoutAsync(model.Model);
+                }
+                await GetRepositoryStatusAsync();
+                SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
+            }
         }
 
         private async Task ResetWorkspaceFilesAsync()
@@ -469,7 +529,11 @@ namespace GitOut.Features.Git.Stage
 
         private async Task ResetSelectionAsync(IHunkLineVisitorProvider? viewer)
         {
-            if (viewer is null) return;
+            if (viewer is null)
+            {
+                return;
+            }
+
             if (selectedChange is null)
             {
                 throw new ArgumentNullException(nameof(selectedChange), "No change is selected");
@@ -538,7 +602,10 @@ namespace GitOut.Features.Git.Stage
 
         private async Task StageSelectionAsync(IHunkLineVisitorProvider? viewer)
         {
-            if (viewer is null) return;
+            if (viewer is null)
+            {
+                return;
+            }
 
             if (selectedChange is null)
             {
@@ -615,7 +682,10 @@ namespace GitOut.Features.Git.Stage
 
         private void PrepareEditSelection(IHunkLineVisitorProvider? viewer)
         {
-            if (viewer is null) return;
+            if (viewer is null)
+            {
+                return;
+            }
 
             if (selectedChange is null)
             {

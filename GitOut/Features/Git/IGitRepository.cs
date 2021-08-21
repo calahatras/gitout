@@ -35,7 +35,7 @@ namespace GitOut.Features.Git
         Task CheckoutAsync(GitStatusChange change);
         Task CheckoutBranchAsync(GitBranchName name);
         Task ResetAsync(GitStatusChange change);
-
+        Task RestoreAsync(GitStatusChange change);
         Task ApplyAsync(GitPatch patch);
         Task CommitAsync(GitCommitOptions options);
     }

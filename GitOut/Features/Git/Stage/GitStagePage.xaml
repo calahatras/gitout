@@ -19,6 +19,7 @@
         <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
         <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
         <Style x:Key="GitChangeListStyle" BasedOn="{StaticResource MaterialListStyle}" TargetType="{x:Type ListView}">
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -141,6 +142,7 @@
                     ItemsSource="{Binding WorkspaceFiles}"
                     SelectedValue="{Binding SelectedChange}"
                     SelectedIndex="{Binding SelectedWorkspaceIndex}"
+                    Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
                 >
                     <ListView.InputBindings>
                         <KeyBinding Key="S" Command="{Binding StageWorkspaceFilesCommand}" />
@@ -149,6 +151,93 @@
                         <KeyBinding Key="Delete" Command="{Binding ResetWorkspaceFilesCommand}" />
                         <KeyBinding Key="I" Command="{Binding IntentToAddCommand}" />
                     </ListView.InputBindings>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Height" Value="22"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                            <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" />
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem
+                                            HeaderStringFormat="Open {0}"
+                                            Header="{Binding Path}"
+                                            Command="{x:Static wpfcommands:Application.Open}"
+                                            CommandParameter="{Binding FullPath}"
+                                        />
+                                        <MenuItem
+                                            Header="Copy filename"
+                                            Command="{x:Static wpfcommands:Application.Copy}"
+                                            CommandParameter="{Binding Path}"
+                                        />
+                                        <MenuItem
+                                            Header="Copy full path"
+                                            Command="{x:Static wpfcommands:Application.Copy}"
+                                            CommandParameter="{Binding FullPath}"
+                                        />
+                                        <MenuItem
+                                            Header="Copy directory"
+                                            Command="{x:Static wpfcommands:Application.Copy}"
+                                            CommandParameter="{Binding WorkingDirectory}"
+                                        />
+                                        <Separator />
+                                        <MenuItem
+                                            Header="Stage"
+                                            InputGestureText="S"
+                                            Command="{Binding PlacementTarget.Tag.StageFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                                            CommandParameter="{Binding}"
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem
+                                            Header="Revert"
+                                            InputGestureText="R"
+                                            Command="{Binding PlacementTarget.Tag.ResetWorkspaceFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                                            CommandParameter="{Binding}"
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileUndo}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem
+                                            Header="Add with intent"
+                                            InputGestureText="I"
+                                            Command="{Binding PlacementTarget.Tag.IntentToAddFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" 
+                                            CommandParameter="{Binding}"
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FilePlus}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                Header="Stage all selected files to index"
+                                Command="{Binding StageWorkspaceFilesCommand}"
+                             >
+                                <MenuItem.Icon>
+                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Header="Stage all files to index"
+                                Command="{Binding AddAllCommand}"
+                             >
+                                <MenuItem.Icon>
+                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
                 </ListView>
                 <GridSplitter Grid.Row="1" Style="{StaticResource SplitHorizontalStyle}" />
                 <Grid Grid.Row="1">
