@@ -2134,7 +2134,7 @@
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
-                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="4" />
                 </Grid.ColumnDefinitions>
                 <Canvas Margin="6 0" Name="Icon" Width="24">
                     <Canvas.RenderTransform>
@@ -2161,7 +2161,7 @@
                     />
                 </Border>
                 <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
-                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" />
+                <TextBlock x:Name="InputGestureText" Grid.Column="2" Padding="50 0 0 0" Text="{TemplateBinding InputGestureText}" />
             </Grid>
         </Border>
         <ControlTemplate.Triggers>
@@ -2179,7 +2179,7 @@
                 <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialGray700}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="Foreground" Value="{DynamicResource MaterialGray800}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialGray500}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -2480,7 +2480,7 @@
         </Style.Resources>
     </Style>
 
-    <Style x:Key="{x:Type ToolTip}" TargetType="ToolTip">
+    <Style x:Key="{x:Type ToolTip}" TargetType="{x:Type ToolTip}">
         <Setter Property="Padding" Value="10 6" />
         <Setter Property="BorderBrush" Value="{DynamicResource MaterialGray800}" />
         <Setter Property="BorderThickness" Value="1" />
