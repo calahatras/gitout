@@ -272,11 +272,79 @@
                     ItemsSource="{Binding IndexFiles}"
                     SelectedValue="{Binding SelectedChange}"
                     SelectedIndex="{Binding SelectedIndexIndex}"
+                    Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
                 >
                     <ListView.InputBindings>
                         <KeyBinding Key="R" Command="{Binding ResetIndexFilesCommand}" />
                         <KeyBinding Key="Delete" Command="{Binding ResetIndexFilesCommand}" />
                     </ListView.InputBindings>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Height" Value="22"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                            <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" />
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem
+                                            HeaderStringFormat="Open {0}"
+                                            Header="{Binding Path}"
+                                            Command="{x:Static wpfcommands:Application.Open}"
+                                            CommandParameter="{Binding FullPath}"
+                                        />
+                                        <MenuItem
+                                            Header="Copy filename"
+                                            Command="{x:Static wpfcommands:Application.Copy}"
+                                            CommandParameter="{Binding Path}"
+                                        />
+                                        <MenuItem
+                                            Header="Copy full path"
+                                            Command="{x:Static wpfcommands:Application.Copy}"
+                                            CommandParameter="{Binding FullPath}"
+                                        />
+                                        <MenuItem
+                                            Header="Copy directory"
+                                            Command="{x:Static wpfcommands:Application.Copy}"
+                                            CommandParameter="{Binding WorkingDirectory}"
+                                        />
+                                        <Separator />
+                                        <MenuItem
+                                            Header="Reset file to workspace"
+                                            InputGestureText="R"
+                                            Command="{Binding PlacementTarget.Tag.ResetIndexFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                                            CommandParameter="{Binding}"
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileUndo}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                Header="Reset all selected files to workspace"
+                                Command="{Binding ResetIndexFilesCommand}"
+                            >
+                                <MenuItem.Icon>
+                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Header="Reset to workspace"
+                                Command="{Binding ResetHeadCommand}"
+                            >
+                                <MenuItem.Icon>
+                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
                 </ListView>
             </Grid>
             <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Style="{StaticResource SplitVerticalStyle}" />

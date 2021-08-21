@@ -100,6 +100,7 @@ namespace GitOut.Features.Git.Stage
             StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
             ResetWorkspaceFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(ResetWorkspaceFileAsync);
             ResetWorkspaceFilesCommand = new AsyncCallbackCommand(ResetWorkspaceFilesAsync);
+            ResetIndexFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(ResetIndexFileAsync);
             ResetIndexFilesCommand = new AsyncCallbackCommand(ResetIndexFilesAsync);
             ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync);
             StageSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(StageSelectionAsync);
@@ -231,6 +232,7 @@ namespace GitOut.Features.Git.Stage
         public ICommand StageWorkspaceFilesCommand { get; }
         public ICommand ResetWorkspaceFileCommand { get; }
         public ICommand ResetWorkspaceFilesCommand { get; }
+        public ICommand ResetIndexFileCommand { get; }
         public ICommand ResetIndexFilesCommand { get; }
         public ICommand ResetSelectedTextCommand { get; }
         public ICommand StageSelectedTextCommand { get; }
@@ -510,6 +512,23 @@ namespace GitOut.Features.Git.Stage
             }
             await GetRepositoryStatusAsync();
             SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
+        }
+
+        private async Task ResetIndexFileAsync(StatusChangeViewModel model)
+        {
+            if (model is null)
+            {
+                return;
+            }
+
+            int previousIndex = SelectedIndexIndex;
+            if (model.Location == StatusChangeLocation.Index)
+            {
+                await Repository.ResetAsync(model.Model);
+            }
+
+            await GetRepositoryStatusAsync();
+            SelectedIndexIndex = previousIndex >= indexFiles.Count ? indexFiles.Count - 1 : previousIndex;
         }
 
         private async Task ResetIndexFilesAsync()
