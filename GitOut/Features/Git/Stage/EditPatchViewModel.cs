@@ -21,7 +21,7 @@ namespace GitOut.Features.Git.Stage
         {
             this.fromRangeIndex = fromRangeIndex;
             this.lines = lines;
-            this.text = string.Join(Environment.NewLine, lines.Where(line => line.Type != DiffLineType.Removed).Select(line => line.StrippedLine));
+            text = string.Join(Environment.NewLine, lines.Where(line => line.Type != DiffLineType.Removed).Select(line => line.StrippedLine));
             this.preline = preline;
             this.postline = postline;
         }
@@ -80,7 +80,7 @@ namespace GitOut.Features.Git.Stage
         {
             private readonly EditPatchViewModel parent;
 
-            public EditPatchHunkLineVisitor(EditPatchViewModel editPatchViewModel) => this.parent = editPatchViewModel;
+            public EditPatchHunkLineVisitor(EditPatchViewModel editPatchViewModel) => parent = editPatchViewModel;
 
             public bool IsDone => true;
 

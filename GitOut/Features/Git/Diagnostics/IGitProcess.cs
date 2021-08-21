@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace GitOut.Features.Git.Diagnostics
     {
         Task<ProcessEventArgs> ExecuteAsync(CancellationToken cancellationToken = default);
         Task<ProcessEventArgs> ExecuteAsync(StringBuilder writer, CancellationToken cancellationToken = default);
+        Task<Stream> ReadStreamAsync(CancellationToken cancellationToken = default);
         IAsyncEnumerable<string> ReadLinesAsync(CancellationToken cancellationToken = default);
     }
 }

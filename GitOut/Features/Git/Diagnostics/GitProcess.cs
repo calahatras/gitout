@@ -107,6 +107,41 @@ namespace GitOut.Features.Git.Diagnostics
             }
         }
 
+        public async Task<Stream> ReadStreamAsync(CancellationToken cancellationToken = default)
+        {
+            using var exec = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = CommandLineExecutable,
+                    Arguments = arguments.Arguments,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = workingDirectory.Directory
+                }
+            };
+            exec.Start();
+
+            var stream = new MemoryStream();
+            await exec.StandardOutput.BaseStream.CopyToAsync(stream, cancellationToken);
+            exec.WaitForExit();
+            Trace.WriteLine($"Running command {arguments.Arguments}: {(exec.ExitTime - exec.StartTime).TotalMilliseconds}ms");
+            stream.Position = 0;
+            telemetry.Report(new ProcessEventArgs(
+                CommandLineExecutable,
+                workingDirectory,
+                arguments,
+                new DateTimeOffset(exec.StartTime),
+                exec.ExitTime - exec.StartTime,
+                new StringBuilder(),
+                new string[] { "Read stream" },
+                Array.Empty<string>()
+            ));
+            return stream;
+        }
+
         public async IAsyncEnumerable<string> ReadLinesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var dataCounter = new CountdownEvent(3);

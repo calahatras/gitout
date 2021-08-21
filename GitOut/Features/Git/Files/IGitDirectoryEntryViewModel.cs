@@ -10,7 +10,7 @@ namespace GitOut.Features.Git.Files
         {
             if (a is IGitDirectoryEntryViewModel && b is IGitDirectoryEntryViewModel)
             {
-                return string.Compare(a.FileName, b.FileName, true);
+                return string.Compare(a.FileName.ToString(), b.FileName.ToString(), true);
             }
             if (a is IGitDirectoryEntryViewModel)
             {
@@ -20,7 +20,7 @@ namespace GitOut.Features.Git.Files
             {
                 return 1;
             }
-            return string.Compare(a.FileName, b.FileName, true);
+            return string.Compare(a.FileName.ToString(), b.FileName.ToString(), true);
         }
     }
 }

@@ -30,11 +30,11 @@ namespace GitOut.Features.Git
 
         public override string ToString() => Hash;
 
-        public bool Equals(GitObjectId? obj) => obj is not null && Hash.Equals(obj.Hash, StringComparison.Ordinal);
+        public bool Equals(GitObjectId? other) => other is not null && Hash.Equals(other.Hash, StringComparison.Ordinal);
 
         public override bool Equals(object? obj) => obj is GitObjectId other && Equals(other);
 
-        public static bool operator ==(GitObjectId left, GitObjectId right) => left.Equals(right);
+        public static bool operator ==(GitObjectId left, GitObjectId right) => Equals(left, right);
 
         public static bool operator !=(GitObjectId left, GitObjectId right) => !(left == right);
     }

@@ -144,7 +144,7 @@ namespace GitOut.Features.Git.Log
             int max = 0;
             await foreach (GitFileEntry item in repository.ListTreeAsync(Root.Event.Id, DiffOptions.Builder().Recursive().Build()))
             {
-                var viewModel = GitFileViewModel.Wrap(repository, item);
+                var viewModel = GitFileViewModel.Snapshot(repository, item);
                 if (!tree.TryGetValue(item.Directory.Directory, out DirectoryScaffold? directory))
                 {
                     directory = new DirectoryScaffold(item.Directory);
@@ -199,7 +199,7 @@ namespace GitOut.Features.Git.Log
             IEnumerable<IGitDirectoryEntryViewModel> current = items.OfType<IGitDirectoryEntryViewModel>();
             foreach (string segment in entry.Path.Segments)
             {
-                IGitDirectoryEntryViewModel? child = current.FirstOrDefault(directory => directory.FileName == segment);
+                IGitDirectoryEntryViewModel? child = current.FirstOrDefault(directory => directory.FileName.ToString() == segment);
                 if (child is not null)
                 {
                     child.IsExpanded = true;
@@ -240,7 +240,7 @@ namespace GitOut.Features.Git.Log
 
             public bool IsExpanded { get; set; }
 
-            public string FileName { get; }
+            public FileName FileName { get; }
 
             public string IconResourceKey => throw new InvalidOperationException("Scaffold does not hold an icon");
 

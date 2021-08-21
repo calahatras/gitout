@@ -12,8 +12,8 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = file.Type switch
                 {
-                    GitFileType.Tree => GitDirectoryViewModel.Wrap(file, treeId => ListIdAsync(treeId, repository)),
-                    GitFileType.Blob => GitFileViewModel.Wrap(repository, file),
+                    GitFileType.Tree => GitDirectoryViewModel.Snapshot(file, treeId => ListIdAsync(treeId, repository)),
+                    GitFileType.Blob => GitFileViewModel.Snapshot(repository, file),
                     _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {file.Type}", nameof(file))
                 };
                 yield return viewmodel;
@@ -26,13 +26,13 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = entry.FileType switch
                 {
-                    GitFileType.Tree => GitDirectoryViewModel.Wrap(entry, (treeId, destinationId) => entry.Type switch
+                    GitFileType.Tree => GitDirectoryViewModel.Difference(entry, (treeId, destinationId) => entry.Type switch
                     {
                         GitDiffType.Create => ListIdAsync(destinationId, repository),
                         GitDiffType.Delete => ListIdAsync(treeId, repository),
                         _ => DiffIdAsync(treeId, destinationId, repository)
                     }),
-                    GitFileType.Blob => GitFileViewModel.Wrap(repository, entry),
+                    GitFileType.Blob => GitFileViewModel.Difference(repository, entry),
                     _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {entry.FileType}", nameof(entry))
                 };
                 yield return viewmodel;
@@ -45,7 +45,7 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = entry.FileType switch
                 {
-                    GitFileType.Blob => GitFileViewModel.Wrap(repository, entry),
+                    GitFileType.Blob => GitFileViewModel.Difference(repository, entry),
                     _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {entry.FileType}", nameof(entry))
                 };
                 yield return viewmodel;

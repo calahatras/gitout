@@ -4,6 +4,6 @@ namespace GitOut.Features.Text
 {
     public interface ILineDecorator
     {
-        void Decorate(Paragraph paragraph, int lineNumber);
+        void Decorate(TextElement paragraph, int lineNumber);
     }
 }

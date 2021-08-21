@@ -380,7 +380,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -453,7 +453,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -473,10 +473,10 @@ namespace GitOut.Features.Git.Stage
 --- a/filename.txt
 +++ b/filename.txt
 @@ -1,2 +1,4 @@
- line0
+ line0 
 +line1
 +
- line3
+ line3 
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
 
@@ -525,7 +525,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 3));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 3));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -597,7 +597,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -669,7 +669,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -744,7 +744,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -823,7 +823,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -897,7 +897,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 2));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 2));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -918,7 +918,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,3 +18,2 @@
  line1717
--line18
+-line18  
  line  24
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
@@ -973,7 +973,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 5, 7));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 5, 7));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1067,7 +1067,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 17, 23));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 17, 23));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1088,7 +1088,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -17,3 +17,8 @@
  line1717
--line18
+-line18  
 +line  18
 +line  19
 +line  20
@@ -1150,7 +1150,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1235,7 +1235,7 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetIndex))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetIndex, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 13, 15));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 13, 15));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1316,10 +1316,10 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1340,7 +1340,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,2 +18,3 @@
  line1717
-+line18
++line18  
  line  18
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
         }
@@ -1398,10 +1398,10 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1422,7 +1422,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,3 +18,3 @@
  line1717
-+line18
++line18  
 -line  18
  line  19
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));
@@ -1481,10 +1481,10 @@ namespace GitOut.Features.Git.Stage
             var document = new Mock<IHunkLineVisitorProvider>();
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
             document
                 .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
-                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
+                .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
 
             var actor = new GitStageViewModel(
                 navigation.Object,
@@ -1506,7 +1506,7 @@ namespace GitOut.Features.Git.Stage
 +++ b/filename.txt
 @@ -18,3 +18,3 @@
  line1717
--line18
+-line18  
 +line  18
  line  19
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)));

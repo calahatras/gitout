@@ -6,21 +6,23 @@ namespace GitOut.Features.Git
 {
     public class GitFileEntry
     {
-        private GitFileEntry(GitFileId id, GitFileType type, PosixFileModes[] fileModes, string fileName)
+        public GitFileEntry(
+            GitFileId id,
+            GitFileType type,
+            IEnumerable<PosixFileModes> fileModes,
+            RelativeDirectoryPath directory
+        )
         {
             Id = id;
             Type = type;
             FileModes = fileModes;
-            int lastPos = fileName.LastIndexOf(RelativeDirectoryPath.GitDirectorySeparatorChar);
-            Directory = lastPos != -1
-                ? RelativeDirectoryPath.Create(fileName[0..lastPos])
-                : RelativeDirectoryPath.Root;
-            FileName = FileName.Create(fileName[(lastPos + 1)..]);
+            Directory = directory.Parent;
+            FileName = directory.Name;
         }
 
-        public RelativeDirectoryPath Directory { get; }
         public GitFileId Id { get; }
 
+        public RelativeDirectoryPath Directory { get; }
         public FileName FileName { get; }
 
         public IEnumerable<PosixFileModes> FileModes { get; }
@@ -30,16 +32,24 @@ namespace GitOut.Features.Git
         {
             string[] parts = fileLine.Split('\t', 2);
             string[] metadata = parts[0].Split(' ', 3);
-            Enum.TryParse(metadata[0][3..4], out PosixFileModes user);
-            Enum.TryParse(metadata[0][4..5], out PosixFileModes group);
-            Enum.TryParse(metadata[0][5..6], out PosixFileModes other);
+            _ = Enum.TryParse(metadata[0][3..4], out PosixFileModes user);
+            _ = Enum.TryParse(metadata[0][4..5], out PosixFileModes group);
+            _ = Enum.TryParse(metadata[0][5..6], out PosixFileModes other);
 
             if (!Enum.TryParse(metadata[1], true, out GitFileType type))
             {
                 throw new ArgumentException($"Invalid file type {metadata[1]}", nameof(fileLine));
             }
 
-            return new GitFileEntry(GitFileId.FromHash(metadata[2]), type, new[] { user, group, other }, parts[1]);
+            string path = parts[1];
+            int lastPos = path.LastIndexOf(RelativeDirectoryPath.GitDirectorySeparatorChar);
+
+            return new GitFileEntry(
+                GitFileId.FromHash(metadata[2]),
+                type,
+                new[] { user, group, other },
+                RelativeDirectoryPath.Create(path)
+            );
         }
     }
 }

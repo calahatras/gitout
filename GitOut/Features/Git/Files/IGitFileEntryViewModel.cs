@@ -5,7 +5,7 @@ namespace GitOut.Features.Git.Files
     public interface IGitFileEntryViewModel
     {
         RelativeDirectoryPath Path { get; }
-        string FileName { get; }
+        FileName FileName { get; }
         string IconResourceKey { get; }
     }
 }
