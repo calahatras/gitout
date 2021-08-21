@@ -13,7 +13,7 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = file.Type switch
                 {
-                    GitFileType.Tree => GitDirectoryViewModel.Snapshot(file, currentPath, (treeId, relativePath) => ListIdAsync(treeId, repository, relativePath)),
+                    GitFileType.Tree => GitDirectoryViewModel.Snapshot(repository, file, currentPath, (treeId, relativePath) => ListIdAsync(treeId, repository, relativePath)),
                     GitFileType.Blob => GitFileViewModel.Snapshot(repository, file, currentPath),
                     _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {file.Type}", nameof(file))
                 };
@@ -27,7 +27,7 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = entry.FileType switch
                 {
-                    GitFileType.Tree => GitDirectoryViewModel.Difference(entry, currentPath, (treeId, destinationId, relativePath) => entry.Type switch
+                    GitFileType.Tree => GitDirectoryViewModel.Difference(repository, entry, currentPath, (treeId, destinationId, relativePath) => entry.Type switch
                     {
                         GitDiffType.Create => ListIdAsync(destinationId, repository, relativePath),
                         GitDiffType.Delete => ListIdAsync(treeId, repository, relativePath),

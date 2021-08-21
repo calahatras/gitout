@@ -188,7 +188,8 @@ namespace GitOut.Features.Git.Log
             RootFiles = currentSource.View;
             SelectItem(currentSelection);
 
-            static IGitDirectoryEntryViewModel NormalizeScaffold(DirectoryScaffold scaffold) => new GitDirectoryViewModel(
+            IGitDirectoryEntryViewModel NormalizeScaffold(DirectoryScaffold scaffold) => new GitDirectoryViewModel(
+                repository,
                 scaffold.FileName,
                 scaffold.Path,
                 scaffold
