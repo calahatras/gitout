@@ -32,7 +32,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -83,7 +83,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -129,7 +129,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -178,7 +178,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -237,7 +237,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -295,7 +295,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -368,7 +368,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -440,7 +440,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -513,7 +513,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -585,7 +585,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -657,7 +657,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -732,7 +732,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -811,7 +811,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -885,7 +885,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -961,7 +961,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -1055,7 +1055,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -1138,7 +1138,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -1223,7 +1223,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -1304,7 +1304,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -1386,7 +1386,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
@@ -1469,7 +1469,7 @@ namespace GitOut.Features.Git.Stage
             var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
             var watch = new Mock<IRepositoryWatcher>();
             watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object))
+                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
                 .Returns(watch.Object);
             var snack = new Mock<ISnackbarService>();
             var options = new Mock<IOptionsMonitor<GitStageOptions>>();
