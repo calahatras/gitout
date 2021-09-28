@@ -166,22 +166,38 @@
                                             Header="{Binding Path}"
                                             Command="{x:Static wpfcommands:Application.Open}"
                                             CommandParameter="{Binding FullPath}"
-                                        />
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource OpenInNew}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
                                         <MenuItem
                                             Header="Copy filename"
                                             Command="{x:Static wpfcommands:Application.Copy}"
                                             CommandParameter="{Binding Path}"
-                                        />
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
                                         <MenuItem
                                             Header="Copy full path"
                                             Command="{x:Static wpfcommands:Application.Copy}"
                                             CommandParameter="{Binding FullPath}"
-                                        />
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
                                         <MenuItem
                                             Header="Copy directory"
                                             Command="{x:Static wpfcommands:Application.Copy}"
-                                            CommandParameter="{Binding WorkingDirectory}"
-                                        />
+                                            CommandParameter="{Binding RelativePath}"
+                                        >
+                                            <MenuItem.Icon>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
                                         <Separator />
                                         <MenuItem
                                             Header="Stage"
