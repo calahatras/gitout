@@ -18,6 +18,7 @@ namespace GitOut.Features.Git.Files
             IGitRepository repository,
             RelativeDirectoryPath path,
             FileName fileName,
+            string displayName,
             GitFileId sourceId,
             GitFileId? destinationId = null,
             GitDiffType diffType = GitDiffType.None
@@ -26,6 +27,7 @@ namespace GitOut.Features.Git.Files
             this.repository = repository;
             Path = path;
             FileName = fileName;
+            DisplayName = displayName;
             this.sourceId = sourceId;
             this.destinationId = destinationId;
             Status = diffType;
@@ -44,6 +46,7 @@ namespace GitOut.Features.Git.Files
         public RelativeDirectoryPath Path { get; }
         public FileName FileName { get; }
         public GitDiffType Status { get; }
+        public string DisplayName { get; }
         public string IconResourceKey { get; }
         // note: this viewmodel is used in tree view and as such requires IsExpanded property
         public bool IsExpanded { get; set; }
@@ -64,11 +67,37 @@ namespace GitOut.Features.Git.Files
 
         public static GitFileViewModel Snapshot(IGitRepository repository, GitFileEntry file) => file.Type != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
-            : new GitFileViewModel(repository, file.Directory, file.FileName, file.Id);
+            : new GitFileViewModel(
+                repository,
+                file.Directory,
+                file.FileName,
+                file.FileName.ToString(),
+                file.Id
+            );
 
         public static GitFileViewModel Difference(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
-            : new GitFileViewModel(repository, file.Source.Directory, file.Source.FileName, file.Source.Id, file.Destination.Id, file.Type);
+            : new GitFileViewModel(
+                repository,
+                file.Source.Directory,
+                file.Source.FileName,
+                file.Source.FileName.ToString(),
+                file.Source.Id,
+                file.Destination.Id,
+                file.Type
+            );
+
+        public static GitFileViewModel RelativeDifference(IGitRepository repository, GitDiffFileEntry file) => file.FileType != GitFileType.Blob
+            ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
+            : new GitFileViewModel(
+                repository,
+                file.Source.Directory,
+                file.Source.FileName,
+                System.IO.Path.Combine(file.Source.Directory.ToString(), file.Source.FileName.ToString()).Replace('\\', '/'),
+                file.Source.Id,
+                file.Destination.Id,
+                file.Type
+            );
 
         private async Task RefreshDiffAsync()
         {

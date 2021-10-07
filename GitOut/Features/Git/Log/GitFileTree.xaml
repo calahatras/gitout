@@ -41,7 +41,7 @@
                                 Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
                             />
                         </Canvas>
-                        <TextBlock Text="{Binding FileName}" />
+                        <TextBlock Text="{Binding DisplayName}" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type files:LoadingViewModel}">

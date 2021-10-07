@@ -45,7 +45,7 @@ namespace GitOut.Features.Git.Files
             {
                 IGitFileEntryViewModel viewmodel = entry.FileType switch
                 {
-                    GitFileType.Blob => GitFileViewModel.Difference(repository, entry),
+                    GitFileType.Blob => GitFileViewModel.RelativeDifference(repository, entry),
                     _ => throw new ArgumentOutOfRangeException($"Cannot create viewmodel for invalid type {entry.FileType}", nameof(entry))
                 };
                 yield return viewmodel;
