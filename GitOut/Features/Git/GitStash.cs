@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace GitOut.Features.Git
@@ -6,8 +7,10 @@ namespace GitOut.Features.Git
     public class GitStash
     {
         private static readonly Regex stashIndexMatcher = new("(?:stash@\\{)(\\d+)(?:\\})", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+
         public GitStash(
             string name,
+            GitCommitId id,
             int stashIndex,
             string fromNode,
             string fromParent,
@@ -15,6 +18,7 @@ namespace GitOut.Features.Git
         )
         {
             Name = name;
+            Id = id;
             StashIndex = stashIndex;
             FromNode = fromNode;
             FromParent = fromParent;
@@ -22,6 +26,7 @@ namespace GitOut.Features.Git
         }
 
         public string Name { get; }
+        public GitCommitId Id { get; }
         public int StashIndex { get; }
 
         public string FromNode { get; }
@@ -43,7 +48,7 @@ namespace GitOut.Features.Git
                 throw new ArgumentException("Stash name is not a valid name, missing index", nameof(line));
             }
 
-            int stashIndex = int.Parse(match.Groups[1].Value);
+            int stashIndex = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
             string fromNode = parts[1].TrimStart();
             string fromParent = parts[2].TrimStart();
             return new GitStashBuilder(name, stashIndex, fromNode, fromParent);
@@ -55,6 +60,7 @@ namespace GitOut.Features.Git
             private readonly int stashIndex;
             private readonly string fromParent;
             private GitCommitId? parentId;
+            private GitCommitId? id;
 
             public GitStashBuilder(string name, int stashIndex, string fromNode, string fromParent)
             {
@@ -66,14 +72,26 @@ namespace GitOut.Features.Git
 
             public string Name { get; }
 
-            public IGitStashBuilder UseParent(string parentIdHash)
+            public IGitStashBuilder UseId(GitCommitId hash)
             {
-                parentId = GitCommitId.FromHash(parentIdHash);
+                if (id is null)
+                {
+                    id = hash;
+                }
+                else if (parentId is null)
+                {
+                    parentId = hash;
+                }
+                else
+                {
+                    throw new InvalidOperationException("GitStashBuilder can only use one parent id");
+                }
                 return this;
             }
 
             public GitStash Build() => new(
                 Name,
+                id ?? throw new InvalidOperationException("id may not be null when building stash"),
                 stashIndex,
                 fromNode,
                 fromParent,

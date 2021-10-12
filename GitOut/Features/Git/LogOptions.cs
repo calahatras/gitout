@@ -2,11 +2,7 @@ namespace GitOut.Features.Git
 {
     public class LogOptions
     {
-        private LogOptions(bool includeRemotes) => IncludeRemotes = includeRemotes;
-
-        public bool IncludeRemotes { get; }
-
-        public static LogOptions OnlyLocalBranches() => new(false);
-        public static LogOptions WithRemoteBranches() => new(true);
+        public bool IncludeRemotes { get; init; }
+        public bool IncludeStashes { get; init; }
     }
 }

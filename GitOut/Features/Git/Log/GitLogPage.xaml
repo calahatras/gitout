@@ -361,9 +361,47 @@
                     <ToggleButton ToolBar.OverflowMode="AsNeeded" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
                     </ToggleButton>
-                    <ToggleButton ToolBar.OverflowMode="AsNeeded" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
+                    <ToggleButton x:Name="ViewOptions" ToolBar.OverflowMode="Never" ToolTip="View options">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource TuneVerticalVariant}"/>
                     </ToggleButton>
+                    <Popup
+                        ToolBar.OverflowMode="Never"
+                        StaysOpen="False"
+                        AllowsTransparency="True"
+                        IsOpen="{Binding IsChecked, ElementName=ViewOptions}"
+                        PopupAnimation="Fade"
+                        Placement="Bottom"
+                    >
+                        <Grid>
+                            <Border Style="{StaticResource CardPanelStyle}" MinWidth="180" Margin="16 8" Padding="0">
+                                <StackPanel Margin="8 16">
+                                    <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" IsChecked="{Binding IncludeStashes}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                                                <Canvas.LayoutTransform>
+                                                    <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                                                </Canvas.LayoutTransform>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveEye}"/>
+                                            </Canvas>
+                                            <TextBlock Text="Include Stashes" />
+                                        </StackPanel>
+                                    </CheckBox>
+                                    <Border Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}"/>
+                                    <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" IsChecked="{Binding IncludeRemotes}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                                                <Canvas.LayoutTransform>
+                                                    <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                                                </Canvas.LayoutTransform>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
+                                            </Canvas>
+                                            <TextBlock Text="Include Remotes" />
+                                        </StackPanel>
+                                    </CheckBox>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Popup>
                     <Button
                         ToolBar.OverflowMode="Never"
                         Command="{Binding RefreshStatusCommand}"

@@ -1,10 +1,10 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git
 {
     public interface IGitStashBuilder
     {
         string Name { get; }
 
-        IGitStashBuilder UseParent(string parentId);
+        IGitStashBuilder UseId(GitCommitId id);
         GitStash Build();
     }
 }

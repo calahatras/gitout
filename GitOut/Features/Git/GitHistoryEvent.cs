@@ -6,7 +6,6 @@ namespace GitOut.Features.Git
 {
     public class GitHistoryEvent
     {
-        private readonly GitCommitId? parent;
         private readonly GitCommitId? mergeParent;
 
         private GitHistoryEvent(
@@ -20,7 +19,7 @@ namespace GitOut.Features.Git
         )
         {
             Id = hash;
-            this.parent = parent;
+            ParentId = parent;
             this.mergeParent = mergeParent;
             AuthorDate = authorDate;
             Author = author;
@@ -36,6 +35,7 @@ namespace GitOut.Features.Git
 
         public bool IsHead { get; internal set; }
 
+        public GitCommitId? ParentId { get; }
         public GitHistoryEvent? Parent { get; private set; }
         public GitHistoryEvent? MergedParent { get; private set; }
 
@@ -46,7 +46,7 @@ namespace GitOut.Features.Git
 
         public void ResolveParents(IDictionary<GitCommitId, GitHistoryEvent> commits)
         {
-            if (parent is not null && commits.TryGetValue(parent, out GitHistoryEvent? commit))
+            if (ParentId is not null && commits.TryGetValue(ParentId, out GitHistoryEvent? commit))
             {
                 Parent = commit;
                 Parent.Children.Add(this);

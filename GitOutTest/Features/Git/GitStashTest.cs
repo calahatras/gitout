@@ -16,10 +16,12 @@ namespace GitOut.Features.Git
         public void ParseShouldBuild()
         {
             string commandLine = "stash@{0}: WIP on node-2: c49c652 prep diff";
-            string parentHash = "c49c652121b9f1a3823dce746d45390a6906496d";
+            var commitHash = GitCommitId.FromHash("c49c652121b9f1a3823dce746d45390a6906496e");
+            var parentHash = GitCommitId.FromHash("c49c652121b9f1a3823dce746d45390a6906496d");
 
             GitStash stash = GitStash.Parse(commandLine)
-                .UseParent(parentHash)
+                .UseId(commitHash)
+                .UseId(parentHash)
                 .Build();
 
             Assert.That(stash.Name, Is.EqualTo("stash@{0}"));
