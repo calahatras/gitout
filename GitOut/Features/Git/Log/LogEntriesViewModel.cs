@@ -48,13 +48,14 @@ namespace GitOut.Features.Git.Log
 
             _ = logFiles.MaterializeAsync(RelativeDirectoryPath.Root).AsTask();
             this.logFiles = logFiles;
+
             diffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
-                relativePath => GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository, RelativeDirectoryPath.Root),
+                relativePath => GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? root.Event.ParentId, root.Event.Id, repository, RelativeDirectoryPath.Root),
                 IGitDirectoryEntryViewModel.CompareItems
             );
 
             flattenedDiffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
-                relativePath => GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? root.Event.Parent?.Id, root.Event.Id, repository),
+                relativePath => GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? root.Event.ParentId, root.Event.Id, repository),
                 IGitDirectoryEntryViewModel.CompareItems
             );
 

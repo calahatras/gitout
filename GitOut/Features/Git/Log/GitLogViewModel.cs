@@ -21,7 +21,7 @@ namespace GitOut.Features.Git.Log
     public class GitLogViewModel : INotifyPropertyChanged, INavigationListener
     {
         private readonly object activeStashesLock = new();
-        private readonly ObservableCollection<GitStash> activeStashes = new();
+        private readonly ObservableCollection<GitTreeEvent> activeStashes = new();
 
         private readonly object entriesLock = new();
         private readonly ObservableCollection<GitTreeEvent> entries = new();
@@ -389,11 +389,11 @@ namespace GitOut.Features.Git.Log
             {
                 activeStashes.Clear();
             }
-            await foreach (GitStash stashEntry in Repository.StashListAsync())
+            await foreach (GitHistoryEvent stashEntry in Repository.StashListAsync())
             {
                 lock (activeStashesLock)
                 {
-                    activeStashes.Add(stashEntry);
+                    activeStashes.Add(new GitTreeEvent(stashEntry));
                 }
             }
         }

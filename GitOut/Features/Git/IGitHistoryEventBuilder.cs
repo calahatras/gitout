@@ -1,14 +1,14 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git
 {
-    public interface IGitHistoryEventBuilder
+    public interface IGitHistoryEventBuilder<T> where T : GitHistoryEvent
     {
-        IGitHistoryEventBuilder BuildBody(string body);
-        IGitHistoryEventBuilder ParseHash(string hashes);
-        IGitHistoryEventBuilder ParseDate(long unixTime);
-        IGitHistoryEventBuilder ParseAuthorName(string authorName);
-        IGitHistoryEventBuilder ParseAuthorEmail(string authorEmail);
-        IGitHistoryEventBuilder ParseSubject(string subject);
+        IGitHistoryEventBuilder<T> BuildBody(string body);
+        IGitHistoryEventBuilder<T> ParseHash(string hashes);
+        IGitHistoryEventBuilder<T> ParseDate(long unixTime);
+        IGitHistoryEventBuilder<T> ParseAuthorName(string authorName);
+        IGitHistoryEventBuilder<T> ParseAuthorEmail(string authorEmail);
+        IGitHistoryEventBuilder<T> ParseSubject(string subject);
 
-        GitHistoryEvent Build();
+        T Build();
     }
 }

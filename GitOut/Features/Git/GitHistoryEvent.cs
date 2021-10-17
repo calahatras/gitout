@@ -8,7 +8,7 @@ namespace GitOut.Features.Git
     {
         private readonly GitCommitId? mergeParent;
 
-        private GitHistoryEvent(
+        protected GitHistoryEvent(
             GitCommitId hash,
             GitCommitId? parent,
             GitCommitId? mergeParent,
@@ -42,7 +42,7 @@ namespace GitOut.Features.Git
         public IList<GitBranchName> Branches { get; } = new List<GitBranchName>();
         public IList<GitHistoryEvent> Children { get; } = new List<GitHistoryEvent>();
 
-        public static IGitHistoryEventBuilder Builder() => new GitHistoryEventBuilder();
+        public static IGitHistoryEventBuilder<GitHistoryEvent> Builder() => new GitHistoryEventBuilder();
 
         public void ResolveParents(IDictionary<GitCommitId, GitHistoryEvent> commits)
         {
@@ -58,7 +58,7 @@ namespace GitOut.Features.Git
             }
         }
 
-        private class GitHistoryEventBuilder : IGitHistoryEventBuilder
+        private class GitHistoryEventBuilder : IGitHistoryEventBuilder<GitHistoryEvent>
         {
             private readonly StringBuilder bodyBuilder = new();
 
@@ -83,7 +83,7 @@ namespace GitOut.Features.Git
                 bodyBuilder.ToString()
             );
 
-            public IGitHistoryEventBuilder BuildBody(string body)
+            public IGitHistoryEventBuilder<GitHistoryEvent> BuildBody(string body)
             {
                 if (body.Length > 0)
                 {
@@ -92,25 +92,25 @@ namespace GitOut.Features.Git
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseDate(long unixTime)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseDate(long unixTime)
             {
                 authorDate = DateTimeOffset.FromUnixTimeSeconds(unixTime);
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseAuthorEmail(string authorEmail)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseAuthorEmail(string authorEmail)
             {
                 this.authorEmail = authorEmail;
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseAuthorName(string authorName)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseAuthorName(string authorName)
             {
                 this.authorName = authorName;
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseHash(string line)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseHash(string line)
             {
                 ReadOnlySpan<char> span = line.AsSpan();
                 hash = GitCommitId.FromHash(span.Slice(0, 40));
@@ -125,7 +125,7 @@ namespace GitOut.Features.Git
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseSubject(string subject)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseSubject(string subject)
             {
                 this.subject = subject;
                 return this;
