@@ -39,6 +39,6 @@ namespace GitOut.Features.IO
         public override string ToString() => Directory;
 
         public static RelativeDirectoryPath Create(string path) => new(path);
-        internal RelativeDirectoryPath Append(string directoryName) => new(Path.Combine(Directory, directoryName));
+        internal RelativeDirectoryPath Append(string directoryName) => new($"{Directory}{(string.IsNullOrWhiteSpace(Directory) ? string.Empty : GitDirectorySeparatorChar)}{directoryName}");
     }
 }
