@@ -10,6 +10,9 @@
     xmlns:app="clr-namespace:GitOut.Features.Wpf.Commands"
     mc:Ignorable="d"
 >
+    <UserControl.Resources>
+        <converters:ToStringConverter x:Key="ToStringConverter" />
+    </UserControl.Resources>
     <Grid>
         <TreeView
             x:Name="FileTree"
@@ -34,7 +37,7 @@
                                 <MenuItem
                                     Header="Copy filename"
                                     Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding FileName}"
+                                    CommandParameter="{Binding FileName, Converter={StaticResource ToStringConverter}}"
                                 >
                                     <MenuItem.Icon>
                                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
