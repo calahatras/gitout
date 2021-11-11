@@ -45,7 +45,8 @@ namespace GitOut.Features.Git.Files
 
         public RelativeDirectoryPath Path { get; }
         public string RootPath => repository.WorkingDirectory.ToString();
-        public string RelativePath => System.IO.Path.Combine(RootPath, Path.ToString().Replace("/", "\\", StringComparison.InvariantCulture));
+        public string RelativePath => FullPath[RootPath.Length..];
+        public string RelativeDirectory => System.IO.Path.Combine(RootPath, Path.ToString().Replace("/", "\\", StringComparison.InvariantCulture));
         public string FullPath => System.IO.Path.Combine(RootPath, Path.ToString(), System.IO.Path.GetFileName(FileName.ToString())).Replace('/', '\\');
         public FileName FileName { get; }
         public GitDiffType Status { get; }

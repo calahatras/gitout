@@ -44,6 +44,14 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem
+                                    Header="Copy relative path"
+                                    Command="{x:Static app:Application.Copy}"
+                                    CommandParameter="{Binding RelativePath, Converter={StaticResource ToStringConverter}}" >
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
                                     Header="Copy full path"
                                     Command="{x:Static app:Application.Copy}"
                                     CommandParameter="{Binding FullPath}" >
@@ -54,7 +62,7 @@
                                 <MenuItem
                                     Header="Copy directory"
                                     Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding RelativePath}"
+                                    CommandParameter="{Binding RelativeDirectory}"
                                 >
                                     <MenuItem.Icon>
                                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>

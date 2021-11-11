@@ -33,7 +33,8 @@ namespace GitOut.Features.Git.Files
 
         public RelativeDirectoryPath Path { get; }
         public string RootPath => repository.WorkingDirectory.ToString();
-        public string RelativePath => FullPath;
+        public string RelativePath => FullPath[RootPath.ToString().Length..];
+        public string RelativeDirectory => FullPath[..^FileName.ToString().Length];
         public string FullPath => System.IO.Path.Combine(repository.WorkingDirectory.ToString(), Path.ToString(), System.IO.Path.GetFileName(FileName.ToString().Replace("/", "\\", StringComparison.InvariantCulture)));
 
         public FileName FileName { get; }
