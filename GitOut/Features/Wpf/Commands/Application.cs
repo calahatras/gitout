@@ -23,50 +23,41 @@ namespace GitOut.Features.Wpf.Commands
         public static CompositeCommand<string>? Copy { get; private set; }
         public static CompositeCommand<string>? RevealInExplorer { get; private set; }
 
-        private void OnOpen(string? path)
+        private void OnOpen(string path)
         {
-            if (path is not null)
+            try
             {
-                try
-                {
-                    Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
-                    snack.Show($"started {path}");
-                }
-                catch (Exception e)
-                {
-                    snack.ShowError(e.Message, e);
-                }
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
+                snack.Show($"started {path}");
+            }
+            catch (Exception e)
+            {
+                snack.ShowError(e.Message, e);
             }
         }
 
-        private void OnCopy(string? text)
+        private void OnCopy(string text)
         {
-            if (text is not null)
+            try
             {
-                try
-                {
-                    Clipboard.SetText(text, TextDataFormat.UnicodeText);
-                    snack.ShowSuccess($"Copied {text} to clipboard");
-                }
-                catch (COMException comException)
-                {
-                    snack.ShowError(comException.Message, comException);
-                }
+                Clipboard.SetText(text, TextDataFormat.UnicodeText);
+                snack.ShowSuccess($"Copied {text} to clipboard");
+            }
+            catch (COMException comException)
+            {
+                snack.ShowError(comException.Message, comException);
             }
         }
 
-        private void OnRevealInExplorer(string? path)
+        private void OnRevealInExplorer(string path)
         {
-            if (path is not null)
+            try
             {
-                try
-                {
-                    Process.Start("explorer.exe", $"/s,{path}").Dispose();
-                }
-                catch (Exception e)
-                {
-                    snack.ShowError(e.Message, e);
-                }
+                Process.Start("explorer.exe", $"/s,{path}").Dispose();
+            }
+            catch (Exception e)
+            {
+                snack.ShowError(e.Message, e);
             }
         }
     }
