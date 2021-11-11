@@ -73,7 +73,7 @@ namespace GitOut.Features.Text
         private readonly ObservableCollection<object?> localItems = new();
         private readonly ICollectionView localView;
 
-        private ILazyAsyncEnumerable<object>? deferredSource;
+        private ILazyAsyncEnumerable<object, RelativeDirectoryPath>? deferredSource;
 
         public Autocomplete()
         {
@@ -179,7 +179,7 @@ namespace GitOut.Features.Text
         {
             if (e.NewValue is bool visible && visible)
             {
-                if (deferredSource is ILazyAsyncEnumerable<object> lazy)
+                if (deferredSource is ILazyAsyncEnumerable<object, RelativeDirectoryPath> lazy)
                 {
                     await lazy.MaterializeAsync(RelativeDirectoryPath.Root);
                 }
@@ -189,7 +189,7 @@ namespace GitOut.Features.Text
 
         private void UpdateLocalView(IEnumerable<object> items)
         {
-            if (items is ILazyAsyncEnumerable<object> lazy)
+            if (items is ILazyAsyncEnumerable<object, RelativeDirectoryPath> lazy)
             {
                 deferredSource = lazy;
             }

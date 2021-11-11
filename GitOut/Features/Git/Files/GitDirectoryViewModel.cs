@@ -29,7 +29,7 @@ namespace GitOut.Features.Git.Files
             : this(repository, fileName, parent, new SortedObservableCollection<IGitFileEntryViewModel>(children, IGitDirectoryEntryViewModel.CompareItems)) { }
 
         private GitDirectoryViewModel(IGitRepository repository, FileName fileName, RelativeDirectoryPath parent, Func<RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
-            : this(repository, fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
+            : this(repository, fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
 
         public RelativeDirectoryPath Path { get; }
         public string RootPath => repository.WorkingDirectory.ToString();
@@ -46,7 +46,7 @@ namespace GitOut.Features.Git.Files
                 if (SetProperty(ref isExpanded, value))
                 {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IconResourceKey)));
-                    if (value && entries is ILazyAsyncEnumerable<IGitFileEntryViewModel> lazy && !lazy.IsMaterialized)
+                    if (value && entries is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy && !lazy.IsMaterialized)
                     {
 #pragma warning disable CA2012 // Use ValueTasks correctly
                         _ = lazy.MaterializeAsync(Path.Append(FileName.ToString())).AsTask();
