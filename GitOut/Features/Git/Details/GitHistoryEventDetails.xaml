@@ -6,12 +6,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:GitOut.Features.Git.Details"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
     mc:Ignorable="d"
 >
     <UserControl.Resources>
+        <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
         <converters:NullToVisibilityMultiConverter x:Key="NullToVisibilityMultiConverter" />
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:StringNotNullOrEmptyToBooleanConverter x:Key="StringNotNullOrEmptyToBooleanConverter" />
         <converters:SubstringConverter x:Key="GitCommitSubstringConverter" />
+        <converters:ToStringConverter x:Key="ToStringConverter" />
 
         <Style x:Key="LargerSizeTextStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="FontSize" Value="16" />
@@ -32,6 +36,126 @@
             <Setter Property="Focusable" Value="False" />
         </Style>
     </UserControl.Resources>
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem
+                Header="Copy author name"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding PlacementTarget.GitHistoryEvent.Author.Name, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+            />
+            <MenuItem
+                Header="Copy date"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.AuthorDate,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
+                    Converter={StaticResource ToStringConverter}
+                }"
+            />
+            <MenuItem
+                Header="Copy author email"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding PlacementTarget.GitHistoryEvent.Author.Email, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+            />
+            <MenuItem
+                Header="Copy short sha"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.Id.Hash,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
+                    Converter={StaticResource GitCommitSubstringConverter},
+                    ConverterParameter=7
+                }"
+            />
+            <MenuItem
+                Header="Copy sha"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.Id.Hash,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}
+                }"
+            />
+            <MenuItem
+                Header="Copy left parent short sha"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.Parent.Id.Hash,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
+                    Converter={StaticResource GitCommitSubstringConverter},
+                    ConverterParameter=7
+                }"
+            />
+            <MenuItem
+                Header="Copy left parent sha"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.Parent.Id.Hash,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}
+                }"
+            />
+            <MenuItem
+                Header="Copy right parent short sha"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                IsEnabled="{Binding
+                    PlacementTarget.GitHistoryEvent.MergedParent,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
+                    Converter={StaticResource NullToBooleanConverter}
+                }"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.MergedParent.Id.Hash,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
+                    Converter={StaticResource GitCommitSubstringConverter},
+                    ConverterParameter=7
+                }"
+            />
+            <MenuItem
+                Header="Copy right parent sha"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                IsEnabled="{Binding
+                    PlacementTarget.GitHistoryEvent.MergedParent,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
+                    Converter={StaticResource NullToBooleanConverter}
+                }"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.MergedParent.Id.Hash,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}
+                }"
+            />
+            <MenuItem
+                Header="Copy subject"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.Subject,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}
+                }"
+            />
+            <MenuItem
+                Header="Copy body"
+                IsEnabled="{Binding
+                    PlacementTarget.GitHistoryEvent.Body,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
+                    Converter={StaticResource StringNotNullOrEmptyToBooleanConverter}
+                }"
+                Command="{x:Static wpfcommands:Application.Copy}"
+                CommandParameter="{Binding
+                    PlacementTarget.GitHistoryEvent.Body,
+                    RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}
+                }"
+            />
+            <MenuItem Header="Copy branch name" ItemsSource="{Binding
+                PlacementTarget.GitHistoryEvent.Branches,
+                RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}
+            }">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="{x:Type MenuItem}">
+                        <Setter Property="Header" Value="{Binding Name}"/>
+                        <Setter Property="Command" Value="{x:Static wpfcommands:Application.Copy}"/>
+                        <Setter Property="CommandParameter" Value="{Binding Name}" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+        </ContextMenu>
+    </UserControl.ContextMenu>
 
     <Grid
         Background="{DynamicResource PrimaryHueLightBrush}"
