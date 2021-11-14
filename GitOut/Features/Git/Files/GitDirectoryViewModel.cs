@@ -16,7 +16,12 @@ namespace GitOut.Features.Git.Files
         private readonly ICollection<IGitFileEntryViewModel> entries;
         private bool isExpanded;
 
-        private GitDirectoryViewModel(IGitRepository repository, FileName fileName, RelativeDirectoryPath parent, SortedObservableCollection<IGitFileEntryViewModel> entries)
+        private GitDirectoryViewModel(
+            IGitRepository repository,
+            FileName fileName,
+            RelativeDirectoryPath parent,
+            SortedObservableCollection<IGitFileEntryViewModel> entries
+        )
         {
             this.repository = repository;
             FileName = fileName;
@@ -25,11 +30,19 @@ namespace GitOut.Features.Git.Files
             entries.CollectionChanged += (o, e) => CollectionChanged?.Invoke(this, e);
         }
 
-        public GitDirectoryViewModel(IGitRepository repository, FileName fileName, RelativeDirectoryPath parent, IEnumerable<IGitFileEntryViewModel> children)
-            : this(repository, fileName, parent, new SortedObservableCollection<IGitFileEntryViewModel>(children, IGitDirectoryEntryViewModel.CompareItems)) { }
+        public GitDirectoryViewModel(
+            IGitRepository repository,
+            FileName fileName,
+            RelativeDirectoryPath parent,
+            IEnumerable<IGitFileEntryViewModel> children
+        ) : this(repository, fileName, parent, new SortedObservableCollection<IGitFileEntryViewModel>(children, IGitDirectoryEntryViewModel.CompareItems)) { }
 
-        private GitDirectoryViewModel(IGitRepository repository, FileName fileName, RelativeDirectoryPath parent, Func<RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
-            : this(repository, fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
+        private GitDirectoryViewModel(
+            IGitRepository repository,
+            FileName fileName,
+            RelativeDirectoryPath parent,
+            Func<RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
+        ) : this(repository, fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
 
         public RelativeDirectoryPath Path { get; }
         public string RootPath => repository.WorkingDirectory.ToString();
@@ -67,11 +80,21 @@ namespace GitOut.Features.Git.Files
         public IEnumerator<IGitFileEntryViewModel> GetEnumerator() => entries.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => entries.GetEnumerator();
 
-        public static GitDirectoryViewModel Snapshot(IGitRepository repository, GitFileEntry file, RelativeDirectoryPath parent, Func<GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.Type != GitFileType.Tree
+        public static GitDirectoryViewModel Snapshot(
+            IGitRepository repository,
+            GitFileEntry file,
+            RelativeDirectoryPath parent,
+            Func<GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
+        ) => file.Type != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
             : new GitDirectoryViewModel(repository, file.FileName, parent, relativePath => lookup(file.Id, relativePath));
 
-        public static GitDirectoryViewModel Difference(IGitRepository repository, GitDiffFileEntry file, RelativeDirectoryPath parent, Func<GitObjectId, GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.FileType != GitFileType.Tree
+        public static GitDirectoryViewModel Difference(
+            IGitRepository repository,
+            GitDiffFileEntry file,
+            RelativeDirectoryPath parent,
+            Func<GitObjectId, GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
+        ) => file.FileType != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
             : new GitDirectoryViewModel(repository, file.Source.FileName, parent, relativePath => lookup(file.Source.Id, file.Destination.Id, relativePath));
 
