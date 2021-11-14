@@ -125,6 +125,7 @@ namespace GitOut.Features.Git
                     if (historyByCommitId.TryGetValue(item.ParentId!, out GitHistoryEvent? parent))
                     {
                         history.Insert(history.IndexOf(parent), item);
+                        item.Branches.Add(GitBranchName.Create($"refs/stash@{{{i}}}"));
                     }
                     ++i;
                 }
@@ -416,8 +417,11 @@ namespace GitOut.Features.Git
                         break;
                 }
             }
-            T lastItem = builder.Build();
-            yield return lastItem;
+            if (state != 0)
+            {
+                T lastItem = builder.Build();
+                yield return lastItem;
+            }
         }
     }
 }
