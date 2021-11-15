@@ -82,7 +82,7 @@
                                     Header="Explore file folder"
                                     Command="{x:Static app:Application.RevealInExplorer}"
                                     CommandParameter="{Binding RelativeDirectory}"
-                                    >
+                                >
                                     <MenuItem.Icon>
                                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderOpen}"/>
                                     </MenuItem.Icon>
