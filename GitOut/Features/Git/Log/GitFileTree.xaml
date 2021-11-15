@@ -54,7 +54,7 @@
                                 <MenuItem
                                     Header="Copy full path"
                                     Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding FullPath}" >
+                                    CommandParameter="{Binding FullPath}">
                                     <MenuItem.Icon>
                                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
                                     </MenuItem.Icon>
