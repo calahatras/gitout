@@ -41,6 +41,9 @@ namespace GitOut.Features.Git.Stage
         }
 
         public string Path { get; }
+        public string FullPath => Model.FullPath;
+        public string? RelativePath => System.IO.Path.GetDirectoryName(FullPath);
+        public string WorkingDirectory => Model.WorkingDirectory?.ToString() ?? string.Empty;
         public GitModifiedStatusType Status { get; }
         public string IconResourceKey { get; }
 

@@ -226,6 +226,7 @@ namespace GitOut.Features.Git
                     {
                         builder.MergedFrom(line[ranges[++i]]);
                     }
+                    builder.WorkingDirectory(WorkingDirectory);
                     statusChanges.Add(builder.Build());
                 }
             }
@@ -371,6 +372,8 @@ namespace GitOut.Features.Git
         }
 
         public Task ResetAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"reset -- {change.Path}")).ExecuteAsync();
+
+        public Task RestoreAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"restore --staged -- {change.Path}")).ExecuteAsync();
 
         public Task CommitAsync(GitCommitOptions options)
         {

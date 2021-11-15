@@ -41,6 +41,7 @@ namespace GitOut
 
             ILogger<App> logger = host.Services.GetRequiredService<ILogger<App>>();
             RegisterExceptionHandlers(logger);
+            _ = host.Services.GetService<Features.Wpf.Commands.Application>();
 
             IHostApplicationLifetime life = host.Services.GetRequiredService<IHostApplicationLifetime>();
             life.ApplicationStarted.Register(LogLifetimeEvent(logger, "Host started"));
@@ -75,6 +76,7 @@ namespace GitOut
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<ITitleService, TitleService>();
             services.AddSingleton<IWritableStorage, FileStorage>();
+            services.AddSingleton<Features.Wpf.Commands.Application>();
 
             services.AddSettingsFeature();
             services.AddGitFeature();

@@ -4,26 +4,25 @@ using System.Threading.Tasks;
 
 namespace GitOut.Features.Collections
 {
-    public class SortedLazyAsyncCollection<T> : SortedObservableCollection<T>, ILazyAsyncEnumerable<T>
+    public class SortedLazyAsyncCollection<T, TArg> : SortedObservableCollection<T>, ILazyAsyncEnumerable<T, TArg>
     {
-        private readonly Func<IAsyncEnumerable<T>> factory;
-        private bool isMaterialized;
+        private readonly Func<TArg, IAsyncEnumerable<T>> factory;
 
         public SortedLazyAsyncCollection(
-            Func<IAsyncEnumerable<T>> factory,
+            Func<TArg, IAsyncEnumerable<T>> factory,
             Func<T, T, int> comparer
         ) : base(comparer) => this.factory = factory;
 
-        public bool IsMaterialized => isMaterialized;
+        public bool IsMaterialized { get; private set; }
 
-        public async ValueTask MaterializeAsync()
+        public async ValueTask MaterializeAsync(TArg argument)
         {
-            if (isMaterialized)
+            if (IsMaterialized)
             {
                 return;
             }
-            isMaterialized = true;
-            IAsyncEnumerable<T> enumerable = factory();
+            IsMaterialized = true;
+            IAsyncEnumerable<T> enumerable = factory(argument);
             await foreach (T item in enumerable)
             {
                 Add(item);

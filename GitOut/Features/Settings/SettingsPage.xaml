@@ -8,7 +8,7 @@
     xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
-    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=local:SettingsViewModel}"
     d:DesignHeight="450"

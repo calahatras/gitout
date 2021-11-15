@@ -7,14 +7,91 @@
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
+    xmlns:app="clr-namespace:GitOut.Features.Wpf.Commands"
     mc:Ignorable="d"
 >
+    <UserControl.Resources>
+        <converters:ToStringConverter x:Key="ToStringConverter" />
+    </UserControl.Resources>
     <Grid>
         <TreeView
             x:Name="FileTree"
             ItemsSource="{Binding RootFiles, RelativeSource={RelativeSource AncestorType={x:Type local:GitFileTree}}}"
             Style="{StaticResource MaterialTreeViewStyle}"
         >
+            <TreeView.ItemContainerStyle>
+                <Style BasedOn="{StaticResource DefaultTreeViewItemStyle}" TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem
+                                    Header="{Binding FileName}"
+                                    HeaderStringFormat="Open {0}"
+                                    Command="{x:Static app:Application.Open}"
+                                    CommandParameter="{Binding FullPath}"
+                                >
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource OpenInNew}" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
+                                    Header="Copy filename"
+                                    Command="{x:Static app:Application.Copy}"
+                                    CommandParameter="{Binding FileName, Converter={StaticResource ToStringConverter}}"
+                                >
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
+                                    Header="Copy relative path"
+                                    Command="{x:Static app:Application.Copy}"
+                                    CommandParameter="{Binding RelativePath, Converter={StaticResource ToStringConverter}}">
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
+                                    Header="Copy full path"
+                                    Command="{x:Static app:Application.Copy}"
+                                    CommandParameter="{Binding FullPath}">
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
+                                    Header="Copy directory"
+                                    Command="{x:Static app:Application.Copy}"
+                                    CommandParameter="{Binding RelativeDirectory}"
+                                >
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem
+                                    Header="Explore project folder"
+                                    Command="{x:Static app:Application.RevealInExplorer}"
+                                    CommandParameter="{Binding RootPath}"
+                                >
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Folder}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
+                                    Header="Explore file folder"
+                                    Command="{x:Static app:Application.RevealInExplorer}"
+                                    CommandParameter="{Binding RelativeDirectory}"
+                                >
+                                    <MenuItem.Icon>
+                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderOpen}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TreeView.ItemContainerStyle>
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding}">
                     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">

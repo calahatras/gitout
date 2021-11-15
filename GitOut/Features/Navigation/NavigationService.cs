@@ -62,7 +62,7 @@ namespace GitOut.Features.Navigation
                 }
             });
 
-            Wpf.ApplicationCommands.Navigate.Back.Add(Back, CanGoBack);
+            Wpf.Commands.Navigate.Back.Add(Back, CanGoBack);
         }
 
         public string? CurrentPage { get; private set; }

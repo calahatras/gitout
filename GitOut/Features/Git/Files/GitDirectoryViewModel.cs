@@ -12,24 +12,44 @@ namespace GitOut.Features.Git.Files
 {
     public class GitDirectoryViewModel : IGitDirectoryEntryViewModel, INotifyCollectionChanged, INotifyPropertyChanged
     {
+        private readonly IGitRepository repository;
         private readonly ICollection<IGitFileEntryViewModel> entries;
         private bool isExpanded;
 
-        private GitDirectoryViewModel(FileName fileName, RelativeDirectoryPath parent, SortedObservableCollection<IGitFileEntryViewModel> entries)
+        private GitDirectoryViewModel(
+            IGitRepository repository,
+            FileName fileName,
+            RelativeDirectoryPath parent,
+            SortedObservableCollection<IGitFileEntryViewModel> entries
+        )
         {
+            this.repository = repository;
             FileName = fileName;
             Path = parent;
             this.entries = entries;
             entries.CollectionChanged += (o, e) => CollectionChanged?.Invoke(this, e);
         }
 
-        public GitDirectoryViewModel(FileName fileName, RelativeDirectoryPath parent, IEnumerable<IGitFileEntryViewModel> children)
-            : this(fileName, parent, new SortedObservableCollection<IGitFileEntryViewModel>(children, IGitDirectoryEntryViewModel.CompareItems)) { }
+        public GitDirectoryViewModel(
+            IGitRepository repository,
+            FileName fileName,
+            RelativeDirectoryPath parent,
+            IEnumerable<IGitFileEntryViewModel> children
+        ) : this(repository, fileName, parent, new SortedObservableCollection<IGitFileEntryViewModel>(children, IGitDirectoryEntryViewModel.CompareItems)) { }
 
-        private GitDirectoryViewModel(FileName fileName, RelativeDirectoryPath parent, Func<IAsyncEnumerable<IGitFileEntryViewModel>> lookup)
-            : this(fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
+        private GitDirectoryViewModel(
+            IGitRepository repository,
+            FileName fileName,
+            RelativeDirectoryPath parent,
+            Func<RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
+        ) : this(repository, fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
 
         public RelativeDirectoryPath Path { get; }
+        public string RootPath => repository.WorkingDirectory.ToString();
+        public string RelativePath => FullPath[RootPath.ToString().Length..];
+        public string RelativeDirectory => FullPath[..^FileName.ToString().Length];
+        public string FullPath => System.IO.Path.Combine(repository.WorkingDirectory.ToString(), Path.ToString(), System.IO.Path.GetFileName(FileName.ToString().Replace("/", "\\", StringComparison.InvariantCulture)));
+
         public FileName FileName { get; }
         public string IconResourceKey => IsExpanded ? "FolderOpen" : "Folder";
         public bool IsExpanded
@@ -40,10 +60,10 @@ namespace GitOut.Features.Git.Files
                 if (SetProperty(ref isExpanded, value))
                 {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IconResourceKey)));
-                    if (value && entries is ILazyAsyncEnumerable<IGitFileEntryViewModel> lazy && !lazy.IsMaterialized)
+                    if (value && entries is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy && !lazy.IsMaterialized)
                     {
 #pragma warning disable CA2012 // Use ValueTasks correctly
-                        _ = lazy.MaterializeAsync();
+                        _ = lazy.MaterializeAsync(Path.Append(FileName.ToString())).AsTask();
 #pragma warning restore CA2012 // Use ValueTasks correctly
                         entries.Remove(LoadingViewModel.Proxy);
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
@@ -60,13 +80,23 @@ namespace GitOut.Features.Git.Files
         public IEnumerator<IGitFileEntryViewModel> GetEnumerator() => entries.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => entries.GetEnumerator();
 
-        public static GitDirectoryViewModel Snapshot(GitFileEntry file, Func<GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.Type != GitFileType.Tree
+        public static GitDirectoryViewModel Snapshot(
+            IGitRepository repository,
+            GitFileEntry file,
+            RelativeDirectoryPath parent,
+            Func<GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
+        ) => file.Type != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitDirectoryViewModel(file.FileName, file.Directory, () => lookup(file.Id));
+            : new GitDirectoryViewModel(repository, file.FileName, parent, relativePath => lookup(file.Id, relativePath));
 
-        public static GitDirectoryViewModel Difference(GitDiffFileEntry file, Func<GitObjectId, GitObjectId, IAsyncEnumerable<IGitFileEntryViewModel>> lookup) => file.FileType != GitFileType.Tree
+        public static GitDirectoryViewModel Difference(
+            IGitRepository repository,
+            GitDiffFileEntry file,
+            RelativeDirectoryPath parent,
+            Func<GitObjectId, GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
+        ) => file.FileType != GitFileType.Tree
             ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitDirectoryViewModel(file.Source.FileName, file.Source.Directory, () => lookup(file.Source.Id, file.Destination.Id));
+            : new GitDirectoryViewModel(repository, file.Source.FileName, parent, relativePath => lookup(file.Source.Id, file.Destination.Id, relativePath));
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

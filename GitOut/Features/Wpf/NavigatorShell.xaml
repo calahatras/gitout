@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:GitOut.Features.Wpf"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
-    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.ApplicationCommands"
+    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
     xmlns:zoom="clr-namespace:GitOut.Features.Wpf.Zoom"
     mc:Ignorable="d"
     x:Name="window"

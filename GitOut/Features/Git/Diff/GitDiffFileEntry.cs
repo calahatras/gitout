@@ -108,7 +108,7 @@ namespace GitOut.Features.Git.Diff
                 return new GitDiffFileEntry(
                     fileType,
                     new GitFileEntry(sourceId, fileType, sourceFileModes, path),
-                    new GitFileEntry(destinationId, fileType, destinationFileModes, path),
+                    new GitFileEntry(destinationId, fileType, destinationFileModes, path.Parent),
                     Type
                 );
             }
