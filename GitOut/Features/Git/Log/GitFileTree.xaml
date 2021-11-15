@@ -46,7 +46,7 @@
                                 <MenuItem
                                     Header="Copy relative path"
                                     Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding RelativePath, Converter={StaticResource ToStringConverter}}" >
+                                    CommandParameter="{Binding RelativePath, Converter={StaticResource ToStringConverter}}">
                                     <MenuItem.Icon>
                                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
                                     </MenuItem.Icon>
