@@ -570,7 +570,7 @@
                                                     BorderBrush="{Binding DataContext.CommitBrush, RelativeSource={RelativeSource AncestorType=Grid}}"
                                                 >
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Canvas Grid.Column="1" Width="24" Height="24" Margin="0 0 4 0" ToolTip="{Binding Status}">
+                                                        <Canvas Grid.Column="1" Width="24" Height="24" Margin="0 0 4 0">
                                                             <Canvas.Style>
                                                                 <Style TargetType="{x:Type Canvas}">
                                                                     <Style.Triggers>
