@@ -49,6 +49,8 @@ namespace GitOut.Features.Git.Log
             set => SetProperty(ref isSelected, value);
         }
 
+        public int StashIndex => Event is GitStash stash ? stash.StashIndex : -1;
+
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
 
         public static void ResetColors() => colors.ForEach(c => c.Available = true);

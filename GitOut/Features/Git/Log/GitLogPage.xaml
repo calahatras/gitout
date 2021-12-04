@@ -467,13 +467,16 @@
                         <DataTemplate DataType="{x:Type local:GitTreeEvent}">
                             <Grid Margin="0 4">
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto" MinWidth="20"/>
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock FontSize="10" VerticalAlignment="Center">
-                                    <Run Text="{Binding Event.StashIndex, Mode=OneWay, StringFormat={}{0}:}" />
+
+                                <Path Margin="0 0 8 0" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
+                                <TextBlock Grid.Column="1" FontSize="10" VerticalAlignment="Center">
+                                    <Run Text="{Binding StashIndex, Mode=OneWay, StringFormat={}{0}:}" />
                                 </TextBlock>
-                                <TextBlock Grid.Column="1" Style="{StaticResource NormalTextStyle}" VerticalAlignment="Center">
+                                <TextBlock Grid.Column="2" Style="{StaticResource NormalTextStyle}" VerticalAlignment="Center">
                                     <Run Text="{Binding Event.Subject, Mode=OneWay}"/>
                                 </TextBlock>
                             </Grid>
@@ -566,25 +569,28 @@
                                                     Style="{StaticResource BranchStyle}"
                                                     BorderBrush="{Binding DataContext.CommitBrush, RelativeSource={RelativeSource AncestorType=Grid}}"
                                                 >
-                                                    <TextBlock Text="{Binding Name}"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Canvas Grid.Column="1" Width="24" Height="24" Margin="0 0 4 0" ToolTip="{Binding Status}">
+                                                            <Canvas.Style>
+                                                                <Style TargetType="{x:Type Canvas}">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding DataContext.StashIndex, ElementName=outerGrid}" Value="-1">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Canvas.Style>
+                                                            <Canvas.LayoutTransform>
+                                                                <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                                                            </Canvas.LayoutTransform>
+                                                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
+                                                        </Canvas>
+                                                        <TextBlock Text="{Binding Name}"/>
+                                                    </StackPanel>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-
-                                    <!--
-                                    <Border
-                                        Style="{StaticResource BranchStyle}"
-                                        Margin="0 4 4 4"
-                                        BorderBrush="{Binding DataContext.CommitBrush, RelativeSource={RelativeSource AncestorType=Grid}}"
-                                        Visibility="{Binding Event.StashIndex, Converter={StaticResource NumberToVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                                    >
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            Text="{Binding Event.StashIndex}"
-                                        />
-                                    </Border>
-                                    -->
 
                                     <TextBlock
                                         Grid.Column="1"
