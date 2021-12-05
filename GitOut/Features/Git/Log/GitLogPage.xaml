@@ -30,7 +30,7 @@
         <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter" />
         <files:FileEntryQueryMatcher x:Key="FileNameQueryMatcher" />
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
-        <lc:TreeNodePathDataConverter x:Key="TreeNodePathDataConverter" />
+        <lc:NodesToPathConverter x:Key="NodesToPathConverter" />
         <Canvas x:Key="IconCanvas" x:Shared="False" Width="24" Height="24">
             <Canvas.LayoutTransform>
                 <ScaleTransform ScaleX=".8" ScaleY=".8" />
@@ -509,29 +509,18 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Grid>
-                                    <ItemsControl ItemsSource="{Binding Nodes}">
+                                    <ItemsControl>
+                                        <ItemsControl.ItemsSource>
+                                            <MultiBinding Converter="{StaticResource NodesToPathConverter}">
+                                                <Binding Path="Nodes" />
+                                                <Binding Path="Height" ElementName="outerGrid" />
+                                            </MultiBinding>
+                                        </ItemsControl.ItemsSource>
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <Canvas />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Path
-                                                    Fill="Transparent"
-                                                    StrokeThickness="2"
-                                                    Height="28"
-                                                    Stroke="{Binding Color, Converter={StaticResource ColorToBrushConverter}}"
-                                                >
-                                                    <Path.Data>
-                                                        <MultiBinding Converter="{StaticResource TreeNodePathDataConverter}">
-                                                            <Binding Path="." />
-                                                            <Binding Path="ActualHeight" ElementName="outerGrid" />
-                                                        </MultiBinding>
-                                                    </Path.Data>
-                                                </Path>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </Grid>
                                 <Grid
