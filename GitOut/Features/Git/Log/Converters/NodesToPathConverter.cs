@@ -34,10 +34,11 @@ namespace GitOut.Features.Git.Log.Converters
                     {
                         Stroke = new SolidColorBrush(node.Color),
                         StrokeThickness = 2,
+                        SnapsToDevicePixels = true
                     };
                     if (node.LineType == LineType.Dashed)
                     {
-                        path.StrokeDashArray = new DoubleCollection(new[] { 1d, 4 });
+                        path.StrokeDashArray = new DoubleCollection(new[] { 3d, 1 });
                     }
                     path.Data = GeometryFromTopToBottom(node, height);
                     paths.Add(path);
@@ -49,6 +50,7 @@ namespace GitOut.Features.Git.Log.Converters
                     {
                         Stroke = new SolidColorBrush(node.Color),
                         StrokeThickness = 2,
+                        SnapsToDevicePixels = true
                     };
                     if (node.LineType == LineType.Dashed)
                     {
@@ -79,6 +81,7 @@ namespace GitOut.Features.Git.Log.Converters
             {
                 Stroke = new SolidColorBrush(node.Color),
                 StrokeThickness = 2,
+                SnapsToDevicePixels = true
             };
             var pathGeometry = new PathGeometry();
             // should be if (node.Variant == Variant.Commit | Variant.Stage or something instead
@@ -89,15 +92,14 @@ namespace GitOut.Features.Git.Log.Converters
             else
             {
                 var pathFigure = new PathFigure(
-                    new Point(index * XDistance + XOffset, height / 2 - (Size.Height / 2)),
+                    new Point(index * XDistance + XOffset - (Size.Width * 2 / 3), height / 2 - (Size.Height * 2 / 3)),
                     new[]
                     {
 
                         new PolyLineSegment(new[]
                         {
-                            new Point(index * XDistance + XOffset + Size.Width / 2, height/ 2),
+                            new Point(index * XDistance + XOffset + (Size.Width * 2 / 3), height / 2 - (Size.Height *2 / 3)),
                             new Point(index * XDistance + XOffset, height / 2 + (Size.Height / 2)),
-                            new Point(index * XDistance + XOffset - Size.Width / 2, height/ 2)
                         }, true),
                     },
                     true);
