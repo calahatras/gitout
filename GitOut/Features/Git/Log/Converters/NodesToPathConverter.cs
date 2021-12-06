@@ -17,9 +17,9 @@ namespace GitOut.Features.Git.Log.Converters
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (
-                values.Length != 2 ||
-                values[0] is not IEnumerable<GitTreeNode> nodes ||
-                values[1] is not double height
+                values.Length != 2
+                || values[0] is not IEnumerable<GitTreeNode> nodes
+                || values[1] is not double height
             )
             {
                 return DependencyProperty.UnsetValue;
@@ -36,7 +36,7 @@ namespace GitOut.Features.Git.Log.Converters
                         StrokeThickness = 2,
                         SnapsToDevicePixels = true
                     };
-                    if (node.LineType == LineType.Dashed)
+                    if (node.BottomLineType == LineType.Dashed)
                     {
                         path.StrokeDashArray = new DoubleCollection(new[] { 3d, 1 });
                     }
@@ -45,27 +45,44 @@ namespace GitOut.Features.Git.Log.Converters
                 }
                 else
                 {
+                    // commit
+                    Path? commitPath = AddCommitGeometry(node, height);
+                    if (commitPath != null)
+                        paths.Add(commitPath);
 
-                    Path linePath = new()
+                    // top
+                    Path topLinePath = new()
                     {
                         Stroke = new SolidColorBrush(node.Color),
                         StrokeThickness = 2,
                         SnapsToDevicePixels = true
                     };
-                    if (node.LineType == LineType.Dashed)
+                    if (node.TopLineType == LineType.Dashed)
                     {
-                        linePath.StrokeDashArray = new DoubleCollection(new[] { 3d, 1 });
+                        topLinePath.StrokeDashArray = new DoubleCollection(new[] { 3d, 1 });
                     }
 
-                    Path? commitPath = AddCommitGeometry(node, height);
-                    if (commitPath != null)
-                        paths.Add(commitPath);
+                    var topPathGeometry = new PathGeometry();
+                    topLinePath.Data = topPathGeometry;
+                    DrawTop(topPathGeometry, node, height);
+                    paths.Add(topLinePath);
 
-                    var pathGeometry = new PathGeometry();
-                    linePath.Data = pathGeometry;
-                    DrawBottom(pathGeometry, node, height);
-                    DrawTop(pathGeometry, node, height);
-                    paths.Add(linePath);
+                    // bottom
+                    Path bottomLinePath = new()
+                    {
+                        Stroke = new SolidColorBrush(node.Color),
+                        StrokeThickness = 2,
+                        SnapsToDevicePixels = true
+                    };
+                    if (node.BottomLineType == LineType.Dashed)
+                    {
+                        bottomLinePath.StrokeDashArray = new DoubleCollection(new[] { 3d, 1 });
+                    }
+                    var bottomPathGeometry = new PathGeometry();
+                    bottomLinePath.Data = bottomPathGeometry;
+                    DrawBottom(bottomPathGeometry, node, height);
+
+                    paths.Add(bottomLinePath);
                 }
             }
 
@@ -81,11 +98,12 @@ namespace GitOut.Features.Git.Log.Converters
             {
                 Stroke = new SolidColorBrush(node.Color),
                 StrokeThickness = 2,
-                SnapsToDevicePixels = true
+                SnapsToDevicePixels = true,
+                Fill = Brushes.Transparent
             };
             var pathGeometry = new PathGeometry();
             // should be if (node.Variant == Variant.Commit | Variant.Stage or something instead
-            if (node.LineType == LineType.Solid)
+            if (node.BottomLineType == LineType.Solid)
             {
                 pathGeometry.AddGeometry(new EllipseGeometry(new Point(index * XDistance + XOffset, height / 2), Size.Height / 2, Size.Width / 2));
             }
@@ -138,13 +156,13 @@ namespace GitOut.Features.Git.Log.Converters
             else
             {
                 var nodes = new List<BezierSegment>();
-                double offset = node.LineType == LineType.Solid ? Size.Width / 2 : 0;
+                double offset = node.BottomLineType == LineType.Solid ? Size.Width / 2 : 0;
                 if (line.Up < line.Down)
                 {
                     nodes.Add(new BezierSegment(
                         new Point(bottomXCoordinate, height * 3 / 4),
                         new Point(bottomXCoordinate, height / 2),
-                        new Point(XOffset + line.Up * XDistance + offset, height / 2),
+                        new Point(XOffset + line.Up * XDistance + offset + 1, height / 2),
                         true
                     ));
                 }
@@ -172,14 +190,14 @@ namespace GitOut.Features.Git.Log.Converters
 
             if (line.Up == line.Down)
             {
-                double sameOffset = node.LineType == LineType.Solid ? Size.Height / 2 : 0;
+                double sameOffset = Size.Height / 2;
                 double middleXCoordinate = XOffset + line.Down * XDistance;
                 double middleYCoordinate = height / 2 - sameOffset;
                 geometry.Figures.Add(new PathFigure(new Point(upperXCoordinate, 0), new[] { new LineSegment(new Point(middleXCoordinate, middleYCoordinate), true) }, false));
                 return;
             }
             BezierSegment bezierSegment;
-            double offset = Size.Width / 2;
+            double offset = Size.Width / 2 + 1;
 
             bezierSegment = line.Up < line.Down
                 ? new BezierSegment(

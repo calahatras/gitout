@@ -6,7 +6,6 @@ namespace GitOut.Features.Git.Log
     public class GitTreeNode
     {
         private const string LinesDoNotMeetError = "lines do not meet";
-        private Line? bottomLayer;
 
         private GitTreeNode(Line? top, Line? bottom, Color color, bool commit, LineType lineType)
         {
@@ -14,26 +13,33 @@ namespace GitOut.Features.Git.Log
             Bottom = bottom;
             Color = color;
             IsCommit = commit;
-            LineType = lineType;
+            if (bottom is not null)
+            {
+                BottomLineType = lineType;
+            }
+            if (top is not null)
+            {
+                TopLineType = lineType;
+            }
         }
 
         public bool IsCommit { get; }
-        public LineType LineType { get; }
+        public LineType TopLineType { get; }
+        public LineType BottomLineType { get; private set; }
         public Color Color { get; }
 
         public Line? Top { get; }
-        public Line? Bottom
-        {
-            get => bottomLayer;
-            set
-            {
-                if (value is Line bottom && Top is Line top && top.Down != bottom.Up)
-                {
-                    throw new ArgumentException(LinesDoNotMeetError, nameof(value));
-                }
+        public Line? Bottom { get; private set; }
 
-                bottomLayer = value;
+        public void AttachBottom(Line value, LineType type)
+        {
+            if (value is Line bottom && Top is Line top && top.Down != bottom.Up)
+            {
+                throw new ArgumentException(LinesDoNotMeetError, nameof(value));
             }
+
+            Bottom = value;
+            BottomLineType = type;
         }
 
         public static GitTreeNode WithTopLine(

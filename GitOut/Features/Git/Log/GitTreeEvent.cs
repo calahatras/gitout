@@ -76,7 +76,7 @@ namespace GitOut.Features.Git.Log
                     colorIndex = colors.FindIndex(ac => ac.Color == leaf.Current.Color);
                     if (Event.Parent is not null)
                     {
-                        leaf.Current.Bottom = new Line(from, to++);
+                        leaf.Current.AttachBottom(new Line(from, to++), EventLineType());
                         bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, leaf.Current, EventLineType()));
                         if (Event.MergedParent is not null)
                         {
@@ -89,7 +89,7 @@ namespace GitOut.Features.Git.Log
                 }
                 else
                 {
-                    leaf.Current.Bottom = new Line(from++, to++);
+                    leaf.Current.AttachBottom(new Line(from++, to++), leaf.LineType);
                     bottomLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, leaf.Current, leaf.LineType));
                 }
             }
