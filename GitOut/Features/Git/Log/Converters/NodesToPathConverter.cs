@@ -33,13 +33,13 @@ namespace GitOut.Features.Git.Log.Converters
                     paths.Add(CreatePath(
                         color: node.Color,
                         useDashedLine: node.BottomLineType == LineType.Dashed,
-                        geometry: GeometryFromTopToBottom(node, height)
+                        geometry: CreateTopToBottomGeometry(node, height)
                     ));
                 }
                 else
                 {
                     Path? commitPath = AddCommitGeometry(node, height);
-                    if (commitPath != null)
+                    if (commitPath is not null)
                         paths.Add(commitPath);
 
                     if (node.Top is Line upperLine)
@@ -62,60 +62,31 @@ namespace GitOut.Features.Git.Log.Converters
             }
 
             return paths.ToArray();
-
-            static Path CreatePath(Color color, bool useDashedLine, PathGeometry geometry)
-            {
-                Path path = new()
-                {
-                    Stroke = new SolidColorBrush(color),
-                    StrokeThickness = 2,
-                    SnapsToDevicePixels = true,
-                    Data = geometry
-                };
-                if (useDashedLine)
-                {
-                    path.StrokeDashArray = new DoubleCollection(new[] { 3d, 1 });
-                }
-                return path;
-            }
         }
+
+        public object[]? ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => null;
+
+        private static Path CreatePath(Color color, bool useDashedLine, PathGeometry geometry) => new Path()
+        {
+            Stroke = new SolidColorBrush(color),
+            StrokeThickness = 2,
+            SnapsToDevicePixels = true,
+            Data = geometry,
+            StrokeDashArray = useDashedLine ? new DoubleCollection(new[] { 3d, 1 }) : null
+        };
 
         private static Path? AddCommitGeometry(GitTreeNode node, double height)
         {
             int index = GetCommitIndex(node);
-            if (index == -1) return null;
-
-            Path path = new()
-            {
-                Stroke = new SolidColorBrush(node.Color),
-                StrokeThickness = 2,
-                SnapsToDevicePixels = true
-            };
-            var pathGeometry = new PathGeometry();
-            if (node.BottomLineType == LineType.Solid)
-            {
-                pathGeometry.AddGeometry(new EllipseGeometry(new Point(index * XDistance + XOffset, height / 2), Size.Height / 2, Size.Width / 2));
-            }
-            else
-            {
-                var pathFigure = new PathFigure(
-                    new Point(index * XDistance + XOffset - (Size.Width * 2 / 3), height / 2 - (Size.Height * 2 / 3)),
-                    new[]
-                    {
-
-                        new PolyLineSegment(new[]
-                        {
-                            new Point(index * XDistance + XOffset + (Size.Width * 2 / 3), height / 2 - (Size.Height *2 / 3)),
-                            new Point(index * XDistance + XOffset, height / 2 + (Size.Height / 2)),
-                        }, true),
-                    },
-                    true);
-
-                pathGeometry.Figures.Add(pathFigure);
-
-            }
-            path.Data = pathGeometry;
-            return path;
+            return index == -1
+                ? null
+                : CreatePath(
+                    node.Color,
+                    false,
+                    node.BottomLineType == LineType.Solid
+                        ? CreateCommitGeometry(height, index)
+                        : CreateStashGeometry(index, height)
+                );
         }
 
         private static int GetCommitIndex(GitTreeNode node) =>
@@ -124,6 +95,30 @@ namespace GitOut.Features.Git.Log.Converters
                 : node.Top is Line topLine && topLine.Up == topLine.Down
                     ? topLine.Up
                     : -1;
+
+        private static PathGeometry CreateCommitGeometry(double height, int index)
+        {
+            var pathGeometry = new PathGeometry();
+            pathGeometry.AddGeometry(new EllipseGeometry(new Point(index * XDistance + XOffset, height / 2), Size.Height / 2, Size.Width / 2));
+            return pathGeometry;
+        }
+
+        private static PathGeometry CreateStashGeometry(int index, double height)
+        {
+            var pathFigure = new PathFigure(
+                new Point(index * XDistance + XOffset - (Size.Width * 2 / 3), height / 2 - (Size.Height * 2 / 3)),
+                new[]
+                {
+                    new PolyLineSegment(new[]
+                    {
+                        new Point(index * XDistance + XOffset + (Size.Width * 2 / 3), height / 2 - (Size.Height *2 / 3)),
+                        new Point(index * XDistance + XOffset, height / 2 + (Size.Height / 2)),
+                    }, true),
+                },
+                true
+            );
+            return new PathGeometry(new[] { pathFigure });
+        }
 
         private static PathGeometry CreateLowerGeometry(Line line, double height)
         {
@@ -166,7 +161,7 @@ namespace GitOut.Features.Git.Log.Converters
             if (line.Up == line.Down)
             {
                 double middleXCoordinate = XOffset + line.Down * XDistance;
-                double middleYCoordinate = height / 2 - offset;
+                double middleYCoordinate = height / 2 - offset + 1;
                 geometry.Figures.Add(new PathFigure(new Point(upperXCoordinate, 0), new[] { new LineSegment(new Point(middleXCoordinate, middleYCoordinate), true) }, false));
                 return geometry;
             }
@@ -188,9 +183,7 @@ namespace GitOut.Features.Git.Log.Converters
             return geometry;
         }
 
-        public object[]? ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => null;
-
-        private static PathGeometry GeometryFromTopToBottom(GitTreeNode node, double height)
+        private static PathGeometry CreateTopToBottomGeometry(GitTreeNode node, double height)
         {
             if (node.Top is not Line topLayer)
             {
