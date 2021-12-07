@@ -11,10 +11,4 @@ namespace GitOut.Features.Wpf.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => DependencyProperty.UnsetValue;
     }
-    public sealed class NumberToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value is int i && i > 0 ? Visibility.Visible : Visibility.Collapsed;
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => DependencyProperty.UnsetValue;
-    }
 }

@@ -26,7 +26,6 @@
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter" />
         <converters:SubstringConverter x:Key="SubstringConverter" />
-        <converters:NumberToVisibilityConverter x:Key="NumberToVisibilityConverter" />
         <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter" />
         <files:FileEntryQueryMatcher x:Key="FileNameQueryMatcher" />
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />

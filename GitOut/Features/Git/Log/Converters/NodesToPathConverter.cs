@@ -255,6 +255,5 @@ namespace GitOut.Features.Git.Log.Converters
 
             return new PathGeometry { Figures = { pathFigure } };
         }
-
     }
 }
