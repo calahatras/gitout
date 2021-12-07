@@ -30,18 +30,11 @@ namespace GitOut.Features.Git.Log.Converters
             {
                 if (!node.IsCommit)
                 {
-                    Path path = new()
-                    {
-                        Stroke = new SolidColorBrush(node.Color),
-                        StrokeThickness = 2,
-                        SnapsToDevicePixels = true
-                    };
-                    if (node.BottomLineType == LineType.Dashed)
-                    {
-                        path.StrokeDashArray = new DoubleCollection(new[] { 3d, 1 });
-                    }
-                    path.Data = GeometryFromTopToBottom(node, height);
-                    paths.Add(path);
+                    paths.Add(CreatePath(
+                        color: node.Color,
+                        useDashedLine: node.BottomLineType == LineType.Dashed,
+                        geometry: GeometryFromTopToBottom(node, height)
+                    ));
                 }
                 else
                 {
@@ -54,8 +47,8 @@ namespace GitOut.Features.Git.Log.Converters
                         paths.Add(CreatePath(
                             color: node.Color,
                             useDashedLine: node.TopLineType == LineType.Dashed,
-                            geometry: CreateUpperGeometry(upperLine, height
-                        )));
+                            geometry: CreateUpperGeometry(upperLine, height)
+                        ));
                     }
                     if (node.Bottom is Line lowerLine)
                     {
@@ -96,11 +89,9 @@ namespace GitOut.Features.Git.Log.Converters
             {
                 Stroke = new SolidColorBrush(node.Color),
                 StrokeThickness = 2,
-                SnapsToDevicePixels = true,
-                Fill = Brushes.Transparent
+                SnapsToDevicePixels = true
             };
             var pathGeometry = new PathGeometry();
-            // should be if (node.Variant == Variant.Commit | Variant.Stage or something instead
             if (node.BottomLineType == LineType.Solid)
             {
                 pathGeometry.AddGeometry(new EllipseGeometry(new Point(index * XDistance + XOffset, height / 2), Size.Height / 2, Size.Width / 2));
