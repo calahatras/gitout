@@ -6,10 +6,9 @@ namespace GitOut.Features.Git
 {
     public class GitHistoryEvent
     {
-        private readonly GitCommitId? parent;
         private readonly GitCommitId? mergeParent;
 
-        private GitHistoryEvent(
+        protected GitHistoryEvent(
             GitCommitId hash,
             GitCommitId? parent,
             GitCommitId? mergeParent,
@@ -20,7 +19,7 @@ namespace GitOut.Features.Git
         )
         {
             Id = hash;
-            this.parent = parent;
+            ParentId = parent;
             this.mergeParent = mergeParent;
             AuthorDate = authorDate;
             Author = author;
@@ -36,17 +35,18 @@ namespace GitOut.Features.Git
 
         public bool IsHead { get; internal set; }
 
+        public GitCommitId? ParentId { get; }
         public GitHistoryEvent? Parent { get; private set; }
         public GitHistoryEvent? MergedParent { get; private set; }
 
         public IList<GitBranchName> Branches { get; } = new List<GitBranchName>();
         public IList<GitHistoryEvent> Children { get; } = new List<GitHistoryEvent>();
 
-        public static IGitHistoryEventBuilder Builder() => new GitHistoryEventBuilder();
+        public static IGitHistoryEventBuilder<GitHistoryEvent> Builder() => new GitHistoryEventBuilder();
 
         public void ResolveParents(IDictionary<GitCommitId, GitHistoryEvent> commits)
         {
-            if (parent is not null && commits.TryGetValue(parent, out GitHistoryEvent? commit))
+            if (ParentId is not null && commits.TryGetValue(ParentId, out GitHistoryEvent? commit))
             {
                 Parent = commit;
                 Parent.Children.Add(this);
@@ -58,7 +58,7 @@ namespace GitOut.Features.Git
             }
         }
 
-        private class GitHistoryEventBuilder : IGitHistoryEventBuilder
+        private class GitHistoryEventBuilder : IGitHistoryEventBuilder<GitHistoryEvent>
         {
             private readonly StringBuilder bodyBuilder = new();
 
@@ -83,7 +83,7 @@ namespace GitOut.Features.Git
                 bodyBuilder.ToString()
             );
 
-            public IGitHistoryEventBuilder BuildBody(string body)
+            public IGitHistoryEventBuilder<GitHistoryEvent> BuildBody(string body)
             {
                 if (body.Length > 0)
                 {
@@ -92,25 +92,25 @@ namespace GitOut.Features.Git
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseDate(long unixTime)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseDate(long unixTime)
             {
                 authorDate = DateTimeOffset.FromUnixTimeSeconds(unixTime);
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseAuthorEmail(string authorEmail)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseAuthorEmail(string authorEmail)
             {
                 this.authorEmail = authorEmail;
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseAuthorName(string authorName)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseAuthorName(string authorName)
             {
                 this.authorName = authorName;
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseHash(string line)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseHash(string line)
             {
                 ReadOnlySpan<char> span = line.AsSpan();
                 hash = GitCommitId.FromHash(span.Slice(0, 40));
@@ -125,7 +125,7 @@ namespace GitOut.Features.Git
                 return this;
             }
 
-            public IGitHistoryEventBuilder ParseSubject(string subject)
+            public IGitHistoryEventBuilder<GitHistoryEvent> ParseSubject(string subject)
             {
                 this.subject = subject;
                 return this;

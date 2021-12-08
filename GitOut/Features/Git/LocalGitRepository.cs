@@ -46,7 +46,7 @@ namespace GitOut.Features.Git
         {
             IGitProcess log = CreateProcess(ProcessOptions.FromArguments("-c log.showSignature=false log -n1 -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" HEAD"));
             int state = 0;
-            IGitHistoryEventBuilder builder = GitHistoryEvent.Builder();
+            IGitHistoryEventBuilder<GitHistoryEvent> builder = GitHistoryEvent.Builder();
             await foreach (string line in log.ReadLinesAsync())
             {
                 switch (state)
@@ -102,8 +102,6 @@ namespace GitOut.Features.Git
         {
             IDictionary<GitCommitId, GitHistoryEvent> historyByCommitId = new Dictionary<GitCommitId, GitHistoryEvent>();
             IList<GitHistoryEvent> history = new List<GitHistoryEvent>();
-            IGitHistoryEventBuilder builder = GitHistoryEvent.Builder();
-            int state = 0;
             IProcessOptionsBuilder processOptionsBuilder = ProcessOptions
                 .Builder()
                 .AppendRange("-c", "log.showSignature=false", "log", "-z", "--date-order", "--pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\"", "--branches");
@@ -113,57 +111,25 @@ namespace GitOut.Features.Git
                 processOptionsBuilder.Append(" --remotes");
             }
             IGitProcess log = CreateProcess(processOptionsBuilder.Build());
-            await foreach (string line in log.ReadLinesAsync())
+            await foreach (GitHistoryEvent item in ParseHistoryLines(log.ReadLinesAsync(), GitHistoryEvent.Builder))
             {
-                switch (state)
+                history.Add(item);
+                historyByCommitId.Add(item.Id, item);
+            }
+            if (options.IncludeStashes)
+            {
+                IGitProcess stashes = CreateProcess(ProcessOptions.FromArguments("stash list --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" -z"));
+                int i = 0;
+                await foreach (GitHistoryEvent item in StashListAsync())
                 {
-                    case 0:
-                        builder.ParseHash(line);
-                        ++state;
-                        break;
-                    case 1:
-                        builder.ParseDate(long.Parse(line));
-                        ++state;
-                        break;
-                    case 2:
-                        builder.ParseAuthorName(line);
-                        ++state;
-                        break;
-                    case 3:
-                        builder.ParseAuthorEmail(line);
-                        ++state;
-                        break;
-                    case 4:
-                        builder.ParseSubject(line);
-                        ++state;
-                        break;
-                    case 5:
-                        int zeroSeparator = line.IndexOf('\0', StringComparison.OrdinalIgnoreCase);
-                        if (zeroSeparator != -1)
-                        {
-                            string body = line[0..zeroSeparator];
-                            builder.BuildBody(body);
-                            string hashes = line[(zeroSeparator + 1)..];
-                            if (hashes.Length == 0)
-                            {
-                                break;
-                            }
-                            GitHistoryEvent item = builder.Build();
-                            history.Add(item);
-                            historyByCommitId.Add(item.Id, item);
-                            builder = GitHistoryEvent.Builder().ParseHash(hashes);
-                            state = 1;
-                        }
-                        else
-                        {
-                            builder.BuildBody(line);
-                        }
-                        break;
+                    if (historyByCommitId.TryGetValue(item.ParentId!, out GitHistoryEvent? parent))
+                    {
+                        history.Insert(history.IndexOf(parent), item);
+                        item.Branches.Add(GitBranchName.Create($"refs/stash@{{{i}}}"));
+                    }
+                    ++i;
                 }
             }
-            GitHistoryEvent lastItem = builder.Build();
-            history.Add(lastItem);
-            historyByCommitId.Add(lastItem.Id, lastItem);
             foreach (GitHistoryEvent children in history)
             {
                 children.ResolveParents(historyByCommitId);
@@ -179,7 +145,6 @@ namespace GitOut.Features.Git
                     logitem.Branches.Add(branch);
                 }
             }
-
             IGitProcess head = CreateProcess(ProcessOptions.FromArguments("rev-parse HEAD"));
             await foreach (string line in head.ReadLinesAsync())
             {
@@ -195,20 +160,12 @@ namespace GitOut.Features.Git
 
         public async IAsyncEnumerable<GitStash> StashListAsync()
         {
-            IGitProcess stashes = CreateProcess(ProcessOptions.FromArguments("stash list -z"));
-            await foreach (string line in stashes.ReadLinesAsync())
+            IGitProcess stashes = CreateProcess(ProcessOptions.FromArguments("stash list --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" -z"));
+            int i = 0;
+            await foreach (GitStash item in ParseHistoryLines(stashes.ReadLinesAsync(), () => GitStash.Builder(i)))
             {
-                string[] stashEntries = line.Split('\0', StringSplitOptions.RemoveEmptyEntries);
-                foreach (string stashLine in stashEntries)
-                {
-                    IGitStashBuilder stash = GitStash.Parse(stashLine);
-                    IGitProcess getParentId = CreateProcess(ProcessOptions.FromArguments($"rev-parse \"{stash.Name}~\""));
-                    await foreach (string parentId in getParentId.ReadLinesAsync())
-                    {
-                        stash.UseParent(parentId);
-                    }
-                    yield return stash.Build();
-                }
+                ++i;
+                yield return item;
             }
         }
 
@@ -407,5 +364,64 @@ namespace GitOut.Features.Git
         ) => new(path, processFactory);
 
         private IGitProcess CreateProcess(ProcessOptions arguments) => processFactory.Create(WorkingDirectory, arguments);
+
+        private static async IAsyncEnumerable<T> ParseHistoryLines<T>(IAsyncEnumerable<string> lines, Func<IGitHistoryEventBuilder<T>> factory) where T : GitHistoryEvent
+        {
+            IGitHistoryEventBuilder<T> builder = factory();
+            int state = 0;
+            await foreach (string line in lines)
+            {
+                switch (state)
+                {
+                    case 0:
+                        builder.ParseHash(line);
+                        ++state;
+                        break;
+                    case 1:
+                        builder.ParseDate(long.Parse(line));
+                        ++state;
+                        break;
+                    case 2:
+                        builder.ParseAuthorName(line);
+                        ++state;
+                        break;
+                    case 3:
+                        builder.ParseAuthorEmail(line);
+                        ++state;
+                        break;
+                    case 4:
+                        builder.ParseSubject(line);
+                        ++state;
+                        break;
+                    case 5:
+                        int zeroSeparator = line.IndexOf('\0', StringComparison.OrdinalIgnoreCase);
+                        if (zeroSeparator != -1)
+                        {
+                            string body = line[0..zeroSeparator];
+                            builder.BuildBody(body);
+                            string hashes = line[(zeroSeparator + 1)..];
+                            if (hashes.Length == 0)
+                            {
+                                break;
+                            }
+                            T item = builder.Build();
+                            yield return item;
+                            builder = factory();
+                            builder.ParseHash(hashes);
+                            state = 1;
+                        }
+                        else
+                        {
+                            builder.BuildBody(line);
+                        }
+                        break;
+                }
+            }
+            if (state != 0)
+            {
+                T lastItem = builder.Build();
+                yield return lastItem;
+            }
+        }
     }
 }

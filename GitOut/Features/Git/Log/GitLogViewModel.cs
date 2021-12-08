@@ -21,7 +21,7 @@ namespace GitOut.Features.Git.Log
     public class GitLogViewModel : INotifyPropertyChanged, INavigationListener
     {
         private readonly object activeStashesLock = new();
-        private readonly ObservableCollection<GitStash> activeStashes = new();
+        private readonly ObservableCollection<GitTreeEvent> activeStashes = new();
 
         private readonly object entriesLock = new();
         private readonly ObservableCollection<GitTreeEvent> entries = new();
@@ -35,6 +35,7 @@ namespace GitOut.Features.Git.Log
         private readonly IRepositoryWatcher repositoryWatcher;
 
         private int changesCount;
+        private bool includeStashes = true;
         private bool includeRemotes = true;
         private bool showSpacesAsDots;
         private bool isStashesVisible;
@@ -93,7 +94,7 @@ namespace GitOut.Features.Git.Log
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
             CheckoutBranchCommand = new AsyncCallbackCommand(
-               async () =>
+                async () =>
                 {
                     IsCheckoutBranchVisible = false;
                     try
@@ -157,6 +158,18 @@ namespace GitOut.Features.Git.Log
             AppendSelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit => entries.First(e => e.Event.Id == commit.Id).IsSelected = true);
             CloseAutocompleteCommand = new CallbackCommand(() => IsSearchDisplayed = false);
             ShowSearchFilesCommand = new CallbackCommand(() => IsSearchDisplayed = true);
+        }
+
+        public bool IncludeStashes
+        {
+            get => includeStashes;
+            set
+            {
+                if (SetProperty(ref includeStashes, value))
+                {
+                    _ = CheckRepositoryStatusAsync();
+                }
+            }
         }
 
         public bool IncludeRemotes
@@ -352,7 +365,11 @@ namespace GitOut.Features.Git.Log
 
         private async Task CheckRepositoryStatusAsync()
         {
-            IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(IncludeRemotes ? LogOptions.WithRemoteBranches() : LogOptions.OnlyLocalBranches()).ConfigureAwait(false);
+            IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(new LogOptions
+            {
+                IncludeRemotes = includeRemotes,
+                IncludeStashes = includeStashes
+            }).ConfigureAwait(false);
             IEnumerable<GitTreeEvent> history = BuildTree(tree);
             lock (entriesLock)
             {
@@ -372,20 +389,11 @@ namespace GitOut.Features.Git.Log
             {
                 activeStashes.Clear();
             }
-            await foreach (GitStash stashEntry in Repository.StashListAsync())
+            await foreach (GitHistoryEvent stashEntry in Repository.StashListAsync())
             {
-                for (int i = 0; i < entries.Count; ++i)
-                {
-                    if (entries[i].Event.Id == stashEntry.ParentId)
-                    {
-                        // todo: convert stash to githistoryevent, or wrap history event in viewmodel? :thinking:
-                        //entries.Insert(i, new GitTreeEvent());
-                    }
-                }
-
                 lock (activeStashesLock)
                 {
-                    activeStashes.Add(stashEntry);
+                    activeStashes.Add(new GitTreeEvent(stashEntry));
                 }
             }
         }

@@ -49,9 +49,18 @@ namespace GitOut.Features.Git.Log
             set => SetProperty(ref isSelected, value);
         }
 
+        public int StashIndex => Event is GitStash stash ? stash.StashIndex : -1;
+
         public IEnumerable<TreeBuildingLeaf> Process(IEnumerable<TreeBuildingLeaf> leafs) => ProcessBottom(ProcessTop(leafs));
 
         public static void ResetColors() => colors.ForEach(c => c.Available = true);
+        private LineType EventLineType() =>
+            Event switch
+            {
+                GitStash _ => LineType.Dashed,
+                GitHistoryEvent _ => LineType.Solid,
+                _ => LineType.None
+            };
 
         private IEnumerable<TreeBuildingLeaf> ProcessBottom(IEnumerable<TreeBuildingLeaf> leafs)
         {
@@ -67,38 +76,38 @@ namespace GitOut.Features.Git.Log
                     colorIndex = colors.FindIndex(ac => ac.Color == leaf.Current.Color);
                     if (Event.Parent is not null)
                     {
-                        leaf.Current.Bottom = new Line(from, to++);
-                        bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, leaf.Current));
+                        leaf.Current.AttachBottom(new Line(from, to++), EventLineType());
+                        bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, leaf.Current, EventLineType()));
                         if (Event.MergedParent is not null)
                         {
-                            var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
+                            var node = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true, LineType.Solid);
                             nodes.Add(node);
-                            bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, node));
+                            bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, node, EventLineType()));
                         }
                     }
                     ++from;
                 }
                 else
                 {
-                    leaf.Current.Bottom = new Line(from++, to++);
-                    bottomLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, leaf.Current));
+                    leaf.Current.AttachBottom(new Line(from++, to++), leaf.LineType);
+                    bottomLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor!, leaf.Current, leaf.LineType));
                 }
             }
             if (!processedCommit)
             {
                 Color color = GetNextAvailableColor();
-                var node = GitTreeNode.WithBottomLine(new Line(from, to++), color, true);
+                var node = GitTreeNode.WithBottomLine(new Line(from, to++), color, true, EventLineType());
                 colorIndex = colors.FindIndex(ac => ac.Color == color);
 
                 nodes.Add(node);
                 if (Event.Parent is not null)
                 {
-                    bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, node));
+                    bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.Parent, node, EventLineType()));
                     if (Event.MergedParent is not null)
                     {
-                        var mergedNode = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true);
+                        var mergedNode = GitTreeNode.WithBottomLine(new Line(from, to++), GetNextAvailableColor(), true, EventLineType());
                         nodes.Add(mergedNode);
-                        bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, mergedNode));
+                        bottomLeafs.Add(TreeBuildingLeaf.WithParent(Event.MergedParent, mergedNode, EventLineType()));
                     }
                 }
             }
@@ -118,7 +127,7 @@ namespace GitOut.Features.Git.Log
                     if (commitIndex == -1)
                     {
                         commitIndex = to++;
-                        node = GitTreeNode.WithTopLine(new Line(from++, commitIndex), leaf.Current.Color, true);
+                        node = GitTreeNode.WithTopLine(new Line(from++, commitIndex), leaf.Current.Color, true, leaf.LineType);
 
                         // add node to topleafs, so that it's processed in ProcessBottom
                         // done only for the first branch that finds the commit, the other would be duplicates
@@ -127,21 +136,21 @@ namespace GitOut.Features.Git.Log
                     }
                     else
                     {
-                        node = GitTreeNode.WithTopLine(new Line(from++, commitIndex), leaf.Current.Color, true);
+                        node = GitTreeNode.WithTopLine(new Line(from++, commitIndex), leaf.Current.Color, true, leaf.LineType);
                         SetColorAvailable(leaf.Current.Color);
                     }
                     nodes.Add(node);
                 }
                 else
                 {
-                    var newNode = GitTreeNode.WithTopLine(new Line(from++, to++), leaf.Current.Color, false);
+                    var newNode = GitTreeNode.WithTopLine(new Line(from++, to++), leaf.Current.Color, false, leaf.LineType);
                     nodes.Add(newNode);
                     if (leaf.LookingFor is null)
                     {
                         throw new InvalidOperationException("leaf should have something to look for");
                     }
 
-                    topLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor, newNode));
+                    topLeafs.Add(TreeBuildingLeaf.WithParent(leaf.LookingFor, newNode, leaf.LineType));
                 }
             }
             if (commitIndex == -1)

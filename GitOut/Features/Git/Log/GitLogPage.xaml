@@ -29,7 +29,7 @@
         <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter" />
         <files:FileEntryQueryMatcher x:Key="FileNameQueryMatcher" />
         <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
-        <lc:TreeNodePathDataConverter x:Key="TreeNodePathDataConverter" />
+        <lc:NodesToPathConverter x:Key="NodesToPathConverter" />
         <Canvas x:Key="IconCanvas" x:Shared="False" Width="24" Height="24">
             <Canvas.LayoutTransform>
                 <ScaleTransform ScaleX=".8" ScaleY=".8" />
@@ -361,9 +361,47 @@
                     <ToggleButton ToolBar.OverflowMode="AsNeeded" IsChecked="{Binding IsStashesVisible}" ToolTip="View stashes">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
                     </ToggleButton>
-                    <ToggleButton ToolBar.OverflowMode="AsNeeded" IsChecked="{Binding IncludeRemotes}" ToolTip="Show remotes">
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
+                    <ToggleButton x:Name="ViewOptions" ToolBar.OverflowMode="Never" ToolTip="View options">
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource TuneVerticalVariant}"/>
                     </ToggleButton>
+                    <Popup
+                        ToolBar.OverflowMode="Never"
+                        StaysOpen="False"
+                        AllowsTransparency="True"
+                        IsOpen="{Binding IsChecked, ElementName=ViewOptions}"
+                        PopupAnimation="Fade"
+                        Placement="Bottom"
+                    >
+                        <Grid>
+                            <Border Style="{StaticResource CardPanelStyle}" MinWidth="180" Margin="16 8" Padding="0">
+                                <StackPanel Margin="8 16">
+                                    <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" IsChecked="{Binding IncludeStashes}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                                                <Canvas.LayoutTransform>
+                                                    <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                                                </Canvas.LayoutTransform>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveEye}"/>
+                                            </Canvas>
+                                            <TextBlock Text="Include Stashes" />
+                                        </StackPanel>
+                                    </CheckBox>
+                                    <Border Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}"/>
+                                    <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" IsChecked="{Binding IncludeRemotes}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                                                <Canvas.LayoutTransform>
+                                                    <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                                                </Canvas.LayoutTransform>
+                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource CheckNetwork}"/>
+                                            </Canvas>
+                                            <TextBlock Text="Include Remotes" />
+                                        </StackPanel>
+                                    </CheckBox>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Popup>
                     <Button
                         ToolBar.OverflowMode="Never"
                         Command="{Binding RefreshStatusCommand}"
@@ -413,16 +451,34 @@
                     Grid.Row="1"
                     Style="{StaticResource MaterialListStyle}"
                     ItemsSource="{Binding ActiveStashes}"
+                    attached:BindableSelectedItems.SelectedItems="{Binding SelectedLogEntries}"
                 >
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Padding" Value="8 0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
-                        <DataTemplate DataType="{x:Type git:GitStash}">
-                            <StackPanel Margin="0 4">
-                                <TextBlock Style="{StaticResource PrimaryTextStyle}" Margin="0">
-                                    <Run Text="{Binding StashIndex, Mode=OneWay, StringFormat={}{{ {0} }}:}" />
-                                    <Run Text="{Binding FromNode, Mode=OneWay}" FontSize="11" Foreground="{DynamicResource MaterialGray400}" />
+                        <DataTemplate DataType="{x:Type local:GitTreeEvent}">
+                            <Grid Margin="0 4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto" MinWidth="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Path Margin="0 0 8 0" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
+                                <TextBlock Grid.Column="1" FontSize="10" VerticalAlignment="Center">
+                                    <Run Text="{Binding StashIndex, Mode=OneWay, StringFormat={}{0}:}" />
                                 </TextBlock>
-                                <TextBlock Style="{StaticResource SecondaryTextStyle}" FontSize="12" Text="{Binding FromParent}" />
-                            </StackPanel>
+                                <TextBlock Grid.Column="2" Style="{StaticResource NormalTextStyle}" VerticalAlignment="Center">
+                                    <Run Text="{Binding Event.Subject, Mode=OneWay}"/>
+                                </TextBlock>
+                            </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
@@ -452,29 +508,18 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Grid>
-                                    <ItemsControl ItemsSource="{Binding Nodes}">
+                                    <ItemsControl>
+                                        <ItemsControl.ItemsSource>
+                                            <MultiBinding Converter="{StaticResource NodesToPathConverter}">
+                                                <Binding Path="Nodes" />
+                                                <Binding Path="Height" ElementName="outerGrid" />
+                                            </MultiBinding>
+                                        </ItemsControl.ItemsSource>
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <Canvas />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Path
-                                                    Fill="Transparent"
-                                                    StrokeThickness="2"
-                                                    Height="28"
-                                                    Stroke="{Binding Color, Converter={StaticResource ColorToBrushConverter}}"
-                                                >
-                                                    <Path.Data>
-                                                        <MultiBinding Converter="{StaticResource TreeNodePathDataConverter}">
-                                                            <Binding Path="." />
-                                                            <Binding Path="ActualHeight" ElementName="outerGrid" />
-                                                        </MultiBinding>
-                                                    </Path.Data>
-                                                </Path>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </Grid>
                                 <Grid
@@ -512,7 +557,24 @@
                                                     Style="{StaticResource BranchStyle}"
                                                     BorderBrush="{Binding DataContext.CommitBrush, RelativeSource={RelativeSource AncestorType=Grid}}"
                                                 >
-                                                    <TextBlock Text="{Binding Name}"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Canvas Grid.Column="1" Width="24" Height="24" Margin="0 0 4 0">
+                                                            <Canvas.Style>
+                                                                <Style TargetType="{x:Type Canvas}">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding DataContext.StashIndex, ElementName=outerGrid}" Value="-1">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Canvas.Style>
+                                                            <Canvas.LayoutTransform>
+                                                                <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                                                            </Canvas.LayoutTransform>
+                                                            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Inbox}"/>
+                                                        </Canvas>
+                                                        <TextBlock Text="{Binding Name}"/>
+                                                    </StackPanel>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -527,11 +589,21 @@
                                     <TextBlock
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
+                                        FontSize="10"
                                         Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                     >
                                         <Run Text="{Binding Event.Author.Name, Mode=OneWay}" ToolTip="{Binding Event.Author.Email}" />
                                         <Run Text="{Binding Event.Id.Hash, Mode=OneWay, Converter={StaticResource SubstringConverter}, ConverterParameter=7}" />
                                         <Run Text="{Binding Event.AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
+                                    </TextBlock>
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontSize="10"
+                                        Visibility="{Binding DataContext.FileViewVisible, Converter={StaticResource BooleanToVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                    >
+                                        <Run Text="{Binding Event.Author.Name, Mode=OneWay}" ToolTip="{Binding Event.Author.Email}" />
+                                        <Run Text="{Binding Event.AuthorDate, Mode=OneWay, StringFormat={}{0:HH:mm}, Converter={StaticResource UtcToLocalTimeConverter}}" ToolTip="{Binding Event.AuthorDate, Mode=OneWay, StringFormat={}{0:F}, Converter={StaticResource UtcToLocalTimeConverter}}" />
                                     </TextBlock>
                                 </Grid>
                             </Grid>

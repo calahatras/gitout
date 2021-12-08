@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Media;
 
 namespace GitOut.Features.Git.Log
@@ -6,36 +6,54 @@ namespace GitOut.Features.Git.Log
     public class GitTreeNode
     {
         private const string LinesDoNotMeetError = "lines do not meet";
-        private Line? bottomLayer;
 
-        private GitTreeNode(Line? top, Line? bottom, Color color, bool commit)
+        private GitTreeNode(Line? top, Line? bottom, Color color, bool commit, LineType lineType)
         {
             Top = top;
             Bottom = bottom;
             Color = color;
             IsCommit = commit;
-        }
-
-        public bool IsCommit { get; }
-
-        public Color Color { get; }
-
-        public Line? Top { get; }
-        public Line? Bottom
-        {
-            get => bottomLayer;
-            set
+            if (bottom is not null)
             {
-                if (value is Line bottom && Top is Line top && top.Down != bottom.Up)
-                {
-                    throw new ArgumentException(LinesDoNotMeetError, nameof(value));
-                }
-
-                bottomLayer = value;
+                BottomLineType = lineType;
+            }
+            if (top is not null)
+            {
+                TopLineType = lineType;
             }
         }
 
-        public static GitTreeNode WithTopLine(Line top, Color color, bool commit) => new(top, null, color, commit);
-        public static GitTreeNode WithBottomLine(Line bottom, Color color, bool commit) => new(null, bottom, color, commit);
+        public bool IsCommit { get; }
+        public LineType TopLineType { get; }
+        public LineType BottomLineType { get; private set; }
+        public Color Color { get; }
+
+        public Line? Top { get; }
+        public Line? Bottom { get; private set; }
+
+        public void AttachBottom(Line value, LineType type)
+        {
+            if (value is Line bottom && Top is Line top && top.Down != bottom.Up)
+            {
+                throw new ArgumentException(LinesDoNotMeetError, nameof(value));
+            }
+
+            Bottom = value;
+            BottomLineType = type;
+        }
+
+        public static GitTreeNode WithTopLine(
+            Line top,
+            Color color,
+            bool commit,
+            LineType lineType
+        ) => new(top, null, color, commit, lineType);
+
+        public static GitTreeNode WithBottomLine(
+            Line bottom,
+            Color color,
+            bool commit,
+            LineType lineType
+        ) => new(null, bottom, color, commit, lineType);
     }
 }
