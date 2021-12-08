@@ -373,9 +373,18 @@ namespace GitOut.Features.Git.Log
             IEnumerable<GitTreeEvent> history = BuildTree(tree);
             lock (entriesLock)
             {
+                List<GitCommitId> selected = entries
+                    .Where(e => e.IsSelected)
+                    .Select(e => e.Event.Id)
+                    .ToList();
+
                 entries.Clear();
                 foreach (GitTreeEvent item in history)
                 {
+                    if (selected.Contains(item.Event.Id))
+                    {
+                        item.IsSelected = true;
+                    }
                     entries.Add(item);
                 }
             }
