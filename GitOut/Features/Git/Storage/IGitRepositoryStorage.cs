@@ -8,6 +8,7 @@ namespace GitOut.Features.Git.Storage
         IObservable<IEnumerable<IGitRepository>> Repositories { get; }
 
         void Add(IGitRepository repository);
+        void AddRange(IEnumerable<IGitRepository> repositories);
         void Remove(IGitRepository repository);
     }
 }

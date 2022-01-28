@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using GitOut.Features.Collections;
@@ -14,12 +15,17 @@ using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
 
+using DataObject = System.Windows.DataObject;
+
 namespace GitOut.Features.Git.RepositoryList
 {
     public class RepositoryListViewModel : INavigationListener, INotifyPropertyChanged
     {
         private readonly ICollection<IGitRepository> repositories = new SortedObservableCollection<IGitRepository>((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
         private readonly IDisposable subscription;
+        private readonly IGitRepositoryStorage storage;
+        private readonly IGitRepositoryFactory repositoryFactory;
+        private readonly ISnackbarService snack;
         private string searchQuery = string.Empty;
 
         public RepositoryListViewModel(
@@ -29,6 +35,10 @@ namespace GitOut.Features.Git.RepositoryList
             ISnackbarService snack
         )
         {
+            this.storage = storage;
+            this.repositoryFactory = repositoryFactory;
+            this.snack = snack;
+
             NavigateToLogCommand = new NavigateLocalCommand<IGitRepository>(
                 navigation,
                 typeof(GitLogPage).FullName!,
@@ -41,21 +51,8 @@ namespace GitOut.Features.Git.RepositoryList
                 var dialog = new FolderBrowserDialog();
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    IGitRepository repository = repositoryFactory.Create(DirectoryPath.Create(dialog.SelectedPath));
-                    if (!await repository.IsInsideWorkTree())
-                    {
-                        const string approveText = "YES";
-                        SnackAction? action = await snack.ShowAsync(Snack.Builder()
-                            .WithMessage($"{Path.GetFileName(dialog.SelectedPath)} is not a valid git repository, do you want to add the folder anyway?")
-                            .WithDuration(TimeSpan.FromSeconds(300))
-                            .AddAction(approveText));
-                        if (action?.Text == approveText)
-                        {
-                            storage.Add(repository);
-                            snack.ShowSuccess("Added repository");
-                        }
-                    }
-                    else
+                    IGitRepository? repository = await CreateRepositoryAsync(dialog.SelectedPath);
+                    if (repository is not null)
                     {
                         storage.Add(repository);
                         snack.ShowSuccess("Added repository");
@@ -81,6 +78,59 @@ namespace GitOut.Features.Git.RepositoryList
             });
 
             ClearCommand = new CallbackCommand(() => SearchQuery = string.Empty);
+
+            DropCommand = new AsyncCallbackCommand<DataObject>(OnDropAsync);
+        }
+
+        private async Task<IGitRepository?> CreateRepositoryAsync(string path)
+        {
+            IGitRepository repository = repositoryFactory.Create(DirectoryPath.Create(path));
+            if (await repository.IsInsideWorkTree())
+            {
+                return repository;
+            }
+
+            const string approveText = "YES";
+            SnackAction? action = await snack.ShowAsync(Snack.Builder()
+                .WithMessage($"{Path.GetFileName(path)} is not a valid git repository, do you want to add the folder anyway?")
+                .WithDuration(TimeSpan.FromSeconds(300))
+                .AddAction(approveText));
+
+            return action?.Text == approveText ? repository : null;
+        }
+
+        private async Task OnDropAsync(System.Windows.DataObject? dataObject)
+        {
+            if (dataObject == null)
+            {
+                return;
+            }
+
+            List<IGitRepository> repositories = new();
+            foreach (string? path in dataObject.GetFileDropList())
+            {
+                if (path is null)
+                {
+                    continue;
+                }
+                if (!Directory.Exists(path))
+                {
+                    continue;
+                }
+                IGitRepository? repository = await CreateRepositoryAsync(path);
+                if (repository is not null)
+                {
+                    repositories.Add(repository);
+                }
+            }
+
+            if (repositories.Count == 0)
+            {
+                return;
+            }
+
+            storage.AddRange(repositories);
+            snack.ShowSuccess($"Added {(repositories.Count == 1 ? "repository" : "repositories")}");
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -89,6 +139,8 @@ namespace GitOut.Features.Git.RepositoryList
         public ICommand AddRepositoryCommand { get; }
         public ICommand RemoveRepositoryCommand { get; }
         public ICommand ClearCommand { get; }
+        public ICommand DropCommand { get; }
+
         public IEnumerable<IGitRepository> Repositories => repositories;
 
         public string SearchQuery
