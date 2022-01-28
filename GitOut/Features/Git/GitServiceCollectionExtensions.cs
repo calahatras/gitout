@@ -18,12 +18,12 @@ namespace GitOut.Features.Git
             services.AddScoped<IProcessFactory<IGitProcess>, GitProcessFactory>();
             services.AddScoped<IGitRepositoryFactory, GitRepositoryFactory>();
             services.AddScoped<IGitRepositoryWatcherProvider, GitRepositoryFileSystemWatcherProvider>();
-            services.AddScoped<GitLogPage>();
-            services.AddScoped<GitLogViewModel>();
-            services.AddScoped<GitStagePage>();
-            services.AddScoped<GitStageViewModel>();
-            services.AddScoped<RepositoryListPage>();
-            services.AddScoped<RepositoryListViewModel>();
+            services.AddTransient<GitLogPage>();
+            services.AddTransient<GitLogViewModel>();
+            services.AddTransient<GitStagePage>();
+            services.AddTransient<GitStageViewModel>();
+            services.AddTransient<RepositoryListPage>();
+            services.AddTransient<RepositoryListViewModel>();
         }
     }
 }

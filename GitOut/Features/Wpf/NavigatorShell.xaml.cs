@@ -1,19 +1,69 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using GitOut.Features.Navigation;
+using GitOut.Features.Storage;
+using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Wpf
 {
     public partial class NavigatorShell : Window
     {
-        public NavigatorShell(NavigatorShellViewModel dataContext)
+        private readonly IWritableStorage storage;
+        private readonly IOptions<NavigationWindowOptions> windowOptions;
+
+        public NavigatorShell(
+            NavigatorShellViewModel dataContext,
+            IWritableStorage storage,
+            IOptions<NavigationWindowOptions> windowOptions
+        )
         {
-            InitializeComponent();
+            this.storage = storage;
+            this.windowOptions = windowOptions;
             DataContext = dataContext;
+            InitializeComponent();
         }
 
         public event EventHandler? Resized;
+
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+            NavigationWindowOptions cachedValues = windowOptions.Value;
+            if (cachedValues.Width.HasValue)
+            {
+                Width = cachedValues.Width.Value;
+            }
+            if (cachedValues.Height.HasValue)
+            {
+                Height = cachedValues.Height.Value;
+            }
+            if (cachedValues.Top.HasValue)
+            {
+                Top = cachedValues.Top.Value;
+            }
+            if (cachedValues.Left.HasValue)
+            {
+                Left = cachedValues.Left.Value;
+            }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            if (WindowState == WindowState.Normal)
+            {
+                storage.Write(NavigationWindowOptions.SectionKey, new
+                {
+                    Width = ActualWidth,
+                    Height = ActualHeight,
+                    Left,
+                    Top
+                });
+            }
+        }
 
         protected override void OnSourceInitialized(EventArgs e)
         {

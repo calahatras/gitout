@@ -72,29 +72,22 @@ namespace GitOut
 
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
-            services.AddSingleton<ISnackbarService, SnackbarService>();
-            services.AddSingleton<INavigationService, NavigationService>();
-            services.AddSingleton<ITitleService, TitleService>();
+            services.AddScoped<ISnackbarService, SnackbarService>();
+            services.AddNavigationServiceWithStartPage<RepositoryListPage>(context.Configuration);
+
+            services.AddScoped<ITitleService, TitleService>();
             services.AddSingleton<IWritableStorage, FileStorage>();
-            services.AddSingleton<Features.Wpf.Commands.Application>();
+            services.AddScoped<Features.Wpf.Commands.Application>();
 
             services.AddSettingsFeature();
             services.AddGitFeature();
             services.AddThemeFeature();
 
             services.AddOptions();
-            services.AddOptions<NavigationRegistrationOptions>().Configure(options =>
-            {
-                options.StartupWindow = typeof(NavigatorShell).FullName!;
-                options.StartupType = typeof(RepositoryListPage).FullName!;
-            });
-            services.AddOptions<NavigationWindowOptions>().Bind(context.Configuration.GetSection(NavigationWindowOptions.SectionKey));
+
             services.AddOptions<GitStoreOptions>().Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
             services.AddOptions<GitStageOptions>().Bind(context.Configuration.GetSection(GitStageOptions.SectionKey));
             services.AddLogging();
-
-            services.AddTransient<NavigatorShellViewModel>();
-            services.AddScoped<NavigatorShell>();
 
             services.AddHostedService<Bootstrap>();
         }

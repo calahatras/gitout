@@ -34,7 +34,8 @@ namespace GitOut.Features.Navigation
         public void Execute(object? parameter)
         {
             object? pageOptions = options == null ? null : options((T?)parameter);
-            navigation.Navigate(pagename, pageOptions);
+            bool newWindow = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+            navigation.Navigate(pagename, pageOptions, new NavigationOptions(newWindow));
         }
     }
 }
