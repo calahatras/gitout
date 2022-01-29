@@ -13,6 +13,7 @@
     xmlns:lc="clr-namespace:GitOut.Features.Git.Log.Converters"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:attached="clr-namespace:GitOut.Features.Wpf.AttachedProperties"
+    xmlns:progress="clr-namespace:GitOut.Features.Material.Progress"
     xmlns:scroll="clr-namespace:GitOut.Features.Wpf.Scrolling"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
     xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
@@ -174,6 +175,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Button
@@ -183,7 +185,18 @@
                 >
                     <Path Height="24" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowLeft}"/>
                 </Button>
-                <TextBlock Grid.Column="1" Style="{StaticResource MaterialToolbarHeaderStyle}" Text="{Binding Repository.Name}"/>
+                <progress:CircularProgressIndicator
+                    Grid.Column="1"
+                    Visibility="{Binding IsWorking, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    StrokeThickness="3"
+                    Diameter="20"
+                    Stroke="{DynamicResource MaterialForegroundBase}"
+                />
+                <TextBlock
+                    Grid.Column="2"
+                    Style="{StaticResource MaterialToolbarHeaderStyle}"
+                    Text="{Binding Repository.Name}"
+                />
             </Grid>
 
             <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
