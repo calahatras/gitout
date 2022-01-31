@@ -40,27 +40,24 @@ namespace GitOut.Features.Wpf.DragDrop
 
         private static void OnUseAdornerChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not FrameworkElement element)
+            if (d is FrameworkElement element)
             {
-                return;
-            }
-            bool useAdorner = (bool)e.NewValue;
-            if (useAdorner)
-            {
-                var layer = AdornerLayer.GetAdornerLayer(element);
-                layer?.Add(new DropAdorner(element, data => HasDirectory(data) ? "Drop folder here" : "Only accepts folders"));
+                bool useAdorner = (bool)e.NewValue;
+                if (useAdorner)
+                {
+                    var layer = AdornerLayer.GetAdornerLayer(element);
+                    layer?.Add(new DropAdorner(element, data => HasDirectory(data) ? "Drop folder here" : "Only accepts folders"));
+                }
             }
         }
 
         private static void OnCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not FrameworkElement element)
+            if (d is FrameworkElement element)
             {
-                return;
+                element.Drop -= OnDrop;
+                element.Drop += OnDrop;
             }
-
-            element.Drop -= OnDrop;
-            element.Drop += OnDrop;
         }
 
         private static void OnDrop(object sender, DragEventArgs e)

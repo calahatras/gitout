@@ -99,9 +99,9 @@ namespace GitOut.Features.Git.RepositoryList
             return action?.Text == approveText ? repository : null;
         }
 
-        private async Task OnDropAsync(System.Windows.DataObject? dataObject)
+        private async Task OnDropAsync(DataObject? dataObject)
         {
-            if (dataObject == null)
+            if (dataObject is null)
             {
                 return;
             }

@@ -8,18 +8,18 @@ namespace GitOut.Features.Wpf.DragDrop
 {
     public class DropAdorner : Adorner
     {
-        private readonly Func<IDataObject, string> adornerText;
+        private readonly Func<IDataObject, string> textSelector;
 
         private bool isDragging;
         private string textToRender = string.Empty;
 
-        public DropAdorner(UIElement adornedElement, Func<IDataObject, string> adornerText) : base(adornedElement)
+        public DropAdorner(UIElement adornedElement, Func<IDataObject, string> textSelector) : base(adornedElement)
         {
             IsHitTestVisible = false;
             adornedElement.DragEnter += OnAdornedElementDragEnter;
             adornedElement.DragLeave += OnAdornedElementDragLeave;
             adornedElement.Drop += OnAdornedElementDrop;
-            this.adornerText = adornerText;
+            this.textSelector = textSelector;
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -31,15 +31,15 @@ namespace GitOut.Features.Wpf.DragDrop
 
             Rect adornedElementRect = new(AdornedElement.RenderSize);
             Brush? brush = DragDropBehavior.GetAdornerStrokeBrush(AdornedElement);
-            Pen renderPen = new(brush, 5) { DashStyle = new DashStyle(new[] { 4d, 4 }, 0) };
+            Pen renderPen = new(brush, 3) { DashStyle = new DashStyle(new[] { 4d, 4 }, 0) };
 
-            drawingContext.DrawRoundedRectangle(Brushes.Transparent, renderPen, adornedElementRect, 10, 10);
+            drawingContext.DrawRectangle(Brushes.Transparent, renderPen, adornedElementRect);
 
             var textblock = new FormattedText(
                 textToRender,
                 CultureInfo.InvariantCulture,
                 FlowDirection.LeftToRight,
-                new Typeface(new FontFamily("Segoe UI"),
+                new Typeface(new FontFamily("Roboto"),
                 FontStyles.Italic,
                 FontWeights.Normal,
                 FontStretches.Normal),
@@ -72,7 +72,7 @@ namespace GitOut.Features.Wpf.DragDrop
             }
 
             isDragging = true;
-            textToRender = adornerText(e.Data);
+            textToRender = textSelector(e.Data);
 
             base.OnDragEnter(e);
             InvalidateVisual();
