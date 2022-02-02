@@ -38,6 +38,13 @@ namespace GitOut.Features.Git.Storage
                 .ToArray()
         });
 
+        public void AddRange(IEnumerable<IGitRepository> repositories) => storage.Write(GitStoreOptions.SectionKey, new
+        {
+            Repositories = (options.CurrentValue.Repositories ?? Array.Empty<string>())
+                .Concat(repositories.Select(r => r.WorkingDirectory.Directory))
+                .ToArray()
+        });
+
         public void Remove(IGitRepository repository) => storage.Write(GitStoreOptions.SectionKey, new
         {
             Repositories = (options.CurrentValue.Repositories ?? Array.Empty<string>())

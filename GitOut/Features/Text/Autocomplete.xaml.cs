@@ -28,6 +28,12 @@ namespace GitOut.Features.Text
             typeof(Autocomplete)
         );
 
+        public static readonly DependencyProperty DropCommandProperty = DependencyProperty.Register(
+            nameof(DropCommand),
+            typeof(ICommand),
+            typeof(Autocomplete)
+        );
+
         public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(
             nameof(Header),
             typeof(string),
@@ -137,6 +143,12 @@ namespace GitOut.Features.Text
         {
             get => (ICommand)GetValue(ItemSelectedCommandProperty);
             set => SetValue(ItemSelectedCommandProperty, value);
+        }
+
+        public ICommand DropCommand
+        {
+            get => (ICommand)GetValue(DropCommandProperty);
+            set => SetValue(DropCommandProperty, value);
         }
 
         public string Header
