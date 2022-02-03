@@ -21,7 +21,7 @@ namespace GitOut.Features.Navigation
         private readonly IThemeService theme;
         private readonly ILogger<NavigationService> logger;
 
-        private readonly Stack<Tuple<ContentControl, string?>> pageStack = new();
+        private readonly Stack<(ContentControl, string?)> pageStack = new();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
 
         private NavigatorShell? shell;
@@ -63,7 +63,7 @@ namespace GitOut.Features.Navigation
 
         public string? CurrentPage { get; private set; }
 
-        public event EventHandler<CancelEventArgs>? Closing;
+        public event EventHandler<EventArgs>? Closed;
         public event EventHandler<NavigationEventArgs>? NavigationRequested;
 
         public void Back()
@@ -110,7 +110,7 @@ namespace GitOut.Features.Navigation
                 logger.LogInformation(LogEventId.Navigation, "Opening new window");
                 INavigationService windowNavigation = scope.ServiceProvider.GetRequiredService<INavigationService>();
                 windowNavigation.Navigate(pageName, options);
-                windowNavigation.Closing += (s, e) => scope.Dispose();
+                windowNavigation.Closed += (s, e) => scope.Dispose();
             }
             else
             {
@@ -164,7 +164,7 @@ namespace GitOut.Features.Navigation
                     listener.Navigated(NavigationType.Deactivated);
                 }
             };
-            window.Closing += (sender, args) => OnClosing(args);
+            window.Closed += (sender, args) => OnClosed(args);
             theme.RegisterResourceProvider(window.Resources);
             window.Show();
             return window;
@@ -176,7 +176,7 @@ namespace GitOut.Features.Navigation
         {
             string? currentTitle = titleService.Title;
             OnNavigationRequested(page);
-            pageStack.Push(new Tuple<ContentControl, string?>(page, currentTitle));
+            pageStack.Push((page, currentTitle));
             CompositeCommand.RaiseExecuteChanged();
             if (page.DataContext is INavigationListener listener)
             {
@@ -184,7 +184,7 @@ namespace GitOut.Features.Navigation
             }
         }
 
-        private void OnClosing(CancelEventArgs args) => Closing?.Invoke(this, args);
+        private void OnClosed(EventArgs args) => Closed?.Invoke(this, args);
         private void OnNavigationRequested(ContentControl control) => NavigationRequested?.Invoke(this, new NavigationEventArgs(control));
     }
 }
