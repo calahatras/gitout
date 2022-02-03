@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
@@ -22,7 +23,7 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Git.Stage
 {
-    public class GitStageViewModel : INotifyPropertyChanged, INavigationListener, IDisposable
+    public class GitStageViewModel : INotifyPropertyChanged, INavigationListener, INavigationFallback, IDisposable
     {
         private readonly ISnackbarService snack;
         private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
@@ -242,6 +243,9 @@ namespace GitOut.Features.Git.Stage
         public ICommand CommitCommand { get; }
         public ICommand CancelEditTextCommand { get; }
         public ICommand PatchEditTextCommand { get; }
+
+        public string FallbackPageName => typeof(GitLogPage).FullName!;
+        public object? FallbackOptions => GitLogPageOptions.OpenRepository(Repository);
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

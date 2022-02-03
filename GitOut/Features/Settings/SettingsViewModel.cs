@@ -4,9 +4,11 @@ using System.Runtime.CompilerServices;
 using System.Windows.Data;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git;
+using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.Material.Snackbar;
+using GitOut.Features.Navigation;
 using GitOut.Features.Storage;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
@@ -14,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Settings
 {
-    public sealed class SettingsViewModel : INotifyPropertyChanged, IDisposable
+    public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallback, IDisposable
     {
         private readonly GeneralSettingsViewModel general;
         private object content;
@@ -70,6 +72,9 @@ namespace GitOut.Features.Settings
             set => SetProperty(ref content, value);
         }
         public ICollectionView MenuItems { get; }
+
+        public string FallbackPageName => typeof(RepositoryListPage).FullName!;
+        public object? FallbackOptions => null;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

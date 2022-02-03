@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
@@ -18,7 +19,7 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Git.Log
 {
-    public class GitLogViewModel : INotifyPropertyChanged, INavigationListener
+    public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INavigationFallback
     {
         private readonly object activeStashesLock = new();
         private readonly ObservableCollection<GitTreeEvent> activeStashes = new();
@@ -303,6 +304,9 @@ namespace GitOut.Features.Git.Log
         public ICommand CloseAutocompleteCommand { get; }
         public ICommand ShowSearchFilesCommand { get; }
         public ICommand CloseDetailsCommand { get; }
+
+        public string FallbackPageName => typeof(RepositoryListPage).FullName!;
+        public object? FallbackOptions => null;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

@@ -68,16 +68,11 @@ namespace GitOut.Features.Navigation
 
         public void Back()
         {
-            if (pageStack.Count <= 1)
+            if (pageStack.Count < 1)
             {
                 return;
             }
             (ContentControl current, string _) = pageStack.Pop();
-            (ContentControl latest, string? title) = pageStack.Peek();
-            OnNavigationRequested(latest);
-            titleService.Title = title;
-            CurrentPage = latest.GetType().FullName;
-            logger.LogInformation(LogEventId.Navigation, "Navigating back to {CurrentPage} ({Title})", CurrentPage, title);
             if (current.DataContext is INavigationListener navigatedToContext)
             {
                 navigatedToContext.Navigated(NavigationType.NavigatedLeave);
@@ -86,15 +81,27 @@ namespace GitOut.Features.Navigation
             {
                 dispose.Dispose();
             }
-            if (latest.DataContext is INavigationListener revisitedContext)
+            if (pageStack.Count == 0 && current.DataContext is INavigationFallback fallback)
             {
-                revisitedContext.Navigated(NavigationType.NavigatedBack);
+                Navigate(fallback.FallbackPageName, fallback.FallbackOptions);
+            }
+            else
+            {
+                (ContentControl latest, string? title) = pageStack.Peek();
+                OnNavigationRequested(latest);
+                titleService.Title = title;
+                CurrentPage = latest.GetType().FullName;
+                logger.LogInformation(LogEventId.Navigation, "Navigating back to {CurrentPage} ({Title})", CurrentPage, title);
+                if (latest.DataContext is INavigationListener revisitedContext)
+                {
+                    revisitedContext.Navigated(NavigationType.NavigatedBack);
+                }
             }
         }
 
         public bool CanGoBack() =>
-            pageStack.Count > 0
-            && Window.GetWindow(pageStack.Peek().Item1) == Application.Current.MainWindow;
+            (pageStack.Count > 1 && Window.GetWindow(pageStack.Peek().Item1) == Application.Current.MainWindow)
+            || (pageStack.Count == 1 && pageStack.Peek().Item1.DataContext is INavigationFallback);
 
         public void Navigate(string pageName, object? options, NavigationOptions? navigation = default)
         {
@@ -102,7 +109,7 @@ namespace GitOut.Features.Navigation
             {
                 shell = CreateShell();
             }
-            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), "Invalid page name " + pageName);
+            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
 
             if (navigation?.OpenInNewWindow ?? false)
             {
