@@ -113,7 +113,6 @@ namespace GitOut.Features.Navigation
         {
             EnsureShell();
             Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
-
             if (options is not null)
             {
                 if (pageOptions.ContainsKey(pageName))
@@ -138,9 +137,7 @@ namespace GitOut.Features.Navigation
         public void NavigateNewWindow(string pageName, object? options)
         {
             EnsureShell();
-
             Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
-
             IServiceScope scope = provider.CreateScope();
             logger.LogInformation(LogEventId.Navigation, "Opening new window");
             INavigationService windowNavigation = scope.ServiceProvider.GetRequiredService<INavigationService>();
