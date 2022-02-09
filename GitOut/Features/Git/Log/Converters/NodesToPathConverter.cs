@@ -40,7 +40,9 @@ namespace GitOut.Features.Git.Log.Converters
                 {
                     Path? commitPath = AddCommitGeometry(node, height);
                     if (commitPath is not null)
+                    {
                         paths.Add(commitPath);
+                    }
 
                     if (node.Top is Line upperLine)
                     {

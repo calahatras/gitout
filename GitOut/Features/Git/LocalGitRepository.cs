@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xaml;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Diff;
@@ -138,7 +137,7 @@ namespace GitOut.Features.Git
             IGitProcess branches = CreateProcess(ProcessOptions.FromArguments("for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname)\""));
             await foreach (string line in branches.ReadLinesAsync())
             {
-                var id = GitCommitId.FromHash(line.Substring(0, 40));
+                var id = GitCommitId.FromHash(line[..40]);
                 if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? logitem))
                 {
                     var branch = GitBranchName.Create(line[41..]);

@@ -20,7 +20,7 @@ namespace GitOut.Features.Navigation
         private readonly IThemeService theme;
         private readonly ILogger<NavigationService> logger;
 
-        private readonly Stack<(ContentControl Control, string?)> pageStack = new();
+        private readonly Stack<(ContentControl, string?)> pageStack = new();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
 
         private NavigatorShell? shell;
@@ -105,7 +105,7 @@ namespace GitOut.Features.Navigation
                 return false;
             }
 
-            ContentControl control = pageStack.Peek().Control;
+            (ContentControl control, string _) = pageStack.Peek();
             return Window.GetWindow(control) == Application.Current.MainWindow && (pageStack.Count > 1 || control.DataContext is INavigationFallback);
         }
 
