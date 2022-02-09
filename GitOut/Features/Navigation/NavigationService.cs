@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using GitOut.Features.Logging;
@@ -21,7 +20,7 @@ namespace GitOut.Features.Navigation
         private readonly IThemeService theme;
         private readonly ILogger<NavigationService> logger;
 
-        private readonly Stack<(ContentControl, string?)> pageStack = new();
+        private readonly Stack<(ContentControl Control, string?)> pageStack = new();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
 
         private NavigatorShell? shell;
@@ -99,9 +98,16 @@ namespace GitOut.Features.Navigation
             }
         }
 
-        public bool CanGoBack() =>
-            (pageStack.Count > 1 && Window.GetWindow(pageStack.Peek().Item1) == Application.Current.MainWindow)
-            || (pageStack.Count == 1 && pageStack.Peek().Item1.DataContext is INavigationFallback);
+        public bool CanGoBack()
+        {
+            if (pageStack.Count == 0)
+            {
+                return false;
+            }
+
+            ContentControl control = pageStack.Peek().Control;
+            return Window.GetWindow(control) == Application.Current.MainWindow && (pageStack.Count > 1 || control.DataContext is INavigationFallback);
+        }
 
         public void Navigate(string pageName, object? options, NavigationOptions? navigation = default)
         {
