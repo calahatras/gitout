@@ -109,43 +109,50 @@ namespace GitOut.Features.Navigation
             return Window.GetWindow(control) == Application.Current.MainWindow && (pageStack.Count > 1 || control.DataContext is INavigationFallback);
         }
 
-        public void Navigate(string pageName, object? options, NavigationOptions? navigation = default)
+        public void Navigate(string pageName, object? options)
+        {
+            EnsureShell();
+            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
+
+            if (options is not null)
+            {
+                if (pageOptions.ContainsKey(pageName))
+                {
+                    pageOptions[pageName] = options;
+                }
+                else
+                {
+                    pageOptions.Add(pageName, options);
+                }
+            }
+            if (provider.GetService(pageType) is not UserControl page)
+            {
+                throw new ArgumentException($"No control provided for page {pageName}", nameof(pageName));
+            }
+            logger.LogInformation(LogEventId.Navigation, "Navigating to control {PageName}", pageName);
+
+            NavigateToControl(page);
+            CurrentPage = pageName;
+        }
+
+        public void NavigateNewWindow(string pageName, object? options)
+        {
+            EnsureShell();
+
+            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
+
+            IServiceScope scope = provider.CreateScope();
+            logger.LogInformation(LogEventId.Navigation, "Opening new window");
+            INavigationService windowNavigation = scope.ServiceProvider.GetRequiredService<INavigationService>();
+            windowNavigation.Navigate(pageName, options);
+            windowNavigation.Closed += (s, e) => scope.Dispose();
+        }
+
+        private void EnsureShell()
         {
             if (shell is null)
             {
                 shell = CreateShell();
-            }
-            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
-
-            if (navigation?.OpenInNewWindow ?? false)
-            {
-                IServiceScope scope = provider.CreateScope();
-                logger.LogInformation(LogEventId.Navigation, "Opening new window");
-                INavigationService windowNavigation = scope.ServiceProvider.GetRequiredService<INavigationService>();
-                windowNavigation.Navigate(pageName, options);
-                windowNavigation.Closed += (s, e) => scope.Dispose();
-            }
-            else
-            {
-                if (options is not null)
-                {
-                    if (pageOptions.ContainsKey(pageName))
-                    {
-                        pageOptions[pageName] = options;
-                    }
-                    else
-                    {
-                        pageOptions.Add(pageName, options);
-                    }
-                }
-                if (provider.GetService(pageType) is not UserControl page)
-                {
-                    throw new ArgumentException($"No control provided for page {pageName}", nameof(pageName));
-                }
-                logger.LogInformation(LogEventId.Navigation, "Navigating to control {PageName}", pageName);
-
-                NavigateToControl(page);
-                CurrentPage = pageName;
             }
         }
 

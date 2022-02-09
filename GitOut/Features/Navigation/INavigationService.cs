@@ -11,6 +11,7 @@ namespace GitOut.Features.Navigation
 
         T? GetOptions<T>(string pageName) where T : class;
 
-        void Navigate(string page, object? options, NavigationOptions? navigation = default);
+        void Navigate(string page, object? options);
+        void NavigateNewWindow(string page, object? options);
     }
 }
