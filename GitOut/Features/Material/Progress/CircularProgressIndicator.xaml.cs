@@ -212,7 +212,6 @@ namespace GitOut.Features.Material.Progress
                 TimeSpan throttleTime,
                 Action<T> init,
                 Action<T> update
-
             )
             {
                 this.init = init;
