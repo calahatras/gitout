@@ -9,14 +9,6 @@ namespace GitOut.Features.Collections
     {
         private bool suppressNotification;
 
-        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
-        {
-            if (!suppressNotification)
-            {
-                base.OnCollectionChanged(e);
-            }
-        }
-
         public void AddRange(IEnumerable<T> list)
         {
             _ = list ?? throw new ArgumentNullException(nameof(list));
@@ -28,6 +20,14 @@ namespace GitOut.Features.Collections
             }
             suppressNotification = false;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (!suppressNotification)
+            {
+                base.OnCollectionChanged(e);
+            }
         }
     }
 }
