@@ -113,7 +113,7 @@ namespace GitOut.Features.Git
             public IGitHistoryEventBuilder<GitHistoryEvent> ParseHash(string line)
             {
                 ReadOnlySpan<char> span = line.AsSpan();
-                hash = GitCommitId.FromHash(span.Slice(0, 40));
+                hash = GitCommitId.FromHash(span[..40]);
                 if (line.Length > 40)
                 {
                     parent = GitCommitId.FromHash(span.Slice(40, 40));

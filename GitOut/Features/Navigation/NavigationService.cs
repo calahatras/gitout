@@ -18,41 +18,36 @@ namespace GitOut.Features.Navigation
         private readonly IServiceProvider provider;
         private readonly ITitleService titleService;
         private readonly IThemeService theme;
-        private readonly IOptions<NavigationWindowOptions> windowOptions;
-        private readonly IWritableStorage storage;
         private readonly ILogger<NavigationService> logger;
-        private readonly Stack<Tuple<ContentControl, string?, IServiceScope>> pageStack = new();
+
+        private readonly Stack<(ContentControl, string?)> pageStack = new();
         private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
 
-        private Window? currentWindow;
+        private NavigatorShell? shell;
 
         public NavigationService(
             IServiceProvider provider,
             IHostApplicationLifetime life,
             ITitleService title,
             IThemeService theme,
-            IOptions<NavigationWindowOptions> windowOptions,
-            IWritableStorage storage,
             ILogger<NavigationService> logger
         )
         {
             this.provider = provider;
-            this.windowOptions = windowOptions;
-            this.storage = storage;
             titleService = title;
             this.theme = theme;
             this.logger = logger;
             life.ApplicationStopping.Register(() =>
             {
-                if (currentWindow is not null)
+                foreach (Window window in Application.Current.Windows)
                 {
                     try
                     {
-                        currentWindow.Dispatcher.Invoke(() =>
+                        window.Dispatcher.Invoke(() =>
                         {
-                            if (currentWindow.IsActive)
+                            if (window.IsActive)
                             {
-                                currentWindow.Close();
+                                window.Close();
                             }
                         });
                     }
@@ -66,20 +61,17 @@ namespace GitOut.Features.Navigation
         }
 
         public string? CurrentPage { get; private set; }
+
+        public event EventHandler<EventArgs>? Closed;
         public event EventHandler<NavigationEventArgs>? NavigationRequested;
 
         public void Back()
         {
-            if (pageStack.Count <= 1)
+            if (pageStack.Count < 1)
             {
                 return;
             }
-            (ContentControl current, string _, IServiceScope scope) = pageStack.Pop();
-            (ContentControl latest, string? title, IServiceScope _) = pageStack.Peek();
-            OnNavigationRequested(latest);
-            titleService.Title = title;
-            CurrentPage = latest.GetType().FullName;
-            logger.LogInformation(LogEventId.Navigation, $"Navigating back to {CurrentPage} ({title})");
+            (ContentControl current, string _) = pageStack.Pop();
             if (current.DataContext is INavigationListener navigatedToContext)
             {
                 navigatedToContext.Navigated(NavigationType.NavigatedLeave);
@@ -88,21 +80,39 @@ namespace GitOut.Features.Navigation
             {
                 dispose.Dispose();
             }
-            if (latest.DataContext is INavigationListener revisitedContext)
+            if (pageStack.Count == 0 && current.DataContext is INavigationFallback fallback)
             {
-                revisitedContext.Navigated(NavigationType.NavigatedBack);
+                Navigate(fallback.FallbackPageName, fallback.FallbackOptions);
             }
-
-            scope.Dispose();
+            else
+            {
+                (ContentControl latest, string? title) = pageStack.Peek();
+                OnNavigationRequested(latest);
+                titleService.Title = title;
+                CurrentPage = latest.GetType().FullName;
+                logger.LogInformation(LogEventId.Navigation, "Navigating back to {CurrentPage} ({Title})", CurrentPage, title);
+                if (latest.DataContext is INavigationListener revisitedContext)
+                {
+                    revisitedContext.Navigated(NavigationType.NavigatedBack);
+                }
+            }
         }
 
-        public bool CanGoBack() => pageStack.Count > 1;
+        public bool CanGoBack()
+        {
+            if (pageStack.Count == 0)
+            {
+                return false;
+            }
+
+            (ContentControl control, string _) = pageStack.Peek();
+            return Window.GetWindow(control) == Application.Current.MainWindow && (pageStack.Count > 1 || control.DataContext is INavigationFallback);
+        }
 
         public void Navigate(string pageName, object? options)
         {
-            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), "Invalid page name " + pageName);
-            IServiceScope scope = provider.CreateScope();
-            object? service;
+            EnsureShell();
+            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
             if (options is not null)
             {
                 if (pageOptions.ContainsKey(pageName))
@@ -114,86 +124,84 @@ namespace GitOut.Features.Navigation
                     pageOptions.Add(pageName, options);
                 }
             }
-            switch (service = scope.ServiceProvider.GetService(pageType))
+            if (provider.GetService(pageType) is not UserControl page)
             {
-                case Window window:
-                    {
-                        logger.LogInformation(LogEventId.Navigation, "Navigating to page " + pageName);
-                        currentWindow = window;
-                        NavigationWindowOptions cachedValues = windowOptions.Value;
-                        if (cachedValues.Width.HasValue)
-                        {
-                            currentWindow.Width = cachedValues.Width.Value;
-                        }
-                        if (cachedValues.Height.HasValue)
-                        {
-                            currentWindow.Height = cachedValues.Height.Value;
-                        }
-                        if (cachedValues.Top.HasValue)
-                        {
-                            currentWindow.Top = cachedValues.Top.Value;
-                        }
-                        if (cachedValues.Left.HasValue)
-                        {
-                            currentWindow.Left = cachedValues.Left.Value;
-                        }
-                        currentWindow.Activated += (sender, args) =>
-                        {
-                            if (pageStack.Count == 0)
-                            {
-                                return;
-                            }
-                            (ContentControl current, string? title, IServiceScope _) = pageStack.Peek();
-                            if (current.DataContext is INavigationListener listener)
-                            {
-                                listener.Navigated(NavigationType.Activated);
-                            }
-                        };
-                        currentWindow.Deactivated += (sender, args) =>
-                        {
-                            (ContentControl current, string? title, IServiceScope _) = pageStack.Peek();
-                            if (current.DataContext is INavigationListener listener)
-                            {
-                                listener.Navigated(NavigationType.Deactivated);
-                            }
-                        };
-                        currentWindow.Closing += (sender, args) =>
-                        {
-                            if (currentWindow.WindowState == WindowState.Normal)
-                            {
-                                storage.Write(NavigationWindowOptions.SectionKey, new
-                                {
-                                    Width = currentWindow.ActualWidth,
-                                    Height = currentWindow.ActualHeight,
-                                    currentWindow.Left,
-                                    currentWindow.Top
-                                });
-                            }
-                        };
-                        theme.RegisterResourceProvider(window.Resources);
-                        window.Show();
-                    }
-                    break;
-                case UserControl page:
-                    {
-                        string? currentTitle = titleService.Title;
-                        logger.LogInformation(LogEventId.Navigation, "Navigating to control " + pageName);
-                        OnNavigationRequested(page);
-                        pageStack.Push(new Tuple<ContentControl, string?, IServiceScope>(page, currentTitle, scope));
-                        CompositeCommand.RaiseExecuteChanged();
-                        CurrentPage = pageName;
-                        if (page.DataContext is INavigationListener listener)
-                        {
-                            listener.Navigated(NavigationType.Initial);
-                        }
-                    }
-                    break;
-                default: throw new ArgumentOutOfRangeException("Invalid navigational type: " + (service is not null ? service.ToString() : pageName));
+                throw new ArgumentException($"No control provided for page {pageName}", nameof(pageName));
             }
+            logger.LogInformation(LogEventId.Navigation, "Navigating to control {PageName}", pageName);
+
+            NavigateToControl(page);
+            CurrentPage = pageName;
+        }
+
+        public void NavigateNewWindow(string pageName, object? options)
+        {
+            EnsureShell();
+            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
+            IServiceScope scope = provider.CreateScope();
+            logger.LogInformation(LogEventId.Navigation, "Opening new window");
+            INavigationService windowNavigation = scope.ServiceProvider.GetRequiredService<INavigationService>();
+            windowNavigation.Navigate(pageName, options);
+            windowNavigation.Closed += (s, e) => scope.Dispose();
+        }
+
+        private void EnsureShell()
+        {
+            if (shell is null)
+            {
+                shell = CreateShell();
+            }
+        }
+
+        private NavigatorShell CreateShell()
+        {
+            var window = new NavigatorShell(
+                provider.GetRequiredService<NavigatorShellViewModel>(),
+                provider.GetRequiredService<IWritableStorage>(),
+                provider.GetRequiredService<IOptions<NavigationWindowOptions>>()
+            );
+            window.Activated += (sender, args) =>
+            {
+                Application.Current.MainWindow = window;
+                if (pageStack.Count == 0)
+                {
+                    return;
+                }
+                (ContentControl current, string? title) = pageStack.Peek();
+                if (current.DataContext is INavigationListener listener)
+                {
+                    listener.Navigated(NavigationType.Activated);
+                }
+            };
+            window.Deactivated += (sender, args) =>
+            {
+                (ContentControl current, string? title) = pageStack.Peek();
+                if (current.DataContext is INavigationListener listener)
+                {
+                    listener.Navigated(NavigationType.Deactivated);
+                }
+            };
+            window.Closed += (sender, args) => OnClosed(args);
+            theme.RegisterResourceProvider(window.Resources);
+            window.Show();
+            return window;
         }
 
         public T? GetOptions<T>(string pageName) where T : class => pageOptions.TryGetValue(pageName, out object? options) ? options as T : null;
 
+        private void NavigateToControl(UserControl page)
+        {
+            string? currentTitle = titleService.Title;
+            OnNavigationRequested(page);
+            pageStack.Push((page, currentTitle));
+            CompositeCommand.RaiseExecuteChanged();
+            if (page.DataContext is INavigationListener listener)
+            {
+                listener.Navigated(NavigationType.Initial);
+            }
+        }
+
+        private void OnClosed(EventArgs args) => Closed?.Invoke(this, args);
         private void OnNavigationRequested(ContentControl control) => NavigationRequested?.Invoke(this, new NavigationEventArgs(control));
     }
 }
