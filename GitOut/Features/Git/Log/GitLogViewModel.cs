@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Collections;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.IO;
@@ -25,7 +26,7 @@ namespace GitOut.Features.Git.Log
         private readonly ObservableCollection<GitTreeEvent> activeStashes = new();
 
         private readonly object entriesLock = new();
-        private readonly ObservableCollection<GitTreeEvent> entries = new();
+        private readonly RangeObservableCollection<GitTreeEvent> entries = new();
 
         private readonly object remotesLock = new();
         private readonly ObservableCollection<GitRemoteViewModel> remotes = new();
@@ -50,6 +51,8 @@ namespace GitOut.Features.Git.Log
         private string? checkoutBranchName;
         private GitTreeEvent? entryInView;
         private bool hasChanges;
+
+        private bool isWorking;
 
         public GitLogViewModel(
             INavigationService navigation,
@@ -203,6 +206,12 @@ namespace GitOut.Features.Git.Log
             set => SetProperty(ref isCheckoutBranchVisible, value);
         }
 
+        public bool IsWorking
+        {
+            get => isWorking;
+            set => SetProperty(ref isWorking, value);
+        }
+
         public int ChangesCount
         {
             get => changesCount;
@@ -345,6 +354,7 @@ namespace GitOut.Features.Git.Log
 
         private async Task FetchRemotesAsync()
         {
+            IsWorking = true;
             foreach (GitRemoteViewModel remote in remotes)
             {
                 if (remote.IsSelected)
@@ -354,10 +364,12 @@ namespace GitOut.Features.Git.Log
             }
             snack.ShowSuccess("Fetched all selected remotes");
             await CheckRepositoryStatusAsync();
+            IsWorking = false;
         }
 
         private async Task PopulateRemotesAsync()
         {
+            IsWorking = true;
             await foreach (GitRemote remote in Repository.GetRemotesAsync())
             {
                 lock (remotesLock)
@@ -365,35 +377,44 @@ namespace GitOut.Features.Git.Log
                     remotes.Add(GitRemoteViewModel.From(remote));
                 }
             }
+            IsWorking = false;
         }
 
         private async Task CheckRepositoryStatusAsync()
         {
-            IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(new LogOptions
+            IsWorking = true;
+            IEnumerable<GitTreeEvent>? history = await Task.Run(async () =>
             {
-                IncludeRemotes = includeRemotes,
-                IncludeStashes = includeStashes
-            }).ConfigureAwait(false);
-            IEnumerable<GitTreeEvent> history = BuildTree(tree);
-            lock (entriesLock)
-            {
+                IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(new LogOptions
+                {
+                    IncludeRemotes = includeRemotes,
+                    IncludeStashes = includeStashes
+                }).ConfigureAwait(false);
+
+                IEnumerable<GitTreeEvent>? result = BuildTree(tree);
                 List<GitCommitId> selected = entries
                     .Where(e => e.IsSelected)
                     .Select(e => e.Event.Id)
                     .ToList();
 
-                entries.Clear();
-                foreach (GitTreeEvent item in history)
+                foreach (GitTreeEvent item in result)
                 {
                     if (selected.Contains(item.Event.Id))
                     {
                         item.IsSelected = true;
                     }
-                    entries.Add(item);
                 }
+                return result;
+            }).ConfigureAwait(false);
+
+            lock (entriesLock)
+            {
+                entries.Clear();
+                entries.AddRange(history);
             }
             GitStatusResult status = await Repository.StatusAsync().ConfigureAwait(false);
             ChangesCount = status.Changes.Count;
+            IsWorking = false;
         }
 
         private async Task RefreshStashListAsync()
