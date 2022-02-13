@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Collections;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.IO;
@@ -25,7 +26,7 @@ namespace GitOut.Features.Git.Log
         private readonly ObservableCollection<GitTreeEvent> activeStashes = new();
 
         private readonly object entriesLock = new();
-        private readonly ObservableCollection<GitTreeEvent> entries = new();
+        private readonly RangeObservableCollection<GitTreeEvent> entries = new();
 
         private readonly object remotesLock = new();
         private readonly ObservableCollection<GitRemoteViewModel> remotes = new();
@@ -382,28 +383,34 @@ namespace GitOut.Features.Git.Log
         private async Task CheckRepositoryStatusAsync()
         {
             IsWorking = true;
-            IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(new LogOptions
+            IEnumerable<GitTreeEvent>? history = await Task.Run(async () =>
             {
-                IncludeRemotes = includeRemotes,
-                IncludeStashes = includeStashes
-            }).ConfigureAwait(false);
-            IEnumerable<GitTreeEvent> history = BuildTree(tree);
-            lock (entriesLock)
-            {
+                IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(new LogOptions
+                {
+                    IncludeRemotes = includeRemotes,
+                    IncludeStashes = includeStashes
+                }).ConfigureAwait(false);
+
+                IEnumerable<GitTreeEvent>? result = BuildTree(tree);
                 List<GitCommitId> selected = entries
                     .Where(e => e.IsSelected)
                     .Select(e => e.Event.Id)
                     .ToList();
 
-                entries.Clear();
-                foreach (GitTreeEvent item in history)
+                foreach (GitTreeEvent item in result)
                 {
                     if (selected.Contains(item.Event.Id))
                     {
                         item.IsSelected = true;
                     }
-                    entries.Add(item);
                 }
+                return result;
+            }).ConfigureAwait(false);
+
+            lock (entriesLock)
+            {
+                entries.Clear();
+                entries.AddRange(history);
             }
             GitStatusResult status = await Repository.StatusAsync().ConfigureAwait(false);
             ChangesCount = status.Changes.Count;
