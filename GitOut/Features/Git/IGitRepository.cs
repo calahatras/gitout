@@ -31,8 +31,11 @@ namespace GitOut.Features.Git
 
         Task AddAllAsync();
         Task ResetAllAsync();
+        Task ResetToCommitAsync(GitCommitId id);
         Task AddAsync(GitStatusChange change, AddOptions options);
         Task CheckoutAsync(GitStatusChange change);
+        Task CreateBranchAsync(GitBranchName name);
+        Task DeleteBranchAsync(GitBranchName name);
         Task CheckoutBranchAsync(GitBranchName name);
         Task ResetAsync(GitStatusChange change);
         Task RestoreAsync(GitStatusChange change);

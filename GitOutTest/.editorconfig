@@ -1,0 +1,3 @@
+root = false
+
+dotnet_diagnostic.CA1506.severity=silent

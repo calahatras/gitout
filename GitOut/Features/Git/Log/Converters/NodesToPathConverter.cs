@@ -68,7 +68,7 @@ namespace GitOut.Features.Git.Log.Converters
 
         public object[]? ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => null;
 
-        private static Path CreatePath(Color color, bool useDashedLine, PathGeometry geometry) => new Path()
+        private static Path CreatePath(Color color, bool useDashedLine, PathGeometry geometry) => new()
         {
             Stroke = new SolidColorBrush(color),
             StrokeThickness = 2,
