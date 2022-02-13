@@ -28,7 +28,7 @@ namespace GitOut.Features.Git.Diff
         public IEnumerable<LineNumberViewModel> LineNumbers { get; }
         public TextRange? Selection { get; set; }
 
-        public List<(Paragraph, HunkLine)> DiffContexts { get; }
+        public IReadOnlyCollection<(Paragraph, HunkLine)> DiffContexts { get; }
 
         public static GitDiffViewModel ParseDiff(IEnumerable<GitDiffHunk> result, DiffDisplayOptions display)
         {

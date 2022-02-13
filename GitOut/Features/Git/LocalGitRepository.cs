@@ -314,9 +314,29 @@ namespace GitOut.Features.Git
 
         public Task ResetAllAsync() => CreateProcess(ProcessOptions.FromArguments("reset HEAD")).ExecuteAsync();
 
+        public Task ResetToCommitAsync(GitCommitId id) => CreateProcess(ProcessOptions.FromArguments($"reset {id}")).ExecuteAsync();
+
         public Task AddAsync(GitStatusChange change, AddOptions options) => CreateProcess(ProcessOptions.FromArguments($"add {string.Join(" ", options.BuildArguments())} -- {change.Path}")).ExecuteAsync();
 
         public Task CheckoutAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
+
+        public async Task CreateBranchAsync(GitBranchName name)
+        {
+            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"branch {name.Name}")).ExecuteAsync();
+            if (args.ErrorLines.Count > 0)
+            {
+                throw new InvalidOperationException($"Could not create branch: {args.Error}");
+            }
+        }
+
+        public async Task DeleteBranchAsync(GitBranchName name)
+        {
+            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"branch -D {name.Name}")).ExecuteAsync();
+            if (args.ErrorLines.Count > 0 && !args.ErrorLines.First().StartsWith("Deleted branch"))
+            {
+                throw new InvalidOperationException($"Could not delete branch: {args.Error}");
+            }
+        }
 
         public async Task CheckoutBranchAsync(GitBranchName name)
         {

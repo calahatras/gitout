@@ -146,6 +146,11 @@ namespace GitOut.Features.Git.Log
                 data => snack.ShowError(data.Message, data)
             );
 
+            SquashCommitsCommand = new AsyncCallbackCommand<LogEntriesViewModel?>(
+                SquashCommitAsync,
+                gte => gte is not null && changesCount == 0
+            );
+
             CloseDetailsCommand = new CallbackCommand(() =>
             {
                 foreach (GitTreeEvent entry in entries)
@@ -326,6 +331,7 @@ namespace GitOut.Features.Git.Log
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
+        public ICommand SquashCommitsCommand { get; }
         public ICommand SelectCommitCommand { get; }
         public ICommand AppendSelectCommitCommand { get; }
         public ICommand CloseAutocompleteCommand { get; }
@@ -448,6 +454,35 @@ namespace GitOut.Features.Git.Log
                 {
                     activeStashes.Add(new GitTreeEvent(stashEntry));
                 }
+            }
+        }
+
+        private async Task SquashCommitAsync(LogEntriesViewModel? gte)
+        {
+            IsWorking = true;
+            string subject = gte!.Root.Event.Subject;
+            string body = gte.Root.Event.Body;
+            var branch = GitBranchName.CreateLocal($"gitout-bkp/{Guid.NewGuid():N}");
+            await Repository.CreateBranchAsync(branch);
+            await Repository.ResetToCommitAsync(gte!.Root.Event.Id);
+            await Repository.AddAllAsync();
+            await Repository.CommitAsync(GitCommitOptions.AmendLatest(body.Length > 0 ? $"{subject}{Environment.NewLine}{Environment.NewLine}{body}" : subject));
+            snack.ShowSuccess("Successfully reset to previous commit");
+            await CheckRepositoryStatusAsync();
+            IsWorking = false;
+            const string approveActionText = "YES";
+            SnackAction? result = await snack.ShowAsync(
+                Snack.Builder()
+                    .WithMessage("Remove temporary branch?")
+                    .WithDuration(TimeSpan.FromMinutes(1))
+                    .AddAction(approveActionText)
+            );
+            if (result?.Text == approveActionText)
+            {
+                IsWorking = true;
+                await Repository.DeleteBranchAsync(branch);
+                await CheckRepositoryStatusAsync();
+                IsWorking = false;
             }
         }
 
