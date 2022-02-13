@@ -187,7 +187,7 @@
                 </Button>
                 <progress:CircularProgressIndicator
                     Grid.Column="1"
-                    Visibility="{Binding IsWorking, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    ShowProgress="{Binding IsWorking}"
                     StrokeThickness="3"
                     Diameter="20"
                     Stroke="{DynamicResource MaterialForegroundBase}"
