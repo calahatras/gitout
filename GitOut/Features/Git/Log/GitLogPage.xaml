@@ -214,6 +214,19 @@
                     <Button ToolTip="Close details" Command="{Binding CloseDetailsCommand}">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowCollapseRight}"/>
                     </Button>
+                    <Button ToolTip="Swap commits" Command="{Binding SwapCommitsCommand}">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="{DynamicResource MaterialGray400}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource SwapVerticalBold}"/>
+                    </Button>
                     <ToggleButton IsChecked="{Binding IsSearchDisplayed}" ToolTip="Search file">
                         <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileSearch}"/>
                     </ToggleButton>

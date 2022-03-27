@@ -11,6 +11,7 @@ namespace GitOut.Features.Git.Files
         public bool IsExpanded { get; set; }
         public RelativeDirectoryPath Path => RelativeDirectoryPath.Root;
         public FileName FileName => FileName.Create(string.Empty);
+        public string FullPath => string.Empty;
         public string IconResourceKey => string.Empty;
     }
 }

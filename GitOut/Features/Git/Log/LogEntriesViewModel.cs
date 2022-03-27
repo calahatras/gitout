@@ -152,6 +152,20 @@ namespace GitOut.Features.Git.Log
             return context;
         }
 
+        public LogEntriesViewModel? CopyContext(IList<GitTreeEvent> entries, IGitRepository repository, LogRevisionViewMode mode)
+        {
+            if (entries.Count is not 2)
+            {
+                return null;
+            }
+            var context = new LogEntriesViewModel(entries[0], entries[1], repository)
+            {
+                selectedItem = selectedItem,
+                ViewMode = mode
+            };
+            return context;
+        }
+
         private async IAsyncEnumerable<IGitFileEntryViewModel> ListAllFilesAsync()
         {
             IGitFileEntryViewModel? currentSelection = selectedItem;
@@ -222,7 +236,9 @@ namespace GitOut.Features.Git.Log
                     current = child.OfType<IGitDirectoryEntryViewModel>();
                 }
             }
-            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => SelectedItem = entry));
+            IEnumerable<IGitFileEntryViewModel> files = items.OfType<IGitFileEntryViewModel>();
+            IGitFileEntryViewModel? selectedItem = files.FirstOrDefault(f => f.FullPath == entry.FullPath);
+            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => SelectedItem = selectedItem));
         }
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
@@ -246,6 +262,7 @@ namespace GitOut.Features.Git.Log
                 IsRoot = directory == RelativeDirectoryPath.Root;
                 Count = directory.Segments.Count;
                 FileName = directory.Name;
+                FullPath = directory.ToString();
             }
 
             public RelativeDirectoryPath Path { get; }
@@ -257,6 +274,7 @@ namespace GitOut.Features.Git.Log
             public bool IsExpanded { get; set; }
 
             public FileName FileName { get; }
+            public string FullPath { get; }
 
             public string IconResourceKey => throw new InvalidOperationException("Scaffold does not hold an icon");
 
