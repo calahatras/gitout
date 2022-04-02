@@ -227,6 +227,7 @@ namespace GitOut.Features.Git.Log
                 return;
             }
             IEnumerable<IGitDirectoryEntryViewModel> current = items.OfType<IGitDirectoryEntryViewModel>();
+            IGitFileEntryViewModel? selectedItem = null;
             foreach (string segment in entry.Path.Segments)
             {
                 IGitDirectoryEntryViewModel? child = current.FirstOrDefault(directory => directory.FileName.ToString() == segment);
@@ -234,10 +235,18 @@ namespace GitOut.Features.Git.Log
                 {
                     child.IsExpanded = true;
                     current = child.OfType<IGitDirectoryEntryViewModel>();
+                    if (selectedItem is null)
+                    {
+                        IEnumerable<IGitFileEntryViewModel> files = child.OfType<IGitFileEntryViewModel>();
+                        selectedItem = files.FirstOrDefault(f => f.FullPath == entry.FullPath);
+                    }
                 }
             }
-            IEnumerable<IGitFileEntryViewModel> files = items.OfType<IGitFileEntryViewModel>();
-            IGitFileEntryViewModel? selectedItem = files.FirstOrDefault(f => f.FullPath == entry.FullPath);
+            if (selectedItem is null)
+            {
+                IEnumerable<IGitFileEntryViewModel> files = items.OfType<IGitFileEntryViewModel>();
+                selectedItem = files.FirstOrDefault(f => f.FullPath == entry.FullPath);
+            }
             Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => SelectedItem = selectedItem));
         }
 

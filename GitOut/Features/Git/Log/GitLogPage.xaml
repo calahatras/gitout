@@ -698,7 +698,7 @@
             </Grid>
             <GridSplitter Grid.Column="5" Style="{StaticResource SplitVerticalStyle}" />
             <Grid Grid.Column="6">
-                <ContentPresenter Content="{Binding ElementName=FileTree, Path=SelectedItem, FallbackValue=Nothing}">
+                <ContentPresenter Content="{Binding SelectedContext.SelectedItem, FallbackValue=Nothing}">
                     <ContentPresenter.Resources>
                         <DataTemplate DataType="{x:Type files:GitFileViewModel}">
                             <Grid>

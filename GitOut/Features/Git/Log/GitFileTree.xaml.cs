@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace GitOut.Features.Git.Log
 {
@@ -40,10 +42,45 @@ namespace GitOut.Features.Git.Log
         {
             if (d is GitFileTree control)
             {
-                DependencyObject container = control.FileTree.ItemContainerGenerator.ContainerFromItem(e.NewValue);
-                if (container is TreeViewItem child)
+                FocusChild(control.FileTree.ItemContainerGenerator, e.NewValue);
+            }
+
+            bool FocusChild(ItemContainerGenerator generator, object child)
+            {
+                DependencyObject container = generator.ContainerFromItem(child);
+                if (container is TreeViewItem treeViewItem)
                 {
-                    child.Focus();
+                    treeViewItem.Focus();
+                    return true;
+                }
+
+                foreach (object? item in generator.Items)
+                {
+                    DependencyObject childContainer = generator.ContainerFromItem(item);
+                    if (childContainer is TreeViewItem childTreeViewItem)
+                    {
+                        if (childTreeViewItem.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+                        {
+                            if (FocusChild(childTreeViewItem.ItemContainerGenerator, child))
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            childTreeViewItem.ItemContainerGenerator.StatusChanged += OnContainerStatusChanged;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            void OnContainerStatusChanged(object? sender, EventArgs args)
+            {
+                if (sender is ItemContainerGenerator generator && generator.Status == GeneratorStatus.ContainersGenerated)
+                {
+                    FocusChild(generator, e.NewValue);
+                    generator.StatusChanged -= OnContainerStatusChanged;
                 }
             }
         }
