@@ -16,6 +16,7 @@ using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
+using GitOut.Features.Native.Shell32;
 using GitOut.Features.Navigation;
 using GitOut.Features.Text;
 using GitOut.Features.Wpf;
@@ -902,14 +903,17 @@ namespace GitOut.Features.Git.Stage
             ISnackBuilder? builder = Snack.Builder();
             builder.AddAction("YES");
             builder.AddAction("NO");
-            builder.WithMessage("This file is untracked. This will delete the file. Are you sure that you want to delete the file?");
+            builder.WithMessage(
+                $"{Path.GetFileName(path)} is untracked. " +
+                $"This will move the file to the recycle bin. " +
+                $"Are you sure that you want to recycle the file?");
             builder.WithDuration(Timeout.InfiniteTimeSpan);
             builder.WithCancellation(cancelRefreshSnack.Token);
             SnackAction? action = await snack.ShowAsync(builder);
 
             if (action?.Text == "YES")
             {
-                File.Delete(path);
+                FileOperations.MoveFileToRecycleBin(path);
             }
         }
 
