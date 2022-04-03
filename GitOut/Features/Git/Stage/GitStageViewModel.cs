@@ -478,7 +478,7 @@ namespace GitOut.Features.Git.Stage
                 switch (model.Status)
                 {
                     case GitModifiedStatusType.Added:
-                        await Repository.RestoreAsync(model.Model);
+                        await Repository.RestoreAsync(model.Model).ConfigureAwait(false);
                         break;
                     case GitModifiedStatusType.Untracked:
                         await DeleteFileSnackAsync(model.FullPath).ConfigureAwait(false);
@@ -496,17 +496,20 @@ namespace GitOut.Features.Git.Stage
         {
             undoPatch = null;
             int previousIndex = SelectedWorkspaceIndex;
-            foreach (StatusChangeViewModel item in workspaceFiles)
+            foreach (StatusChangeViewModel model in workspaceFiles)
             {
-                if (item.IsSelected)
+                if (model.IsSelected)
                 {
-                    switch (item.Status)
+                    switch (model.Status)
                     {
+                        case GitModifiedStatusType.Added:
+                            await Repository.RestoreAsync(model.Model).ConfigureAwait(false);
+                            break;
                         case GitModifiedStatusType.Untracked:
-                            await DeleteFileSnackAsync(item.FullPath).ConfigureAwait(false);
+                            await DeleteFileSnackAsync(model.FullPath).ConfigureAwait(false);
                             break;
                         default:
-                            await Repository.CheckoutAsync(item.Model).ConfigureAwait(false);
+                            await Repository.CheckoutAsync(model.Model).ConfigureAwait(false);
                             break;
                     }
                 }
