@@ -16,6 +16,7 @@ using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
+using GitOut.Features.Native.Shell32;
 using GitOut.Features.Navigation;
 using GitOut.Features.Text;
 using GitOut.Features.Wpf;
@@ -473,32 +474,20 @@ namespace GitOut.Features.Git.Stage
             if (model.Location == StatusChangeLocation.Workspace)
             {
                 int previousIndex = SelectedWorkspaceIndex;
-                if (model.Status == GitModifiedStatusType.Added)
-                {
-                    await Repository.RestoreAsync(model.Model);
-                }
-                else if (model.Status == GitModifiedStatusType.Untracked)
-                {
-                    cancelRefreshSnack?.Cancel();
-                    cancelRefreshSnack = new CancellationTokenSource();
-                    ISnackBuilder? builder = Snack.Builder();
-                    builder.AddAction("YES");
-                    builder.AddAction("NO");
-                    builder.WithMessage("This file is untracked. This will delete the file. Are you sure that you want to delete the file?");
-                    builder.WithDuration(Timeout.InfiniteTimeSpan);
-                    builder.WithCancellation(cancelRefreshSnack.Token);
-                    SnackAction? action = await snack.ShowAsync(builder);
 
-                    if (action?.Text == "YES")
-                    {
-                        File.Delete(model.FullPath);
-                    }
-                }
-                else
+                switch (model.Status)
                 {
-                    await Repository.CheckoutAsync(model.Model);
+                    case GitModifiedStatusType.Added:
+                        await Repository.RestoreAsync(model.Model).ConfigureAwait(false);
+                        break;
+                    case GitModifiedStatusType.Untracked:
+                        await DeleteFileSnackAsync(model.FullPath).ConfigureAwait(false);
+                        break;
+                    default:
+                        await Repository.CheckoutAsync(model.Model).ConfigureAwait(false);
+                        break;
                 }
-                await GetRepositoryStatusAsync();
+                await GetRepositoryStatusAsync().ConfigureAwait(false);
                 SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
             }
         }
@@ -507,14 +496,25 @@ namespace GitOut.Features.Git.Stage
         {
             undoPatch = null;
             int previousIndex = SelectedWorkspaceIndex;
-            foreach (StatusChangeViewModel item in workspaceFiles)
+            foreach (StatusChangeViewModel model in workspaceFiles)
             {
-                if (item.IsSelected)
+                if (model.IsSelected)
                 {
-                    await Repository.CheckoutAsync(item.Model);
+                    switch (model.Status)
+                    {
+                        case GitModifiedStatusType.Added:
+                            await Repository.RestoreAsync(model.Model).ConfigureAwait(false);
+                            break;
+                        case GitModifiedStatusType.Untracked:
+                            await DeleteFileSnackAsync(model.FullPath).ConfigureAwait(false);
+                            break;
+                        default:
+                            await Repository.CheckoutAsync(model.Model).ConfigureAwait(false);
+                            break;
+                    }
                 }
             }
-            await GetRepositoryStatusAsync();
+            await GetRepositoryStatusAsync().ConfigureAwait(false);
             SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
         }
 
@@ -897,6 +897,30 @@ namespace GitOut.Features.Git.Stage
                 return true;
             }
             return false;
+        }
+
+        private async Task DeleteFileSnackAsync(string path)
+        {
+            cancelRefreshSnack?.Cancel();
+            cancelRefreshSnack = new CancellationTokenSource();
+            ISnackBuilder? builder = Snack.Builder();
+            builder.AddAction("DELETE");
+            builder.AddAction("RECYCLE");
+            builder.WithMessage(
+                $"{Path.GetFileName(path)} is untracked. " +
+                $"Do you want to delete the file?");
+            builder.WithDuration(Timeout.InfiniteTimeSpan);
+            builder.WithCancellation(cancelRefreshSnack.Token);
+            SnackAction? action = await snack.ShowAsync(builder);
+
+            if (action?.Text == "DELETE")
+            {
+                File.Delete(path);
+            }
+            else if (action?.Text == "RECYCLE")
+            {
+                FileOperations.MoveFileToRecycleBin(path);
+            }
         }
 
         private static int FindSortedIndex<T>(IList<T> items, Func<T, int> compare)
