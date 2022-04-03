@@ -6,6 +6,7 @@ namespace GitOut.Features.Git.Files
     {
         RelativeDirectoryPath Path { get; }
         FileName FileName { get; }
+        string FullPath { get; }
         string IconResourceKey { get; }
     }
 }

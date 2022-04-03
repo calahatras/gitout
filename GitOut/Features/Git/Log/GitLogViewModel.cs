@@ -39,6 +39,7 @@ namespace GitOut.Features.Git.Log
         private int changesCount;
         private bool includeStashes = true;
         private bool includeRemotes = true;
+        private bool suppressSelectedLogEntriesCollectionChanged;
         private bool showSpacesAsDots;
         private bool isStashesVisible;
         private bool isSearchDisplayed;
@@ -86,6 +87,11 @@ namespace GitOut.Features.Git.Log
 
             selectedLogEntries.CollectionChanged += (sender, args) =>
             {
+                if (suppressSelectedLogEntriesCollectionChanged)
+                {
+                    return;
+                }
+
                 SelectedContext = LogEntriesViewModel.CreateContext(selectedLogEntries, Repository, RevisionViewMode);
                 ViewMode = SelectedContext is null
                     ? LogViewMode.None
@@ -147,6 +153,18 @@ namespace GitOut.Features.Git.Log
                     entry.IsSelected = false;
                 }
             });
+            SwapCommitsCommand = new CallbackCommand(
+                () =>
+                {
+                    suppressSelectedLogEntriesCollectionChanged = true;
+                    (selectedLogEntries[0], selectedLogEntries[1]) = (selectedLogEntries[1], selectedLogEntries[0]);
+
+                    SelectedContext = selectedContext!.CopyContext(selectedLogEntries, Repository, RevisionViewMode);
+
+                    suppressSelectedLogEntriesCollectionChanged = false;
+                },
+                () => selectedLogEntries.Count == 2
+            );
             SelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
             {
                 EntryInView = null;
@@ -313,6 +331,7 @@ namespace GitOut.Features.Git.Log
         public ICommand CloseAutocompleteCommand { get; }
         public ICommand ShowSearchFilesCommand { get; }
         public ICommand CloseDetailsCommand { get; }
+        public ICommand SwapCommitsCommand { get; }
 
         public string FallbackPageName => typeof(RepositoryListPage).FullName!;
         public object? FallbackOptions => null;
@@ -392,7 +411,7 @@ namespace GitOut.Features.Git.Log
                 }).ConfigureAwait(false);
 
                 IEnumerable<GitTreeEvent>? result = BuildTree(tree);
-                List<GitCommitId> selected = entries
+                var selected = entries
                     .Where(e => e.IsSelected)
                     .Select(e => e.Event.Id)
                     .ToList();
