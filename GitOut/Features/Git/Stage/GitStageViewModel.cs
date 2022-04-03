@@ -904,17 +904,20 @@ namespace GitOut.Features.Git.Stage
             cancelRefreshSnack?.Cancel();
             cancelRefreshSnack = new CancellationTokenSource();
             ISnackBuilder? builder = Snack.Builder();
-            builder.AddAction("YES");
-            builder.AddAction("NO");
+            builder.AddAction("DELETE");
+            builder.AddAction("RECYCLE");
             builder.WithMessage(
                 $"{Path.GetFileName(path)} is untracked. " +
-                $"This will move the file to the recycle bin. " +
-                $"Are you sure that you want to recycle the file?");
+                $"Do you want to delete the file?");
             builder.WithDuration(Timeout.InfiniteTimeSpan);
             builder.WithCancellation(cancelRefreshSnack.Token);
             SnackAction? action = await snack.ShowAsync(builder);
 
-            if (action?.Text == "YES")
+            if (action?.Text == "DELETE")
+            {
+                File.Delete(path);
+            }
+            else if (action?.Text == "RECYCLE")
             {
                 FileOperations.MoveFileToRecycleBin(path);
             }
