@@ -473,32 +473,20 @@ namespace GitOut.Features.Git.Stage
             if (model.Location == StatusChangeLocation.Workspace)
             {
                 int previousIndex = SelectedWorkspaceIndex;
-                if (model.Status == GitModifiedStatusType.Added)
-                {
-                    await Repository.RestoreAsync(model.Model);
-                }
-                else if (model.Status == GitModifiedStatusType.Untracked)
-                {
-                    cancelRefreshSnack?.Cancel();
-                    cancelRefreshSnack = new CancellationTokenSource();
-                    ISnackBuilder? builder = Snack.Builder();
-                    builder.AddAction("YES");
-                    builder.AddAction("NO");
-                    builder.WithMessage("This file is untracked. This will delete the file. Are you sure that you want to delete the file?");
-                    builder.WithDuration(Timeout.InfiniteTimeSpan);
-                    builder.WithCancellation(cancelRefreshSnack.Token);
-                    SnackAction? action = await snack.ShowAsync(builder);
 
-                    if (action?.Text == "YES")
-                    {
-                        File.Delete(model.FullPath);
-                    }
-                }
-                else
+                switch (model.Status)
                 {
-                    await Repository.CheckoutAsync(model.Model);
+                    case GitModifiedStatusType.Added:
+                        await Repository.RestoreAsync(model.Model);
+                        break;
+                    case GitModifiedStatusType.Untracked:
+                        await DeleteFileSnackAsync(model.FullPath).ConfigureAwait(false);
+                        break;
+                    default:
+                        await Repository.CheckoutAsync(model.Model).ConfigureAwait(false);
+                        break;
                 }
-                await GetRepositoryStatusAsync();
+                await GetRepositoryStatusAsync().ConfigureAwait(false);
                 SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
             }
         }
@@ -511,10 +499,18 @@ namespace GitOut.Features.Git.Stage
             {
                 if (item.IsSelected)
                 {
-                    await Repository.CheckoutAsync(item.Model);
+                    switch (item.Status)
+                    {
+                        case GitModifiedStatusType.Untracked:
+                            await DeleteFileSnackAsync(item.FullPath).ConfigureAwait(false);
+                            break;
+                        default:
+                            await Repository.CheckoutAsync(item.Model).ConfigureAwait(false);
+                            break;
+                    }
                 }
             }
-            await GetRepositoryStatusAsync();
+            await GetRepositoryStatusAsync().ConfigureAwait(false);
             SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
         }
 
@@ -897,6 +893,24 @@ namespace GitOut.Features.Git.Stage
                 return true;
             }
             return false;
+        }
+
+        private async Task DeleteFileSnackAsync(string path)
+        {
+            cancelRefreshSnack?.Cancel();
+            cancelRefreshSnack = new CancellationTokenSource();
+            ISnackBuilder? builder = Snack.Builder();
+            builder.AddAction("YES");
+            builder.AddAction("NO");
+            builder.WithMessage("This file is untracked. This will delete the file. Are you sure that you want to delete the file?");
+            builder.WithDuration(Timeout.InfiniteTimeSpan);
+            builder.WithCancellation(cancelRefreshSnack.Token);
+            SnackAction? action = await snack.ShowAsync(builder);
+
+            if (action?.Text == "YES")
+            {
+                File.Delete(path);
+            }
         }
 
         private static int FindSortedIndex<T>(IList<T> items, Func<T, int> compare)
