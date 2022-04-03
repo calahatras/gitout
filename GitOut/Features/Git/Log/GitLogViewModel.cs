@@ -88,7 +88,9 @@ namespace GitOut.Features.Git.Log
             selectedLogEntries.CollectionChanged += (sender, args) =>
             {
                 if (suppressSelectedLogEntriesCollectionChanged)
+                {
                     return;
+                }
 
                 SelectedContext = LogEntriesViewModel.CreateContext(selectedLogEntries, Repository, RevisionViewMode);
                 ViewMode = SelectedContext is null
@@ -151,15 +153,17 @@ namespace GitOut.Features.Git.Log
                     entry.IsSelected = false;
                 }
             });
-            SwapCommitsCommand = new CallbackCommand(() =>
-            {
-                suppressSelectedLogEntriesCollectionChanged = true;
-                (selectedLogEntries[0], selectedLogEntries[1]) = (selectedLogEntries[1], selectedLogEntries[0]);
+            SwapCommitsCommand = new CallbackCommand(
+                () =>
+                {
+                    suppressSelectedLogEntriesCollectionChanged = true;
+                    (selectedLogEntries[0], selectedLogEntries[1]) = (selectedLogEntries[1], selectedLogEntries[0]);
 
-                SelectedContext = selectedContext!.CopyContext(selectedLogEntries, Repository, RevisionViewMode);
+                    SelectedContext = selectedContext!.CopyContext(selectedLogEntries, Repository, RevisionViewMode);
 
-                suppressSelectedLogEntriesCollectionChanged = false;
-            }, () => selectedLogEntries.Count == 2
+                    suppressSelectedLogEntriesCollectionChanged = false;
+                },
+                () => selectedLogEntries.Count == 2
             );
             SelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
             {
@@ -407,7 +411,7 @@ namespace GitOut.Features.Git.Log
                 }).ConfigureAwait(false);
 
                 IEnumerable<GitTreeEvent>? result = BuildTree(tree);
-                List<GitCommitId> selected = entries
+                var selected = entries
                     .Where(e => e.IsSelected)
                     .Select(e => e.Event.Id)
                     .ToList();

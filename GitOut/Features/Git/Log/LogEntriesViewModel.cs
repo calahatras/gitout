@@ -237,15 +237,13 @@ namespace GitOut.Features.Git.Log
                     current = child.OfType<IGitDirectoryEntryViewModel>();
                     if (selectedItem is null)
                     {
-                        IEnumerable<IGitFileEntryViewModel> files = child.OfType<IGitFileEntryViewModel>();
-                        selectedItem = files.FirstOrDefault(f => f.FullPath == entry.FullPath);
+                        selectedItem = child.FirstOrDefault(f => f.FullPath == entry.FullPath);
                     }
                 }
             }
             if (selectedItem is null)
             {
-                IEnumerable<IGitFileEntryViewModel> files = items.OfType<IGitFileEntryViewModel>();
-                selectedItem = files.FirstOrDefault(f => f.FullPath == entry.FullPath);
+                selectedItem = items.FirstOrDefault(f => f.FullPath == entry.FullPath);
             }
             Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => SelectedItem = selectedItem));
         }
