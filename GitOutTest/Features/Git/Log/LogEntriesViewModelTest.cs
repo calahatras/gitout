@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Files;
 using GitOut.Features.IO;
+using GitOut.Features.Material.Snackbar;
 using Moq;
 using NUnit.Framework;
 
@@ -32,10 +33,13 @@ namespace GitOut.Features.Git.Log
             };
 
             var repository = new Mock<IGitRepository>();
+            var notifier = new Mock<IGitRepositoryNotifier>();
             repository.Setup(m => m.ListTreeAsync(root.Event.Id, It.IsAny<DiffOptions>())).Returns(entries.ToAsyncEnumerable());
+            var snack = new Mock<ISnackbarService>();
 
-            var actor = new LogEntriesViewModel(root, repository.Object);
-            await actor.AllFiles.MaterializeAsync(RelativeDirectoryPath.Root);
+            var actor = LogEntriesViewModel.CreateContext(new List<GitTreeEvent>(new[] { root }), repository.Object, notifier.Object, snack.Object, LogRevisionViewMode.CurrentRevision);
+            Assert.IsNotNull(actor);
+            await actor!.AllFiles.MaterializeAsync(RelativeDirectoryPath.Root);
 
             Assert.That(actor.RootFiles.OfType<IGitFileEntryViewModel>().Count(), Is.EqualTo(2));
             Assert.That(actor.RootFiles.OfType<IGitDirectoryEntryViewModel>().Count(), Is.EqualTo(1));

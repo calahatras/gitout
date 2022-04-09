@@ -41,6 +41,15 @@ namespace GitOut.Features.Git
             return false;
         }
 
+        public async Task<GitCommitId?> GetCommitIdAsync(string reference)
+        {
+            await foreach (string line in CreateProcess(ProcessOptions.FromArguments($"rev-parse {reference}")).ReadLinesAsync())
+            {
+                return GitCommitId.FromHash(line);
+            }
+            return null;
+        }
+
         public async Task<GitHistoryEvent> GetHeadAsync()
         {
             IGitProcess log = CreateProcess(ProcessOptions.FromArguments("-c log.showSignature=false log -n1 -z --pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\" HEAD"));
@@ -144,11 +153,10 @@ namespace GitOut.Features.Git
                     logitem.Branches.Add(branch);
                 }
             }
-            IGitProcess head = CreateProcess(ProcessOptions.FromArguments("rev-parse HEAD"));
-            await foreach (string line in head.ReadLinesAsync())
+            GitCommitId? head = await GetCommitIdAsync("HEAD");
+            if (head is not null)
             {
-                var id = GitCommitId.FromHash(line);
-                if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? value))
+                if (historyByCommitId.TryGetValue(head, out GitHistoryEvent? value))
                 {
                     value.IsHead = true;
                 }
@@ -320,22 +328,34 @@ namespace GitOut.Features.Git
 
         public Task CheckoutAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"checkout HEAD -- {change.Path}")).ExecuteAsync();
 
-        public async Task CreateBranchAsync(GitBranchName name)
+        public async Task CreateBranchAsync(GitBranchName name, GitCreateBranchOptions? options = default)
         {
-            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"branch {name.Name}")).ExecuteAsync();
+            IProcessOptionsBuilder arguments = ProcessOptions.Builder().Append("branch").Append(name.Name);
+            if (options is not null)
+            {
+                arguments.Append(options.From.ToString());
+            }
+            ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
             if (args.ErrorLines.Count > 0)
             {
                 throw new InvalidOperationException($"Could not create branch: {args.Error}");
             }
         }
 
-        public async Task DeleteBranchAsync(GitBranchName name)
+        public async Task<GitDeleteResult> DeleteBranchAsync(GitBranchName name, GitDeleteBranchOptions? options = default)
         {
-            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"branch -D {name.Name}")).ExecuteAsync();
-            if (args.ErrorLines.Count > 0 && !args.ErrorLines.First().StartsWith("Deleted branch"))
-            {
-                throw new InvalidOperationException($"Could not delete branch: {args.Error}");
-            }
+            ProcessOptions arguments = ProcessOptions.Builder()
+                .Append("branch")
+                .Append(options?.ForceDelete ?? false ? "--delete --force" : "--delete")
+                .Append(name.Name)
+                .Build();
+            ProcessEventArgs args = await CreateProcess(arguments).ExecuteAsync();
+            return GitDeleteResult.Parse(
+                name,
+                this,
+                args.OutputLines,
+                args.ErrorLines
+            );
         }
 
         public async Task CheckoutBranchAsync(GitBranchName name)

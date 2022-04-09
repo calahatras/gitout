@@ -40,7 +40,7 @@
         <ContextMenu x:Key="LogEventMenu">
             <MenuItem Header="Copy commit hash" Command="{Binding CopyCommitHashCommand}" CommandParameter="{Binding SelectedContext.Root.Event}" />
             <MenuItem Header="Copy subject" Command="{Binding CopySubjectCommand}" CommandParameter="{Binding SelectedContext}" />
-            <MenuItem Header="Copy branch name" ItemsSource="{Binding SelectedContext.Branches}">
+            <MenuItem Header="Copy branch name" ItemsSource="{Binding SelectedContext.Branches}" IsEnabled="{Binding SelectedContext.HasBranches}">
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="{x:Type MenuItem}">
                         <Setter Property="Header" Value="{Binding Name}"/>
@@ -51,6 +51,15 @@
             </MenuItem>
             <Separator />
             <MenuItem Header="Reset to here and amend (squash)" Command="{Binding SquashCommitsCommand}" CommandParameter="{Binding SelectedContext}" />
+            <MenuItem Header="Delete branch" ItemsSource="{Binding SelectedContext.Branches}" IsEnabled="{Binding SelectedContext.HasBranches}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="{x:Type MenuItem}">
+                        <Setter Property="Header" Value="{Binding Name}"/>
+                        <Setter Property="Icon" Value="{StaticResource IconCanvas}" />
+                        <Setter Property="Command" Value="{Binding DeleteBranchCommand}"/>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
         </ContextMenu>
         <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
             <Setter Property="Background" Value="Transparent" />
