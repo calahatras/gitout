@@ -171,7 +171,7 @@ namespace GitOut.Features.Git.Log
                 () =>
                 {
                     suppressSelectedLogEntriesCollectionChanged = true;
-                    selectedContext = selectedContext!.SwapEntries();
+                    SelectedContext = selectedContext!.SwapEntries();
                     suppressSelectedLogEntriesCollectionChanged = false;
                 },
                 () => selectedLogEntries.Count == 2
