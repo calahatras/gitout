@@ -9,19 +9,22 @@ namespace GitOut.Features.Git
     {
         private GitDeleteResult(
             string message,
-            ICommand? undo,
-            ICommand? forceDelete
-
+            ICommand? undo = null,
+            ICommand? forceDelete = null,
+            bool isBranchDeleted = false
         )
         {
             Message = message;
             UndoCommand = undo;
             ForceDeleteCommand = forceDelete;
+            IsBranchDeleted = isBranchDeleted;
         }
 
         public string Message { get; }
         public ICommand? UndoCommand { get; }
         public ICommand? ForceDeleteCommand { get; }
+
+        public bool IsBranchDeleted { get; }
 
         public static GitDeleteResult Parse(
             GitBranchName name,
@@ -44,7 +47,7 @@ namespace GitOut.Features.Git
                             await repository.CreateBranchAsync(name, new GitCreateBranchOptions(id));
                         }
                     }),
-                    null
+                    isBranchDeleted: true
                 );
             }
             else if (errorLines.Count >= 1)
@@ -54,16 +57,15 @@ namespace GitOut.Features.Git
                 {
                     return new GitDeleteResult(
                         $"The branch is not fully merged to remote, are you sure you want to delete {name.Name}",
-                        null,
-                        new AsyncCallbackCommand(() => repository.DeleteBranchAsync(name, new GitDeleteBranchOptions(true)))
+                        forceDelete: new AsyncCallbackCommand(() => repository.DeleteBranchAsync(name, new GitDeleteBranchOptions(true)))
                     );
                 }
                 else if (first.StartsWith("error: Cannot delete branch '"))
                 {
-                    return new GitDeleteResult($"Cannot delete branch '{name.Name}' because it is checked out!", null, null);
+                    return new GitDeleteResult($"Cannot delete branch '{name.Name}' because it is checked out!");
                 }
             }
-            return new GitDeleteResult("Unknown issue", null, null);
+            return new GitDeleteResult("Unknown issue");
         }
     }
 }

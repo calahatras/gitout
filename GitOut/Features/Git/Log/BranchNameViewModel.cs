@@ -24,7 +24,11 @@ namespace GitOut.Features.Git.Log
             DeleteBranchCommand = new AsyncCallbackCommand(
                 async () =>
                 {
-                    GitDeleteResult? result = await repository.DeleteBranchAsync(model);
+                    GitDeleteResult result = await repository.DeleteBranchAsync(model);
+                    if (result.IsBranchDeleted)
+                    {
+                        notifier.NotifyLogChanged();
+                    }
                     const string undoActionText = "UNDO";
                     const string forceDeleteActionText = "FORCE";
                     ISnackBuilder? builder = Snack.Builder()
