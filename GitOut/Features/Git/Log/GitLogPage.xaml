@@ -50,7 +50,23 @@
                 </MenuItem.ItemContainerStyle>
             </MenuItem>
             <Separator />
-            <MenuItem Header="Reset to here and amend (squash)" Command="{Binding SquashCommitsCommand}" CommandParameter="{Binding SelectedContext}" />
+            <MenuItem
+                Header="Reset to here and amend (squash)"
+                ToolTipService.ShowOnDisabled="True"
+                Command="{Binding SquashCommitsCommand}"
+                CommandParameter="{Binding SelectedContext}"
+            >
+                <MenuItem.Style>
+                    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="ToolTip" Value="{x:Null}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="False">
+                                <Setter Property="ToolTip" Value="Index has to be clean in order to reset and amend" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
             <MenuItem Header="Delete branch" ItemsSource="{Binding SelectedContext.Branches}" IsEnabled="{Binding SelectedContext.HasBranches}">
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="{x:Type MenuItem}">
