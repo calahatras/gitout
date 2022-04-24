@@ -15,6 +15,7 @@ namespace GitOut.Features.Git
         GitStatusResult? CachedStatus { get; }
 
         Task<bool> IsInsideWorkTree();
+        Task<GitCommitId?> GetCommitIdAsync(string reference);
         Task<GitHistoryEvent> GetHeadAsync();
         IAsyncEnumerable<GitRemote> GetRemotesAsync();
 
@@ -31,8 +32,11 @@ namespace GitOut.Features.Git
 
         Task AddAllAsync();
         Task ResetAllAsync();
+        Task ResetToCommitAsync(GitCommitId id);
         Task AddAsync(GitStatusChange change, AddOptions options);
         Task CheckoutAsync(GitStatusChange change);
+        Task CreateBranchAsync(GitBranchName name, GitCreateBranchOptions? options = default);
+        Task<GitDeleteResult> DeleteBranchAsync(GitBranchName name, GitDeleteBranchOptions? options = default);
         Task CheckoutBranchAsync(GitBranchName name);
         Task ResetAsync(GitStatusChange change);
         Task RestoreAsync(GitStatusChange change);

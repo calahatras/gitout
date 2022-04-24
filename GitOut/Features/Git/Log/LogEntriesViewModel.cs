@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using GitOut.Features.Collections;
 using GitOut.Features.Git.Files;
 using GitOut.Features.IO;
+using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Git.Log
@@ -20,6 +21,8 @@ namespace GitOut.Features.Git.Log
     {
         private readonly GitTreeEvent? diff;
         private readonly IGitRepository repository;
+        private readonly IGitRepositoryNotifier notifier;
+        private readonly ISnackbarService snack;
 
         private readonly CollectionViewSource currentSource;
 
@@ -32,11 +35,17 @@ namespace GitOut.Features.Git.Log
         private IGitFileEntryViewModel? selectedItem;
         private LogRevisionViewMode viewMode = LogRevisionViewMode.CurrentRevision;
 
-        public LogEntriesViewModel(GitTreeEvent root, IGitRepository repository)
+        private LogEntriesViewModel(
+            GitTreeEvent root,
+            IGitRepository repository,
+            IGitRepositoryNotifier notifier,
+            ISnackbarService snack
+        )
         {
             Root = root;
             this.repository = repository;
-
+            this.notifier = notifier;
+            this.snack = snack;
             allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
                 _ => ListAllFilesAsync(),
                 IGitDirectoryEntryViewModel.CompareItems
@@ -65,13 +74,28 @@ namespace GitOut.Features.Git.Log
             };
             rootView = currentSource.View;
 
-            Branches = root.Event.Branches.Select(BranchNameViewModel.FromModel);
+            Branches = root.Event
+                .Branches
+                .Select(branch => new BranchNameViewModel(
+                    branch,
+                    repository,
+                    notifier,
+                    snack
+                ))
+                .ToList()
+                .AsReadOnly();
+            HasBranches = Branches.Count > 0;
 
             SelectFileCommand = new CallbackCommand<IGitFileEntryViewModel>(SelectItem);
         }
 
-        public LogEntriesViewModel(GitTreeEvent root, GitTreeEvent diff, IGitRepository repository)
-            : this(root, repository) => this.diff = diff;
+        private LogEntriesViewModel(
+            GitTreeEvent root,
+            GitTreeEvent diff,
+            IGitRepository repository,
+            IGitRepositoryNotifier notifier,
+            ISnackbarService snack
+        ) : this(root, repository, notifier, snack) => this.diff = diff;
 
         public GitTreeEvent Root { get; }
 
@@ -85,7 +109,9 @@ namespace GitOut.Features.Git.Log
             private set => SetProperty(ref rootView, value);
         }
 
-        public IEnumerable<BranchNameViewModel> Branches { get; }
+        public bool HasBranches { get; }
+
+        public IReadOnlyCollection<BranchNameViewModel> Branches { get; }
 
         public IGitFileEntryViewModel? SelectedItem
         {
@@ -132,7 +158,13 @@ namespace GitOut.Features.Git.Log
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static LogEntriesViewModel? CreateContext(IList<GitTreeEvent> entries, IGitRepository repository, LogRevisionViewMode mode)
+        public static LogEntriesViewModel? CreateContext(
+            IList<GitTreeEvent> entries,
+            IGitRepository repository,
+            IGitRepositoryNotifier notifier,
+            ISnackbarService snack,
+            LogRevisionViewMode mode
+        )
         {
             if (entries.Count is 0 or >= 3)
             {
@@ -142,29 +174,23 @@ namespace GitOut.Features.Git.Log
             if (entries.Count == 1)
             {
                 // single item, show file content and diff against parent
-                context = new LogEntriesViewModel(entries[0], repository);
+                context = new LogEntriesViewModel(entries[0], repository, notifier, snack);
             }
             else //if (entries.Count == 2)
             {
-                context = new LogEntriesViewModel(entries[0], entries[1], repository);
+                context = new LogEntriesViewModel(entries[0], entries[1], repository, notifier, snack);
             }
             context.ViewMode = mode;
             return context;
         }
 
-        public LogEntriesViewModel? CopyContext(IList<GitTreeEvent> entries, IGitRepository repository, LogRevisionViewMode mode)
-        {
-            if (entries.Count is not 2)
-            {
-                return null;
-            }
-            var context = new LogEntriesViewModel(entries[0], entries[1], repository)
+        public LogEntriesViewModel SwapEntries() => diff is null
+            ? throw new InvalidOperationException("Cannot swap entries when diff is not set")
+            : new LogEntriesViewModel(diff, Root, repository, notifier, snack)
             {
                 selectedItem = selectedItem,
-                ViewMode = mode
+                ViewMode = ViewMode
             };
-            return context;
-        }
 
         private async IAsyncEnumerable<IGitFileEntryViewModel> ListAllFilesAsync()
         {

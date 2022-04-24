@@ -518,7 +518,7 @@ namespace GitOut.Features.Git.Stage
             SelectedWorkspaceIndex = previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
         }
 
-        private async Task ResetIndexFileAsync(StatusChangeViewModel model)
+        private async Task ResetIndexFileAsync(StatusChangeViewModel? model)
         {
             if (model is null)
             {

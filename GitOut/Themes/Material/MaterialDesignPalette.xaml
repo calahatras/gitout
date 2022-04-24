@@ -24,7 +24,7 @@
     <SolidColorBrush x:Key="MaterialLightDisabledText" Color="#80ffffff"/>
     <SolidColorBrush x:Key="MaterialLightDividers" Color="#0cffffff"/>
     <SolidColorBrush x:Key="MaterialLightFocused" Color="#0cffffff"/>
-    
+
     <!-- Palette -->
     <!-- Gray -->
     <SolidColorBrush x:Key="MaterialGray50" Color="#fafafa"/>

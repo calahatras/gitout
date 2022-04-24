@@ -35,6 +35,7 @@ namespace GitOut.Features.Git.Log
 
         private readonly ISnackbarService snack;
         private readonly IRepositoryWatcher repositoryWatcher;
+        private readonly IGitRepositoryMonitor monitor;
 
         private int changesCount;
         private bool includeStashes = true;
@@ -68,6 +69,8 @@ namespace GitOut.Features.Git.Log
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             Repository = options.Repository;
+            monitor = new GitRepositoryMonitor();
+            monitor.LogChanged += OnLogChanged;
             title.Title = $"{Repository.Name} (Log)";
 
             repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository, RepositoryWatcherOptions.Workspace);
@@ -92,7 +95,13 @@ namespace GitOut.Features.Git.Log
                     return;
                 }
 
-                SelectedContext = LogEntriesViewModel.CreateContext(selectedLogEntries, Repository, RevisionViewMode);
+                SelectedContext = LogEntriesViewModel.CreateContext(
+                    selectedLogEntries,
+                    Repository,
+                    monitor.CreateCallback(),
+                    snack,
+                    RevisionViewMode
+                );
                 ViewMode = SelectedContext is null
                     ? LogViewMode.None
                     : LogViewMode.Files;
@@ -146,6 +155,11 @@ namespace GitOut.Features.Git.Log
                 data => snack.ShowError(data.Message, data)
             );
 
+            SquashCommitsCommand = new AsyncCallbackCommand<LogEntriesViewModel?>(
+                SquashCommitAsync,
+                gte => gte is not null && changesCount == 0
+            );
+
             CloseDetailsCommand = new CallbackCommand(() =>
             {
                 foreach (GitTreeEvent entry in entries)
@@ -157,10 +171,7 @@ namespace GitOut.Features.Git.Log
                 () =>
                 {
                     suppressSelectedLogEntriesCollectionChanged = true;
-                    (selectedLogEntries[0], selectedLogEntries[1]) = (selectedLogEntries[1], selectedLogEntries[0]);
-
-                    SelectedContext = selectedContext!.CopyContext(selectedLogEntries, Repository, RevisionViewMode);
-
+                    SelectedContext = selectedContext!.SwapEntries();
                     suppressSelectedLogEntriesCollectionChanged = false;
                 },
                 () => selectedLogEntries.Count == 2
@@ -241,6 +252,7 @@ namespace GitOut.Features.Git.Log
         public ICollectionView Remotes { get; }
 
         public IGitRepository Repository { get; }
+
         public IList<GitTreeEvent> SelectedLogEntries => selectedLogEntries;
 
         public GitTreeEvent? EntryInView
@@ -326,6 +338,7 @@ namespace GitOut.Features.Git.Log
         public ICommand CopyContentCommand { get; }
         public ICommand CopyCommitHashCommand { get; }
         public ICommand CopySubjectCommand { get; }
+        public ICommand SquashCommitsCommand { get; }
         public ICommand SelectCommitCommand { get; }
         public ICommand AppendSelectCommitCommand { get; }
         public ICommand CloseAutocompleteCommand { get; }
@@ -352,6 +365,7 @@ namespace GitOut.Features.Git.Log
                 case NavigationType.NavigatedLeave:
                     repositoryWatcher.Events -= OnFileSystemChanges;
                     repositoryWatcher.Dispose();
+                    monitor.LogChanged -= OnLogChanged;
                     break;
                 case NavigationType.Deactivated:
                     repositoryWatcher.EnableRaisingEvents = true;
@@ -368,6 +382,8 @@ namespace GitOut.Features.Git.Log
                     break;
             }
         }
+
+        private void OnLogChanged(object? sender, EventArgs args) => _ = CheckRepositoryStatusAsync();
 
         private void OnFileSystemChanges(object sender, RepositoryWatcherEventArgs args) => hasChanges = true;
 
@@ -448,6 +464,35 @@ namespace GitOut.Features.Git.Log
                 {
                     activeStashes.Add(new GitTreeEvent(stashEntry));
                 }
+            }
+        }
+
+        private async Task SquashCommitAsync(LogEntriesViewModel? gte)
+        {
+            IsWorking = true;
+            string subject = gte!.Root.Event.Subject;
+            string body = gte.Root.Event.Body;
+            var branch = GitBranchName.CreateLocal($"gitout-bkp/{Guid.NewGuid():N}");
+            await Repository.CreateBranchAsync(branch);
+            await Repository.ResetToCommitAsync(gte!.Root.Event.Id);
+            await Repository.AddAllAsync();
+            await Repository.CommitAsync(GitCommitOptions.AmendLatest(body.Length > 0 ? $"{subject}{Environment.NewLine}{Environment.NewLine}{body}" : subject));
+            snack.ShowSuccess("Successfully reset to previous commit");
+            await CheckRepositoryStatusAsync();
+            IsWorking = false;
+            const string approveActionText = "YES";
+            SnackAction? result = await snack.ShowAsync(
+                Snack.Builder()
+                    .WithMessage("Remove temporary branch?")
+                    .WithDuration(TimeSpan.FromMinutes(1))
+                    .AddAction(approveActionText)
+            );
+            if (result?.Text == approveActionText)
+            {
+                IsWorking = true;
+                await Repository.DeleteBranchAsync(branch, new GitDeleteBranchOptions(ForceDelete: true));
+                await CheckRepositoryStatusAsync();
+                IsWorking = false;
             }
         }
 

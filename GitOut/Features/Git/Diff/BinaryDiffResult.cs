@@ -19,7 +19,9 @@ namespace GitOut.Features.Git.Diff
             this.sourceId = sourceId;
         }
 
+#pragma warning disable CA1024 // Use properties where appropriate
         public Stream GetBaseStream()
+#pragma warning restore CA1024 // Use properties where appropriate
         {
             destinationStream.Position = 0;
             return destinationStream;

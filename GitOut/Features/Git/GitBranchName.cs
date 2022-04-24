@@ -34,6 +34,10 @@ namespace GitOut.Features.Git
 
         public string IconResource { get; }
 
+        public bool IsLocalBranchType => Type == LocalBranchType;
+
+        public bool IsRemoteBranchType => Type == RemoteBranchType;
+
         public static bool IsValid(string? name) => name is not null && name.Length > 1 && ValidBranchName.IsMatch(name);
 
         public static GitBranchName Create(string name)
