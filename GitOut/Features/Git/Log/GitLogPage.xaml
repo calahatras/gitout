@@ -463,6 +463,13 @@
                     </Button>
                     <Separator Style="{StaticResource MaterialVerticalDivider}"/>
                     <Button
+                        ToolTip="Generate Release Notes"
+                        Command="{x:Static wpfcommands:Application.OpenReleaseNotesWindow}"
+                        CommandParameter="{Binding Repository, Mode=OneWay}"
+                    >
+                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileDocument}"/>
+                    </Button>
+                    <Button
                         ToolBar.OverflowMode="Never"
                         Command="{Binding NavigateToStageAreaCommand}"
                         ToolTip="Open stage area"

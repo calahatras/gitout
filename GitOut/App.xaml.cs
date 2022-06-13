@@ -11,6 +11,7 @@ using GitOut.Features.Git.Storage;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
+using GitOut.Features.ReleaseNotes;
 using GitOut.Features.Settings;
 using GitOut.Features.Storage;
 using GitOut.Features.Themes;
@@ -81,6 +82,7 @@ namespace GitOut
 
             services.AddSettingsFeature();
             services.AddGitFeature();
+            services.AddReleaseNotesFeature();
             services.AddThemeFeature();
 
             services.AddOptions();

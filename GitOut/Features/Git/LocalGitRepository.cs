@@ -112,8 +112,16 @@ namespace GitOut.Features.Git
             IList<GitHistoryEvent> history = new List<GitHistoryEvent>();
             IProcessOptionsBuilder processOptionsBuilder = ProcessOptions
                 .Builder()
-                .AppendRange("-c", "log.showSignature=false", "log", "-z", "--date-order", "--pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\"", "--branches");
+                .AppendRange("-c", "log.showSignature=false", "log", "-z", "--date-order", "--pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\"");
 
+            if (options.RevisionRange is not null)
+            {
+                processOptionsBuilder.AppendRange(string.Join("..", options.RevisionRange));
+            }
+            else
+            {
+                processOptionsBuilder.Append("--branches");
+            }
             if (options.IncludeRemotes)
             {
                 processOptionsBuilder.Append(" --remotes");

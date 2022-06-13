@@ -4,5 +4,6 @@ namespace GitOut.Features.Git
     {
         public bool IncludeRemotes { get; init; }
         public bool IncludeStashes { get; init; }
+        public string[]? RevisionRange { get; init; }
     }
 }
