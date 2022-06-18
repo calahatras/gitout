@@ -8,6 +8,7 @@
     xmlns:text="clr-namespace:GitOut.Features.Text"
     xmlns:local="clr-namespace:GitOut.Features.Git.RepositoryList"
     mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type={x:Type local:RepositoryListViewModel}}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:Name="Root"

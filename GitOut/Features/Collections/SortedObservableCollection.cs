@@ -2,10 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace GitOut.Features.Collections
 {
-    public class SortedObservableCollection<T> : ICollection<T>, IReadOnlyCollection<T>, INotifyCollectionChanged
+    public class SortedObservableCollection<T> : ICollection<T>, IReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         private readonly Func<T, T, int> comparer;
         private readonly IList<T> backingCollection = new List<T>();
@@ -27,6 +28,7 @@ namespace GitOut.Features.Collections
         public T this[int index] => backingCollection[index];
 
         public event NotifyCollectionChangedEventHandler? CollectionChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public void Add(T item)
         {
@@ -63,6 +65,7 @@ namespace GitOut.Features.Collections
             T item = backingCollection[index];
             backingCollection.RemoveAt(index);
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
 
         public void CopyTo(T[] array, int arrayIndex) => backingCollection.CopyTo(array, arrayIndex);
@@ -73,6 +76,7 @@ namespace GitOut.Features.Collections
         {
             backingCollection.Insert(index, item);
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
 
         private int FindSortedIndex(T item)
