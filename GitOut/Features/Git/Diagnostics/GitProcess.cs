@@ -152,6 +152,7 @@ namespace GitOut.Features.Git.Diagnostics
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = CommandLineExecutable,
+                    StandardOutputEncoding = Encoding.UTF8,
                     Arguments = arguments.Arguments,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
