@@ -37,7 +37,8 @@ namespace GitOut.Features.Git
         Task CheckoutAsync(GitStatusChange change);
         Task CreateBranchAsync(GitBranchName name, GitCreateBranchOptions? options = default);
         Task<GitDeleteResult> DeleteBranchAsync(GitBranchName name, GitDeleteBranchOptions? options = default);
-        Task CheckoutBranchAsync(GitBranchName name);
+        Task CheckoutCommitDetachedAsync(GitCommitId id);
+        Task CheckoutBranchAsync(GitBranchName name, GitCheckoutBranchOptions? options = default);
         Task ResetAsync(GitStatusChange change);
         Task RestoreAsync(GitStatusChange change);
         Task ApplyAsync(GitPatch patch);

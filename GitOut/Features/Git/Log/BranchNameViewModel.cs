@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Windows.Input;
 using GitOut.Features.Material.Snackbar;
@@ -20,6 +21,21 @@ namespace GitOut.Features.Git.Log
                 o => model.Name,
                 o => true,
                 System.Windows.TextDataFormat.UnicodeText
+            );
+            CheckoutBranchCommand = new AsyncCallbackCommand(
+                async () =>
+                {
+                    try
+                    {
+                        await repository.CheckoutBranchAsync(model);
+                        notifier.NotifyLogChanged();
+                        snack.ShowSuccess($"Checked out branch '{Name}'");
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        snack.ShowError(e.Message, e, TimeSpan.FromSeconds(5));
+                    }
+                }
             );
             DeleteBranchCommand = new AsyncCallbackCommand(
                 async () =>
@@ -61,6 +77,7 @@ namespace GitOut.Features.Git.Log
         public string IconResource { get; }
 
         public ICommand CopyBranchNameCommand { get; }
+        public ICommand CheckoutBranchCommand { get; }
         public ICommand DeleteBranchCommand { get; }
     }
 }

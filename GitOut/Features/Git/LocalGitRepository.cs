@@ -358,12 +358,65 @@ namespace GitOut.Features.Git
             );
         }
 
-        public async Task CheckoutBranchAsync(GitBranchName name)
+        public async Task CheckoutCommitDetachedAsync(GitCommitId id)
         {
-            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"checkout -b {name.Name}")).ExecuteAsync();
-            if (args.ErrorLines.Count > 0 && !args.ErrorLines.First().StartsWith("Switched to a new branch"))
+            ProcessEventArgs args = await CreateProcess(ProcessOptions.FromArguments($"checkout {id} --detach")).ExecuteAsync();
+            if (args.ErrorLines.Count > 0)
             {
-                throw new InvalidOperationException($"Could not create branch: {args.Error}");
+                string message = args.ErrorLines.First();
+                if (
+                    message.StartsWith("Note: switching to ")
+                    || message.StartsWith("HEAD is now at ")
+                    || message.StartsWith("Previous HEAD position was ")
+                )
+                {
+                    return;
+                }
+                if (message == "error: Your local changes to the following files would be overwritten by checkout:")
+                {
+                    throw new InvalidOperationException($"Could not checkout commit due to edits: {args.Error}");
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Could not checkout commit: {args.Error}");
+                }
+            }
+        }
+
+        public async Task CheckoutBranchAsync(GitBranchName name, GitCheckoutBranchOptions? options = default)
+        {
+            IProcessOptionsBuilder arguments = ProcessOptions.Builder();
+            arguments.Append("checkout");
+            if (options is not null && options.CreateBranch)
+            {
+                arguments.Append("-b");
+            }
+            arguments.Append(name.Name);
+            ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
+            if (args.ErrorLines.Count > 0)
+            {
+                string message = args.ErrorLines.First();
+                if (
+                    message == $"Switched to branch '{name.Name}'"
+                    || message == $"Switched to a new branch '{name.Name}'"
+                    || message == $"Already on '{name}'"
+                    || message.StartsWith("Previous HEAD position was ")
+                )
+                {
+                    return;
+                }
+                if (message == $"fatal: A branch named '{name}' already exists.")
+                {
+                    throw new InvalidOperationException($"Could not create branch: {args.Error}");
+                }
+                if (message == "error: Your local changes to the following files would be overwritten by checkout:")
+                {
+                    throw new InvalidOperationException($"Could not checkout branch due to edits: {args.Error}");
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Could not checkout branch: {args.Error}");
+                }
             }
         }
 
