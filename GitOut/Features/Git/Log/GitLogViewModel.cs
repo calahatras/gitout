@@ -316,32 +316,11 @@ namespace GitOut.Features.Git.Log
             get => revisionViewMode;
             set
             {
-                if (SetProperty(ref revisionViewMode, value))
+                if (SetProperty(ref revisionViewMode, value) && selectedContext is not null)
                 {
-                    if (selectedContext is not null)
-                    {
-                        selectedContext.ViewMode = revisionViewMode;
-                    }
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionAtCurrent)));
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionDiff)));
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowRevisionDiffInline)));
+                    selectedContext.ViewMode = revisionViewMode;
                 }
             }
-        }
-        public bool ShowRevisionAtCurrent
-        {
-            get => RevisionViewMode == LogRevisionViewMode.CurrentRevision;
-            set { if (value) { RevisionViewMode = LogRevisionViewMode.CurrentRevision; } }
-        }
-        public bool ShowRevisionDiff
-        {
-            get => RevisionViewMode == LogRevisionViewMode.Diff;
-            set { if (value) { RevisionViewMode = LogRevisionViewMode.Diff; } }
-        }
-        public bool ShowRevisionDiffInline
-        {
-            get => RevisionViewMode == LogRevisionViewMode.DiffInline;
-            set { if (value) { RevisionViewMode = LogRevisionViewMode.DiffInline; } }
         }
 
         public string? CheckoutBranchName
