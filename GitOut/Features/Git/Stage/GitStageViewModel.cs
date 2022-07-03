@@ -752,9 +752,17 @@ namespace GitOut.Features.Git.Stage
         {
             if (CheckoutBranchBeforeCommit)
             {
-                await Repository.CheckoutBranchAsync(GitBranchName.CreateLocal(NewBranchName));
-                NewBranchName = string.Empty;
-                snack.ShowSuccess("Created new branch");
+                try
+                {
+                    await Repository.CheckoutBranchAsync(GitBranchName.CreateLocal(NewBranchName), new GitCheckoutBranchOptions(true));
+                    NewBranchName = string.Empty;
+                    snack.ShowSuccess("Created new branch");
+                }
+                catch (InvalidOperationException e)
+                {
+                    snack.ShowError(e.Message, e, TimeSpan.FromSeconds(10));
+                    return;
+                }
             }
 
             GitCommitOptions options = amendLastCommit

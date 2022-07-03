@@ -112,6 +112,26 @@ namespace GitOut.Features.Git.Log
             };
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
+            CheckoutCommitCommand = new AsyncCallbackCommand<GitCommitId>(
+                async id =>
+                {
+                    if (id is null)
+                    {
+                        return;
+                    }
+                    try
+                    {
+                        await Repository.CheckoutCommitDetachedAsync(id);
+                        await CheckRepositoryStatusAsync();
+                        snack.ShowSuccess($"Checked out commit with id '{id.Hash[0..7]}'");
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        snack.ShowError(e.Message, e, TimeSpan.FromSeconds(10));
+                    }
+                },
+                id => id is not null
+            );
             CheckoutBranchCommand = new AsyncCallbackCommand(
                 async () =>
                 {
@@ -119,14 +139,14 @@ namespace GitOut.Features.Git.Log
                     try
                     {
                         var branchName = GitBranchName.CreateLocal(checkoutBranchName!); // name is validated by the canExecute callback
-                        await Repository.CheckoutBranchAsync(branchName);
+                        await Repository.CheckoutBranchAsync(branchName, new GitCheckoutBranchOptions(true));
                         await CheckRepositoryStatusAsync();
                         snack.ShowSuccess($"Branch {branchName.Name} created");
                         checkoutBranchName = string.Empty;
                     }
                     catch (InvalidOperationException e)
                     {
-                        snack.ShowError($"Could not create branch", e, TimeSpan.FromSeconds(10));
+                        snack.ShowError("Could not create branch", e, TimeSpan.FromSeconds(10));
                     }
                 },
                 () => checkoutBranchName is not null && GitBranchName.IsValid(checkoutBranchName)
@@ -333,6 +353,7 @@ namespace GitOut.Features.Git.Log
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
         public ICommand FetchRemotesCommand { get; }
+        public ICommand CheckoutCommitCommand { get; }
         public ICommand CheckoutBranchCommand { get; }
         public ICommand RevealInExplorerCommand { get; }
         public ICommand CopyContentCommand { get; }

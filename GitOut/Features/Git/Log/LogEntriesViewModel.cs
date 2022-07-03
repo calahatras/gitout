@@ -110,6 +110,7 @@ namespace GitOut.Features.Git.Log
         }
 
         public bool HasBranches { get; }
+        public bool IsSingleSelection => diff is null;
 
         public IReadOnlyCollection<BranchNameViewModel> Branches { get; }
 
