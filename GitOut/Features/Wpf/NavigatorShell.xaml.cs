@@ -48,6 +48,7 @@ namespace GitOut.Features.Wpf
             {
                 Left = cachedValues.Left.Value;
             }
+            EnsureWithinBounds();
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -89,6 +90,19 @@ namespace GitOut.Features.Wpf
                 Resized?.Invoke(this, EventArgs.Empty);
             }
             return IntPtr.Zero;
+        }
+
+        private void EnsureWithinBounds()
+        {
+            double left = SystemParameters.VirtualScreenLeft;
+            double right = SystemParameters.VirtualScreenWidth;
+            if (Left > right
+                || Left + ActualWidth < left)
+            {
+                Left = 10;
+                Top = 10;
+                Height = SystemParameters.WorkArea.Height - 20;
+            }
         }
     }
 }
