@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using GitOut.Features.Logging;
-using GitOut.Features.Storage;
+using GitOut.Features.Options;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.DependencyInjection;
@@ -157,7 +157,7 @@ namespace GitOut.Features.Navigation
         {
             var window = new NavigatorShell(
                 provider.GetRequiredService<NavigatorShellViewModel>(),
-                provider.GetRequiredService<IWritableStorage>(),
+                provider.GetRequiredService<IOptionsWriter<NavigationWindowOptions>>(),
                 provider.GetRequiredService<IOptions<NavigationWindowOptions>>()
             );
             window.Activated += (sender, args) =>

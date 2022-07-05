@@ -15,7 +15,7 @@ using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
-using GitOut.Features.Storage;
+using GitOut.Features.Options;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
@@ -24,7 +24,7 @@ namespace GitOut.Features.Settings
 {
     public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposable
     {
-        private readonly IWritableStorage storage;
+        private readonly IOptionsWriter<GitStageOptions> storage;
         private readonly IDisposable unsubscribeOptions;
         private bool useTransparentBackground = true;
         private bool trimLineEndings;
@@ -37,7 +37,7 @@ namespace GitOut.Features.Settings
             IGitRepositoryStorage repositories,
             IGitRepositoryFactory gitFactory,
             IOptionsMonitor<GitStageOptions> stageOptions,
-            IWritableStorage storage
+            IOptionsWriter<GitStageOptions> storage
         )
         {
             this.storage = storage;
@@ -94,8 +94,9 @@ namespace GitOut.Features.Settings
             showSpacesAsDots = stageOptions.CurrentValue.ShowSpacesAsDots;
             unsubscribeOptions = stageOptions.OnChange(value =>
             {
-                SetProperty(ref trimLineEndings, value.TrimLineEndings);
-                SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots);
+                SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
+                SetProperty(ref tabTransformText, value.TabTransformText, nameof(TabTransformText));
+                SetProperty(ref trimLineEndings, value.TrimLineEndings, nameof(TrimLineEndings));
             });
         }
 
@@ -122,7 +123,7 @@ namespace GitOut.Features.Settings
             {
                 if (SetProperty(ref showSpacesAsDots, value))
                 {
-                    PersistStorage();
+                    storage.Update(snapshot => snapshot.ShowSpacesAsDots = value);
                 }
             }
         }
@@ -134,7 +135,7 @@ namespace GitOut.Features.Settings
             {
                 if (SetProperty(ref trimLineEndings, value))
                 {
-                    PersistStorage();
+                    storage.Update(snapshot => snapshot.TrimLineEndings = value);
                 }
             }
         }
@@ -146,7 +147,7 @@ namespace GitOut.Features.Settings
             {
                 if (SetProperty(ref tabTransformText, value))
                 {
-                    PersistStorage();
+                    storage.Update(snapshot => snapshot.TabTransformText = value);
                 }
             }
         }
@@ -159,13 +160,6 @@ namespace GitOut.Features.Settings
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public void Dispose() => unsubscribeOptions.Dispose();
-
-        private void PersistStorage() => storage.Write(GitStageOptions.SectionKey, new GitStageOptions
-        {
-            ShowSpacesAsDots = showSpacesAsDots,
-            TrimLineEndings = trimLineEndings,
-            TabTransformText = tabTransformText
-        });
 
         private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

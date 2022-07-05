@@ -15,6 +15,7 @@ using GitOut.Features.Git.Stage;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
+using GitOut.Features.Options;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 
@@ -34,8 +35,10 @@ namespace GitOut.Features.Git.Log
         private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new();
 
         private readonly ISnackbarService snack;
+        private readonly IOptionsWriter<GitStageOptions> updateStageOptions;
         private readonly IRepositoryWatcher repositoryWatcher;
         private readonly IGitRepositoryMonitor monitor;
+        private readonly IDisposable settingsMonitorHandle;
 
         private int changesCount;
         private bool includeStashes = true;
@@ -61,11 +64,14 @@ namespace GitOut.Features.Git.Log
             ITitleService title,
             IGitRepositoryWatcherProvider watchProvider,
             ISnackbarService snack,
-            IOptionsMonitor<GitStageOptions> stagingOptions
+            IOptionsMonitor<GitStageOptions> stagingOptions,
+            IOptionsWriter<GitStageOptions> updateStageOptions
         )
         {
             this.snack = snack;
+            this.updateStageOptions = updateStageOptions;
             showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
+            settingsMonitorHandle = stagingOptions.OnChange(options => SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots)));
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
             Repository = options.Repository;
@@ -240,7 +246,13 @@ namespace GitOut.Features.Git.Log
         public bool ShowSpacesAsDots
         {
             get => showSpacesAsDots;
-            set => SetProperty(ref showSpacesAsDots, value);
+            set
+            {
+                if (SetProperty(ref showSpacesAsDots, value))
+                {
+                    updateStageOptions.Update(snap => snap.ShowSpacesAsDots = value);
+                }
+            }
         }
 
         public bool IsSearchDisplayed
@@ -366,6 +378,7 @@ namespace GitOut.Features.Git.Log
                     repositoryWatcher.Events -= OnFileSystemChanges;
                     repositoryWatcher.Dispose();
                     monitor.LogChanged -= OnLogChanged;
+                    settingsMonitorHandle.Dispose();
                     break;
                 case NavigationType.Deactivated:
                     repositoryWatcher.EnableRaisingEvents = true;

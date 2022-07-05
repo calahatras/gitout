@@ -11,6 +11,7 @@ using GitOut.Features.Git.Storage;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
+using GitOut.Features.Options;
 using GitOut.Features.Settings;
 using GitOut.Features.Storage;
 using GitOut.Features.Themes;
@@ -86,7 +87,7 @@ namespace GitOut
             services.AddOptions();
 
             services.AddOptions<GitStoreOptions>().Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
-            services.AddOptions<GitStageOptions>().Bind(context.Configuration.GetSection(GitStageOptions.SectionKey));
+            services.AddWritableOptions<GitStageOptions>().Bind(context.Configuration, GitStageOptions.SectionKey);
             services.AddLogging();
 
             services.AddHostedService<Bootstrap>();

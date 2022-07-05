@@ -6,8 +6,8 @@ namespace GitOut.Features.Settings
     {
         public static void AddSettingsFeature(this IServiceCollection services)
         {
-            services.AddScoped<SettingsPage>();
-            services.AddScoped<SettingsViewModel>();
+            services.AddTransient<SettingsPage>();
+            services.AddTransient<SettingsViewModel>();
         }
     }
 }
