@@ -25,7 +25,7 @@ namespace GitOut.Features.Git.Diff
             nameof(ShowSpacesAsDots),
             typeof(bool),
             typeof(GitDiffControl),
-            new PropertyMetadata(false)
+            new PropertyMetadata(false, OnSpacesViewModeChanged)
         );
 
         public static readonly DependencyProperty CurrentContentProperty = DependencyProperty.Register(
@@ -85,6 +85,25 @@ namespace GitOut.Features.Git.Diff
             return null;
         }
 
+        private void ParseCurrentContent(IEnumerable<GitDiffHunk> hunks)
+        {
+            double pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+            DiffDisplayOptions display = ShowSpacesAsDots
+                ? new DiffDisplayOptions(
+                    pixelsPerDip,
+                    (Brush)Application.Current.Resources["MaterialLightDividers"],
+                    (Brush)Application.Current.Resources["MaterialGray400"],
+                    new ShowSpacesAsDotsTransform()
+                )
+                : new DiffDisplayOptions(
+                    pixelsPerDip,
+                    (Brush)Application.Current.Resources["MaterialLightDividers"],
+                    (Brush)Application.Current.Resources["MaterialGray400"]
+                );
+            var vm = GitDiffViewModel.ParseDiff(hunks, display);
+            CurrentContent = vm;
+        }
+
         private static async void OnDiffChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is GitDiffControl control)
@@ -113,21 +132,7 @@ namespace GitOut.Features.Git.Diff
                     }
                     else if (context.Text is not null)
                     {
-                        double pixelsPerDip = VisualTreeHelper.GetDpi(control).PixelsPerDip;
-                        DiffDisplayOptions display = control.ShowSpacesAsDots
-                            ? new DiffDisplayOptions(
-                                pixelsPerDip,
-                                (Brush)Application.Current.Resources["MaterialLightDividers"],
-                                (Brush)Application.Current.Resources["MaterialGray400"],
-                                new ShowSpacesAsDotsTransform()
-                            )
-                            : new DiffDisplayOptions(
-                                pixelsPerDip,
-                                (Brush)Application.Current.Resources["MaterialLightDividers"],
-                                (Brush)Application.Current.Resources["MaterialGray400"]
-                            );
-                        var vm = GitDiffViewModel.ParseDiff(context.Text.Hunks, display);
-                        control.CurrentContent = vm;
+                        control.ParseCurrentContent(context.Text.Hunks);
                     }
                 }
             }
@@ -142,6 +147,14 @@ namespace GitOut.Features.Git.Diff
                 ".tiff"
             })
             .Contains(extension);
+        }
+
+        private static void OnSpacesViewModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is GitDiffControl control && control.Diff is DiffContext context && context.Text is not null)
+            {
+                control.ParseCurrentContent(context.Text.Hunks);
+            }
         }
     }
 }

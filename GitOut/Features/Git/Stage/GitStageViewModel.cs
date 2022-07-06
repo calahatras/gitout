@@ -29,6 +29,7 @@ namespace GitOut.Features.Git.Stage
         private readonly ISnackbarService snack;
         private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
         private readonly IRepositoryWatcher repositoryWatcher;
+        private readonly IDisposable stagingOptionsHandle;
 
         private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
         private readonly object workspaceFilesLock = new();
@@ -41,6 +42,7 @@ namespace GitOut.Features.Git.Stage
         private int selectedWorkspaceIndex;
         private int selectedIndexIndex;
 
+        private bool showSpacesAsDots;
         private bool diffWhitespace;
         private bool amendLastCommit;
         private bool checkoutBranchBeforeCommit;
@@ -70,7 +72,8 @@ namespace GitOut.Features.Git.Stage
             this.stagingOptions = stagingOptions;
             Repository = options.Repository;
             title.Title = $"{Repository.Name} (Stage)";
-            ShowSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
+            showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
+            stagingOptionsHandle = stagingOptions.OnChange(options => SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots)));
 
             repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository);
             repositoryWatcher.Events += OnFileSystemChanges;
@@ -119,7 +122,7 @@ namespace GitOut.Features.Git.Stage
 
         public IGitRepository Repository { get; }
 
-        public bool ShowSpacesAsDots { get; }
+        public bool ShowSpacesAsDots => showSpacesAsDots;
 
         public bool RefreshAutomatically
         {
@@ -324,13 +327,14 @@ namespace GitOut.Features.Git.Stage
             {
                 cancelRefreshSnack?.Dispose();
                 repositoryWatcher.Dispose();
+                stagingOptionsHandle.Dispose();
             }
         }
 
         private void OnFileSystemChanges(object sender, RepositoryWatcherEventArgs args)
         {
             hasChanges = true;
-            selectedFileHasChanges |= !(SelectedChange is null)
+            selectedFileHasChanges |= SelectedChange is not null
                 && SelectedChange.Location == StatusChangeLocation.Workspace
                 && args.RepositoryPath == SelectedChange.Path;
         }
@@ -353,9 +357,7 @@ namespace GitOut.Features.Git.Stage
                     ? head.Subject
                     : $"{head.Subject}{Environment.NewLine}{Environment.NewLine}{head.Body}";
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (InvalidOperationException) { }
-#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private async Task ExecuteDiffAsync()
