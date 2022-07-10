@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -10,10 +11,11 @@ namespace GitOut.Features.Storage
         public void Write(string key, object value)
         {
             string configFile = SettingsOptions.GetSettingsPath();
-            if (Directory.GetParent(configFile) is DirectoryInfo existing)
+            if (Directory.GetParent(configFile) is not DirectoryInfo existing)
             {
-                Directory.CreateDirectory(existing.FullName);
+                throw new InvalidOperationException($"Could not get parent path of {configFile}");
             }
+            Directory.CreateDirectory(existing.FullName);
 
             IDictionary<string, object> sections;
             try

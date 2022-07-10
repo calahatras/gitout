@@ -1,3 +1,4 @@
+using GitOut.Features.Options;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,7 @@ namespace GitOut.Features.Navigation
             services.AddScoped<NavigatorShellViewModel>();
 
             services.AddOptions<NavigationRegistrationOptions>().Configure(options => options.StartupType = typeof(T).FullName!);
-            services.AddOptions<NavigationWindowOptions>().Bind(configuration.GetSection(NavigationWindowOptions.SectionKey));
+            services.AddWritableOptions<NavigationWindowOptions>().Bind(configuration, NavigationWindowOptions.SectionKey);
         }
     }
 }

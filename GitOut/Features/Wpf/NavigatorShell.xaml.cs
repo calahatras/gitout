@@ -4,19 +4,19 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using GitOut.Features.Navigation;
-using GitOut.Features.Storage;
+using GitOut.Features.Options;
 using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Wpf
 {
     public partial class NavigatorShell : Window
     {
-        private readonly IWritableStorage storage;
+        private readonly IOptionsWriter<NavigationWindowOptions> storage;
         private readonly IOptions<NavigationWindowOptions> windowOptions;
 
         public NavigatorShell(
             NavigatorShellViewModel dataContext,
-            IWritableStorage storage,
+            IOptionsWriter<NavigationWindowOptions> storage,
             IOptions<NavigationWindowOptions> windowOptions
         )
         {
@@ -55,12 +55,12 @@ namespace GitOut.Features.Wpf
             base.OnClosing(e);
             if (WindowState == WindowState.Normal)
             {
-                storage.Write(NavigationWindowOptions.SectionKey, new
+                storage.Update(snap =>
                 {
-                    Width = ActualWidth,
-                    Height = ActualHeight,
-                    Left,
-                    Top
+                    snap.Width = (int)ActualWidth;
+                    snap.Height = (int)ActualHeight;
+                    snap.Left = (int)Left;
+                    snap.Top = (int)Top;
                 });
             }
         }

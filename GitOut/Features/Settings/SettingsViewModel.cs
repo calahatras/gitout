@@ -9,7 +9,7 @@ using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
-using GitOut.Features.Storage;
+using GitOut.Features.Options;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
@@ -32,7 +32,7 @@ namespace GitOut.Features.Settings
             IGitRepositoryStorage repositories,
             IGitRepositoryFactory gitFactory,
             IOptionsMonitor<GitStageOptions> stageOptions,
-            IWritableStorage storage,
+            IOptionsWriter<GitStageOptions> storage,
             IProcessTelemetryCollector telemetry
         )
         {
