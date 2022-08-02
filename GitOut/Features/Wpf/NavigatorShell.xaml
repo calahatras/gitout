@@ -21,7 +21,7 @@
     TextElement.Foreground="{DynamicResource MaterialLightPrimaryText}"
     TextElement.FontWeight="Regular"
     TextElement.FontSize="16"
-    TextOptions.TextFormattingMode="Ideal" 
+    TextOptions.TextFormattingMode="Ideal"
     TextOptions.TextRenderingMode="Auto"
     FontFamily="Roboto"
     Language="sv"
@@ -33,11 +33,11 @@
     </Window.InputBindings>
     <Window.Resources>
         <Style x:Key="NavigationToolbarStyle" TargetType="{x:Type Grid}">
-            <Setter Property="Height" Value="20"/>
             <Setter Property="Background" Value="#212225"/>
             <Setter Property="TextElement.Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
         </Style>
-        <Style x:Key="MenuButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}">
+        <Style x:Key="StatusBarMenuButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialIconButtonStyle}">
+            <Setter Property="Margin" Value="0"/>
             <Setter Property="Content">
                 <Setter.Value>
                     <Canvas Width="24" Height="24">
@@ -48,6 +48,10 @@
                     </Canvas>
                 </Setter.Value>
             </Setter>
+        </Style>
+        <Style x:Key="StatusBarTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource NormalTextStyle}">
+            <Setter Property="TextElement.FontSize" Value="10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
     </Window.Resources>
     <Grid
@@ -102,8 +106,7 @@
         </Border>
         <DockPanel>
             <Grid
-                DockPanel.Dock="Top"
-                Margin="1 1 1 0"
+                DockPanel.Dock="Bottom"
                 Style="{StaticResource NavigationToolbarStyle}"
             >
                 <StackPanel
@@ -111,7 +114,16 @@
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                 >
-                    <Button Style="{StaticResource MenuButtonStyle}" Command="{Binding OpenSettingsCommand}" ToolTip="Settings"/>
+                    <Button
+                        Style="{StaticResource StatusBarMenuButtonStyle}"
+                        Command="{Binding OpenSettingsCommand}"
+                        ToolTip="Settings"
+                    />
+                    <TextBlock
+                        Style="{StaticResource StatusBarTextStyle}"
+                        Text="{Binding StatusBarText}"
+                        ToolTip="{Binding StatusBarText}"
+                    />
                 </StackPanel>
             </Grid>
             <Grid>

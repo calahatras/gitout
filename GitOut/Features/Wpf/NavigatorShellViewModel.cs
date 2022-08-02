@@ -1,20 +1,26 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Diagnostics;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Settings;
 
 namespace GitOut.Features.Wpf
 {
-    public class NavigatorShellViewModel : INotifyPropertyChanged
+    public sealed class NavigatorShellViewModel : INotifyPropertyChanged, IDisposable
     {
+        private readonly IDisposable processStreamSubscription;
+
         private string? title;
+        private string? statusBarText;
         private ContentControl? content;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -24,6 +30,7 @@ namespace GitOut.Features.Wpf
         public NavigatorShellViewModel(
             INavigationService navigation,
             ISnackbarService snack,
+            IProcessTelemetryCollector processCollection,
             ITitleService titleService
         )
         {
@@ -34,6 +41,10 @@ namespace GitOut.Features.Wpf
             Snacks = CollectionViewSource.GetDefaultView(snacks);
             Snacks.SortDescriptions.Add(new SortDescription("DateAddedUtc", ListSortDirection.Ascending));
             snack.SnackReceived += (sender, args) => ShowSnack(args.Snack, snacks);
+            processStreamSubscription = processCollection
+                .EventsStream
+                .Select(item => $"{item.ProcessName} {item.Options.Arguments} finished in {item.Duration.TotalMilliseconds}ms")
+                .Subscribe(statusText => StatusBarText = statusText);
 
             OpenSettingsCommand = new NavigateLocalCommand<object>(
                 navigation,
@@ -51,6 +62,12 @@ namespace GitOut.Features.Wpf
             private set => SetProperty(ref title, value);
         }
 
+        public string? StatusBarText
+        {
+            get => statusBarText;
+            private set => SetProperty(ref statusBarText, value);
+        }
+
         public ContentControl? Content
         {
             get => content;
@@ -60,6 +77,8 @@ namespace GitOut.Features.Wpf
         public ICollectionView Snacks { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public void Dispose() => processStreamSubscription.Dispose();
 
         private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {

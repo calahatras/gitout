@@ -19,6 +19,7 @@ namespace GitOut.Features.Settings
     public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallback, IDisposable
     {
         private readonly GeneralSettingsViewModel general;
+        private ProcessSettingsViewModel? process;
         private object content;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -46,7 +47,6 @@ namespace GitOut.Features.Settings
                 stageOptions,
                 storage
             );
-            ProcessSettingsViewModel? process = null;
             content = general;
             MenuItem[] menuItems = new[]
             {
@@ -78,7 +78,11 @@ namespace GitOut.Features.Settings
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public void Dispose() => general.Dispose();
+        public void Dispose()
+        {
+            general.Dispose();
+            process?.Dispose();
+        }
 
         private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
         {
