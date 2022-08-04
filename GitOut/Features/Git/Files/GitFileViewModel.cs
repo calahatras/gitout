@@ -59,7 +59,7 @@ namespace GitOut.Features.Git.Files
         {
             get
             {
-                if (result == null)
+                if (result is null)
                 {
                     _ = RefreshDiffAsync();
                 }

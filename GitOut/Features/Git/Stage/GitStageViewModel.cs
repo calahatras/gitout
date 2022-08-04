@@ -11,7 +11,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using GitOut.Features.Collections;
 using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
@@ -38,6 +40,9 @@ namespace GitOut.Features.Git.Stage
 
         private StatusChangeViewModel? selectedChange;
         private DiffContext? selectedDiffResult;
+
+        private ICollectionView? amendFilesView;
+        private IGitFileEntryViewModel? selectedAmendChange;
 
         private int selectedWorkspaceIndex;
         private int selectedIndexIndex;
@@ -107,14 +112,14 @@ namespace GitOut.Features.Git.Stage
             ResetWorkspaceFilesCommand = new AsyncCallbackCommand(ResetWorkspaceFilesAsync);
             ResetIndexFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(ResetIndexFileAsync);
             ResetIndexFilesCommand = new AsyncCallbackCommand(ResetIndexFilesAsync);
-            ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync);
-            StageSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(StageSelectionAsync);
-            EditSelectedTextCommand = new CallbackCommand<IHunkLineVisitorProvider>(PrepareEditSelection);
+            ResetSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(ResetSelectionAsync, CanModifySelection);
+            StageSelectedTextCommand = new AsyncCallbackCommand<IHunkLineVisitorProvider>(StageSelectionAsync, CanModifySelection);
+            EditSelectedTextCommand = new CallbackCommand<IHunkLineVisitorProvider>(PrepareEditSelection, CanModifySelection);
             UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => undoPatch is not null);
-            AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync);
+            AddAllCommand = new AsyncCallbackCommand(StageAllFilesAsync, () => workspaceFiles.Count > 0);
             IntentToAddFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(IntentToAddFileAsync, CanIntentToAddFile);
             IntentToAddCommand = new AsyncCallbackCommand(IntentToAddAsync);
-            ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync);
+            ResetHeadCommand = new AsyncCallbackCommand(ResetAllFilesAsync, () => indexFiles.Count > 0);
 
             CancelEditTextCommand = new CallbackCommand(() => EditHunk = null);
             PatchEditTextCommand = new AsyncCallbackCommand(PatchEditSelectionAsync, () => editHunk is not null);
@@ -154,11 +159,12 @@ namespace GitOut.Features.Git.Stage
                 if (value)
                 {
                     cachedCommitMessage = CommitMessage;
-                    _ = SetAppendCommitMessageAsync();
+                    _ = PrepareAmendAsync();
                 }
                 else
                 {
                     CommitMessage = cachedCommitMessage;
+                    AmendFiles = null;
                 }
             }
         }
@@ -204,9 +210,39 @@ namespace GitOut.Features.Git.Stage
                     cancelRefreshSnack?.Cancel();
                     if (selectedChange is not null)
                     {
+                        SelectedAmendChange = null;
                         _ = ExecuteDiffAsync();
                     }
                 }
+            }
+        }
+
+        public IGitFileEntryViewModel? SelectedAmendChange
+        {
+            get => selectedAmendChange;
+            set
+            {
+                if (selectedAmendChange is INotifyPropertyChanged unsubscribe)
+                {
+                    unsubscribe.PropertyChanged -= NotifyDiffResultPropertyChanged;
+                }
+                if (SetProperty(ref selectedAmendChange, value))
+                {
+                    SelectedDiffResult = null;
+                    if (selectedAmendChange is INotifyPropertyChanged subscribe)
+                    {
+                        subscribe.PropertyChanged += NotifyDiffResultPropertyChanged;
+                    }
+                    if (selectedAmendChange is not null)
+                    {
+                        SelectedChange = null;
+                        ExecuteAmendDiff();
+                    }
+                }
+
+                void NotifyDiffResultPropertyChanged(object? sender, EventArgs e) => SelectedDiffResult = sender is GitFileViewModel container
+                    ? container.DiffResult
+                    : null;
             }
         }
 
@@ -224,6 +260,11 @@ namespace GitOut.Features.Git.Stage
 
         public ICollectionView IndexFiles { get; }
         public ICollectionView WorkspaceFiles { get; }
+        public ICollectionView? AmendFiles
+        {
+            get => amendFilesView;
+            set => SetProperty(ref amendFilesView, value);
+        }
 
         public ICommand RefreshStatusCommand { get; }
         public ICommand SetFocusCommand { get; }
@@ -339,6 +380,10 @@ namespace GitOut.Features.Git.Stage
                 && args.RepositoryPath == SelectedChange.Path;
         }
 
+        private bool CanModifySelection(IHunkLineVisitorProvider? viewer) => viewer is not null && selectedChange is not null;
+
+        private bool CanIntentToAddFile(StatusChangeViewModel? model) => model is not null && model.Model.Type == GitStatusChangeType.Untracked;
+
         private async Task GetRepositoryStatusAsync()
         {
             ParseStatus(await Repository.StatusAsync());
@@ -348,16 +393,39 @@ namespace GitOut.Features.Git.Stage
             }
         }
 
-        private async Task SetAppendCommitMessageAsync()
+        private async Task PrepareAmendAsync()
         {
             try
             {
                 GitHistoryEvent head = await Repository.GetHeadAsync();
-                CommitMessage = string.IsNullOrEmpty(head.Body)
-                    ? head.Subject
-                    : $"{head.Subject}{Environment.NewLine}{Environment.NewLine}{head.Body}";
+                UpdateCommitMessageFromHead(head);
+                RefreshAmendList(head);
             }
             catch (InvalidOperationException) { }
+        }
+
+        private void UpdateCommitMessageFromHead(GitHistoryEvent head) =>
+            CommitMessage = string.IsNullOrEmpty(head.Body)
+                ? head.Subject
+                : $"{head.Subject}{Environment.NewLine}{Environment.NewLine}{head.Body}";
+
+        private void RefreshAmendList(GitHistoryEvent head)
+        {
+            var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
+                relativePath => GitFileEntryViewModelFactory.DiffAllAsync(head.ParentId, head.Id, Repository),
+                IGitDirectoryEntryViewModel.CompareItems
+            );
+
+            _ = logFiles.MaterializeAsync(RelativeDirectoryPath.Root).AsTask();
+            AmendFiles = CollectionViewSource.GetDefaultView(logFiles);
+        }
+
+        private void ExecuteAmendDiff()
+        {
+            if (selectedAmendChange is GitFileViewModel viewmodel)
+            {
+                SelectedDiffResult = viewmodel.DiffResult;
+            }
         }
 
         private async Task ExecuteDiffAsync()
@@ -407,8 +475,6 @@ namespace GitOut.Features.Git.Stage
             await Repository.AddAsync(model.Model, AddOptions.Builder().WithIntent().Build());
             await GetRepositoryStatusAsync();
         }
-
-        private bool CanIntentToAddFile(StatusChangeViewModel? model) => model is not null && model.Model.Type == GitStatusChangeType.Untracked;
 
         private async Task IntentToAddAsync()
         {
@@ -773,7 +839,12 @@ namespace GitOut.Features.Git.Stage
             await Repository.CommitAsync(options);
             snack.ShowSuccess("Commited changes successfully");
             await GetRepositoryStatusAsync();
-            if (!amendLastCommit)
+            if (amendLastCommit)
+            {
+                GitHistoryEvent head = await Repository.GetHeadAsync();
+                RefreshAmendList(head);
+            }
+            else
             {
                 CommitMessage = string.Empty;
             }

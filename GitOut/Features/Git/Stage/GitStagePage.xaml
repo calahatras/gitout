@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
     xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
+    xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
     xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
     xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
@@ -17,6 +18,7 @@
 >
     <UserControl.Resources>
         <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+        <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
         <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
@@ -134,6 +136,30 @@
                     <RowDefinition Height="*" MinHeight="20"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition>
+                        <RowDefinition.Style>
+                            <Style TargetType="{x:Type RowDefinition}">
+                                <Setter Property="Height" Value="0"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
+                                        <Setter Property="Height" Value="Auto"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RowDefinition.Style>
+                    </RowDefinition>
+                    <RowDefinition>
+                        <RowDefinition.Style>
+                            <Style TargetType="{x:Type RowDefinition}">
+                                <Setter Property="Height" Value="0"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
+                                        <Setter Property="Height" Value="*"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RowDefinition.Style>
+                    </RowDefinition>
                 </Grid.RowDefinitions>
                 <ListView
                     x:Name="WorkspaceFiles"
@@ -222,7 +248,7 @@
                                         <MenuItem
                                             Header="Add with intent"
                                             InputGestureText="I"
-                                            Command="{Binding PlacementTarget.Tag.IntentToAddFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" 
+                                            Command="{Binding PlacementTarget.Tag.IntentToAddFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
                                             CommandParameter="{Binding}"
                                         >
                                             <MenuItem.Icon>
@@ -239,7 +265,7 @@
                             <MenuItem
                                 Header="Stage all selected files to index"
                                 Command="{Binding StageWorkspaceFilesCommand}"
-                             >
+                            >
                                 <MenuItem.Icon>
                                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
                                 </MenuItem.Icon>
@@ -247,7 +273,7 @@
                             <MenuItem
                                 Header="Stage all files to index"
                                 Command="{Binding AddAllCommand}"
-                             >
+                            >
                                 <MenuItem.Icon>
                                     <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
                                 </MenuItem.Icon>
@@ -361,6 +387,83 @@
                             </MenuItem>
                         </ContextMenu>
                     </ListView.ContextMenu>
+                </ListView>
+
+                <GridSplitter Grid.Row="3">
+                    <GridSplitter.Style>
+                        <Style TargetType="{x:Type GridSplitter}" BasedOn="{StaticResource SplitHorizontalStyle}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </GridSplitter.Style>
+                </GridSplitter>
+                <Grid Grid.Row="3">
+                    <Grid.Style>
+                        <Style TargetType="{x:Type Grid}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <TextBlock Text="Amend" VerticalAlignment="Center" IsHitTestVisible="False" Style="{StaticResource Header6TextStyle}" Margin="4 0" />
+                </Grid>
+                <ListView
+                    Grid.Row="4"
+                    ItemsSource="{Binding AmendFiles}"
+                    SelectedValue="{Binding SelectedAmendChange}"
+                >
+                    <ListView.Style>
+                        <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource GitChangeListStyle}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.Style>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Height" Value="22"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="{x:Type files:GitFileViewModel}">
+                            <Grid
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                            >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                                    <Canvas.LayoutTransform>
+                                        <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                                    </Canvas.LayoutTransform>
+                                    <Path
+                                        Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
+                                        Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+                                    />
+                                </Canvas>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Style="{StaticResource NormalTextStyle}"
+                                    Text="{Binding FileName.Name}"
+                                    ToolTip="{Binding RelativePath}"
+                                />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
                 </ListView>
             </Grid>
             <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Style="{StaticResource SplitVerticalStyle}" />
