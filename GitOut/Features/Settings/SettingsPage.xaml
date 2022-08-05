@@ -146,7 +146,7 @@
                                                 >
                                                     <Button
                                                         Style="{StaticResource MaterialButtonStyle}"
-                                                        Command="{Binding DataContext.AddRepositoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        Command="{Binding DataContext.CurrentContent.AddRepositoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         Content="ADD"
                                                     />
