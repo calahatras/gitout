@@ -43,10 +43,6 @@ namespace GitOut.Features.Git.Properties
             catch (Exception e)
             {
                 Trace.WriteLine(e.ToString());
-                if (!Debugger.IsAttached)
-                {
-                    Debugger.Launch();
-                }
             }
         }
 
