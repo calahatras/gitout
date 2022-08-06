@@ -76,7 +76,16 @@ namespace GitOut.Features.Git.Diagnostics
 
             TimeSpan duration = exec.ExitTime - exec.StartTime;
             Trace.WriteLine($"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms");
-            var args = new ProcessEventArgs(CommandLineExecutable, workingDirectory, arguments, new DateTimeOffset(exec.StartTime), duration, writer, output.AsReadOnly(), error.AsReadOnly());
+            var args = new ProcessEventArgs(
+                CommandLineExecutable,
+                workingDirectory,
+                arguments,
+                new DateTimeOffset(exec.StartTime),
+                duration,
+                writer,
+                output.AsReadOnly(),
+                error.AsReadOnly()
+            );
             telemetry.Report(args);
             if (!isSuccessful)
             {
@@ -188,7 +197,16 @@ namespace GitOut.Features.Git.Diagnostics
             queue.Complete();
             TimeSpan duration = exec.ExitTime - exec.StartTime;
             Trace.WriteLine($"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms");
-            telemetry.Report(new ProcessEventArgs(CommandLineExecutable, workingDirectory, arguments, new DateTimeOffset(exec.StartTime), duration, new StringBuilder(), output.AsReadOnly(), error.AsReadOnly()));
+            telemetry.Report(new ProcessEventArgs(
+                CommandLineExecutable,
+                workingDirectory,
+                arguments,
+                new DateTimeOffset(exec.StartTime),
+                duration,
+                new StringBuilder(),
+                output.AsReadOnly(),
+                error.AsReadOnly())
+            );
 
             void OnHandleOutputData(object sender, DataReceivedEventArgs e)
             {

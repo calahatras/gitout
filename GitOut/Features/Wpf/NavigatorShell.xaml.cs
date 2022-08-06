@@ -64,6 +64,10 @@ namespace GitOut.Features.Wpf
                     snap.Top = (int)Top;
                 });
             }
+            if (DataContext is NavigatorShellViewModel viewModel)
+            {
+                viewModel.Dispose();
+            }
         }
 
         protected override void OnSourceInitialized(EventArgs e)
