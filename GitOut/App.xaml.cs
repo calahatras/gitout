@@ -58,6 +58,7 @@ namespace GitOut
 
             ILogger<App> logger = host.Services.GetRequiredService<ILogger<App>>();
             logger.LogInformation(LogEventId.Application, "Application started");
+            logger.LogInformation(LogEventId.Application, "Commit ID: {CommitId}", Features.Git.Properties.GitProperties.CommitId);
             base.OnStartup(e);
             var token = new CancellationToken();
             host.RunAsync(token);

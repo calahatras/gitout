@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:props="clr-namespace:GitOut.Features.Git.Properties"
     xmlns:staging="clr-namespace:GitOut.Features.Git.Stage"
     xmlns:local="clr-namespace:GitOut.Features.Settings"
     xmlns:themes="clr-namespace:GitOut.Features.Themes"
@@ -16,6 +17,10 @@
     x:Name="Root"
 >
     <UserControl.Resources>
+        <Style x:Key="GridHeaderTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialInputStyle}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="TextElement.FontSize" Value="12" />
+        </Style>
         <Style x:Key="InputTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MonoSpacedTextBoxStyle}">
             <Setter Property="IsReadOnly" Value="True" />
             <Setter Property="Foreground" Value="{DynamicResource MaterialGray300}" />
@@ -170,6 +175,29 @@
                                 <themes:ThemeSettingsPicker
                                     SelectThemeCommand="{Binding ChangeThemeCommand}"
                                 />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource CardPanelStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Git properties" Style="{StaticResource Header6TextStyle}" />
+                                <Grid Margin="0 10 0 0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBox
+                                        AutomationProperties.HelpText="Commit ID"
+                                        Style="{StaticResource GridHeaderTextBoxStyle}"
+                                        Text="{Binding Source={x:Static props:GitProperties.CommitId}, Mode=OneWay}"
+                                    />
+                                    <TextBox
+                                        Grid.Row="1"
+                                        AutomationProperties.HelpText="Branch name"
+                                        Style="{StaticResource GridHeaderTextBoxStyle}"
+                                        Text="{Binding Source={x:Static props:GitProperties.BranchName}, Mode=OneWay}"
+                                    />
+                                </Grid>
                             </StackPanel>
                         </Border>
                     </StackPanel>
