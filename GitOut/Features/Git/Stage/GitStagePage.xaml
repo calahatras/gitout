@@ -458,7 +458,7 @@
                                 <TextBlock
                                     Grid.Column="1"
                                     Style="{StaticResource NormalTextStyle}"
-                                    Text="{Binding FileName.Name}"
+                                    Text="{Binding DisplayName}"
                                     ToolTip="{Binding RelativePath}"
                                 />
                             </Grid>

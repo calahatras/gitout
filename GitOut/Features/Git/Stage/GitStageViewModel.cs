@@ -240,9 +240,7 @@ namespace GitOut.Features.Git.Stage
                     }
                 }
 
-                void NotifyDiffResultPropertyChanged(object? sender, EventArgs e) => SelectedDiffResult = sender is GitFileViewModel container
-                    ? container.DiffResult
-                    : null;
+                void NotifyDiffResultPropertyChanged(object? sender, EventArgs e) => SelectedDiffResult = (sender as GitFileViewModel)?.DiffResult;
             }
         }
 
