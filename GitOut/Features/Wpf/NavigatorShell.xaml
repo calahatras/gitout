@@ -30,6 +30,7 @@
     <Window.InputBindings>
         <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding OpenSettingsCommand}" />
         <KeyBinding Key="Left" Modifiers="Alt" Command="{x:Static wpfcommands:Navigate.Back}" />
+        <KeyBinding Key="F11" Command="{Binding ToggleFullScreenCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
     </Window.InputBindings>
     <Window.Resources>
         <Style x:Key="NavigationToolbarStyle" TargetType="{x:Type Grid}">
