@@ -52,9 +52,25 @@ namespace GitOut.Features.Wpf
                 null,
                 _ => navigation.CurrentPage != typeof(SettingsPage).FullName
             );
+            ToggleFullScreenCommand = new NotNullCallbackCommand<Window>(
+                window =>
+                {
+                    if (window.WindowStyle == WindowStyle.None)
+                    {
+                        window.WindowStyle = WindowStyle.SingleBorderWindow;
+                        window.WindowState = WindowState.Normal;
+                    }
+                    else
+                    {
+                        window.WindowStyle = WindowStyle.None;
+                        window.WindowState = WindowState.Maximized;
+                    }
+                }
+            );
         }
 
         public ICommand OpenSettingsCommand { get; }
+        public ICommand ToggleFullScreenCommand { get; }
 
         public string? Title
         {
