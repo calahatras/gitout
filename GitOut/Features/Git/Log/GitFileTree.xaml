@@ -5,12 +5,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+    xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
     xmlns:files="clr-namespace:GitOut.Features.Git.Files"
     xmlns:local="clr-namespace:GitOut.Features.Git.Log"
     xmlns:app="clr-namespace:GitOut.Features.Wpf.Commands"
     mc:Ignorable="d"
 >
     <UserControl.Resources>
+        <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
         <converters:ToStringConverter x:Key="ToStringConverter" />
     </UserControl.Resources>
     <Grid>
@@ -114,7 +116,7 @@
                                 <ScaleTransform ScaleX=".6" ScaleY=".6" />
                             </Canvas.LayoutTransform>
                             <Path
-                                Fill="{DynamicResource MaterialForegroundBase}"
+                                Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
                                 Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
                             />
                         </Canvas>
