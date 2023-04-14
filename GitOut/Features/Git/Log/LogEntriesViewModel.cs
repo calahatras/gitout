@@ -19,7 +19,7 @@ namespace GitOut.Features.Git.Log
 {
     public class LogEntriesViewModel : INotifyPropertyChanged
     {
-        private readonly GitTreeEvent? diff;
+        private readonly GitHistoryEvent? diff;
         private readonly IGitRepository repository;
         private readonly IGitRepositoryNotifier notifier;
         private readonly ISnackbarService snack;
@@ -36,7 +36,7 @@ namespace GitOut.Features.Git.Log
         private LogRevisionViewMode viewMode = LogRevisionViewMode.CurrentRevision;
 
         private LogEntriesViewModel(
-            GitTreeEvent root,
+            GitHistoryEvent root,
             IGitRepository repository,
             IGitRepositoryNotifier notifier,
             ISnackbarService snack
@@ -51,7 +51,7 @@ namespace GitOut.Features.Git.Log
                 IGitDirectoryEntryViewModel.CompareItems
             );
             var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
-                relativePath => GitFileEntryViewModelFactory.ListIdAsync(root.Event.Id, repository, relativePath),
+                relativePath => GitFileEntryViewModelFactory.ListIdAsync(root.Id, repository, relativePath),
                 IGitDirectoryEntryViewModel.CompareItems
             );
 
@@ -59,12 +59,12 @@ namespace GitOut.Features.Git.Log
             this.logFiles = logFiles;
 
             diffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
-                relativePath => GitFileEntryViewModelFactory.DiffIdAsync(diff?.Event.Id ?? root.Event.ParentId, root.Event.Id, repository, RelativeDirectoryPath.Root),
+                relativePath => GitFileEntryViewModelFactory.DiffIdAsync(diff?.Id ?? root.ParentId, root.Id, repository, RelativeDirectoryPath.Root),
                 IGitDirectoryEntryViewModel.CompareItems
             );
 
             flattenedDiffFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
-                relativePath => GitFileEntryViewModelFactory.DiffAllAsync(diff?.Event.Id ?? root.Event.ParentId, root.Event.Id, repository),
+                relativePath => GitFileEntryViewModelFactory.DiffAllAsync(diff?.Id ?? root.ParentId, root.Id, repository),
                 IGitDirectoryEntryViewModel.CompareItems
             );
 
@@ -74,7 +74,7 @@ namespace GitOut.Features.Git.Log
             };
             rootView = currentSource.View;
 
-            Branches = root.Event
+            Branches = root
                 .Branches
                 .Select(branch => new BranchNameViewModel(
                     branch,
@@ -90,16 +90,16 @@ namespace GitOut.Features.Git.Log
         }
 
         private LogEntriesViewModel(
-            GitTreeEvent root,
-            GitTreeEvent diff,
+            GitHistoryEvent root,
+            GitHistoryEvent diff,
             IGitRepository repository,
             IGitRepositoryNotifier notifier,
             ISnackbarService snack
         ) : this(root, repository, notifier, snack) => this.diff = diff;
 
-        public GitTreeEvent Root { get; }
+        public GitHistoryEvent Root { get; }
 
-        public string Subject => Root.Event.Subject;
+        public string Subject => Root.Subject;
 
         public ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> AllFiles => allFiles;
 
@@ -159,13 +159,13 @@ namespace GitOut.Features.Git.Log
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static LogEntriesViewModel? CreateContext(
-            IList<GitTreeEvent> entries,
+        public static LogEntriesViewModel? CreateContext<T>(
+            IList<T> entries,
             IGitRepository repository,
             IGitRepositoryNotifier notifier,
             ISnackbarService snack,
             LogRevisionViewMode mode
-        )
+        ) where T : GitHistoryEvent
         {
             if (entries.Count is 0 or >= 3)
             {
@@ -198,7 +198,7 @@ namespace GitOut.Features.Git.Log
             IGitFileEntryViewModel? currentSelection = selectedItem;
             IDictionary<string, DirectoryScaffold> tree = new Dictionary<string, DirectoryScaffold>();
             int max = 0;
-            await foreach (GitFileEntry item in repository.ListTreeAsync(Root.Event.Id, DiffOptions.Builder().Recursive().Build()))
+            await foreach (GitFileEntry item in repository.ListTreeAsync(Root.Id, DiffOptions.Builder().Recursive().Build()))
             {
                 var viewModel = GitFileViewModel.Snapshot(repository, item, RelativeDirectoryPath.Root);
                 if (!tree.TryGetValue(item.Directory.Directory, out DirectoryScaffold? directory))

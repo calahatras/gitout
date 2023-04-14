@@ -11,12 +11,12 @@ namespace GitOut.Features.Wpf
 {
     public partial class NavigatorShell : Window
     {
-        private readonly IOptionsWriter<NavigationWindowOptions> storage;
+        private readonly IOptionsWriter<NavigationWindowOptions>? storage;
         private readonly IOptions<NavigationWindowOptions> windowOptions;
 
         public NavigatorShell(
             NavigatorShellViewModel dataContext,
-            IOptionsWriter<NavigationWindowOptions> storage,
+            IOptionsWriter<NavigationWindowOptions>? storage,
             IOptions<NavigationWindowOptions> windowOptions
         )
         {
@@ -54,7 +54,7 @@ namespace GitOut.Features.Wpf
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
-            if (WindowState == WindowState.Normal)
+            if (WindowState == WindowState.Normal && storage is not null)
             {
                 storage.Update(snap =>
                 {

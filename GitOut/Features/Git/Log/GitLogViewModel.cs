@@ -16,6 +16,7 @@ using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Options;
+using GitOut.Features.Text;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 
@@ -23,8 +24,11 @@ namespace GitOut.Features.Git.Log
 {
     public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INavigationFallback
     {
+        private static readonly Size PromptSize = new(400, 150);
+        private static readonly Point PromptOffset = new(80, 60);
+
         private readonly object activeStashesLock = new();
-        private readonly ObservableCollection<GitTreeEvent> activeStashes = new();
+        private readonly ObservableCollection<GitStashEventViewModel> activeStashes = new();
 
         private readonly object entriesLock = new();
         private readonly RangeObservableCollection<GitTreeEvent> entries = new();
@@ -33,12 +37,14 @@ namespace GitOut.Features.Git.Log
         private readonly ObservableCollection<GitRemoteViewModel> remotes = new();
 
         private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new();
-
+        private readonly ObservableCollection<GitStashEventViewModel> selectedStashEntries = new();
         private readonly ISnackbarService snack;
         private readonly IOptionsWriter<GitStageOptions> updateStageOptions;
         private readonly IRepositoryWatcher repositoryWatcher;
         private readonly IGitRepositoryMonitor monitor;
         private readonly IDisposable settingsMonitorHandle;
+
+        private readonly ICommand createStashBranchCommand;
 
         private int changesCount;
         private bool includeStashes = true;
@@ -102,7 +108,7 @@ namespace GitOut.Features.Git.Log
                 }
 
                 SelectedContext = LogEntriesViewModel.CreateContext(
-                    selectedLogEntries,
+                    selectedLogEntries.Select(vm => vm.Event).ToList(),
                     Repository,
                     monitor.CreateCallback(),
                     snack,
@@ -116,6 +122,56 @@ namespace GitOut.Features.Git.Log
                     RevisionViewMode = LogRevisionViewMode.Diff;
                 }
             };
+            selectedStashEntries.CollectionChanged += (sender, args) =>
+            {
+                SelectedContext = LogEntriesViewModel.CreateContext(
+                    selectedStashEntries.Select(vm => vm.Event).ToList(),
+                    Repository,
+                    monitor.CreateCallback(),
+                    snack,
+                    RevisionViewMode
+                );
+                ViewMode = SelectedContext is null
+                    ? LogViewMode.None
+                    : LogViewMode.Files;
+            };
+
+            createStashBranchCommand = new NotNullCallbackCommand<GitStashEventViewModel>(
+                model =>
+                {
+                    INavigationService child = navigation.NavigateNewWindow(
+                        typeof(TextPromptPage).FullName!,
+                        new TextPromptOptions(
+                            $"stash-{model.StashIndex}",
+                            "Branch name",
+                            GitBranchName.IsValid,
+                            GitBranchName.CreateLocal
+                        ),
+                        new NavigationOverrideOptions(
+                            PromptSize,
+                            PromptOffset,
+                            IsModal: true,
+                            IsStatusBarVisible: false
+                        )
+                    );
+                    child.Closed += async (sender, args) =>
+                    {
+                        GitBranchName? branchName = child.GetDialogResult<GitBranchName>();
+                        if (branchName is not null)
+                        {
+                            try
+                            {
+                                await Repository.CreateBranchAsync(branchName, new GitCreateBranchOptions(model.Event.Id));
+                                await CheckRepositoryStatusAsync();
+                            }
+                            catch (InvalidOperationException ioe)
+                            {
+                                snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
+                            }
+                        }
+                    };
+                }
+            );
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
             CheckoutCommitCommand = new AsyncCallbackCommand<GitCommitId>(
@@ -286,6 +342,7 @@ namespace GitOut.Features.Git.Log
         public IGitRepository Repository { get; }
 
         public IList<GitTreeEvent> SelectedLogEntries => selectedLogEntries;
+        public IList<GitStashEventViewModel> SelectedStashEntries => selectedStashEntries;
 
         public GitTreeEvent? EntryInView
         {
@@ -471,11 +528,11 @@ namespace GitOut.Features.Git.Log
             {
                 activeStashes.Clear();
             }
-            await foreach (GitHistoryEvent stashEntry in Repository.StashListAsync())
+            await foreach (GitStash stashEntry in Repository.StashListAsync())
             {
                 lock (activeStashesLock)
                 {
-                    activeStashes.Add(new GitTreeEvent(stashEntry));
+                    activeStashes.Add(new GitStashEventViewModel(stashEntry, createStashBranchCommand));
                 }
             }
         }
@@ -483,11 +540,11 @@ namespace GitOut.Features.Git.Log
         private async Task SquashCommitAsync(LogEntriesViewModel? gte)
         {
             IsWorking = true;
-            string subject = gte!.Root.Event.Subject;
-            string body = gte.Root.Event.Body;
+            string subject = gte!.Root.Subject;
+            string body = gte.Root.Body;
             var branch = GitBranchName.CreateLocal($"gitout-bkp/{Guid.NewGuid():N}");
             await Repository.CreateBranchAsync(branch);
-            await Repository.ResetToCommitAsync(gte!.Root.Event.Id);
+            await Repository.ResetToCommitAsync(gte!.Root.Id);
             await Repository.AddAllAsync();
             await Repository.CommitAsync(GitCommitOptions.AmendLatest(body.Length > 0 ? $"{subject}{Environment.NewLine}{Environment.NewLine}{body}" : subject));
             snack.ShowSuccess("Successfully reset to previous commit");

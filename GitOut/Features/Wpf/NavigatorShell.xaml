@@ -13,7 +13,7 @@
     Title="{Binding Title, TargetNullValue='git out'}"
     Width="1280"
     Height="800"
-    MinHeight="300"
+    MinHeight="150"
     MinWidth="320"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="Manual"
@@ -109,6 +109,7 @@
             <Grid
                 DockPanel.Dock="Bottom"
                 Style="{StaticResource NavigationToolbarStyle}"
+                Visibility="{Binding IsStatusBarVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
             >
                 <StackPanel
                     Grid.Column="0"

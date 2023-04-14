@@ -16,14 +16,14 @@ namespace GitOut.Features.Git.Log
         {
             var hash = GitFileId.FromHash("f665b5a0faac191d8558ea8af26c8aa478be7c48");
             var parent = GitFileId.FromHash("23307fe3ad484c6086a2f6a1f3387087a29217cb");
-            var root = new GitTreeEvent(GitHistoryEvent
+            GitHistoryEvent root = GitHistoryEvent
                 .Builder()
                 .ParseHash(hash.ToString() + parent.ToString())
                 .ParseDate(1613333029)
                 .ParseAuthorEmail("user@example.com")
                 .ParseAuthorName("User")
                 .ParseSubject("refactor(log): add test")
-                .Build());
+                .Build();
 
             ICollection<GitFileEntry> entries = new List<GitFileEntry>
             {
@@ -34,10 +34,10 @@ namespace GitOut.Features.Git.Log
 
             var repository = new Mock<IGitRepository>();
             var notifier = new Mock<IGitRepositoryNotifier>();
-            repository.Setup(m => m.ListTreeAsync(root.Event.Id, It.IsAny<DiffOptions>())).Returns(entries.ToAsyncEnumerable());
+            repository.Setup(m => m.ListTreeAsync(root.Id, It.IsAny<DiffOptions>())).Returns(entries.ToAsyncEnumerable());
             var snack = new Mock<ISnackbarService>();
 
-            var actor = LogEntriesViewModel.CreateContext(new List<GitTreeEvent>(new[] { root }), repository.Object, notifier.Object, snack.Object, LogRevisionViewMode.CurrentRevision);
+            var actor = LogEntriesViewModel.CreateContext(new List<GitHistoryEvent>(new[] { root }), repository.Object, notifier.Object, snack.Object, LogRevisionViewMode.CurrentRevision);
             Assert.IsNotNull(actor);
             await actor!.AllFiles.MaterializeAsync(RelativeDirectoryPath.Root);
 
