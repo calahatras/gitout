@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace GitOut.Features.Git.Log;
 
-public class GitStashEventViewModel : INotifyPropertyChanged
+public sealed class GitStashEventViewModel : INotifyPropertyChanged
 {
     private bool isSelected;
     public GitStashEventViewModel(

@@ -5,7 +5,7 @@ using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Text;
 
-public class TextPromptViewModel
+public sealed class TextPromptViewModel
 {
     private readonly TextPromptOptions options;
 

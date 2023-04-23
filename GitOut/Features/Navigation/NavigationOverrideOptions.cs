@@ -2,7 +2,7 @@ using System.Windows;
 
 namespace GitOut.Features.Navigation;
 
-public record NavigationOverrideOptions(
+public sealed record NavigationOverrideOptions(
     Size WindowSize,
     Point Offset,
     bool IsModal = false,

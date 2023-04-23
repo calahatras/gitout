@@ -2,7 +2,7 @@ using System;
 
 namespace GitOut.Features.Text;
 
-public record TextPromptOptions(
+public sealed record TextPromptOptions(
     string? StartValue,
     string Prompt,
     Func<string, bool>? Validator,
