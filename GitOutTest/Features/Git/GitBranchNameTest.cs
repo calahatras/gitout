@@ -23,6 +23,7 @@ namespace GitOut.Features.Git
         [TestCase("feature_something")]
         [TestCase("some-&-thing")]
         [TestCase("some@name")]
+        [TestCase("wip(test)")]
         public void CreateLocalShouldAllowValidNames(string input)
         {
             bool isValid = GitBranchName.IsValid(input);
