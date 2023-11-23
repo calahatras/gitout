@@ -35,7 +35,7 @@ namespace GitOut.Features.Git.Stage
         private readonly ISnackbarService snack;
         private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
         private readonly IRepositoryWatcher repositoryWatcher;
-        private readonly IDisposable stagingOptionsHandle;
+        private readonly IDisposable? stagingOptionsHandle;
 
         private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
         private readonly object workspaceFilesLock = new();
@@ -63,6 +63,8 @@ namespace GitOut.Features.Git.Stage
 
         private string commitMessage = string.Empty;
         private string newBranchName = string.Empty;
+        private string includeFilterText = string.Empty;
+        private string excludeFilterText = string.Empty;
         private string cachedCommitMessage = string.Empty;
         private EditPatchViewModel? editHunk;
         private GitPatch? undoPatch;
@@ -96,6 +98,16 @@ namespace GitOut.Features.Git.Stage
 
             BindingOperations.EnableCollectionSynchronization(workspaceFiles, workspaceFilesLock);
             WorkspaceFiles = CollectionViewSource.GetDefaultView(workspaceFiles);
+            WorkspaceFiles.Filter = (item) =>
+            {
+                if (item is StatusChangeViewModel model)
+                {
+                    bool isIncluded = string.IsNullOrEmpty(IncludeFilterText) || IncludeFilterText.Split(';').Any(filter => model.Path.Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+                    bool isExcluded = !string.IsNullOrEmpty(ExcludeFilterText) && ExcludeFilterText.Split(';').Any(filter => model.Path.Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+                    return isIncluded && !isExcluded;
+                }
+                return false;
+            };
             BindingOperations.EnableCollectionSynchronization(indexFiles, indexFilesLock);
             IndexFiles = CollectionViewSource.GetDefaultView(indexFiles);
 
@@ -228,6 +240,30 @@ namespace GitOut.Features.Git.Stage
         {
             get => newBranchName;
             set => SetProperty(ref newBranchName, value);
+        }
+
+        public string IncludeFilterText
+        {
+            get => includeFilterText;
+            set
+            {
+                if (SetProperty(ref includeFilterText, value))
+                {
+                    WorkspaceFiles.Refresh();
+                }
+            }
+        }
+
+        public string ExcludeFilterText
+        {
+            get => excludeFilterText;
+            set
+            {
+                if (SetProperty(ref excludeFilterText, value))
+                {
+                    WorkspaceFiles.Refresh();
+                }
+            }
         }
 
         public int SelectedWorkspaceIndex
@@ -422,7 +458,7 @@ namespace GitOut.Features.Git.Stage
             {
                 cancelRefreshSnack?.Dispose();
                 repositoryWatcher.Dispose();
-                stagingOptionsHandle.Dispose();
+                stagingOptionsHandle?.Dispose();
             }
         }
 
