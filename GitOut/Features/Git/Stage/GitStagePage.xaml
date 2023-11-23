@@ -218,6 +218,7 @@
       </Grid.ColumnDefinitions>
       <Grid wpf:GridSplitterBehavior.FreezeRow="2">
         <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
           <RowDefinition Height="*" MinHeight="20" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
@@ -252,9 +253,23 @@
             </RowDefinition.Style>
           </RowDefinition>
         </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="0,4,0,0">
+          <TextBox
+            Style="{StaticResource MonoSpacedTextBoxStyle}"
+            Text="{Binding IncludeFilterText, UpdateSourceTrigger=PropertyChanged}"
+            AutomationProperties.HelpText="Include filter"
+            Margin="0"
+          />
+          <TextBox
+            Style="{StaticResource MonoSpacedTextBoxStyle}"
+            Text="{Binding ExcludeFilterText, UpdateSourceTrigger=PropertyChanged}"
+            AutomationProperties.HelpText="Exclude filter"
+            Margin="0"
+          />
+        </StackPanel>
         <ListView
           x:Name="WorkspaceFiles"
-          Grid.Row="0"
+          Grid.Row="1"
           Style="{StaticResource GitChangeListStyle}"
           ItemsSource="{Binding WorkspaceFiles}"
           SelectedValue="{Binding SelectedChange}"
@@ -410,8 +425,8 @@
             </ContextMenu>
           </ListView.ContextMenu>
         </ListView>
-        <GridSplitter Grid.Row="1" Style="{StaticResource SplitHorizontalStyle}" />
-        <Grid Grid.Row="1">
+        <GridSplitter Grid.Row="2" Style="{StaticResource SplitHorizontalStyle}" />
+        <Grid Grid.Row="2">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -458,7 +473,7 @@
         </Grid>
         <ListView
           x:Name="IndexFiles"
-          Grid.Row="2"
+          Grid.Row="3"
           Style="{StaticResource GitChangeListStyle}"
           ItemsSource="{Binding IndexFiles}"
           SelectedValue="{Binding SelectedChange}"
@@ -569,7 +584,7 @@
             </ContextMenu>
           </ListView.ContextMenu>
         </ListView>
-        <GridSplitter Grid.Row="3">
+        <GridSplitter Grid.Row="4">
           <GridSplitter.Style>
             <Style
               TargetType="{x:Type GridSplitter}"
@@ -587,7 +602,7 @@
             </Style>
           </GridSplitter.Style>
         </GridSplitter>
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
           <Grid.Style>
             <Style TargetType="{x:Type Grid}">
               <Setter Property="Visibility" Value="Collapsed" />
@@ -610,7 +625,7 @@
           />
         </Grid>
         <ListView
-          Grid.Row="4"
+          Grid.Row="5"
           ItemsSource="{Binding AmendFiles}"
           SelectedValue="{Binding SelectedAmendChange}"
         >
@@ -750,15 +765,15 @@
                   Style="{StaticResource MaterialButtonStyle}"
                   Command="{Binding PatchEditTextCommand}"
                 >
-                                    OK
-                                </Button
+                  OK
+                </Button
                 >
                 <Button
                   Style="{StaticResource MaterialButtonStyle}"
                   Command="{Binding CancelEditTextCommand}"
                 >
-                                    CANCEL
-                                </Button
+                  CANCEL
+                </Button
                 >
               </StackPanel>
             </Grid>
