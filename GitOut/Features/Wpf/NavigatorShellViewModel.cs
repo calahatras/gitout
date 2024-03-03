@@ -20,6 +20,7 @@ namespace GitOut.Features.Wpf
         private readonly IDisposable processStreamSubscription;
 
         private string? title;
+        private bool isStatusBarVisible;
         private string? statusBarText;
         private ContentControl? content;
 
@@ -76,6 +77,12 @@ namespace GitOut.Features.Wpf
         {
             get => title;
             private set => SetProperty(ref title, value);
+        }
+
+        public bool IsStatusBarVisible
+        {
+            get => isStatusBarVisible;
+            set => SetProperty(ref isStatusBarVisible, value);
         }
 
         public string? StatusBarText

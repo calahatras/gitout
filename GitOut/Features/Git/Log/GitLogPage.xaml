@@ -42,7 +42,7 @@
             <MenuItem
                 Header="Copy commit hash"
                 Command="{Binding CopyCommitHashCommand}"
-                CommandParameter="{Binding SelectedContext.Root.Event}"
+                CommandParameter="{Binding SelectedContext.Root}"
                 IsEnabled="{Binding SelectedContext.IsSingleSelection}"
             />
             <MenuItem
@@ -68,7 +68,7 @@
             <MenuItem
                 Header="Checkout commit (detached)"
                 Command="{Binding CheckoutCommitCommand}"
-                CommandParameter="{Binding SelectedContext.Root.Event.Id}"
+                CommandParameter="{Binding SelectedContext.Root.Id}"
                 IsEnabled="{Binding SelectedContext.IsSingleSelection}"
             />
             <MenuItem
@@ -116,6 +116,13 @@
                     </Style>
                 </MenuItem.ItemContainerStyle>
             </MenuItem>
+        </ContextMenu>
+        <ContextMenu x:Key="StashMenu">
+            <MenuItem
+                Header="Create branch"
+                Command="{Binding CreateBranchCommand}"
+                CommandParameter="{Binding}"
+            />
         </ContextMenu>
         <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
             <Setter Property="Background" Value="Transparent"/>
@@ -555,7 +562,8 @@
                     Grid.Row="1"
                     Style="{StaticResource MaterialListStyle}"
                     ItemsSource="{Binding ActiveStashes}"
-                    attached:BindableSelectedItems.SelectedItems="{Binding SelectedLogEntries}"
+                    SelectionMode="Single"
+                    attached:BindableSelectedItems.SelectedItems="{Binding SelectedStashEntries}"
                 >
                     <ListView.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}">
@@ -564,10 +572,11 @@
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
                             <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+                            <Setter Property="ContextMenu" Value="{StaticResource StashMenu}"/>
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
-                        <DataTemplate DataType="{x:Type local:GitTreeEvent}">
+                        <DataTemplate DataType="{x:Type local:GitStashEventViewModel}">
                             <Grid Margin="0 4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>

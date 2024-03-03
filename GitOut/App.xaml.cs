@@ -14,6 +14,7 @@ using GitOut.Features.Navigation;
 using GitOut.Features.Options;
 using GitOut.Features.Settings;
 using GitOut.Features.Storage;
+using GitOut.Features.Text;
 using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Configuration;
@@ -83,6 +84,7 @@ namespace GitOut
 
             services.AddSettingsFeature();
             services.AddGitFeature();
+            services.AddTextPromptFeature();
             services.AddThemeFeature();
 
             services.AddOptions();
