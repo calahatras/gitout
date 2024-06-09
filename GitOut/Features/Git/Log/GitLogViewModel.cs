@@ -41,7 +41,7 @@ namespace GitOut.Features.Git.Log
         private readonly ISnackbarService snack;
         private readonly IOptionsWriter<GitStageOptions> updateStageOptions;
         private readonly IRepositoryWatcher repositoryWatcher;
-        private readonly IGitRepositoryMonitor monitor;
+        private readonly GitRepositoryMonitor monitor;
         private readonly IDisposable settingsMonitorHandle;
 
         private readonly ICommand createStashBranchCommand;
@@ -79,7 +79,7 @@ namespace GitOut.Features.Git.Log
             showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
             settingsMonitorHandle = stagingOptions.OnChange(options => SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots)));
             GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
-                ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
+                ?? throw new InvalidOperationException("Options may not be null");
             Repository = options.Repository;
             monitor = new GitRepositoryMonitor();
             monitor.LogChanged += OnLogChanged;
@@ -566,7 +566,7 @@ namespace GitOut.Features.Git.Log
             }
         }
 
-        private static IEnumerable<GitTreeEvent> BuildTree(IEnumerable<GitHistoryEvent> log)
+        private static List<GitTreeEvent> BuildTree(IEnumerable<GitHistoryEvent> log)
         {
             var stopwatch = Stopwatch.StartNew();
             var events = new List<GitTreeEvent>();

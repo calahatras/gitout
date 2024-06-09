@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FakeItEasy;
 using GitOut.Features.Git.Files;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
-using Moq;
 using NUnit.Framework;
 
 namespace GitOut.Features.Git.Log
@@ -25,20 +25,27 @@ namespace GitOut.Features.Git.Log
                 .ParseSubject("refactor(log): add test")
                 .Build();
 
-            ICollection<GitFileEntry> entries = new List<GitFileEntry>
-            {
+            ICollection<GitFileEntry> entries =
+            [
                 GitFileEntry.Parse("100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828c\tf.txt"),
                 GitFileEntry.Parse("100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828d\tA/Subfolder/For/a.txt"),
                 GitFileEntry.Parse("100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828e\tA/Subfolder/For/b.txt")
-            };
+            ];
 
-            var repository = new Mock<IGitRepository>();
-            var notifier = new Mock<IGitRepositoryNotifier>();
-            repository.Setup(m => m.ListTreeAsync(root.Id, It.IsAny<DiffOptions>())).Returns(entries.ToAsyncEnumerable());
-            var snack = new Mock<ISnackbarService>();
+            IGitRepository repository = A.Fake<IGitRepository>();
+            IGitRepositoryNotifier notifier = A.Fake<IGitRepositoryNotifier>();
+            Captured<DiffOptions> capturedDiffOptions = A.Captured<DiffOptions>();
+            A.CallTo(() => repository.ListTreeAsync(root.Id, capturedDiffOptions._)).Returns(entries.ToAsyncEnumerable());
+            ISnackbarService snack = A.Fake<ISnackbarService>();
 
-            var actor = LogEntriesViewModel.CreateContext(new List<GitHistoryEvent>(new[] { root }), repository.Object, notifier.Object, snack.Object, LogRevisionViewMode.CurrentRevision);
-            Assert.IsNotNull(actor);
+            var actor = LogEntriesViewModel.CreateContext(
+                new List<GitHistoryEvent>([root]),
+                repository,
+                notifier,
+                snack,
+                LogRevisionViewMode.CurrentRevision
+            );
+            Assert.That(actor, Is.Not.Null);
             await actor!.AllFiles.MaterializeAsync(RelativeDirectoryPath.Root);
 
             Assert.That(actor.RootFiles.OfType<IGitFileEntryViewModel>().Count(), Is.EqualTo(2));

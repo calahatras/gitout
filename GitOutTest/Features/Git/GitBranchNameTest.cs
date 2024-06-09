@@ -12,7 +12,7 @@ namespace GitOut.Features.Git
         public void CreateLocalShouldNotAllowInvalidNames(string? input)
         {
             bool isValid = GitBranchName.IsValid(input);
-            Assert.False(isValid);
+            Assert.That(isValid, Is.False);
         }
 
         [TestCase("wip")]
@@ -27,7 +27,7 @@ namespace GitOut.Features.Git
         public void CreateLocalShouldAllowValidNames(string input)
         {
             bool isValid = GitBranchName.IsValid(input);
-            Assert.True(isValid);
+            Assert.That(isValid, Is.True);
         }
     }
 }

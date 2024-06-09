@@ -22,7 +22,7 @@ namespace GitOut.Features.Navigation
         private readonly ILogger<NavigationService> logger;
 
         private readonly Stack<(ContentControl, string?)> pageStack = new();
-        private readonly IDictionary<string, object> pageOptions = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> pageOptions = new();
 
         private NavigatorShell? shell;
         private object? dialogResult;
@@ -132,13 +132,9 @@ namespace GitOut.Features.Navigation
             Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
             if (options is not null)
             {
-                if (pageOptions.ContainsKey(pageName))
+                if (!pageOptions.TryAdd(pageName, options))
                 {
                     pageOptions[pageName] = options;
-                }
-                else
-                {
-                    pageOptions.Add(pageName, options);
                 }
             }
             if (provider.GetService(pageType) is not UserControl page)
