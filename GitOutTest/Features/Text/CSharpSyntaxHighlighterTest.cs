@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Documents;
-using Moq;
+using FakeItEasy;
 using NUnit.Framework;
 
 namespace GitOut.Features.Text
@@ -11,66 +11,66 @@ namespace GitOut.Features.Text
         [Test]
         public void HighlightShouldHighlight()
         {
-            string[] lines = new[]
-            {
+            string[] lines =
+            [
                 "public void Main() {",
 
-            };
+            ];
 
-            var decorator = new Mock<ILineDecorator>();
+            ILineDecorator decorator = A.Fake<ILineDecorator>();
 
             var actor = new CSharpSyntaxHighlighter();
-            IEnumerable<Paragraph> document = actor.Highlight(lines, decorator.Object);
+            IEnumerable<Paragraph> document = actor.Highlight(lines, decorator);
             Assert.That(document, Is.Not.Null);
         }
 
         [Test]
         public void HighlightShouldFindStrings()
         {
-            string[] lines = new[]
-            {
+            string[] lines =
+            [
                 "\"this is a string\"",
                 "string x = \"a string value\"",
                 "<div class=\"d-flex\" data.attr=\"1\">",
                 "string a = \"escaped \\\"string\\\"\";"
-            };
-            var decorator = new Mock<ILineDecorator>();
+            ];
+            ILineDecorator decorator = A.Fake<ILineDecorator>();
 
             var actor = new CSharpSyntaxHighlighter();
-            IList<Paragraph> document = actor.Highlight(lines, decorator.Object).ToList();
+            IList<Paragraph> document = actor.Highlight(lines, decorator).ToList();
 
-            CollectionAssert.AreEqual(
-                new[] { "this is a string" },
-                document[0].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text.Trim('"'))
+            Assert.That(
+                document[0].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text.Trim('"')),
+                Is.EquivalentTo(new[] { "this is a string" })
             );
-            CollectionAssert.AreEqual(
-                new[] { "a string value" },
-                document[1].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text.Trim('"'))
+            Assert.That(
+                document[1].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text.Trim('"')),
+                Is.EquivalentTo(new[] { "a string value" })
             );
-            CollectionAssert.AreEqual(
-                new[] { "d-flex", "1" },
-                document[2].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text.Trim('"'))
+            Assert.That(
+                document[2].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text.Trim('"')),
+                Is.EquivalentTo(new[] { "d-flex", "1" })
             );
-            CollectionAssert.AreEqual(
-                new[] { "\"escaped \\\"string\\\"\"" },
-                document[3].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text)
+            Assert.That(
+                document[3].Inlines.OfType<Run>().Where(run => run.Foreground == CSharpSyntaxHighlighterOptions.StringForegroundColor).Select(run => run.Text),
+                Is.EquivalentTo(new[] { "\"escaped \\\"string\\\"\"" })
             );
         }
 
         [Test]
         public void HighlightShouldFindKeywords()
         {
-            string[] lines = new[]
-            {
+            string[] lines =
+            [
                 "\"this is a string\"",
                 "string x = \"a string value\"",
                 "var empty = \"\""
-            };
+            ];
 
-            var decorator = new Mock<ILineDecorator>();
+            ILineDecorator decorator = A.Fake<ILineDecorator>();
 
             var actor = new CSharpSyntaxHighlighter();
-            IList<Paragraph> document = actor.Highlight(lines, decorator.Object).ToList();
+            IList<Paragraph> document = actor.Highlight(lines, decorator).ToList();
 
             Assert.That(((Run)document[1].Inlines.FirstInline).Text, Is.EqualTo("string"));
             Assert.That(document[1].Inlines.FirstInline.Foreground, Is.EqualTo(CSharpSyntaxHighlighterOptions.KeywordForegroundColor));

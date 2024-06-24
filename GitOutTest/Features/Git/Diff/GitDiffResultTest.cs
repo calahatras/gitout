@@ -8,8 +8,8 @@ namespace GitOut.Features.Git.Diff
         [Test]
         public void ParseShouldParseIdDiff()
         {
-            string[] diff = new[]
-            {
+            string[] diff =
+            [
                 "diff --git a/015ef887f9c85552a727a19a210ddd644aca41f3 b/d09ce91b690c5555ea2f9895614b6086dea5e2a6",
                 "index 015ef88..d09ce91 100644",
                 "--- a/015ef887f9c85552a727a19a210ddd644aca41f3",
@@ -27,7 +27,7 @@ namespace GitOut.Features.Git.Diff
                 "         private readonly Func<TArg, bool> canexecute;",
                 "+        private readonly TextDataFormat format;",
                 "         private readonly Action<string>? onCopied;",
-            };
+            ];
             IGitDiffBuilder builder = GitDiffResult.Builder();
             foreach (string line in diff)
             {
@@ -41,31 +41,31 @@ namespace GitOut.Features.Git.Diff
         [Test]
         public void ParseShouldParseBinaryDiff()
         {
-            string[] diff = new[]
-            {
+            string[] diff =
+            [
                 "diff --git a/GitOut/gitout.ico b/GitOut/gitout.ico",
                 "new file mode 100644",
                 "index 0000000..fe6742d",
                 "Binary files /dev/null and b/GitOut/gitout.ico differ",
-            };
+            ];
             IGitDiffBuilder builder = GitDiffResult.Builder();
             foreach (string line in diff)
             {
                 builder.Feed(line);
             }
-            Assert.IsTrue(builder.IsBinaryFile);
+            Assert.That(builder.IsBinaryFile, Is.True);
         }
 
         [Test]
         public void ParseShouldParseEmptyFile()
         {
-            string[] diff = new[]
-            {
+            string[] diff =
+            [
                 "diff --git a/a.txt b/a.txt",
                 "new file mode 100644",
                 "index 0000000..ce01362"
                 /* there is no @@ or Binary files here, only the three header lines */
-            };
+            ];
             IGitDiffBuilder builder = GitDiffResult.Builder();
             foreach (string line in diff)
             {

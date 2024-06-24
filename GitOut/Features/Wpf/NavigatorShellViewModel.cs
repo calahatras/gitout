@@ -20,7 +20,7 @@ namespace GitOut.Features.Wpf
         private readonly IDisposable processStreamSubscription;
 
         private string? title;
-        private bool isStatusBarVisible;
+        private bool isStatusBarVisible = true;
         private string? statusBarText;
         private ContentControl? content;
 
@@ -112,7 +112,7 @@ namespace GitOut.Features.Wpf
             }
         }
 
-        private static void ShowSnack(Snack snack, ICollection<Snack> snackStack)
+        private static void ShowSnack(Snack snack, ObservableCollection<Snack> snackStack)
         {
             Application.Current.Dispatcher.Invoke(() => snackStack.Add(snack));
             snack.Canceled.Register(() => Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack)));

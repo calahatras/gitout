@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FakeItEasy;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
@@ -8,7 +9,6 @@ using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
-using Moq;
 using NUnit.Framework;
 
 namespace GitOut.Features.Git.Stage
@@ -18,35 +18,34 @@ namespace GitOut.Features.Git.Stage
         [Test]
         public void UntrackedItemsShouldBeAddedToWorkspace()
         {
-            var repository = new Mock<IGitRepository>();
-            GitStatusChange[] changes = new[]
-            {
+            IGitRepository repository = A.Fake<IGitRepository>();
+            GitStatusChange[] changes =
+            [
                 GitStatusChange.Parse("? new.txt").Build()
-            };
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(changes));
-            var stageOptions = new GitStagePageOptions(repository.Object);
+            ];
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(changes));
+            var stageOptions = new GitStagePageOptions(repository);
 
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             actor.Navigated(NavigationType.Initial);
@@ -63,41 +62,38 @@ namespace GitOut.Features.Git.Stage
         [Test]
         public void UntrackedItemsShouldBeRemovedFromWorkspaceWhenStaged()
         {
-            var repository = new Mock<IGitRepository>();
-            GitStatusChange[] initial = new[]
-            {
+            IGitRepository repository = A.Fake<IGitRepository>();
+            GitStatusChange[] initial =
+            [
                 GitStatusChange.Parse("? new.txt").Build()
-            };
-            GitStatusChange[] staged = new[]
-            {
+            ];
+            GitStatusChange[] staged =
+            [
                 GitStatusChange.Parse("1 A. N... 000000 100644 100644 0000000000000000000000000000000000000000 abcb7caf7a6b8368b4ac4da17863bedbce945dab new.txt").Build()
-            };
-            repository.SetupSequence(m => m.StatusAsync())
-                .ReturnsAsync(new GitStatusResult(initial))
-                .ReturnsAsync(new GitStatusResult(staged));
-            var stageOptions = new GitStagePageOptions(repository.Object);
+            ];
+            A.CallTo(() => repository.StatusAsync())
+                .ReturnsNextFromSequence(new GitStatusResult(initial), new GitStatusResult(staged));
+            var stageOptions = new GitStagePageOptions(repository);
 
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All)).Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             actor.Navigated(NavigationType.Initial);
@@ -115,35 +111,34 @@ namespace GitOut.Features.Git.Stage
         [Test]
         public void RefreshShouldHandleRenamedFileWithWorkspaceChanges()
         {
-            var repository = new Mock<IGitRepository>();
-            GitStatusChange[] changes = new[]
-            {
+            IGitRepository repository = A.Fake<IGitRepository>();
+            GitStatusChange[] changes =
+            [
                 GitStatusChange.Parse("2 RM N... 100644 100644 100644 aea670e83087b8015c431146dc9812a04b818a79 aea670e83087b8015c431146dc9812a04b818a79 R100 node3.txt node2.txt").MergedFrom("node2.txt").Build()
-            };
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(changes));
-            var stageOptions = new GitStagePageOptions(repository.Object);
+            ];
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(changes));
+            var stageOptions = new GitStagePageOptions(repository);
 
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             actor.Navigated(NavigationType.Initial);
@@ -158,41 +153,40 @@ namespace GitOut.Features.Git.Stage
         [Test]
         public void RefreshShouldRemoveWorkspaceFileAfterStageRefresh()
         {
-            var repository = new Mock<IGitRepository>();
-            GitStatusChange[] initial = new[]
-            {
+            IGitRepository repository = A.Fake<IGitRepository>();
+            GitStatusChange[] initial =
+            [
                 GitStatusChange.Parse("1 .M N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c empty.txt").Build()
-            };
-            GitStatusChange[] staged = new[]
-            {
+            ];
+            GitStatusChange[] staged =
+            [
                 GitStatusChange.Parse("1 M. N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c ef498f7ce55ad80dfa295825fa2fb45bd55ed97f empty.txt").Build()
-            };
-            repository.SetupSequence(m => m.StatusAsync())
-                .ReturnsAsync(new GitStatusResult(initial))
-                .ReturnsAsync(new GitStatusResult(staged));
-            var stageOptions = new GitStagePageOptions(repository.Object);
+            ];
+            A
+                .CallTo(() => repository.StatusAsync())
+                .ReturnsNextFromSequence(new GitStatusResult(initial), new GitStatusResult(staged));
+            var stageOptions = new GitStagePageOptions(repository);
 
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
@@ -219,39 +213,38 @@ namespace GitOut.Features.Git.Stage
         [Test]
         public void RefreshShouldRemoveAllFilesIfWorkspaceReset()
         {
-            var repository = new Mock<IGitRepository>();
-            GitStatusChange[] initial = new[]
-            {
+            IGitRepository repository = A.Fake<IGitRepository>();
+            GitStatusChange[] initial =
+            [
                 GitStatusChange.Parse("1 .M N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c work.txt").Build(),
                 GitStatusChange.Parse("1 M. N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c ef498f7ce55ad80dfa295825fa2fb45bd55ed97f index.txt").Build()
-            };
-            GitStatusChange[] next = Array.Empty<GitStatusChange>();
-            repository.SetupSequence(m => m.StatusAsync())
-                .ReturnsAsync(new GitStatusResult(initial))
-                .ReturnsAsync(new GitStatusResult(next));
-            var stageOptions = new GitStagePageOptions(repository.Object);
+            ];
+            GitStatusChange[] next = [];
+            A.CallTo(() => repository.StatusAsync())
+                .ReturnsNextFromSequence(new GitStatusResult(initial), new GitStatusResult(next));
+            var stageOptions = new GitStagePageOptions(repository);
 
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!))
+                .Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
@@ -272,44 +265,42 @@ namespace GitOut.Features.Git.Stage
         [Test]
         public void RefreshShouldRemoveSpecificWorkspaceFileIfWorkspaceReset()
         {
-            var repository = new Mock<IGitRepository>();
-            GitStatusChange[] initial = new[]
-            {
+            IGitRepository repository = A.Fake<IGitRepository>();
+            GitStatusChange[] initial =
+            [
                 GitStatusChange.Parse("1 .M N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c work1.txt").Build(),
                 GitStatusChange.Parse("1 .M N... 100644 100644 100644 aea670e83087b8015c431146dc9812a04b818a79 aea670e83087b8015c431146dc9812a04b818a79 work2.txt").Build(),
                 GitStatusChange.Parse("1 M. N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c ef498f7ce55ad80dfa295825fa2fb45bd55ed97f index.txt").Build()
-            };
-            GitStatusChange[] next = new[]
-            {
+            ];
+            GitStatusChange[] next =
+            [
                 GitStatusChange.Parse("1 .M N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c work1.txt").Build(),
                 GitStatusChange.Parse("1 M. N... 100644 100644 100644 8ccafb210a2d79746acc7ac06ed509f8e87ddf4c ef498f7ce55ad80dfa295825fa2fb45bd55ed97f index.txt").Build()
-            };
-            repository.SetupSequence(m => m.StatusAsync())
-                .ReturnsAsync(new GitStatusResult(initial))
-                .ReturnsAsync(new GitStatusResult(next));
-            var stageOptions = new GitStagePageOptions(repository.Object);
+            ];
+            A.CallTo(() => repository.StatusAsync())
+                .ReturnsNextFromSequence(new GitStatusResult(initial), new GitStatusResult(next));
+            var stageOptions = new GitStagePageOptions(repository);
 
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
@@ -339,7 +330,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenStartHunkSelected()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -351,51 +342,49 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document
+                .GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 4));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -411,7 +400,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldTrimLines()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -423,52 +412,50 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+    ");
             builder.Feed(" line3 ");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false,
                 TrimLineEndings = true
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document
+                 .GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -484,7 +471,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenOnlyAddedLinesSelected()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -496,51 +483,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 3));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -556,7 +540,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenEndHunkSelected()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -568,51 +552,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -628,7 +609,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenFullHunkSelected()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -640,51 +621,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line2");
             builder.Feed(" line3");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 4));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -700,7 +678,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenCrossingHunks()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/advanced.txt b/advanced.txt");
             builder.Feed("index 9e8f761..914708a 100644");
@@ -715,51 +693,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+");
             builder.Feed(" line");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e advanced.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
 --- a/advanced.txt
 +++ b/advanced.txt
@@ -778,7 +753,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenCrossingHunksAndEndIsOfTypeAdded()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/advanced.txt b/advanced.txt");
             builder.Feed("index 9e8f761..914708a 100644");
@@ -794,51 +769,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line 12121");
             builder.Feed("\\ No newline at end of file");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e advanced.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 0, 7));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/advanced.txt b/advanced.txt
 --- a/advanced.txt
 +++ b/advanced.txt
@@ -856,7 +828,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldNotTrimRemovedLines()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -868,51 +840,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  19");
             builder.Feed(" line  24");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 2, 2));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -927,7 +896,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenAddedAndRemovedLines()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -944,51 +913,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  23");
             builder.Feed(" line  24");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 5, 7));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1005,7 +971,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldCreatePatchWhenMixedSelection()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -1038,51 +1004,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  24");
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 17, 23));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1103,7 +1066,7 @@ namespace GitOut.Features.Git.Stage
         public void StageSelectedTextCommandShouldRemoveOneSelectedLine()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -1121,51 +1084,48 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("   }");
             builder.Feed(" }");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.StageSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.StageSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1180,7 +1140,7 @@ namespace GitOut.Features.Git.Stage
         public void ResetSelectedTextCommandShouldCreatePatchWhenMixedSelection()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -1206,51 +1166,51 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  24");
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A
+                .CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 M. N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.ResetIndex))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document
+                .GetHunkVisitor(PatchMode.ResetIndex))
                 .Returns(new DiffHunkLineVisitor(PatchMode.ResetIndex, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 13, 15));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.IndexFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.IndexFiles.CurrentItem;
-            actor.ResetSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.ResetSelectedTextCommand.Execute(document);
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1267,7 +1227,7 @@ namespace GitOut.Features.Git.Stage
         public void ResetSelectedTextCommandShouldResetRemovedLinesFromWorkspace()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -1287,54 +1247,50 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  24");
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddWorkspace))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.ResetWorkspace))
                 .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 4));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.ResetSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.ResetSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1349,7 +1305,7 @@ namespace GitOut.Features.Git.Stage
         public void ResetSelectedTextCommandShouldResetRemovedAndAddedLines()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -1369,54 +1325,50 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  24");
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddWorkspace))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.ResetWorkspace))
                 .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.ResetSelectedTextCommand.Execute(document.Object);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Once);
+            actor.ResetSelectedTextCommand.Execute(document); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt
@@ -1432,7 +1384,7 @@ namespace GitOut.Features.Git.Stage
         public void ResetSelectedTextCommandShouldCreateUndoPatch()
         {
             string? patchText = null;
-            var repository = new Mock<IGitRepository>();
+            IGitRepository repository = A.Fake<IGitRepository>();
             IGitDiffBuilder builder = GitDiffResult.Builder();
             builder.Feed("diff --git a/filename.txt b/filename.txt");
             builder.Feed("index 0123456..789abcd 100644");
@@ -1452,55 +1404,51 @@ namespace GitOut.Features.Git.Stage
             builder.Feed("+line  24");
             builder.Feed(" line1925");
             GitDiffResult result = builder.Build();
-            repository
-                .Setup(m => m.ApplyAsync(It.IsAny<GitPatch>()))
-                .Callback<GitPatch>(patch => patchText = patch.Writer.ToString())
+            Captured<GitPatch> capturedGitPatch = A.Captured<GitPatch>();
+            A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
+                .Invokes((GitPatch patch) => patchText = patch.Writer.ToString())
                 .Returns(Task.CompletedTask);
 
             GitStatusChange change = GitStatusChange.Parse("1 .M N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
-            GitStatusChange[] initial = new[] { change };
+            GitStatusChange[] initial = [change];
 
-            repository.Setup(m => m.StatusAsync()).ReturnsAsync(new GitStatusResult(initial));
+            A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(initial));
 
-            var stageOptions = new GitStagePageOptions(repository.Object);
-            var navigation = new Mock<INavigationService>();
-            navigation.Setup(m => m.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
-            var title = new Mock<ITitleService>();
-            var watchProvider = new Mock<IGitRepositoryWatcherProvider>();
-            var watch = new Mock<IRepositoryWatcher>();
-            watchProvider
-                .Setup(m => m.PrepareWatchRepositoryChanges(repository.Object, RepositoryWatcherOptions.All))
-                .Returns(watch.Object);
-            var snack = new Mock<ISnackbarService>();
-            var options = new Mock<IOptionsMonitor<GitStageOptions>>();
-            options.Setup(m => m.CurrentValue).Returns(new GitStageOptions
+            var stageOptions = new GitStagePageOptions(repository);
+            INavigationService navigation = A.Fake<INavigationService>();
+            A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+            ITitleService title = A.Fake<ITitleService>();
+            IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+            IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+            A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All))
+                .Returns(watch);
+            ISnackbarService snack = A.Fake<ISnackbarService>();
+            IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+            A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions
             {
                 ShowSpacesAsDots = false
             });
 
-            var document = new Mock<IHunkLineVisitorProvider>();
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.AddWorkspace))
+            IHunkLineVisitorProvider document = A.Fake<IHunkLineVisitorProvider>();
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.AddWorkspace))
                 .Returns(new DiffHunkLineVisitor(PatchMode.AddWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
-            document
-                .Setup(m => m.GetHunkVisitor(PatchMode.ResetWorkspace))
+            A.CallTo(() => document.GetHunkVisitor(PatchMode.ResetWorkspace))
                 .Returns(new DiffHunkLineVisitor(PatchMode.ResetWorkspace, result.Text!.Hunks.SelectMany(hunk => new[] { hunk.Header }.Concat(hunk.Lines)), 4, 5));
 
             var actor = new GitStageViewModel(
-                navigation.Object,
-                title.Object,
-                watchProvider.Object,
-                snack.Object,
-                options.Object
+                navigation,
+                title,
+                watchProvider,
+                snack,
+                options
             );
 
             // initialize workspace files with initial change
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
-            actor.ResetSelectedTextCommand.Execute(document.Object);
-            actor.UndoPatchCommand.Execute(null);
-            repository.Verify(m => m.ApplyAsync(It.IsAny<GitPatch>()), Times.Exactly(2));
+            actor.ResetSelectedTextCommand.Execute(document);
+            actor.UndoPatchCommand.Execute(null); A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedTwiceExactly();
             Assert.That(patchText!.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase), Is.EqualTo(@"diff --git a/filename.txt b/filename.txt
 --- a/filename.txt
 +++ b/filename.txt

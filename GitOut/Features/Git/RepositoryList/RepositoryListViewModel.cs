@@ -21,7 +21,7 @@ namespace GitOut.Features.Git.RepositoryList
 {
     public class RepositoryListViewModel : INavigationListener, INotifyPropertyChanged
     {
-        private readonly ICollection<IGitRepository> repositories = new SortedObservableCollection<IGitRepository>((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+        private readonly SortedObservableCollection<IGitRepository> repositories = new((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
         private readonly IDisposable subscription;
         private readonly IGitRepositoryStorage storage;
         private readonly IGitRepositoryFactory repositoryFactory;

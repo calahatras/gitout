@@ -31,6 +31,8 @@ namespace GitOut.Features.Git
 
         public GitStatusResult? CachedStatus { get; private set; }
 
+        private static readonly char[] GitLineSeparator = new char[] { '\0' };
+
         public async Task<bool> IsInsideWorkTree()
         {
             IGitProcess proc = CreateProcess(ProcessOptions.Builder().AppendRange("rev-parse", "--is-inside-work-tree").Build());
@@ -80,8 +82,7 @@ namespace GitOut.Features.Git
                         ++state;
                         break;
                     case 5:
-                        int zeroSeparator = line.IndexOf('\0', StringComparison.OrdinalIgnoreCase);
-                        if (zeroSeparator != -1)
+                        if (line.Contains('\0', StringComparison.OrdinalIgnoreCase))
                         {
                             throw new InvalidOperationException("Multiple history events found but expected only 1");
                         }
@@ -108,8 +109,8 @@ namespace GitOut.Features.Git
 
         public async Task<IEnumerable<GitHistoryEvent>> LogAsync(LogOptions options)
         {
-            IDictionary<GitCommitId, GitHistoryEvent> historyByCommitId = new Dictionary<GitCommitId, GitHistoryEvent>();
-            IList<GitHistoryEvent> history = new List<GitHistoryEvent>();
+            var historyByCommitId = new Dictionary<GitCommitId, GitHistoryEvent>();
+            var history = new List<GitHistoryEvent>();
             IProcessOptionsBuilder processOptionsBuilder = ProcessOptions
                 .Builder()
                 .AppendRange("-c", "log.showSignature=false", "log", "-z", "--date-order", "--pretty=format:\"%H%P%n%at%n%an%n%ae%n%s%n%b\"", "--branches");
@@ -146,7 +147,7 @@ namespace GitOut.Features.Git
             IGitProcess branches = CreateProcess(ProcessOptions.FromArguments("for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname)\""));
             await foreach (string line in branches.ReadLinesAsync())
             {
-                var id = GitCommitId.FromHash(line[..40]);
+                var id = GitCommitId.FromHash(line.AsSpan()[..40]);
                 if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? logitem))
                 {
                     var branch = GitBranchName.Create(line[41..]);
@@ -178,7 +179,7 @@ namespace GitOut.Features.Git
 
         public async Task<GitStatusResult> StatusAsync()
         {
-            IList<GitStatusChange> statusChanges = new List<GitStatusChange>();
+            var statusChanges = new List<GitStatusChange>();
             IGitProcess status = CreateProcess(ProcessOptions.FromArguments("--no-optional-locks status --porcelain=2 -z --untracked-files=all --ignore-submodules=none"));
             await foreach (string line in status.ReadLinesAsync())
             {
@@ -227,7 +228,7 @@ namespace GitOut.Features.Git
 
             await foreach (string line in diff.ReadLinesAsync())
             {
-                string[] diffLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] diffLines = line.Split(GitLineSeparator, StringSplitOptions.RemoveEmptyEntries);
                 if (shouldSkip)
                 {
                     shouldSkip = false;
@@ -310,7 +311,7 @@ namespace GitOut.Features.Git
             IGitProcess process = CreateProcess(builder.Build());
             await foreach (string line in process.ReadLinesAsync())
             {
-                string[] fileLines = line.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] fileLines = line.Split(GitLineSeparator, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string? fileLine in fileLines)
                 {
                     yield return GitFileEntry.Parse(fileLine);
