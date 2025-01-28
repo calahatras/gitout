@@ -436,6 +436,8 @@ namespace GitOut.Features.Git
             return CreateProcess(ProcessOptions.FromArguments(argumentsBuilder.ToString())).ExecuteAsync();
         }
 
+        public Task RestoreWorkspaceAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"restore -- {change.Path}")).ExecuteAsync();
+
         public Task ApplyAsync(GitPatch patch)
         {
             var argumentsBuilder = new StringBuilder("apply --ignore-whitespace");

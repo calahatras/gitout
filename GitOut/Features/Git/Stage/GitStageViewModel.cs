@@ -575,7 +575,7 @@ namespace GitOut.Features.Git.Stage
                             await DeleteFileSnackAsync(model.FullPath).ConfigureAwait(false);
                             break;
                         default:
-                            await Repository.CheckoutAsync(model.Model).ConfigureAwait(false);
+                            await Repository.RestoreWorkspaceAsync(model.Model).ConfigureAwait(false);
                             break;
                     }
                 }
