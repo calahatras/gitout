@@ -425,6 +425,8 @@ namespace GitOut.Features.Git
 
         public Task RestoreAsync(GitStatusChange change) => CreateProcess(ProcessOptions.FromArguments($"restore --staged -- {change.Path}")).ExecuteAsync();
 
+        public Task StashIndexAsync() => CreateProcess(ProcessOptions.FromArguments("stash --staged")).ExecuteAsync();
+
         public Task CommitAsync(GitCommitOptions options)
         {
             var argumentsBuilder = new StringBuilder("commit");

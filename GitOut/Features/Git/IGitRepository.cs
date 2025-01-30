@@ -42,6 +42,7 @@ namespace GitOut.Features.Git
         Task ResetAsync(GitStatusChange change);
         Task RestoreAsync(GitStatusChange change);
         Task ApplyAsync(GitPatch patch);
+        Task StashIndexAsync();
         Task CommitAsync(GitCommitOptions options);
         Task RestoreWorkspaceAsync(GitStatusChange change);
     }

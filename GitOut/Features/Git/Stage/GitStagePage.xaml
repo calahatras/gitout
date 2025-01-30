@@ -70,6 +70,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="StageIconButtonStyle" BasedOn="{StaticResource MaterialIconButtonStyle}" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialGray400}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <UserControl.InputBindings>
         <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
@@ -571,13 +580,17 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" Content="Amend" IsChecked="{Binding AmendLastCommit}"/>
                                 <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" Content="Checkout new branch" IsChecked="{Binding CheckoutBranchBeforeCommit}"/>
                             </StackPanel>
-                            <Button Grid.Column="2" Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding CommitCommand}" ToolTip="Commit">
-                                <Path Fill="{StaticResource MaterialForegroundBase}" Data="{StaticResource ArrowRightBox}"/>
+                            <Button Grid.Column="2" Style="{StaticResource StageIconButtonStyle}" Command="{Binding StashIndexCommand}" ToolTip="Stash index">
+                                <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource Inbox}" />
+                            </Button>
+                            <Button Grid.Column="3" Style="{StaticResource StageIconButtonStyle}" Command="{Binding CommitCommand}" ToolTip="Commit">
+                                <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"  Data="{StaticResource ArrowRightBox}"/>
                             </Button>
                         </Grid>
                     </Grid>
