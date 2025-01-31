@@ -100,6 +100,11 @@ namespace GitOut.Features.Git.Stage
                 list => list.SelectedIndex = Math.Clamp(list.SelectedIndex + 1, 0, list.Items.Count)
             );
 
+            StashIndexCommand = new AsyncCallbackCommand(
+                StashIndexAsync,
+                () => !amendLastCommit && indexFiles.Count > 0 && !checkoutBranchBeforeCommit
+            );
+
             CommitCommand = new AsyncCallbackCommand(
                 CommitChangesAsync,
                 () => !string.IsNullOrEmpty(CommitMessage)
@@ -283,6 +288,7 @@ namespace GitOut.Features.Git.Stage
         public ICommand EditSelectedTextCommand { get; }
         public ICommand UndoPatchCommand { get; }
         public ICommand ResetHeadCommand { get; }
+        public ICommand StashIndexCommand { get; }
         public ICommand CommitCommand { get; }
         public ICommand CancelEditTextCommand { get; }
         public ICommand PatchEditTextCommand { get; }
@@ -811,6 +817,13 @@ namespace GitOut.Features.Git.Stage
             await Repository.ApplyAsync(patch);
             EditHunk = null;
             snack.ShowSuccess("Staged edit");
+            await GetRepositoryStatusAsync();
+        }
+
+        private async Task StashIndexAsync()
+        {
+            await Repository.StashIndexAsync();
+            snack.ShowSuccess("Stashed index successfully");
             await GetRepositoryStatusAsync();
         }
 
