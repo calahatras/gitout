@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" Name=".editorconfig (Test)" />
+    <File Path="GitOutTest/.editorconfig" />
+  </Folder>
+  <Project Path="GitOut/GitOut.csproj" />
+  <Project Path="GitOutTest/GitOutTest.csproj" />
+  <Project Path="GitProperties/GitProperties.csproj" />
+</Solution>
