@@ -28,14 +28,19 @@ namespace GitOut.Features.Git.Log
             ICollection<GitFileEntry> entries =
             [
                 GitFileEntry.Parse("100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828c\tf.txt"),
-                GitFileEntry.Parse("100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828d\tA/Subfolder/For/a.txt"),
-                GitFileEntry.Parse("100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828e\tA/Subfolder/For/b.txt")
+                GitFileEntry.Parse(
+                    "100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828d\tA/Subfolder/For/a.txt"
+                ),
+                GitFileEntry.Parse(
+                    "100644 blob 96d80cd6c4e7158dbebd0849f4fb7ce513e5828e\tA/Subfolder/For/b.txt"
+                ),
             ];
 
             IGitRepository repository = A.Fake<IGitRepository>();
             IGitRepositoryNotifier notifier = A.Fake<IGitRepositoryNotifier>();
             Captured<DiffOptions> capturedDiffOptions = A.Captured<DiffOptions>();
-            A.CallTo(() => repository.ListTreeAsync(root.Id, capturedDiffOptions._)).Returns(entries.ToAsyncEnumerable());
+            A.CallTo(() => repository.ListTreeAsync(root.Id, capturedDiffOptions._))
+                .Returns(entries.ToAsyncEnumerable());
             ISnackbarService snack = A.Fake<ISnackbarService>();
 
             var actor = LogEntriesViewModel.CreateContext(
@@ -49,7 +54,10 @@ namespace GitOut.Features.Git.Log
             await actor!.AllFiles.MaterializeAsync(RelativeDirectoryPath.Root);
 
             Assert.That(actor.RootFiles.OfType<IGitFileEntryViewModel>().Count(), Is.EqualTo(2));
-            Assert.That(actor.RootFiles.OfType<IGitDirectoryEntryViewModel>().Count(), Is.EqualTo(1));
+            Assert.That(
+                actor.RootFiles.OfType<IGitDirectoryEntryViewModel>().Count(),
+                Is.EqualTo(1)
+            );
         }
     }
 }

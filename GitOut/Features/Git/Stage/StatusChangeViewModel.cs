@@ -20,12 +20,16 @@ namespace GitOut.Features.Git.Stage
             }
             else
             {
-                GitModifiedStatusType? status = location == StatusChangeLocation.Workspace
-                    ? model.WorkspaceStatus
-                    : model.IndexStatus;
+                GitModifiedStatusType? status =
+                    location == StatusChangeLocation.Workspace
+                        ? model.WorkspaceStatus
+                        : model.IndexStatus;
                 if (status == null)
                 {
-                    throw new ArgumentNullException(nameof(model), "Got null status for tracked file");
+                    throw new ArgumentNullException(
+                        nameof(model),
+                        "Got null status for tracked file"
+                    );
                 }
                 Status = status.Value;
                 IconResourceKey = status switch
@@ -35,7 +39,7 @@ namespace GitOut.Features.Git.Stage
                     GitModifiedStatusType.Modified => "FileEdit",
                     GitModifiedStatusType.Renamed => "FileMove",
                     GitModifiedStatusType.Copied => "FileReplace",
-                    _ => "FileHidden"
+                    _ => "FileHidden",
                 };
             }
         }
@@ -58,11 +62,17 @@ namespace GitOut.Features.Git.Stage
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static StatusChangeViewModel AsStaged(GitStatusChange change) => new(change, StatusChangeLocation.Index);
+        public static StatusChangeViewModel AsStaged(GitStatusChange change) =>
+            new(change, StatusChangeLocation.Index);
 
-        public static StatusChangeViewModel AsWorkspace(GitStatusChange change) => new(change, StatusChangeLocation.Workspace);
+        public static StatusChangeViewModel AsWorkspace(GitStatusChange change) =>
+            new(change, StatusChangeLocation.Workspace);
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {

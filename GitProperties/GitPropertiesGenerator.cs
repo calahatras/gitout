@@ -15,7 +15,12 @@ namespace GitOut.Features.Generators
         public void Execute(GeneratorExecutionContext context)
         {
             const string ProjectDirOptionsKey = "build_property.projectdir";
-            if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(ProjectDirOptionsKey, out string folder))
+            if (
+                !context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(
+                    ProjectDirOptionsKey,
+                    out string folder
+                )
+            )
             {
                 return;
             }
@@ -27,7 +32,8 @@ namespace GitOut.Features.Generators
                     return;
                 }
 
-                string source = $@"// Auto generated code
+                string source =
+                    $@"// Auto generated code
 namespace GitOut.Features.Git.Properties
 {{
     public static class GitProperties
@@ -46,9 +52,7 @@ namespace GitOut.Features.Git.Properties
             }
         }
 
-        public void Initialize(GeneratorInitializationContext context)
-        {
-        }
+        public void Initialize(GeneratorInitializationContext context) { }
 
         private Properties ReadGitProperties(string folder, CancellationToken token)
         {
@@ -65,7 +69,11 @@ namespace GitOut.Features.Git.Properties
             {
                 return new Properties();
             }
-            string parsedRef = File.ReadLines(Path.Combine(rootFolder, GitConfigurationFolder, GitHeadFile), Encoding.UTF8).First();
+            string parsedRef = File.ReadLines(
+                    Path.Combine(rootFolder, GitConfigurationFolder, GitHeadFile),
+                    Encoding.UTF8
+                )
+                .First();
             if (token.IsCancellationRequested)
             {
                 return new Properties();
@@ -76,17 +84,17 @@ namespace GitOut.Features.Git.Properties
                 string branchName = branchRef
                     .Replace(LocalRefIdentifier, string.Empty)
                     .Replace(RemoteRefIdentifier, string.Empty);
-                string commitId = File.ReadLines(Path.Combine(rootFolder, GitConfigurationFolder, branchRef.Replace(GitRefSeparatorChar, Path.DirectorySeparatorChar))).First();
-                return new Properties
-                {
-                    CommitId = commitId,
-                    BranchName = branchName
-                };
+                string commitId = File.ReadLines(
+                        Path.Combine(
+                            rootFolder,
+                            GitConfigurationFolder,
+                            branchRef.Replace(GitRefSeparatorChar, Path.DirectorySeparatorChar)
+                        )
+                    )
+                    .First();
+                return new Properties { CommitId = commitId, BranchName = branchName };
             }
-            return new Properties
-            {
-                CommitId = parsedRef
-            };
+            return new Properties { CommitId = parsedRef };
         }
 
         private IEnumerable<string> TraverseParentFolder(string root)

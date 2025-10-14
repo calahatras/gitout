@@ -13,7 +13,8 @@ namespace GitOut.Features.Wpf.DragDrop
         private bool isDragging;
         private string textToRender = string.Empty;
 
-        public DropAdorner(UIElement adornedElement, Func<IDataObject, string> textSelector) : base(adornedElement)
+        public DropAdorner(UIElement adornedElement, Func<IDataObject, string> textSelector)
+            : base(adornedElement)
         {
             IsHitTestVisible = false;
             adornedElement.DragEnter += OnAdornedElementDragEnter;
@@ -39,16 +40,21 @@ namespace GitOut.Features.Wpf.DragDrop
                 textToRender,
                 CultureInfo.InvariantCulture,
                 FlowDirection.LeftToRight,
-                new Typeface(new FontFamily("Roboto"),
-                FontStyles.Italic,
-                FontWeights.Normal,
-                FontStretches.Normal),
+                new Typeface(
+                    new FontFamily("Roboto"),
+                    FontStyles.Italic,
+                    FontWeights.Normal,
+                    FontStretches.Normal
+                ),
                 48,
                 brush,
                 1
             );
 
-            var textLocation = new Point(adornedElementRect.Width / 2 - textblock.WidthIncludingTrailingWhitespace / 2, adornedElementRect.Height / 2 - textblock.Height);
+            var textLocation = new Point(
+                adornedElementRect.Width / 2 - textblock.WidthIncludingTrailingWhitespace / 2,
+                adornedElementRect.Height / 2 - textblock.Height
+            );
             drawingContext.DrawText(textblock, textLocation);
         }
 

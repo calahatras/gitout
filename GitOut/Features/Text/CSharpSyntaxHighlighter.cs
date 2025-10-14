@@ -59,7 +59,7 @@ namespace GitOut.Features.Text
             "short",
             "byte",
             "var",
-            "where"
+            "where",
         };
 
         private static readonly string[] ControlKeywords = new[]
@@ -85,17 +85,32 @@ namespace GitOut.Features.Text
         };
 
         private static readonly Regex CommentRegex = new($"//.*$", RegexOptions.Compiled);
-        private static readonly Regex KeywordRegex = new($"\\b({string.Join("|", Keywords)})\\b", RegexOptions.Compiled);
-        private static readonly Regex ControlKeywordRegex = new($"\\b({string.Join("|", ControlKeywords)})\\b", RegexOptions.Compiled);
-        private static readonly Regex StringRegex = new("\"(.)+?(?<!\\\\)\"", RegexOptions.Compiled);
+        private static readonly Regex KeywordRegex = new(
+            $"\\b({string.Join("|", Keywords)})\\b",
+            RegexOptions.Compiled
+        );
+        private static readonly Regex ControlKeywordRegex = new(
+            $"\\b({string.Join("|", ControlKeywords)})\\b",
+            RegexOptions.Compiled
+        );
+        private static readonly Regex StringRegex = new(
+            "\"(.)+?(?<!\\\\)\"",
+            RegexOptions.Compiled
+        );
 
-        public IEnumerable<Paragraph> Highlight(IEnumerable<string> document, ILineDecorator decorator) => document.Select((line, index) =>
-        {
-            var para = new Paragraph() { Margin = ZeroThickness };
-            para.Inlines.AddRange(Tokenize(line));
-            decorator.Decorate(para, index);
-            return para;
-        });
+        public IEnumerable<Paragraph> Highlight(
+            IEnumerable<string> document,
+            ILineDecorator decorator
+        ) =>
+            document.Select(
+                (line, index) =>
+                {
+                    var para = new Paragraph() { Margin = ZeroThickness };
+                    para.Inlines.AddRange(Tokenize(line));
+                    decorator.Decorate(para, index);
+                    return para;
+                }
+            );
 
         private static IEnumerable<Run> Tokenize(string line)
         {
@@ -111,10 +126,22 @@ namespace GitOut.Features.Text
             // join collections and remove invalid (e.g. keywords in string)
             IEnumerable<IDecoratedMatch> matches = Join(
                 line.Length,
-                commentMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.CommentForegroundColor)),
-                keywordMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.KeywordForegroundColor)),
-                controlKeywordMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.ControlKeywordForegroundColor)),
-                stringMatch.Select(match => new ColorAppliedMatch(match, CSharpSyntaxHighlighterOptions.StringForegroundColor))
+                commentMatch.Select(match => new ColorAppliedMatch(
+                    match,
+                    CSharpSyntaxHighlighterOptions.CommentForegroundColor
+                )),
+                keywordMatch.Select(match => new ColorAppliedMatch(
+                    match,
+                    CSharpSyntaxHighlighterOptions.KeywordForegroundColor
+                )),
+                controlKeywordMatch.Select(match => new ColorAppliedMatch(
+                    match,
+                    CSharpSyntaxHighlighterOptions.ControlKeywordForegroundColor
+                )),
+                stringMatch.Select(match => new ColorAppliedMatch(
+                    match,
+                    CSharpSyntaxHighlighterOptions.StringForegroundColor
+                ))
             );
             foreach (IDecoratedMatch match in matches)
             {
@@ -122,7 +149,10 @@ namespace GitOut.Features.Text
             }
         }
 
-        private static IEnumerable<IDecoratedMatch> Join(int length, params IEnumerable<ColorAppliedMatch>[] collections)
+        private static IEnumerable<IDecoratedMatch> Join(
+            int length,
+            params IEnumerable<ColorAppliedMatch>[] collections
+        )
         {
             IEnumerable<ColorAppliedMatch> ordered = collections
                 .SelectMany(e => e)
@@ -158,6 +188,7 @@ namespace GitOut.Features.Text
 
             public int Offset { get; }
             public int EndIndex { get; }
+
             public Run Apply(string line) => new(line[Offset..EndIndex]);
         }
 
@@ -175,10 +206,8 @@ namespace GitOut.Features.Text
             public int Index { get; }
             public int Length { get; }
 
-            public Run Apply(string line) => new(line[Index..(Index + Length)])
-            {
-                Foreground = color
-            };
+            public Run Apply(string line) =>
+                new(line[Index..(Index + Length)]) { Foreground = color };
         }
     }
 }

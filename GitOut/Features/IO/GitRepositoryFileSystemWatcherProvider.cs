@@ -6,14 +6,21 @@ namespace GitOut.Features.IO
 {
     public class GitRepositoryFileSystemWatcherProvider : IGitRepositoryWatcherProvider
     {
-        public IRepositoryWatcher PrepareWatchRepositoryChanges(IGitRepository repository, RepositoryWatcherOptions options)
-            => new RepositoryWatcher(new FileSystemWatcher(repository.WorkingDirectory.Directory)
-            {
-                IncludeSubdirectories = true,
-                NotifyFilter = NotifyFilters.LastWrite
-                    | NotifyFilters.CreationTime
-                    | NotifyFilters.FileName
-            }, options);
+        public IRepositoryWatcher PrepareWatchRepositoryChanges(
+            IGitRepository repository,
+            RepositoryWatcherOptions options
+        ) =>
+            new RepositoryWatcher(
+                new FileSystemWatcher(repository.WorkingDirectory.Directory)
+                {
+                    IncludeSubdirectories = true,
+                    NotifyFilter =
+                        NotifyFilters.LastWrite
+                        | NotifyFilters.CreationTime
+                        | NotifyFilters.FileName,
+                },
+                options
+            );
 
         private class RepositoryWatcher : IRepositoryWatcher
         {
@@ -53,10 +60,17 @@ namespace GitOut.Features.IO
                 }
 
                 bool isGitFolder = args.Name.StartsWith(".git");
-                if (isGitFolder && options.HasFlag(RepositoryWatcherOptions.GitFolder)
-                    || (!isGitFolder && options.HasFlag(RepositoryWatcherOptions.Workspace)))
+                if (
+                    isGitFolder && options.HasFlag(RepositoryWatcherOptions.GitFolder)
+                    || (!isGitFolder && options.HasFlag(RepositoryWatcherOptions.Workspace))
+                )
                 {
-                    Events?.Invoke(this, new RepositoryWatcherEventArgs(args.Name.Replace("\\", "/", StringComparison.Ordinal)));
+                    Events?.Invoke(
+                        this,
+                        new RepositoryWatcherEventArgs(
+                            args.Name.Replace("\\", "/", StringComparison.Ordinal)
+                        )
+                    );
                 }
             }
         }

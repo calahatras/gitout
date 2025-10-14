@@ -12,7 +12,11 @@ namespace GitOut.Features.Git.Diff
 
         private Stream? sourceStream;
 
-        public BinaryDiffResult(Stream destinationStream, IGitRepository repository, GitFileId? sourceId)
+        public BinaryDiffResult(
+            Stream destinationStream,
+            IGitRepository repository,
+            GitFileId? sourceId
+        )
         {
             this.destinationStream = destinationStream;
             this.repository = repository;

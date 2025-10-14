@@ -4,6 +4,6 @@
     {
         None,
         Workspace,
-        Index
+        Index,
     }
 }

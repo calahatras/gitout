@@ -14,11 +14,13 @@ namespace GitOut.Features.Native.Shell32
         public struct SHFILEOPSTRUCT
         {
             public IntPtr hwnd;
+
             [MarshalAs(UnmanagedType.U4)]
             public int wFunc;
             public string pFrom;
             public string pTo;
             public short fFlags;
+
             [MarshalAs(UnmanagedType.Bool)]
             public bool fAnyOperationsAborted;
             public IntPtr hNameMappings;
@@ -34,7 +36,7 @@ namespace GitOut.Features.Native.Shell32
             {
                 wFunc = FO_DELETE,
                 pFrom = path + '\0' + '\0',
-                fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION
+                fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION,
             };
             _ = SHFileOperation(ref fileop);
         }

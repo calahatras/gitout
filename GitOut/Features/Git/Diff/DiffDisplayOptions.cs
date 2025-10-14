@@ -18,17 +18,8 @@ namespace GitOut.Features.Git.Diff
             Transform = transform;
         }
 
-        public DiffDisplayOptions(
-            double pixelsPerDip,
-            Brush dividerBrush,
-            Brush headerForeground
-        ) : this(
-            pixelsPerDip,
-            dividerBrush,
-            headerForeground,
-            new PassThroughTransform()
-        )
-        { }
+        public DiffDisplayOptions(double pixelsPerDip, Brush dividerBrush, Brush headerForeground)
+            : this(pixelsPerDip, dividerBrush, headerForeground, new PassThroughTransform()) { }
 
         public double PixelsPerDip { get; }
         public Brush DividerBrush { get; }

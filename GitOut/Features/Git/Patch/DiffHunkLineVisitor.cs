@@ -12,7 +12,12 @@ namespace GitOut.Features.Git.Patch
         private readonly int endOffset;
         private int currentOffset;
 
-        public DiffHunkLineVisitor(PatchMode mode, IEnumerable<HunkLine> diffContexts, int startOffset, int endOffset)
+        public DiffHunkLineVisitor(
+            PatchMode mode,
+            IEnumerable<HunkLine> diffContexts,
+            int startOffset,
+            int endOffset
+        )
         {
             this.mode = mode;
             this.diffContexts = diffContexts.ToList();
@@ -33,10 +38,19 @@ namespace GitOut.Features.Git.Patch
             for (int startOffset = currentOffset - 1; startOffset >= 0; --startOffset)
             {
                 HunkLine line = diffContexts[startOffset];
-                if (line.Type == DiffLineType.Header
+                if (
+                    line.Type == DiffLineType.Header
                     || line.Type == DiffLineType.None
                     || (line.Type == DiffLineType.Removed && mode == PatchMode.AddIndex)
-                    || (line.Type == DiffLineType.Added && (mode == PatchMode.ResetIndex || mode == PatchMode.ResetWorkspace || mode == PatchMode.AddWorkspace)))
+                    || (
+                        line.Type == DiffLineType.Added
+                        && (
+                            mode == PatchMode.ResetIndex
+                            || mode == PatchMode.ResetWorkspace
+                            || mode == PatchMode.AddWorkspace
+                        )
+                    )
+                )
                 {
                     return line;
                 }
@@ -63,9 +77,19 @@ namespace GitOut.Features.Git.Patch
             for (; currentOffset < diffContexts.Count; ++currentOffset)
             {
                 HunkLine line = diffContexts[currentOffset];
-                if (line.Type == DiffLineType.None || line.Type == DiffLineType.Control
+                if (
+                    line.Type == DiffLineType.None
+                    || line.Type == DiffLineType.Control
                     || (line.Type == DiffLineType.Removed && mode == PatchMode.AddIndex)
-                    || (line.Type == DiffLineType.Added && (mode == PatchMode.ResetIndex || mode == PatchMode.ResetWorkspace || mode == PatchMode.AddWorkspace)))
+                    || (
+                        line.Type == DiffLineType.Added
+                        && (
+                            mode == PatchMode.ResetIndex
+                            || mode == PatchMode.ResetWorkspace
+                            || mode == PatchMode.AddWorkspace
+                        )
+                    )
+                )
                 {
                     return line;
                 }

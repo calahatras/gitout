@@ -7,21 +7,41 @@ namespace GitOut.Features.Wpf
 {
     public static class GridSplitterBehavior
     {
-        public static int GetFreezeColumn(DependencyObject obj) => (int)obj.GetValue(FreezeColumnProperty);
-        public static void SetFreezeColumn(DependencyObject obj, int value) => obj.SetValue(FreezeColumnProperty, value);
+        public static int GetFreezeColumn(DependencyObject obj) =>
+            (int)obj.GetValue(FreezeColumnProperty);
 
-        public static int GetFreezeRow(DependencyObject obj) => (int)obj.GetValue(FreezeRowProperty);
-        public static void SetFreezeRow(DependencyObject obj, int value) => obj.SetValue(FreezeRowProperty, value);
+        public static void SetFreezeColumn(DependencyObject obj, int value) =>
+            obj.SetValue(FreezeColumnProperty, value);
+
+        public static int GetFreezeRow(DependencyObject obj) =>
+            (int)obj.GetValue(FreezeRowProperty);
+
+        public static void SetFreezeRow(DependencyObject obj, int value) =>
+            obj.SetValue(FreezeRowProperty, value);
 
         public static readonly DependencyProperty FreezeColumnProperty =
-            DependencyProperty.RegisterAttached("FreezeColumn", typeof(int), typeof(Grid), new PropertyMetadata(-1, FrozenChanged));
+            DependencyProperty.RegisterAttached(
+                "FreezeColumn",
+                typeof(int),
+                typeof(Grid),
+                new PropertyMetadata(-1, FrozenChanged)
+            );
 
         public static readonly DependencyProperty FreezeRowProperty =
-            DependencyProperty.RegisterAttached("FreezeRow", typeof(int), typeof(Grid), new PropertyMetadata(-1, FrozenChanged));
+            DependencyProperty.RegisterAttached(
+                "FreezeRow",
+                typeof(int),
+                typeof(Grid),
+                new PropertyMetadata(-1, FrozenChanged)
+            );
 
-        private static void FrozenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((Grid)d).Loaded += GridLoaded;
+        private static void FrozenChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        ) => ((Grid)d).Loaded += GridLoaded;
 
-        private static void GridLoaded(object sender, RoutedEventArgs e) => HookResize((Grid)sender);
+        private static void GridLoaded(object sender, RoutedEventArgs e) =>
+            HookResize((Grid)sender);
 
         public static void HookResize(Grid element)
         {
@@ -32,7 +52,9 @@ namespace GitOut.Features.Wpf
             }
             if (Window.GetWindow(element) is not NavigatorShell window)
             {
-                throw new InvalidOperationException("Parent must be a NavigatorShell for frozen panel to work");
+                throw new InvalidOperationException(
+                    "Parent must be a NavigatorShell for frozen panel to work"
+                );
             }
             int column = GetFreezeColumn(element);
             int row = GetFreezeRow(element);
@@ -70,7 +92,8 @@ namespace GitOut.Features.Wpf
                     }
                 }
                 resizing = true;
-            };
+            }
+            ;
 
             void ResizedComplete(object? o, EventArgs e) => resizing = false;
         }

@@ -8,6 +8,6 @@ namespace GitOut.Features.IO
         None = 0,
         Workspace = 1,
         GitFolder = 2,
-        All = 3
+        All = 3,
     }
 }

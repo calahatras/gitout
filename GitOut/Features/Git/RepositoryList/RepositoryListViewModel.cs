@@ -14,14 +14,15 @@ using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
-
 using DataObject = System.Windows.DataObject;
 
 namespace GitOut.Features.Git.RepositoryList
 {
     public class RepositoryListViewModel : INavigationListener, INotifyPropertyChanged
     {
-        private readonly SortedObservableCollection<IGitRepository> repositories = new((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+        private readonly SortedObservableCollection<IGitRepository> repositories = new(
+            (a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)
+        );
         private readonly IDisposable subscription;
         private readonly IGitRepositoryStorage storage;
         private readonly IGitRepositoryFactory repositoryFactory;
@@ -60,18 +61,38 @@ namespace GitOut.Features.Git.RepositoryList
                 }
             });
 
-            RemoveRepositoryCommand = new NotNullCallbackCommand<IGitRepository>(repository => storage.Remove(repository));
+            RemoveRepositoryCommand = new NotNullCallbackCommand<IGitRepository>(repository =>
+                storage.Remove(repository)
+            );
 
             subscription = storage.Repositories.Subscribe(finalList =>
             {
                 foreach (IGitRepository repo in finalList)
                 {
-                    if (!repositories.Any(item => item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory, StringComparison.Ordinal)))
+                    if (
+                        !repositories.Any(item =>
+                            item.WorkingDirectory.Directory.Equals(
+                                repo.WorkingDirectory.Directory,
+                                StringComparison.Ordinal
+                            )
+                        )
+                    )
                     {
                         repositories.Add(repo);
                     }
                 }
-                foreach (IGitRepository repo in repositories.Where(repo => finalList.All(item => !item.WorkingDirectory.Directory.Equals(repo.WorkingDirectory.Directory, StringComparison.Ordinal))).ToList())
+                foreach (
+                    IGitRepository repo in repositories
+                        .Where(repo =>
+                            finalList.All(item =>
+                                !item.WorkingDirectory.Directory.Equals(
+                                    repo.WorkingDirectory.Directory,
+                                    StringComparison.Ordinal
+                                )
+                            )
+                        )
+                        .ToList()
+                )
                 {
                     repositories.Remove(repo);
                 }
@@ -91,10 +112,15 @@ namespace GitOut.Features.Git.RepositoryList
             }
 
             const string approveText = "YES";
-            SnackAction? action = await snack.ShowAsync(Snack.Builder()
-                .WithMessage($"{Path.GetFileName(path)} is not a valid git repository, do you want to add the folder anyway?")
-                .WithDuration(TimeSpan.FromSeconds(300))
-                .AddAction(approveText));
+            SnackAction? action = await snack.ShowAsync(
+                Snack
+                    .Builder()
+                    .WithMessage(
+                        $"{Path.GetFileName(path)} is not a valid git repository, do you want to add the folder anyway?"
+                    )
+                    .WithDuration(TimeSpan.FromSeconds(300))
+                    .AddAction(approveText)
+            );
 
             return action?.Text == approveText ? repository : null;
         }
@@ -157,7 +183,11 @@ namespace GitOut.Features.Git.RepositoryList
             }
         }
 
-        private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private void SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {

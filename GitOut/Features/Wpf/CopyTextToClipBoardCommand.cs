@@ -15,12 +15,28 @@ namespace GitOut.Features.Wpf
 
         public CopyTextToClipBoardCommand(Func<TArg?, string> gettext)
             : this(gettext, o => true, null) { }
-        public CopyTextToClipBoardCommand(Func<TArg?, string> gettext, Func<TArg?, bool> canexecute, Action<string>? onCopied)
+
+        public CopyTextToClipBoardCommand(
+            Func<TArg?, string> gettext,
+            Func<TArg?, bool> canexecute,
+            Action<string>? onCopied
+        )
             : this(gettext, canexecute, TextDataFormat.UnicodeText, onCopied, null) { }
-        public CopyTextToClipBoardCommand(Func<TArg?, string> gettext, Func<TArg?, bool> canexecute, TextDataFormat format)
+
+        public CopyTextToClipBoardCommand(
+            Func<TArg?, string> gettext,
+            Func<TArg?, bool> canexecute,
+            TextDataFormat format
+        )
             : this(gettext, canexecute, format, null, null) { }
 
-        public CopyTextToClipBoardCommand(Func<TArg?, string> gettext, Func<TArg?, bool> canexecute, TextDataFormat format, Action<string>? onCopied, Action<Exception>? onError)
+        public CopyTextToClipBoardCommand(
+            Func<TArg?, string> gettext,
+            Func<TArg?, bool> canexecute,
+            TextDataFormat format,
+            Action<string>? onCopied,
+            Action<Exception>? onError
+        )
         {
             this.gettext = gettext;
             this.canexecute = canexecute;

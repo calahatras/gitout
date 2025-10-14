@@ -11,12 +11,13 @@ namespace GitOut.Features.Navigation
         public int? Top { get; set; }
         public int? Left { get; set; }
 
-        public static NavigationWindowOptions FromPosition(Point location, Size windowSize) => new()
-        {
-            Width = (int)windowSize.Width,
-            Height = (int)windowSize.Height,
-            Left = (int)location.X,
-            Top = (int)location.Y,
-        };
+        public static NavigationWindowOptions FromPosition(Point location, Size windowSize) =>
+            new()
+            {
+                Width = (int)windowSize.Width,
+                Height = (int)windowSize.Height,
+                Left = (int)location.X,
+                Top = (int)location.Y,
+            };
     }
 }

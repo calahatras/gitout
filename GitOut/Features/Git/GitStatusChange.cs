@@ -46,11 +46,16 @@ namespace GitOut.Features.Git
 
         public RelativeDirectoryPath Path { get; }
         public RelativeDirectoryPath? MergedPath { get; }
-        public string FullPath => System.IO.Path.Combine(WorkingDirectory?.ToString() ?? string.Empty, Path.ToString().Replace("/", "\\", StringComparison.CurrentCulture));
+        public string FullPath =>
+            System.IO.Path.Combine(
+                WorkingDirectory?.ToString() ?? string.Empty,
+                Path.ToString().Replace("/", "\\", StringComparison.CurrentCulture)
+            );
 
         public DirectoryPath? WorkingDirectory { get; }
 
-        public static IGitStatusChangeBuilder Parse(ReadOnlySpan<char> change) => new GitStatusChangeBuilder(change);
+        public static IGitStatusChangeBuilder Parse(ReadOnlySpan<char> change) =>
+            new GitStatusChangeBuilder(change);
 
         private class GitStatusChangeBuilder : IGitStatusChangeBuilder
         {
@@ -72,7 +77,10 @@ namespace GitOut.Features.Git
             {
                 if (change.Length < 3)
                 {
-                    throw new ArgumentException($"Change must be longer than 3 characters but was {change.Length}", nameof(change));
+                    throw new ArgumentException(
+                        $"Change must be longer than 3 characters but was {change.Length}",
+                        nameof(change)
+                    );
                 }
                 Type = GetStatusChangeType(change[0]);
                 if (Type == GitStatusChangeType.Untracked)
@@ -83,7 +91,10 @@ namespace GitOut.Features.Git
                 {
                     if (change.Length < 161)
                     {
-                        throw new ArgumentException($"Change must be longer than 160 characters but was {change.Length}", nameof(change));
+                        throw new ArgumentException(
+                            $"Change must be longer than 160 characters but was {change.Length}",
+                            nameof(change)
+                        );
                     }
                     // u <xy> <sub> <m1> <m2> <m3> <mW> <h1> <h2> <h3> <path>
                     stagedStatus = GetModifiedStatusType(change[2]);
@@ -104,7 +115,10 @@ namespace GitOut.Features.Git
                 {
                     if (change.Length < 114)
                     {
-                        throw new ArgumentException($"Change must be longer than 113 characters but was {change.Length}", nameof(change));
+                        throw new ArgumentException(
+                            $"Change must be longer than 113 characters but was {change.Length}",
+                            nameof(change)
+                        );
                     }
 
                     stagedStatus = GetModifiedStatusType(change[2]);
@@ -116,28 +130,34 @@ namespace GitOut.Features.Git
                     sourceId = GitFileId.FromHash(change[31..71]);
                     destinationId = GitFileId.FromHash(change[72..112]);
 
-                    path = Type == GitStatusChangeType.RenamedOrCopied
-                        ? RelativeDirectoryPath.Create(change[(change[113..].IndexOf(' ') + 114)..].ToString())
-                        : RelativeDirectoryPath.Create(change[113..].ToString());
+                    path =
+                        Type == GitStatusChangeType.RenamedOrCopied
+                            ? RelativeDirectoryPath.Create(
+                                change[(change[113..].IndexOf(' ') + 114)..].ToString()
+                            )
+                            : RelativeDirectoryPath.Create(change[113..].ToString());
                 }
             }
 
             public GitStatusChangeType Type { get; }
 
-            public void WorkingDirectory(DirectoryPath workingDirectory) => this.workingDirectory = workingDirectory;
-            public GitStatusChange Build() => new(
-                Type,
-                stagedStatus,
-                unstagedStatus,
-                headFileModes,
-                indexFileModes,
-                worktreeFileModes,
-                sourceId,
-                destinationId,
-                path,
-                mergedPath,
-                workingDirectory
-            );
+            public void WorkingDirectory(DirectoryPath workingDirectory) =>
+                this.workingDirectory = workingDirectory;
+
+            public GitStatusChange Build() =>
+                new(
+                    Type,
+                    stagedStatus,
+                    unstagedStatus,
+                    headFileModes,
+                    indexFileModes,
+                    worktreeFileModes,
+                    sourceId,
+                    destinationId,
+                    path,
+                    mergedPath,
+                    workingDirectory
+                );
 
             public IGitStatusChangeBuilder MergedFrom(string path)
             {
@@ -145,41 +165,43 @@ namespace GitOut.Features.Git
                 return this;
             }
 
-            private static GitStatusChangeType GetStatusChangeType(char type) => type switch
-            {
-                '1' => GitStatusChangeType.Ordinary,
-                '2' => GitStatusChangeType.RenamedOrCopied,
-                'u' => GitStatusChangeType.Unmerged,
-                '?' => GitStatusChangeType.Untracked,
-                '!' => GitStatusChangeType.Ignored,
-                _ => GitStatusChangeType.None
-            };
+            private static GitStatusChangeType GetStatusChangeType(char type) =>
+                type switch
+                {
+                    '1' => GitStatusChangeType.Ordinary,
+                    '2' => GitStatusChangeType.RenamedOrCopied,
+                    'u' => GitStatusChangeType.Unmerged,
+                    '?' => GitStatusChangeType.Untracked,
+                    '!' => GitStatusChangeType.Ignored,
+                    _ => GitStatusChangeType.None,
+                };
 
-            private static GitModifiedStatusType GetModifiedStatusType(char type) => type switch
-            {
-                '.' => GitModifiedStatusType.Unmodified,
-                'M' => GitModifiedStatusType.Modified,
-                'A' => GitModifiedStatusType.Added,
-                'D' => GitModifiedStatusType.Deleted,
-                'R' => GitModifiedStatusType.Renamed,
-                'C' => GitModifiedStatusType.Copied,
-                'U' => GitModifiedStatusType.UpdatedButUnmerged,
-                _ => GitModifiedStatusType.None
-            };
+            private static GitModifiedStatusType GetModifiedStatusType(char type) =>
+                type switch
+                {
+                    '.' => GitModifiedStatusType.Unmodified,
+                    'M' => GitModifiedStatusType.Modified,
+                    'A' => GitModifiedStatusType.Added,
+                    'D' => GitModifiedStatusType.Deleted,
+                    'R' => GitModifiedStatusType.Renamed,
+                    'C' => GitModifiedStatusType.Copied,
+                    'U' => GitModifiedStatusType.UpdatedButUnmerged,
+                    _ => GitModifiedStatusType.None,
+                };
 
             private static PosixFileModes[] GetFileModes(string modes)
             {
                 if (modes.Length != 6)
                 {
-                    throw new ArgumentException($"Modes must be of length 6 but was {modes.Length}", nameof(modes));
+                    throw new ArgumentException(
+                        $"Modes must be of length 6 but was {modes.Length}",
+                        nameof(modes)
+                    );
                 }
                 _ = Enum.TryParse(modes.Substring(3, 1), out PosixFileModes user);
                 _ = Enum.TryParse(modes.Substring(4, 1), out PosixFileModes group);
                 _ = Enum.TryParse(modes.Substring(5, 1), out PosixFileModes other);
-                return new[]
-                {
-                    user, group, other
-                };
+                return new[] { user, group, other };
             }
         }
     }

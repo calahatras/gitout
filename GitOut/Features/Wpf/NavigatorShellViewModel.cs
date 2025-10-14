@@ -36,15 +36,21 @@ namespace GitOut.Features.Wpf
         )
         {
             navigation.NavigationRequested += (sender, args) => Content = args.Control;
-            titleService.TitleChanged += (sender, args) => Title = string.IsNullOrWhiteSpace(args.Title) ? "git out" : $"{args.Title} – git out";
+            titleService.TitleChanged += (sender, args) =>
+                Title = string.IsNullOrWhiteSpace(args.Title)
+                    ? "git out"
+                    : $"{args.Title} ï¿½ git out";
 
             var snacks = new ObservableCollection<Snack>();
             Snacks = CollectionViewSource.GetDefaultView(snacks);
-            Snacks.SortDescriptions.Add(new SortDescription("DateAddedUtc", ListSortDirection.Ascending));
+            Snacks.SortDescriptions.Add(
+                new SortDescription("DateAddedUtc", ListSortDirection.Ascending)
+            );
             snack.SnackReceived += (sender, args) => ShowSnack(args.Snack, snacks);
             processStreamSubscription = processCollection
-                .EventsStream
-                .Select(item => $"{item.ProcessName} {item.Options.Arguments} finished in {item.Duration.TotalMilliseconds}ms")
+                .EventsStream.Select(item =>
+                    $"{item.ProcessName} {item.Options.Arguments} finished in {item.Duration.TotalMilliseconds}ms"
+                )
                 .Subscribe(statusText => StatusBarText = statusText);
 
             OpenSettingsCommand = new NavigateLocalCommand<object>(
@@ -53,21 +59,19 @@ namespace GitOut.Features.Wpf
                 null,
                 _ => navigation.CurrentPage != typeof(SettingsPage).FullName
             );
-            ToggleFullScreenCommand = new NotNullCallbackCommand<Window>(
-                window =>
+            ToggleFullScreenCommand = new NotNullCallbackCommand<Window>(window =>
+            {
+                if (window.WindowStyle == WindowStyle.None)
                 {
-                    if (window.WindowStyle == WindowStyle.None)
-                    {
-                        window.WindowStyle = WindowStyle.SingleBorderWindow;
-                        window.WindowState = WindowState.Normal;
-                    }
-                    else
-                    {
-                        window.WindowStyle = WindowStyle.None;
-                        window.WindowState = WindowState.Maximized;
-                    }
+                    window.WindowStyle = WindowStyle.SingleBorderWindow;
+                    window.WindowState = WindowState.Normal;
                 }
-            );
+                else
+                {
+                    window.WindowStyle = WindowStyle.None;
+                    window.WindowState = WindowState.Maximized;
+                }
+            });
         }
 
         public ICommand OpenSettingsCommand { get; }
@@ -103,7 +107,11 @@ namespace GitOut.Features.Wpf
 
         public void Dispose() => processStreamSubscription.Dispose();
 
-        private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private void SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {
@@ -115,7 +123,9 @@ namespace GitOut.Features.Wpf
         private static void ShowSnack(Snack snack, ObservableCollection<Snack> snackStack)
         {
             Application.Current.Dispatcher.Invoke(() => snackStack.Add(snack));
-            snack.Canceled.Register(() => Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack)));
+            snack.Canceled.Register(() =>
+                Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack))
+            );
         }
     }
 }

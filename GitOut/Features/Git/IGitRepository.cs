@@ -23,10 +23,17 @@ namespace GitOut.Features.Git
         Task<IEnumerable<GitHistoryEvent>> LogAsync(LogOptions options);
         IAsyncEnumerable<GitStash> StashListAsync();
         Task<GitStatusResult> StatusAsync();
-        IAsyncEnumerable<GitDiffFileEntry> ListDiffChangesAsync(GitObjectId change, GitObjectId? parent, DiffOptions? options = default);
+        IAsyncEnumerable<GitDiffFileEntry> ListDiffChangesAsync(
+            GitObjectId change,
+            GitObjectId? parent,
+            DiffOptions? options = default
+        );
         Task<GitDiffResult> DiffAsync(GitFileId source, GitFileId target, DiffOptions options);
         Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options);
-        IAsyncEnumerable<GitFileEntry> ListTreeAsync(GitObjectId id, DiffOptions? options = default);
+        IAsyncEnumerable<GitFileEntry> ListTreeAsync(
+            GitObjectId id,
+            DiffOptions? options = default
+        );
         Stream GetUntrackedBlobStream(RelativeDirectoryPath path);
         Task<Stream> GetBlobStreamAsync(GitFileId file);
 
@@ -36,7 +43,10 @@ namespace GitOut.Features.Git
         Task AddAsync(GitStatusChange change, AddOptions options);
         Task CheckoutAsync(GitStatusChange change);
         Task CreateBranchAsync(GitBranchName name, GitCreateBranchOptions? options = default);
-        Task<GitDeleteResult> DeleteBranchAsync(GitBranchName name, GitDeleteBranchOptions? options = default);
+        Task<GitDeleteResult> DeleteBranchAsync(
+            GitBranchName name,
+            GitDeleteBranchOptions? options = default
+        );
         Task CheckoutCommitDetachedAsync(GitCommitId id);
         Task CheckoutBranchAsync(GitBranchName name, GitCheckoutBranchOptions? options = default);
         Task ResetAsync(GitStatusChange change);

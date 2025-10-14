@@ -27,9 +27,7 @@ namespace GitOut.Features.Git.Patch
             && trimLineEndings == opts.trimLineEndings
             && convertToSpaces == opts.convertToSpaces;
 
-        public override int GetHashCode() =>
-            (trimLineEndings ? 1 : 0) +
-            (convertToSpaces ? 2 : 0);
+        public override int GetHashCode() => (trimLineEndings ? 1 : 0) + (convertToSpaces ? 2 : 0);
 
         public string Transform(string input)
         {
@@ -44,9 +42,11 @@ namespace GitOut.Features.Git.Patch
             return input;
         }
 
-        public static bool operator ==(PatchLineTransform left, PatchLineTransform right) => left.Equals(right);
+        public static bool operator ==(PatchLineTransform left, PatchLineTransform right) =>
+            left.Equals(right);
 
-        public static bool operator !=(PatchLineTransform left, PatchLineTransform right) => !(left == right);
+        public static bool operator !=(PatchLineTransform left, PatchLineTransform right) =>
+            !(left == right);
 
         public static IPatchLineTransformBuilder Builder() => new PatchLineTransformBuilder();
 
@@ -56,7 +56,8 @@ namespace GitOut.Features.Git.Patch
             private bool convertToSpaces;
             private string? tabReplacement;
 
-            public ITextTransform Build() => new PatchLineTransform(trimEndings, convertToSpaces, tabReplacement);
+            public ITextTransform Build() =>
+                new PatchLineTransform(trimEndings, convertToSpaces, tabReplacement);
 
             public IPatchLineTransformBuilder ConvertTabsToSpaces(string replacement)
             {

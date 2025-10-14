@@ -7,10 +7,14 @@ namespace GitOut.Features.Options
 {
     public static class OptionsServiceCollectionExtensions
     {
-        public static WritableOptionsBuilder<T> AddWritableOptions<T>(this IServiceCollection services) where T : class, new() => new(services);
+        public static WritableOptionsBuilder<T> AddWritableOptions<T>(
+            this IServiceCollection services
+        )
+            where T : class, new() => new(services);
     }
 
-    public class WritableOptionsBuilder<T> where T : class, new()
+    public class WritableOptionsBuilder<T>
+        where T : class, new()
     {
         private readonly IServiceCollection services;
 
@@ -19,11 +23,14 @@ namespace GitOut.Features.Options
         public void Bind(IConfiguration config, string section)
         {
             services.AddOptions<T>().Bind(config.GetSection(section));
-            services.AddScoped<IOptionsWriter<T>>((provider) => new OptionsWriter<T>(
-                provider.GetRequiredService<IOptions<T>>(),
-                provider.GetRequiredService<IWritableStorage>(),
-                section
-            ));
+            services.AddScoped<IOptionsWriter<T>>(
+                (provider) =>
+                    new OptionsWriter<T>(
+                        provider.GetRequiredService<IOptions<T>>(),
+                        provider.GetRequiredService<IWritableStorage>(),
+                        section
+                    )
+            );
         }
     }
 }

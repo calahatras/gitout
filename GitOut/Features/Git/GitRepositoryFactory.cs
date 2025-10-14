@@ -8,10 +8,10 @@ namespace GitOut.Features.Git
     {
         private readonly IProcessFactory<IGitProcess> processFactory;
 
-        public GitRepositoryFactory(
-            IProcessFactory<IGitProcess> processFactory
-        ) => this.processFactory = processFactory;
+        public GitRepositoryFactory(IProcessFactory<IGitProcess> processFactory) =>
+            this.processFactory = processFactory;
 
-        public IGitRepository Create(DirectoryPath path) => LocalGitRepository.InitializeFromPath(path, processFactory);
+        public IGitRepository Create(DirectoryPath path) =>
+            LocalGitRepository.InitializeFromPath(path, processFactory);
     }
 }

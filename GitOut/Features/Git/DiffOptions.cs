@@ -4,11 +4,7 @@ namespace GitOut.Features.Git
 {
     public class DiffOptions
     {
-        private DiffOptions(
-            bool cached,
-            bool ignoreAllSpace,
-            bool recursive
-        )
+        private DiffOptions(bool cached, bool ignoreAllSpace, bool recursive)
         {
             Cached = cached;
             IgnoreAllSpace = ignoreAllSpace;

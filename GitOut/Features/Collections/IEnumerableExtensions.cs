@@ -20,7 +20,11 @@ namespace GitOut.Features.Collections
             return -1;
         }
 
-        public static int FindIndex<T>(this IEnumerable<T> collection, int startFrom, Func<T, bool> predicate)
+        public static int FindIndex<T>(
+            this IEnumerable<T> collection,
+            int startFrom,
+            Func<T, bool> predicate
+        )
         {
             int index = startFrom;
             foreach (T item in collection.Skip(startFrom))

@@ -31,13 +31,21 @@ namespace GitOut
         public App()
         {
             host = new HostBuilder()
-                .ConfigureAppConfiguration(config => config.AddJsonFile(SettingsOptions.GetSettingsPath(), true, true))
+                .ConfigureAppConfiguration(config =>
+                    config.AddJsonFile(SettingsOptions.GetSettingsPath(), true, true)
+                )
                 .ConfigureServices(ConfigureServices)
-                .ConfigureLogging((host, builder) =>
-                {
-                    string logFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gitout", "error.log");
-                    builder.AddProvider(new FileLoggerProvider(logFile));
-                })
+                .ConfigureLogging(
+                    (host, builder) =>
+                    {
+                        string logFile = Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                            ".gitout",
+                            "error.log"
+                        );
+                        builder.AddProvider(new FileLoggerProvider(logFile));
+                    }
+                )
                 .UseConsoleLifetime()
                 .Build();
 
@@ -45,7 +53,8 @@ namespace GitOut
             RegisterExceptionHandlers(logger);
             _ = host.Services.GetService<Features.Wpf.Commands.Application>();
 
-            IHostApplicationLifetime life = host.Services.GetRequiredService<IHostApplicationLifetime>();
+            IHostApplicationLifetime life =
+                host.Services.GetRequiredService<IHostApplicationLifetime>();
             life.ApplicationStarted.Register(LogLifetimeEvent(logger, "Host started"));
             life.ApplicationStopping.Register(LogLifetimeEvent(logger, "Application stopping"));
         }
@@ -55,11 +64,16 @@ namespace GitOut
             PresentationTraceSources.Refresh();
             PresentationTraceSources.DataBindingSource.Listeners.Add(new ConsoleTraceListener());
             PresentationTraceSources.DataBindingSource.Listeners.Add(new DebugTraceListener());
-            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Warning | SourceLevels.Error;
+            PresentationTraceSources.DataBindingSource.Switch.Level =
+                SourceLevels.Warning | SourceLevels.Error;
 
             ILogger<App> logger = host.Services.GetRequiredService<ILogger<App>>();
             logger.LogInformation(LogEventId.Application, "Application started");
-            logger.LogInformation(LogEventId.Application, "Commit ID: {CommitId}", Features.Git.Properties.GitProperties.CommitId);
+            logger.LogInformation(
+                LogEventId.Application,
+                "Commit ID: {CommitId}",
+                Features.Git.Properties.GitProperties.CommitId
+            );
             base.OnStartup(e);
             var token = new CancellationToken();
             host.RunAsync(token);
@@ -71,7 +85,8 @@ namespace GitOut
             base.OnExit(e);
         }
 
-        private static void LogUnhandledException(ILogger logger, Exception? exception) => logger.LogError(LogEventId.Unhandled, exception, exception?.Message);
+        private static void LogUnhandledException(ILogger logger, Exception? exception) =>
+            logger.LogError(LogEventId.Unhandled, exception, exception?.Message);
 
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
@@ -89,8 +104,12 @@ namespace GitOut
 
             services.AddOptions();
 
-            services.AddOptions<GitStoreOptions>().Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
-            services.AddWritableOptions<GitStageOptions>().Bind(context.Configuration, GitStageOptions.SectionKey);
+            services
+                .AddOptions<GitStoreOptions>()
+                .Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
+            services
+                .AddWritableOptions<GitStageOptions>()
+                .Bind(context.Configuration, GitStageOptions.SectionKey);
             services.AddLogging();
 
             services.AddHostedService<Bootstrap>();
@@ -99,11 +118,14 @@ namespace GitOut
         private void RegisterExceptionHandlers(ILogger<App> logger)
         {
             DispatcherUnhandledException += (s, e) => LogUnhandledException(logger, e.Exception);
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => LogUnhandledException(logger, e.ExceptionObject as Exception);
-            TaskScheduler.UnobservedTaskException += (s, e) => LogUnhandledException(logger, e.Exception);
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                LogUnhandledException(logger, e.ExceptionObject as Exception);
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+                LogUnhandledException(logger, e.Exception);
         }
 
-        private static Action LogLifetimeEvent(ILogger<App> logger, string message) => () => logger.LogInformation(LogEventId.Application, message);
+        private static Action LogLifetimeEvent(ILogger<App> logger, string message) =>
+            () => logger.LogInformation(LogEventId.Application, message);
     }
 
     public class DebugTraceListener : TraceListener

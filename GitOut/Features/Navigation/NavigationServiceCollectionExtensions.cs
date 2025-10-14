@@ -7,13 +7,20 @@ namespace GitOut.Features.Navigation
 {
     public static class NavigationServiceCollectionExtensions
     {
-        public static void AddNavigationServiceWithStartPage<T>(this IServiceCollection services, IConfiguration configuration)
+        public static void AddNavigationServiceWithStartPage<T>(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             services.AddScoped<INavigationService, NavigationService>();
             services.AddScoped<NavigatorShellViewModel>();
 
-            services.AddOptions<NavigationRegistrationOptions>().Configure(options => options.StartupType = typeof(T).FullName!);
-            services.AddWritableOptions<NavigationWindowOptions>().Bind(configuration, NavigationWindowOptions.SectionKey);
+            services
+                .AddOptions<NavigationRegistrationOptions>()
+                .Configure(options => options.StartupType = typeof(T).FullName!);
+            services
+                .AddWritableOptions<NavigationWindowOptions>()
+                .Bind(configuration, NavigationWindowOptions.SectionKey);
         }
     }
 }

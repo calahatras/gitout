@@ -1,601 +1,806 @@
 ﻿<UserControl
-    x:Class="GitOut.Features.Git.Stage.GitStagePage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
-    xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
-    xmlns:files="clr-namespace:GitOut.Features.Git.Files"
-    xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
-    xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
-    xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
-    Focusable="True"
-    mc:Ignorable="d"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    d:DataContext="{d:DesignInstance local:GitStageViewModel}"
+  x:Class="GitOut.Features.Git.Stage.GitStagePage"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
+  xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
+  xmlns:files="clr-namespace:GitOut.Features.Git.Files"
+  xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+  xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
+  xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
+  Focusable="True"
+  mc:Ignorable="d"
+  d:DesignHeight="450"
+  d:DesignWidth="800"
+  d:DataContext="{d:DesignInstance local:GitStageViewModel}"
 >
-    <UserControl.Resources>
-        <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
-        <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
-        <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
-        <Style x:Key="GitChangeListStyle" BasedOn="{StaticResource MaterialListStyle}" TargetType="{x:Type ListView}">
-            <Setter Property="ItemContainerStyle">
-                <Setter.Value>
-                    <Style TargetType="{x:Type ListViewItem}">
-                        <Setter Property="Height" Value="22"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
-                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                    </Style>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="ItemTemplate">
-                <Setter.Value>
-                    <DataTemplate DataType="{x:Type local:StatusChangeViewModel}">
-                        <Grid
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                        >
-                            <Grid.InputBindings>
-                                <MouseBinding
-                                    MouseAction="LeftDoubleClick"
-                                    Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding}"
-                                />
-                            </Grid.InputBindings>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                                <Canvas.LayoutTransform>
-                                    <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                                </Canvas.LayoutTransform>
-                                <Path
-                                    Fill="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
-                                    Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                                />
-                            </Canvas>
-                            <TextBlock
-                                Grid.Column="1"
-                                Style="{StaticResource NormalTextStyle}"
-                                Text="{Binding Path}"
-                            />
-                        </Grid>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="StageIconButtonStyle" BasedOn="{StaticResource MaterialIconButtonStyle}" TargetType="{x:Type Button}">
-            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
-            <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Foreground" Value="{DynamicResource MaterialGray400}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Resources>
-    <UserControl.InputBindings>
-        <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
-        <KeyBinding Key="Period" Modifiers="Control" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
-        <KeyBinding Key="OemComma" Modifiers="Control+Shift" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
-        <KeyBinding Key="Period" Modifiers="Control+Shift" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
-        <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding SetFocusCommand}" CommandParameter="{Binding ElementName=CommitMessage}" />
-    </UserControl.InputBindings>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid Style="{StaticResource MaterialToolbarStyle}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Button
-                    Style="{StaticResource MaterialButtonStyle}"
-                    Command="{x:Static wpfcommands:Navigate.Back}"
-                    ToolTip="Back"
-                >
-                    <Path Height="24" Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArrowLeft}"/>
-                </Button>
-                <TextBlock Grid.Column="1" Text="Stage" Style="{StaticResource MaterialToolbarHeaderStyle}"/>
+  <UserControl.Resources>
+    <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+    <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter" />
+    <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <Style
+      x:Key="GitChangeListStyle"
+      BasedOn="{StaticResource MaterialListStyle}"
+      TargetType="{x:Type ListView}"
+    >
+      <Setter Property="ItemContainerStyle">
+        <Setter.Value>
+          <Style TargetType="{x:Type ListViewItem}">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+          </Style>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="ItemTemplate">
+        <Setter.Value>
+          <DataTemplate DataType="{x:Type local:StatusChangeViewModel}">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+              <Grid.InputBindings>
+                <MouseBinding
+                  MouseAction="LeftDoubleClick"
+                  Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  CommandParameter="{Binding}"
+                />
+              </Grid.InputBindings>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                <Canvas.LayoutTransform>
+                  <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                </Canvas.LayoutTransform>
+                <Path
+                  Fill="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
+                  Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+                />
+              </Canvas>
+              <TextBlock
+                Grid.Column="1"
+                Style="{StaticResource NormalTextStyle}"
+                Text="{Binding Path}"
+              />
             </Grid>
-            <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
-                <ToolBar>
-                    <Button Command="{Binding UndoPatchCommand}" ToolTip="Undo patch">
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource UndoVariant}"/>
-                    </Button>
-                    <Separator/>
-                    <ToggleButton IsChecked="{Binding RefreshAutomatically}" ToolTip="Auto renew file changes">
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource AutoRenew}"/>
-                    </ToggleButton>
-                    <ToggleButton IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource KeyboardSpace}"/>
-                    </ToggleButton>
-                    <Separator/>
-                    <Button Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileRefresh}"/>
-                    </Button>
-                </ToolBar>
-            </ToolBarTray>
-        </Grid>
-        <Grid
-            Grid.Row="2"
-            Margin="4 0 4 4"
-            wpf:GridSplitterBehavior.FreezeColumn="0"
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style
+      x:Key="StageIconButtonStyle"
+      BasedOn="{StaticResource MaterialIconButtonStyle}"
+      TargetType="{x:Type Button}"
+    >
+      <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+      <Style.Triggers>
+        <Trigger Property="IsEnabled" Value="False">
+          <Setter Property="Foreground" Value="{DynamicResource MaterialGray400}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </UserControl.Resources>
+  <UserControl.InputBindings>
+    <KeyBinding
+      Key="OemComma"
+      Modifiers="Control"
+      Command="{Binding MovePreviousCommand}"
+      CommandParameter="{Binding ElementName=WorkspaceFiles}"
+    />
+    <KeyBinding
+      Key="Period"
+      Modifiers="Control"
+      Command="{Binding MoveNextCommand}"
+      CommandParameter="{Binding ElementName=WorkspaceFiles}"
+    />
+    <KeyBinding
+      Key="OemComma"
+      Modifiers="Control+Shift"
+      Command="{Binding MovePreviousCommand}"
+      CommandParameter="{Binding ElementName=IndexFiles}"
+    />
+    <KeyBinding
+      Key="Period"
+      Modifiers="Control+Shift"
+      Command="{Binding MoveNextCommand}"
+      CommandParameter="{Binding ElementName=IndexFiles}"
+    />
+    <KeyBinding
+      Key="C"
+      Modifiers="Control+Shift"
+      Command="{Binding SetFocusCommand}"
+      CommandParameter="{Binding ElementName=CommitMessage}"
+    />
+  </UserControl.InputBindings>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <Grid Style="{StaticResource MaterialToolbarStyle}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button
+          Style="{StaticResource MaterialButtonStyle}"
+          Command="{x:Static wpfcommands:Navigate.Back}"
+          ToolTip="Back"
         >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="180"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-            <Grid wpf:GridSplitterBehavior.FreezeRow="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" MinHeight="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition>
-                        <RowDefinition.Style>
-                            <Style TargetType="{x:Type RowDefinition}">
-                                <Setter Property="Height" Value="0"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
-                                        <Setter Property="Height" Value="Auto"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </RowDefinition.Style>
-                    </RowDefinition>
-                    <RowDefinition>
-                        <RowDefinition.Style>
-                            <Style TargetType="{x:Type RowDefinition}">
-                                <Setter Property="Height" Value="0"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
-                                        <Setter Property="Height" Value="*"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </RowDefinition.Style>
-                    </RowDefinition>
-                </Grid.RowDefinitions>
-                <ListView
-                    x:Name="WorkspaceFiles"
-                    Grid.Row="0"
-                    Style="{StaticResource GitChangeListStyle}"
-                    ItemsSource="{Binding WorkspaceFiles}"
-                    SelectedValue="{Binding SelectedChange}"
-                    SelectedIndex="{Binding SelectedWorkspaceIndex}"
-                    Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
-                >
-                    <ListView.InputBindings>
-                        <KeyBinding Key="S" Command="{Binding StageWorkspaceFilesCommand}" />
-                        <KeyBinding Key="Enter" Command="{Binding StageWorkspaceFilesCommand}" />
-                        <KeyBinding Key="R" Command="{Binding ResetWorkspaceFilesCommand}" />
-                        <KeyBinding Key="Delete" Command="{Binding ResetWorkspaceFilesCommand}" />
-                        <KeyBinding Key="I" Command="{Binding IntentToAddCommand}" />
-                    </ListView.InputBindings>
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}">
-                            <Setter Property="Height" Value="22"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
-                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                            <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" />
-                            <Setter Property="ContextMenu">
-                                <Setter.Value>
-                                    <ContextMenu>
-                                        <MenuItem
-                                            HeaderStringFormat="Open {0}"
-                                            Header="{Binding Path}"
-                                            Command="{x:Static wpfcommands:Application.Open}"
-                                            CommandParameter="{Binding FullPath}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource OpenInNew}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem
-                                            Header="Copy filename"
-                                            Command="{x:Static wpfcommands:Application.Copy}"
-                                            CommandParameter="{Binding Path}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem
-                                            Header="Copy full path"
-                                            Command="{x:Static wpfcommands:Application.Copy}"
-                                            CommandParameter="{Binding FullPath}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem
-                                            Header="Copy directory"
-                                            Command="{x:Static wpfcommands:Application.Copy}"
-                                            CommandParameter="{Binding RelativePath}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <Separator />
-                                        <MenuItem
-                                            Header="Stage"
-                                            InputGestureText="S"
-                                            Command="{Binding PlacementTarget.Tag.StageFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
-                                            CommandParameter="{Binding}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem
-                                            Header="Revert"
-                                            InputGestureText="R"
-                                            Command="{Binding PlacementTarget.Tag.ResetWorkspaceFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
-                                            CommandParameter="{Binding}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileUndo}"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem
-                                            Header="Add with intent"
-                                            InputGestureText="I"
-                                            Command="{Binding PlacementTarget.Tag.IntentToAddFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
-                                            CommandParameter="{Binding}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FilePlus}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                    </ContextMenu>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem
-                                Header="Stage all selected files to index"
-                                Command="{Binding StageWorkspaceFilesCommand}"
-                            >
-                                <MenuItem.Icon>
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem
-                                Header="Stage all files to index"
-                                Command="{Binding AddAllCommand}"
-                            >
-                                <MenuItem.Icon>
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </ListView.ContextMenu>
-                </ListView>
-                <GridSplitter Grid.Row="1" Style="{StaticResource SplitHorizontalStyle}" />
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Staged" VerticalAlignment="Center" IsHitTestVisible="False" Style="{StaticResource Header6TextStyle}" Margin="4 0" />
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding AddAllCommand}" ToolTip="Stage to index">
-                            <Canvas Width="24" Height="24">
-                                <Canvas.LayoutTransform>
-                                    <ScaleTransform ScaleX=".75" ScaleY=".75" />
-                                </Canvas.LayoutTransform>
-                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}"/>
-                            </Canvas>
-                        </Button>
-                        <Button Style="{StaticResource MaterialIconButtonStyle}" Command="{Binding ResetHeadCommand}" ToolTip="Reset to workspace">
-                            <Canvas Width="24" Height="24">
-                                <Canvas.LayoutTransform>
-                                    <ScaleTransform ScaleX=".75" ScaleY=".75" />
-                                </Canvas.LayoutTransform>
-                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowUp}"/>
-                            </Canvas>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-                <ListView
-                    x:Name="IndexFiles"
-                    Grid.Row="2"
-                    Style="{StaticResource GitChangeListStyle}"
-                    ItemsSource="{Binding IndexFiles}"
-                    SelectedValue="{Binding SelectedChange}"
-                    SelectedIndex="{Binding SelectedIndexIndex}"
-                    Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
-                >
-                    <ListView.InputBindings>
-                        <KeyBinding Key="R" Command="{Binding ResetIndexFilesCommand}" />
-                        <KeyBinding Key="Delete" Command="{Binding ResetIndexFilesCommand}" />
-                    </ListView.InputBindings>
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}">
-                            <Setter Property="Height" Value="22"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
-                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                            <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" />
-                            <Setter Property="ContextMenu">
-                                <Setter.Value>
-                                    <ContextMenu>
-                                        <MenuItem
-                                            HeaderStringFormat="Open {0}"
-                                            Header="{Binding Path}"
-                                            Command="{x:Static wpfcommands:Application.Open}"
-                                            CommandParameter="{Binding FullPath}"
-                                        />
-                                        <MenuItem
-                                            Header="Copy filename"
-                                            Command="{x:Static wpfcommands:Application.Copy}"
-                                            CommandParameter="{Binding Path}"
-                                        />
-                                        <MenuItem
-                                            Header="Copy full path"
-                                            Command="{x:Static wpfcommands:Application.Copy}"
-                                            CommandParameter="{Binding FullPath}"
-                                        />
-                                        <MenuItem
-                                            Header="Copy directory"
-                                            Command="{x:Static wpfcommands:Application.Copy}"
-                                            CommandParameter="{Binding WorkingDirectory}"
-                                        />
-                                        <Separator />
-                                        <MenuItem
-                                            Header="Reset file to workspace"
-                                            InputGestureText="R"
-                                            Command="{Binding PlacementTarget.Tag.ResetIndexFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
-                                            CommandParameter="{Binding}"
-                                        >
-                                            <MenuItem.Icon>
-                                                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FileUndo}"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                    </ContextMenu>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem
-                                Header="Reset all selected files to workspace"
-                                Command="{Binding ResetIndexFilesCommand}"
-                            >
-                                <MenuItem.Icon>
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem
-                                Header="Reset to workspace"
-                                Command="{Binding ResetHeadCommand}"
-                            >
-                                <MenuItem.Icon>
-                                    <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ArchiveArrowDown}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </ListView.ContextMenu>
-                </ListView>
-
-                <GridSplitter Grid.Row="3">
-                    <GridSplitter.Style>
-                        <Style TargetType="{x:Type GridSplitter}" BasedOn="{StaticResource SplitHorizontalStyle}">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </GridSplitter.Style>
-                </GridSplitter>
-                <Grid Grid.Row="3">
-                    <Grid.Style>
-                        <Style TargetType="{x:Type Grid}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <TextBlock Text="Amend" VerticalAlignment="Center" IsHitTestVisible="False" Style="{StaticResource Header6TextStyle}" Margin="4 0" />
-                </Grid>
-                <ListView
-                    Grid.Row="4"
-                    ItemsSource="{Binding AmendFiles}"
-                    SelectedValue="{Binding SelectedAmendChange}"
-                >
-                    <ListView.Style>
-                        <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource GitChangeListStyle}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListView.Style>
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}">
-                            <Setter Property="Height" Value="22"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}"/>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.ItemTemplate>
-                        <DataTemplate DataType="{x:Type files:GitFileViewModel}">
-                            <Grid
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                            >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                                    <Canvas.LayoutTransform>
-                                        <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                                    </Canvas.LayoutTransform>
-                                    <Path
-                                        Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
-                                        Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                                    />
-                                </Canvas>
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Style="{StaticResource NormalTextStyle}"
-                                    Text="{Binding DisplayName}"
-                                    ToolTip="{Binding RelativePath}"
-                                />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
-            <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Style="{StaticResource SplitVerticalStyle}" />
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <diff:GitDiffControl
-                    x:Name="DiffControl"
-                    Diff="{Binding SelectedDiffResult}"
-                    ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
-                >
-                    <diff:GitDiffControl.InputBindings>
-                        <KeyBinding
-                            Key="R"
-                            Command="{Binding ResetSelectedTextCommand}"
-                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
-                        />
-                        <KeyBinding
-                            Key="S"
-                            Command="{Binding StageSelectedTextCommand}"
-                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
-                        />
-                        <KeyBinding
-                            Key="E"
-                            Command="{Binding EditSelectedTextCommand}"
-                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
-                        />
-                        <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding Source={x:Reference WorkspaceFiles}}" />
-                        <KeyBinding Key="Period" Modifiers="Control" Command="{Binding MoveNextCommand}" CommandParameter="{Binding Source={x:Reference WorkspaceFiles}}" />
-                        <KeyBinding Key="OemComma" Modifiers="Control+Shift" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding Source={x:Reference IndexFiles}}" />
-                        <KeyBinding Key="Period" Modifiers="Control+Shift" Command="{Binding MoveNextCommand}" CommandParameter="{Binding Source={x:Reference IndexFiles}}" />
-                        <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding SetFocusCommand}" CommandParameter="{Binding Source={x:Reference CommitMessage}}" />
-                    </diff:GitDiffControl.InputBindings>
-                </diff:GitDiffControl>
-                <Popup
-                    AllowsTransparency="True"
-                    IsOpen="{Binding EditHunk, Converter={StaticResource NullToBooleanConverter}}"
-                    PopupAnimation="Slide"
-                    PlacementRectangle="{Binding SelectionPosition, ElementName=DiffControl, Mode=OneWay}"
-                    PlacementTarget="{Binding ElementName=DiffControl, Mode=OneWay}"
-                >
-                    <Border Style="{StaticResource CardPanelStyle}" MinWidth="600" Margin="16">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <TextBox
-                                Style="{StaticResource MaterialFormAreaStyle}"
-                                TextElement.FontFamily="Consolas sans-serif"
-                                TextElement.FontSize="12"
-                                Text="{Binding EditHunk.Text}"
-                            />
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
-                                <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding PatchEditTextCommand}">
-                                    OK
-                                </Button>
-                                <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelEditTextCommand}">
-                                    CANCEL
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </Popup>
-                <Border Grid.Row="1" Margin="4 8 0 1" Padding="0 2 8 2" Style="{StaticResource CardPanelStyle}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <TextBox
-                            Style="{StaticResource MaterialFormAreaStyle}"
-                            Text="{Binding NewBranchName, UpdateSourceTrigger=PropertyChanged}"
-                            Visibility="{Binding CheckoutBranchBeforeCommit, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            FontSize="12"
-                            AutomationProperties.HelpText="Branch name"
-                        />
-                        <TextBox
-                            x:Name="CommitMessage"
-                            Grid.Row="1"
-                            Style="{StaticResource MaterialFormAreaStyle}"
-                            Text="{Binding CommitMessage, UpdateSourceTrigger=PropertyChanged}"
-                            FontSize="12"
-                            AutomationProperties.HelpText="Commit message"
-                        >
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Return" Modifiers="Shift" Command="{Binding CommitCommand}" />
-                                <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
-                                <KeyBinding Key="Period" Modifiers="Control" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=WorkspaceFiles}" />
-                                <KeyBinding Key="OemComma" Modifiers="Control+Shift" Command="{Binding MovePreviousCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
-                                <KeyBinding Key="Period" Modifiers="Control+Shift" Command="{Binding MoveNextCommand}" CommandParameter="{Binding ElementName=IndexFiles}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
-                        <Grid
-                            Grid.Row="2"
-                            VerticalAlignment="Center"
-                            Margin="8 0 0 8"
-                        >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" Content="Amend" IsChecked="{Binding AmendLastCommit}"/>
-                                <CheckBox Style="{StaticResource MaterialCheckBoxStyle}" Content="Checkout new branch" IsChecked="{Binding CheckoutBranchBeforeCommit}"/>
-                            </StackPanel>
-                            <Button Grid.Column="2" Style="{StaticResource StageIconButtonStyle}" Command="{Binding StashIndexCommand}" ToolTip="Stash index">
-                                <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource Inbox}" />
-                            </Button>
-                            <Button Grid.Column="3" Style="{StaticResource StageIconButtonStyle}" Command="{Binding CommitCommand}" ToolTip="Commit">
-                                <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"  Data="{StaticResource ArrowRightBox}"/>
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Grid>
+          <Path
+            Height="24"
+            Fill="{DynamicResource MaterialForegroundBase}"
+            Data="{StaticResource ArrowLeft}"
+          />
+        </Button>
+        <TextBlock
+          Grid.Column="1"
+          Text="Stage"
+          Style="{StaticResource MaterialToolbarHeaderStyle}"
+        />
+      </Grid>
+      <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
+        <ToolBar>
+          <Button Command="{Binding UndoPatchCommand}" ToolTip="Undo patch">
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource UndoVariant}"
+            />
+          </Button>
+          <Separator />
+          <ToggleButton
+            IsChecked="{Binding RefreshAutomatically}"
+            ToolTip="Auto renew file changes"
+          >
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource AutoRenew}"
+            />
+          </ToggleButton>
+          <ToggleButton IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource KeyboardSpace}"
+            />
+          </ToggleButton>
+          <Separator />
+          <Button Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource FileRefresh}"
+            />
+          </Button>
+        </ToolBar>
+      </ToolBarTray>
     </Grid>
+    <Grid Grid.Row="2" Margin="4 0 4 4" wpf:GridSplitterBehavior.FreezeColumn="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="180" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="3*" />
+      </Grid.ColumnDefinitions>
+      <Grid wpf:GridSplitterBehavior.FreezeRow="2">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*" MinHeight="20" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition>
+            <RowDefinition.Style>
+              <Style TargetType="{x:Type RowDefinition}">
+                <Setter Property="Height" Value="0" />
+                <Style.Triggers>
+                  <DataTrigger
+                    Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+                    Value="True"
+                  >
+                    <Setter Property="Height" Value="Auto" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </RowDefinition.Style>
+          </RowDefinition>
+          <RowDefinition>
+            <RowDefinition.Style>
+              <Style TargetType="{x:Type RowDefinition}">
+                <Setter Property="Height" Value="0" />
+                <Style.Triggers>
+                  <DataTrigger
+                    Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+                    Value="True"
+                  >
+                    <Setter Property="Height" Value="*" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </RowDefinition.Style>
+          </RowDefinition>
+        </Grid.RowDefinitions>
+        <ListView
+          x:Name="WorkspaceFiles"
+          Grid.Row="0"
+          Style="{StaticResource GitChangeListStyle}"
+          ItemsSource="{Binding WorkspaceFiles}"
+          SelectedValue="{Binding SelectedChange}"
+          SelectedIndex="{Binding SelectedWorkspaceIndex}"
+          Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+        >
+          <ListView.InputBindings>
+            <KeyBinding Key="S" Command="{Binding StageWorkspaceFilesCommand}" />
+            <KeyBinding Key="Enter" Command="{Binding StageWorkspaceFilesCommand}" />
+            <KeyBinding Key="R" Command="{Binding ResetWorkspaceFilesCommand}" />
+            <KeyBinding Key="Delete" Command="{Binding ResetWorkspaceFilesCommand}" />
+            <KeyBinding Key="I" Command="{Binding IntentToAddCommand}" />
+          </ListView.InputBindings>
+          <ListView.ItemContainerStyle>
+            <Style TargetType="{x:Type ListViewItem}">
+              <Setter Property="Height" Value="22" />
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+              <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+              <Setter
+                Property="Tag"
+                Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+              />
+              <Setter Property="ContextMenu">
+                <Setter.Value>
+                  <ContextMenu>
+                    <MenuItem
+                      HeaderStringFormat="Open {0}"
+                      Header="{Binding Path}"
+                      Command="{x:Static wpfcommands:Application.Open}"
+                      CommandParameter="{Binding FullPath}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource OpenInNew}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                      Header="Copy filename"
+                      Command="{x:Static wpfcommands:Application.Copy}"
+                      CommandParameter="{Binding Path}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource ContentCopy}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                      Header="Copy full path"
+                      Command="{x:Static wpfcommands:Application.Copy}"
+                      CommandParameter="{Binding FullPath}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource ContentCopy}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                      Header="Copy directory"
+                      Command="{x:Static wpfcommands:Application.Copy}"
+                      CommandParameter="{Binding RelativePath}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource ContentCopy}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem
+                      Header="Stage"
+                      InputGestureText="S"
+                      Command="{Binding PlacementTarget.Tag.StageFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                      CommandParameter="{Binding}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource ArchiveArrowDown}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                      Header="Revert"
+                      InputGestureText="R"
+                      Command="{Binding PlacementTarget.Tag.ResetWorkspaceFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                      CommandParameter="{Binding}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource FileUndo}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                      Header="Add with intent"
+                      InputGestureText="I"
+                      Command="{Binding PlacementTarget.Tag.IntentToAddFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                      CommandParameter="{Binding}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource FilePlus}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                  </ContextMenu>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </ListView.ItemContainerStyle>
+          <ListView.ContextMenu>
+            <ContextMenu>
+              <MenuItem
+                Header="Stage all selected files to index"
+                Command="{Binding StageWorkspaceFilesCommand}"
+              >
+                <MenuItem.Icon>
+                  <Path
+                    Fill="{DynamicResource MaterialForegroundBase}"
+                    Data="{StaticResource ArchiveArrowDown}"
+                  />
+                </MenuItem.Icon>
+              </MenuItem>
+              <MenuItem Header="Stage all files to index" Command="{Binding AddAllCommand}">
+                <MenuItem.Icon>
+                  <Path
+                    Fill="{DynamicResource MaterialForegroundBase}"
+                    Data="{StaticResource ArchiveArrowDown}"
+                  />
+                </MenuItem.Icon>
+              </MenuItem>
+            </ContextMenu>
+          </ListView.ContextMenu>
+        </ListView>
+        <GridSplitter Grid.Row="1" Style="{StaticResource SplitHorizontalStyle}" />
+        <Grid Grid.Row="1">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock
+            Text="Staged"
+            VerticalAlignment="Center"
+            IsHitTestVisible="False"
+            Style="{StaticResource Header6TextStyle}"
+            Margin="4 0"
+          />
+          <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <Button
+              Style="{StaticResource MaterialIconButtonStyle}"
+              Command="{Binding AddAllCommand}"
+              ToolTip="Stage to index"
+            >
+              <Canvas Width="24" Height="24">
+                <Canvas.LayoutTransform>
+                  <ScaleTransform ScaleX=".75" ScaleY=".75" />
+                </Canvas.LayoutTransform>
+                <Path
+                  Fill="{DynamicResource MaterialForegroundBase}"
+                  Data="{StaticResource ArchiveArrowDown}"
+                />
+              </Canvas>
+            </Button>
+            <Button
+              Style="{StaticResource MaterialIconButtonStyle}"
+              Command="{Binding ResetHeadCommand}"
+              ToolTip="Reset to workspace"
+            >
+              <Canvas Width="24" Height="24">
+                <Canvas.LayoutTransform>
+                  <ScaleTransform ScaleX=".75" ScaleY=".75" />
+                </Canvas.LayoutTransform>
+                <Path
+                  Fill="{DynamicResource MaterialForegroundBase}"
+                  Data="{StaticResource ArchiveArrowUp}"
+                />
+              </Canvas>
+            </Button>
+          </StackPanel>
+        </Grid>
+        <ListView
+          x:Name="IndexFiles"
+          Grid.Row="2"
+          Style="{StaticResource GitChangeListStyle}"
+          ItemsSource="{Binding IndexFiles}"
+          SelectedValue="{Binding SelectedChange}"
+          SelectedIndex="{Binding SelectedIndexIndex}"
+          Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+        >
+          <ListView.InputBindings>
+            <KeyBinding Key="R" Command="{Binding ResetIndexFilesCommand}" />
+            <KeyBinding Key="Delete" Command="{Binding ResetIndexFilesCommand}" />
+          </ListView.InputBindings>
+          <ListView.ItemContainerStyle>
+            <Style TargetType="{x:Type ListViewItem}">
+              <Setter Property="Height" Value="22" />
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+              <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+              <Setter
+                Property="Tag"
+                Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+              />
+              <Setter Property="ContextMenu">
+                <Setter.Value>
+                  <ContextMenu>
+                    <MenuItem
+                      HeaderStringFormat="Open {0}"
+                      Header="{Binding Path}"
+                      Command="{x:Static wpfcommands:Application.Open}"
+                      CommandParameter="{Binding FullPath}"
+                    />
+                    <MenuItem
+                      Header="Copy filename"
+                      Command="{x:Static wpfcommands:Application.Copy}"
+                      CommandParameter="{Binding Path}"
+                    />
+                    <MenuItem
+                      Header="Copy full path"
+                      Command="{x:Static wpfcommands:Application.Copy}"
+                      CommandParameter="{Binding FullPath}"
+                    />
+                    <MenuItem
+                      Header="Copy directory"
+                      Command="{x:Static wpfcommands:Application.Copy}"
+                      CommandParameter="{Binding WorkingDirectory}"
+                    />
+                    <Separator />
+                    <MenuItem
+                      Header="Reset file to workspace"
+                      InputGestureText="R"
+                      Command="{Binding PlacementTarget.Tag.ResetIndexFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                      CommandParameter="{Binding}"
+                    >
+                      <MenuItem.Icon>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource FileUndo}"
+                        />
+                      </MenuItem.Icon>
+                    </MenuItem>
+                  </ContextMenu>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </ListView.ItemContainerStyle>
+          <ListView.ContextMenu>
+            <ContextMenu>
+              <MenuItem
+                Header="Reset all selected files to workspace"
+                Command="{Binding ResetIndexFilesCommand}"
+              >
+                <MenuItem.Icon>
+                  <Path
+                    Fill="{DynamicResource MaterialForegroundBase}"
+                    Data="{StaticResource ArchiveArrowDown}"
+                  />
+                </MenuItem.Icon>
+              </MenuItem>
+              <MenuItem Header="Reset to workspace" Command="{Binding ResetHeadCommand}">
+                <MenuItem.Icon>
+                  <Path
+                    Fill="{DynamicResource MaterialForegroundBase}"
+                    Data="{StaticResource ArchiveArrowDown}"
+                  />
+                </MenuItem.Icon>
+              </MenuItem>
+            </ContextMenu>
+          </ListView.ContextMenu>
+        </ListView>
+        <GridSplitter Grid.Row="3">
+          <GridSplitter.Style>
+            <Style
+              TargetType="{x:Type GridSplitter}"
+              BasedOn="{StaticResource SplitHorizontalStyle}"
+            >
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger
+                  Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+                  Value="True"
+                >
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </GridSplitter.Style>
+        </GridSplitter>
+        <Grid Grid.Row="3">
+          <Grid.Style>
+            <Style TargetType="{x:Type Grid}">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger
+                  Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+                  Value="True"
+                >
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Grid.Style>
+          <TextBlock
+            Text="Amend"
+            VerticalAlignment="Center"
+            IsHitTestVisible="False"
+            Style="{StaticResource Header6TextStyle}"
+            Margin="4 0"
+          />
+        </Grid>
+        <ListView
+          Grid.Row="4"
+          ItemsSource="{Binding AmendFiles}"
+          SelectedValue="{Binding SelectedAmendChange}"
+        >
+          <ListView.Style>
+            <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource GitChangeListStyle}">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger
+                  Binding="{Binding DataContext.AmendLastCommit, RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
+                  Value="True"
+                >
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ListView.Style>
+          <ListView.ItemContainerStyle>
+            <Style TargetType="{x:Type ListViewItem}">
+              <Setter Property="Height" Value="22" />
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+            </Style>
+          </ListView.ItemContainerStyle>
+          <ListView.ItemTemplate>
+            <DataTemplate DataType="{x:Type files:GitFileViewModel}">
+              <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                  <Canvas.LayoutTransform>
+                    <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                  </Canvas.LayoutTransform>
+                  <Path
+                    Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
+                    Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+                  />
+                </Canvas>
+                <TextBlock
+                  Grid.Column="1"
+                  Style="{StaticResource NormalTextStyle}"
+                  Text="{Binding DisplayName}"
+                  ToolTip="{Binding RelativePath}"
+                />
+              </Grid>
+            </DataTemplate>
+          </ListView.ItemTemplate>
+        </ListView>
+      </Grid>
+      <GridSplitter
+        Grid.Row="0"
+        Grid.RowSpan="3"
+        Grid.Column="1"
+        Style="{StaticResource SplitVerticalStyle}"
+      />
+      <Grid Grid.Column="2">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <diff:GitDiffControl
+          x:Name="DiffControl"
+          Diff="{Binding SelectedDiffResult}"
+          ShowSpacesAsDots="{Binding ShowSpacesAsDots, Mode=OneWay}"
+        >
+          <diff:GitDiffControl.InputBindings>
+            <KeyBinding
+              Key="R"
+              Command="{Binding ResetSelectedTextCommand}"
+              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+            />
+            <KeyBinding
+              Key="S"
+              Command="{Binding StageSelectedTextCommand}"
+              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+            />
+            <KeyBinding
+              Key="E"
+              Command="{Binding EditSelectedTextCommand}"
+              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+            />
+            <KeyBinding
+              Key="OemComma"
+              Modifiers="Control"
+              Command="{Binding MovePreviousCommand}"
+              CommandParameter="{Binding Source={x:Reference WorkspaceFiles}}"
+            />
+            <KeyBinding
+              Key="Period"
+              Modifiers="Control"
+              Command="{Binding MoveNextCommand}"
+              CommandParameter="{Binding Source={x:Reference WorkspaceFiles}}"
+            />
+            <KeyBinding
+              Key="OemComma"
+              Modifiers="Control+Shift"
+              Command="{Binding MovePreviousCommand}"
+              CommandParameter="{Binding Source={x:Reference IndexFiles}}"
+            />
+            <KeyBinding
+              Key="Period"
+              Modifiers="Control+Shift"
+              Command="{Binding MoveNextCommand}"
+              CommandParameter="{Binding Source={x:Reference IndexFiles}}"
+            />
+            <KeyBinding
+              Key="C"
+              Modifiers="Control+Shift"
+              Command="{Binding SetFocusCommand}"
+              CommandParameter="{Binding Source={x:Reference CommitMessage}}"
+            />
+          </diff:GitDiffControl.InputBindings>
+        </diff:GitDiffControl>
+        <Popup
+          AllowsTransparency="True"
+          IsOpen="{Binding EditHunk, Converter={StaticResource NullToBooleanConverter}}"
+          PopupAnimation="Slide"
+          PlacementRectangle="{Binding SelectionPosition, ElementName=DiffControl, Mode=OneWay}"
+          PlacementTarget="{Binding ElementName=DiffControl, Mode=OneWay}"
+        >
+          <Border Style="{StaticResource CardPanelStyle}" MinWidth="600" Margin="16">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+              </Grid.RowDefinitions>
+              <TextBox
+                Style="{StaticResource MaterialFormAreaStyle}"
+                TextElement.FontFamily="Consolas sans-serif"
+                TextElement.FontSize="12"
+                Text="{Binding EditHunk.Text}"
+              />
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
+                <Button
+                  Style="{StaticResource MaterialButtonStyle}"
+                  Command="{Binding PatchEditTextCommand}"
+                >
+                                    OK
+                                </Button
+                >
+                <Button
+                  Style="{StaticResource MaterialButtonStyle}"
+                  Command="{Binding CancelEditTextCommand}"
+                >
+                                    CANCEL
+                                </Button
+                >
+              </StackPanel>
+            </Grid>
+          </Border>
+        </Popup>
+        <Border
+          Grid.Row="1"
+          Margin="4 8 0 1"
+          Padding="0 2 8 2"
+          Style="{StaticResource CardPanelStyle}"
+        >
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBox
+              Style="{StaticResource MaterialFormAreaStyle}"
+              Text="{Binding NewBranchName, UpdateSourceTrigger=PropertyChanged}"
+              Visibility="{Binding CheckoutBranchBeforeCommit, Converter={StaticResource BooleanToVisibilityConverter}}"
+              FontSize="12"
+              AutomationProperties.HelpText="Branch name"
+            />
+            <TextBox
+              x:Name="CommitMessage"
+              Grid.Row="1"
+              Style="{StaticResource MaterialFormAreaStyle}"
+              Text="{Binding CommitMessage, UpdateSourceTrigger=PropertyChanged}"
+              FontSize="12"
+              AutomationProperties.HelpText="Commit message"
+            >
+              <TextBox.InputBindings>
+                <KeyBinding Key="Return" Modifiers="Shift" Command="{Binding CommitCommand}" />
+                <KeyBinding
+                  Key="OemComma"
+                  Modifiers="Control"
+                  Command="{Binding MovePreviousCommand}"
+                  CommandParameter="{Binding ElementName=WorkspaceFiles}"
+                />
+                <KeyBinding
+                  Key="Period"
+                  Modifiers="Control"
+                  Command="{Binding MoveNextCommand}"
+                  CommandParameter="{Binding ElementName=WorkspaceFiles}"
+                />
+                <KeyBinding
+                  Key="OemComma"
+                  Modifiers="Control+Shift"
+                  Command="{Binding MovePreviousCommand}"
+                  CommandParameter="{Binding ElementName=IndexFiles}"
+                />
+                <KeyBinding
+                  Key="Period"
+                  Modifiers="Control+Shift"
+                  Command="{Binding MoveNextCommand}"
+                  CommandParameter="{Binding ElementName=IndexFiles}"
+                />
+              </TextBox.InputBindings>
+            </TextBox>
+            <Grid Grid.Row="2" VerticalAlignment="Center" Margin="8 0 0 8">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal">
+                <CheckBox
+                  Style="{StaticResource MaterialCheckBoxStyle}"
+                  Content="Amend"
+                  IsChecked="{Binding AmendLastCommit}"
+                />
+                <CheckBox
+                  Style="{StaticResource MaterialCheckBoxStyle}"
+                  Content="Checkout new branch"
+                  IsChecked="{Binding CheckoutBranchBeforeCommit}"
+                />
+              </StackPanel>
+              <Button
+                Grid.Column="2"
+                Style="{StaticResource StageIconButtonStyle}"
+                Command="{Binding StashIndexCommand}"
+                ToolTip="Stash index"
+              >
+                <Path
+                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                  Data="{StaticResource Inbox}"
+                />
+              </Button>
+              <Button
+                Grid.Column="3"
+                Style="{StaticResource StageIconButtonStyle}"
+                Command="{Binding CommitCommand}"
+                ToolTip="Commit"
+              >
+                <Path
+                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                  Data="{StaticResource ArrowRightBox}"
+                />
+              </Button>
+            </Grid>
+          </Grid>
+        </Border>
+      </Grid>
+    </Grid>
+  </Grid>
 </UserControl>

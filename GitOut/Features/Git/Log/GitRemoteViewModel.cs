@@ -26,7 +26,11 @@ namespace GitOut.Features.Git.Log
 
         public static GitRemoteViewModel From(GitRemote model) => new(model, isSelected: true);
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {

@@ -77,15 +77,25 @@ namespace GitOut.Features.Git.Log
             this.snack = snack;
             this.updateStageOptions = updateStageOptions;
             showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
-            settingsMonitorHandle = stagingOptions.OnChange(options => SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots)));
-            GitLogPageOptions options = navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
+            settingsMonitorHandle = stagingOptions.OnChange(options =>
+                SetProperty(
+                    ref showSpacesAsDots,
+                    options.ShowSpacesAsDots,
+                    nameof(ShowSpacesAsDots)
+                )
+            );
+            GitLogPageOptions options =
+                navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
                 ?? throw new InvalidOperationException("Options may not be null");
             Repository = options.Repository;
             monitor = new GitRepositoryMonitor();
             monitor.LogChanged += OnLogChanged;
             title.Title = $"{Repository.Name} (Log)";
 
-            repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(Repository, RepositoryWatcherOptions.Workspace);
+            repositoryWatcher = watchProvider.PrepareWatchRepositoryChanges(
+                Repository,
+                RepositoryWatcherOptions.Workspace
+            );
             repositoryWatcher.Events += OnFileSystemChanges;
 
             BindingOperations.EnableCollectionSynchronization(activeStashes, activeStashesLock);
@@ -97,7 +107,11 @@ namespace GitOut.Features.Git.Log
             BindingOperations.EnableCollectionSynchronization(remotes, remotesLock);
             Remotes = CollectionViewSource.GetDefaultView(remotes);
 
-            NavigateToStageAreaCommand = new NavigateLocalCommand<object>(navigation, typeof(GitStagePage).FullName!, e => GitStagePageOptions.Stage(Repository));
+            NavigateToStageAreaCommand = new NavigateLocalCommand<object>(
+                navigation,
+                typeof(GitStagePage).FullName!,
+                e => GitStagePageOptions.Stage(Repository)
+            );
             RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
 
             selectedLogEntries.CollectionChanged += (sender, args) =>
@@ -114,9 +128,7 @@ namespace GitOut.Features.Git.Log
                     snack,
                     RevisionViewMode
                 );
-                ViewMode = SelectedContext is null
-                    ? LogViewMode.None
-                    : LogViewMode.Files;
+                ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
                 if (selectedLogEntries.Count >= 2)
                 {
                     RevisionViewMode = LogRevisionViewMode.Diff;
@@ -131,47 +143,46 @@ namespace GitOut.Features.Git.Log
                     snack,
                     RevisionViewMode
                 );
-                ViewMode = SelectedContext is null
-                    ? LogViewMode.None
-                    : LogViewMode.Files;
+                ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
             };
 
-            createStashBranchCommand = new NotNullCallbackCommand<GitStashEventViewModel>(
-                model =>
+            createStashBranchCommand = new NotNullCallbackCommand<GitStashEventViewModel>(model =>
+            {
+                INavigationService child = navigation.NavigateNewWindow(
+                    typeof(TextPromptPage).FullName!,
+                    new TextPromptOptions(
+                        $"stash-{model.StashIndex}",
+                        "Branch name",
+                        GitBranchName.IsValid,
+                        GitBranchName.CreateLocal
+                    ),
+                    new NavigationOverrideOptions(
+                        PromptSize,
+                        PromptOffset,
+                        IsModal: true,
+                        IsStatusBarVisible: false
+                    )
+                );
+                child.Closed += async (sender, args) =>
                 {
-                    INavigationService child = navigation.NavigateNewWindow(
-                        typeof(TextPromptPage).FullName!,
-                        new TextPromptOptions(
-                            $"stash-{model.StashIndex}",
-                            "Branch name",
-                            GitBranchName.IsValid,
-                            GitBranchName.CreateLocal
-                        ),
-                        new NavigationOverrideOptions(
-                            PromptSize,
-                            PromptOffset,
-                            IsModal: true,
-                            IsStatusBarVisible: false
-                        )
-                    );
-                    child.Closed += async (sender, args) =>
+                    GitBranchName? branchName = child.GetDialogResult<GitBranchName>();
+                    if (branchName is not null)
                     {
-                        GitBranchName? branchName = child.GetDialogResult<GitBranchName>();
-                        if (branchName is not null)
+                        try
                         {
-                            try
-                            {
-                                await Repository.CreateBranchAsync(branchName, new GitCreateBranchOptions(model.Event.Id));
-                                await CheckRepositoryStatusAsync();
-                            }
-                            catch (InvalidOperationException ioe)
-                            {
-                                snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
-                            }
+                            await Repository.CreateBranchAsync(
+                                branchName,
+                                new GitCreateBranchOptions(model.Event.Id)
+                            );
+                            await CheckRepositoryStatusAsync();
                         }
-                    };
-                }
-            );
+                        catch (InvalidOperationException ioe)
+                        {
+                            snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
+                        }
+                    }
+                };
+            });
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
             CheckoutCommitCommand = new AsyncCallbackCommand<GitCommitId>(
@@ -201,7 +212,10 @@ namespace GitOut.Features.Git.Log
                     try
                     {
                         var branchName = GitBranchName.CreateLocal(checkoutBranchName!); // name is validated by the canExecute callback
-                        await Repository.CheckoutBranchAsync(branchName, new GitCheckoutBranchOptions(true));
+                        await Repository.CheckoutBranchAsync(
+                            branchName,
+                            new GitCheckoutBranchOptions(true)
+                        );
                         await CheckRepositoryStatusAsync();
                         snack.ShowSuccess($"Branch {branchName.Name} created");
                         checkoutBranchName = string.Empty;
@@ -214,7 +228,9 @@ namespace GitOut.Features.Git.Log
                 () => checkoutBranchName is not null && GitBranchName.IsValid(checkoutBranchName)
             );
 
-            RevealInExplorerCommand = new CallbackCommand(() => Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose());
+            RevealInExplorerCommand = new CallbackCommand(() =>
+                Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose()
+            );
             CopyContentCommand = new CopyTextToClipBoardCommand<object>(
                 d => Repository.WorkingDirectory.Directory,
                 d => true,
@@ -270,7 +286,9 @@ namespace GitOut.Features.Git.Log
                 gitTreeEvent.IsSelected = true;
             });
 
-            AppendSelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit => entries.First(e => e.Event.Id == commit.Id).IsSelected = true);
+            AppendSelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
+                entries.First(e => e.Event.Id == commit.Id).IsSelected = true
+            );
             CloseAutocompleteCommand = new CallbackCommand(() => IsSearchDisplayed = false);
             ShowSearchFilesCommand = new CallbackCommand(() => IsSearchDisplayed = true);
         }
@@ -363,7 +381,10 @@ namespace GitOut.Features.Git.Log
             {
                 if (SetProperty(ref viewMode, value))
                 {
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FileViewVisible)));
+                    PropertyChanged?.Invoke(
+                        this,
+                        new PropertyChangedEventArgs(nameof(FileViewVisible))
+                    );
                 }
             }
         }
@@ -453,9 +474,11 @@ namespace GitOut.Features.Git.Log
             }
         }
 
-        private void OnLogChanged(object? sender, EventArgs args) => _ = CheckRepositoryStatusAsync();
+        private void OnLogChanged(object? sender, EventArgs args) =>
+            _ = CheckRepositoryStatusAsync();
 
-        private void OnFileSystemChanges(object sender, RepositoryWatcherEventArgs args) => hasChanges = true;
+        private void OnFileSystemChanges(object sender, RepositoryWatcherEventArgs args) =>
+            hasChanges = true;
 
         private async Task FetchRemotesAsync()
         {
@@ -489,28 +512,33 @@ namespace GitOut.Features.Git.Log
         {
             IsWorking = true;
             IEnumerable<GitTreeEvent>? history = await Task.Run(async () =>
-            {
-                IEnumerable<GitHistoryEvent> tree = await Repository.LogAsync(new LogOptions
                 {
-                    IncludeRemotes = includeRemotes,
-                    IncludeStashes = includeStashes
-                }).ConfigureAwait(false);
+                    IEnumerable<GitHistoryEvent> tree = await Repository
+                        .LogAsync(
+                            new LogOptions
+                            {
+                                IncludeRemotes = includeRemotes,
+                                IncludeStashes = includeStashes,
+                            }
+                        )
+                        .ConfigureAwait(false);
 
-                IEnumerable<GitTreeEvent>? result = BuildTree(tree);
-                var selected = entries
-                    .Where(e => e.IsSelected)
-                    .Select(e => e.Event.Id)
-                    .ToList();
+                    IEnumerable<GitTreeEvent>? result = BuildTree(tree);
+                    var selected = entries
+                        .Where(e => e.IsSelected)
+                        .Select(e => e.Event.Id)
+                        .ToList();
 
-                foreach (GitTreeEvent item in result)
-                {
-                    if (selected.Contains(item.Event.Id))
+                    foreach (GitTreeEvent item in result)
                     {
-                        item.IsSelected = true;
+                        if (selected.Contains(item.Event.Id))
+                        {
+                            item.IsSelected = true;
+                        }
                     }
-                }
-                return result;
-            }).ConfigureAwait(false);
+                    return result;
+                })
+                .ConfigureAwait(false);
 
             lock (entriesLock)
             {
@@ -532,7 +560,9 @@ namespace GitOut.Features.Git.Log
             {
                 lock (activeStashesLock)
                 {
-                    activeStashes.Add(new GitStashEventViewModel(stashEntry, createStashBranchCommand));
+                    activeStashes.Add(
+                        new GitStashEventViewModel(stashEntry, createStashBranchCommand)
+                    );
                 }
             }
         }
@@ -546,13 +576,20 @@ namespace GitOut.Features.Git.Log
             await Repository.CreateBranchAsync(branch);
             await Repository.ResetToCommitAsync(gte!.Root.Id);
             await Repository.AddAllAsync();
-            await Repository.CommitAsync(GitCommitOptions.AmendLatest(body.Length > 0 ? $"{subject}{Environment.NewLine}{Environment.NewLine}{body}" : subject));
+            await Repository.CommitAsync(
+                GitCommitOptions.AmendLatest(
+                    body.Length > 0
+                        ? $"{subject}{Environment.NewLine}{Environment.NewLine}{body}"
+                        : subject
+                )
+            );
             snack.ShowSuccess("Successfully reset to previous commit");
             await CheckRepositoryStatusAsync();
             IsWorking = false;
             const string approveActionText = "YES";
             SnackAction? result = await snack.ShowAsync(
-                Snack.Builder()
+                Snack
+                    .Builder()
                     .WithMessage("Remove temporary branch?")
                     .WithDuration(TimeSpan.FromMinutes(1))
                     .AddAction(approveActionText)
@@ -560,7 +597,10 @@ namespace GitOut.Features.Git.Log
             if (result?.Text == approveActionText)
             {
                 IsWorking = true;
-                await Repository.DeleteBranchAsync(branch, new GitDeleteBranchOptions(ForceDelete: true));
+                await Repository.DeleteBranchAsync(
+                    branch,
+                    new GitDeleteBranchOptions(ForceDelete: true)
+                );
                 await CheckRepositoryStatusAsync();
                 IsWorking = false;
             }
@@ -583,7 +623,11 @@ namespace GitOut.Features.Git.Log
             return events;
         }
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {

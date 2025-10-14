@@ -8,7 +8,10 @@ namespace GitOut.Features.Git
         {
             if (message.Length == 0)
             {
-                throw new ArgumentException("Message must be more than 0 characters", nameof(message));
+                throw new ArgumentException(
+                    "Message must be more than 0 characters",
+                    nameof(message)
+                );
             }
             Amend = amend;
             Message = message;
@@ -18,6 +21,7 @@ namespace GitOut.Features.Git
         public string Message { get; }
 
         public static GitCommitOptions AmendLatest(string message) => new(true, message);
+
         public static GitCommitOptions CreateCommit(string message) => new(false, message);
     }
 }

@@ -67,7 +67,8 @@ namespace GitOut.Features.Navigation
         public event EventHandler<EventArgs>? Closed;
         public event EventHandler<NavigationEventArgs>? NavigationRequested;
 
-        public T? GetDialogResult<T>() where T : class => dialogResult as T;
+        public T? GetDialogResult<T>()
+            where T : class => dialogResult as T;
 
         public void Back()
         {
@@ -94,7 +95,12 @@ namespace GitOut.Features.Navigation
                 OnNavigationRequested(latest);
                 titleService.Title = title;
                 CurrentPage = latest.GetType().FullName;
-                logger.LogInformation(LogEventId.Navigation, "Navigating back to {CurrentPage} ({Title})", CurrentPage, title);
+                logger.LogInformation(
+                    LogEventId.Navigation,
+                    "Navigating back to {CurrentPage} ({Title})",
+                    CurrentPage,
+                    title
+                );
                 if (latest.DataContext is INavigationListener revisitedContext)
                 {
                     revisitedContext.Navigated(NavigationType.NavigatedBack);
@@ -110,7 +116,8 @@ namespace GitOut.Features.Navigation
             }
 
             (ContentControl control, string? _) = pageStack.Peek();
-            return Window.GetWindow(control) == Application.Current.MainWindow && (pageStack.Count > 1 || control.DataContext is INavigationFallback);
+            return Window.GetWindow(control) == Application.Current.MainWindow
+                && (pageStack.Count > 1 || control.DataContext is INavigationFallback);
         }
 
         public void Close()
@@ -121,7 +128,8 @@ namespace GitOut.Features.Navigation
             }
         }
 
-        public void Close<T>(T? result) where T : class
+        public void Close<T>(T? result)
+            where T : class
         {
             dialogResult = result;
             Close();
@@ -129,7 +137,12 @@ namespace GitOut.Features.Navigation
 
         public void Navigate(string pageName, object? options)
         {
-            Type pageType = Type.GetType(pageName) ?? throw new ArgumentNullException(nameof(pageName), $"Invalid page name {pageName}");
+            Type pageType =
+                Type.GetType(pageName)
+                ?? throw new ArgumentNullException(
+                    nameof(pageName),
+                    $"Invalid page name {pageName}"
+                );
             if (options is not null)
             {
                 if (!pageOptions.TryAdd(pageName, options))
@@ -139,21 +152,38 @@ namespace GitOut.Features.Navigation
             }
             if (provider.GetService(pageType) is not UserControl page)
             {
-                throw new ArgumentException($"No control provided for page {pageName}", nameof(pageName));
+                throw new ArgumentException(
+                    $"No control provided for page {pageName}",
+                    nameof(pageName)
+                );
             }
 
             EnsureShell();
-            logger.LogInformation(LogEventId.Navigation, "Navigating to control {PageName}", pageName);
+            logger.LogInformation(
+                LogEventId.Navigation,
+                "Navigating to control {PageName}",
+                pageName
+            );
             NavigateToControl(page);
             CurrentPage = pageName;
             shell.Show();
         }
 
-        public INavigationService NavigateNewWindow(string pageName, object? options, NavigationOverrideOptions? overrideOptions = default)
+        public INavigationService NavigateNewWindow(
+            string pageName,
+            object? options,
+            NavigationOverrideOptions? overrideOptions = default
+        )
         {
             IServiceScope scope = provider.CreateScope();
-            logger.LogInformation(LogEventId.Navigation, "Opening new window at {PageName}", pageName);
-            NavigationService windowNavigation = scope.ServiceProvider.GetRequiredService<INavigationService>() as NavigationService ?? throw new InvalidOperationException("NavigationService is not of correct type");
+            logger.LogInformation(
+                LogEventId.Navigation,
+                "Opening new window at {PageName}",
+                pageName
+            );
+            NavigationService windowNavigation =
+                scope.ServiceProvider.GetRequiredService<INavigationService>() as NavigationService
+                ?? throw new InvalidOperationException("NavigationService is not of correct type");
             windowNavigation.Closed += (s, e) => scope.Dispose();
             if (overrideOptions?.IsModal == true)
             {
@@ -165,12 +195,20 @@ namespace GitOut.Features.Navigation
 
         [MemberNotNull(nameof(shell))]
         private void EnsureShell() => shell ??= CreateShell();
-        [MemberNotNull(nameof(shell))]
-        private void EnsureShell(NavigationOverrideOptions overrideOptions, NavigationService parent) => shell ??= CreateShell(overrideOptions, parent);
 
-        private NavigatorShell CreateShell(NavigationOverrideOptions? overrideOptions = default, NavigationService? parent = default)
+        [MemberNotNull(nameof(shell))]
+        private void EnsureShell(
+            NavigationOverrideOptions overrideOptions,
+            NavigationService parent
+        ) => shell ??= CreateShell(overrideOptions, parent);
+
+        private NavigatorShell CreateShell(
+            NavigationOverrideOptions? overrideOptions = default,
+            NavigationService? parent = default
+        )
         {
-            NavigatorShellViewModel viewModel = provider.GetRequiredService<NavigatorShellViewModel>();
+            NavigatorShellViewModel viewModel =
+                provider.GetRequiredService<NavigatorShellViewModel>();
             IOptionsWriter<NavigationWindowOptions>? storage = null;
             IOptions<NavigationWindowOptions>? windowOptions = null;
             if (overrideOptions is null)
@@ -181,8 +219,11 @@ namespace GitOut.Features.Navigation
             else
             {
                 viewModel.IsStatusBarVisible = overrideOptions.IsStatusBarVisible;
-                Point location = parent!.shell?.PointToScreen(overrideOptions.Offset) ?? overrideOptions.Offset;
-                windowOptions = Microsoft.Extensions.Options.Options.Create(NavigationWindowOptions.FromPosition(location, overrideOptions.WindowSize));
+                Point location =
+                    parent!.shell?.PointToScreen(overrideOptions.Offset) ?? overrideOptions.Offset;
+                windowOptions = Microsoft.Extensions.Options.Options.Create(
+                    NavigationWindowOptions.FromPosition(location, overrideOptions.WindowSize)
+                );
             }
             var window = new NavigatorShell(viewModel, storage, windowOptions);
             window.Activated += (sender, args) =>
@@ -215,7 +256,9 @@ namespace GitOut.Features.Navigation
             return window;
         }
 
-        public T? GetOptions<T>(string pageName) where T : class => pageOptions.TryGetValue(pageName, out object? options) ? options as T : null;
+        public T? GetOptions<T>(string pageName)
+            where T : class =>
+            pageOptions.TryGetValue(pageName, out object? options) ? options as T : null;
 
         private void NavigateToControl(UserControl page)
         {
@@ -230,6 +273,8 @@ namespace GitOut.Features.Navigation
         }
 
         private void OnClosed(EventArgs args) => Closed?.Invoke(this, args);
-        private void OnNavigationRequested(ContentControl control) => NavigationRequested?.Invoke(this, new NavigationEventArgs(control));
+
+        private void OnNavigationRequested(ContentControl control) =>
+            NavigationRequested?.Invoke(this, new NavigationEventArgs(control));
     }
 }

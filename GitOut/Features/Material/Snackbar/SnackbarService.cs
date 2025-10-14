@@ -26,8 +26,11 @@ namespace GitOut.Features.Material.Snackbar
         }
 
         public void Show(string message) => SendSnack(Snack.Builder().WithMessage(message).Build());
-        public void ShowSuccess(string message) => SendSnack(Snack.Builder().WithMessage(message).Build());
 
-        private void SendSnack(Snack snack) => SnackReceived?.Invoke(this, new SnackEventArgs(snack));
+        public void ShowSuccess(string message) =>
+            SendSnack(Snack.Builder().WithMessage(message).Build());
+
+        private void SendSnack(Snack snack) =>
+            SnackReceived?.Invoke(this, new SnackEventArgs(snack));
     }
 }

@@ -44,7 +44,10 @@ namespace GitOut.Features.Git
                         GitCommitId? id = await repository.GetCommitIdAsync(shortCommitId);
                         if (id is not null)
                         {
-                            await repository.CreateBranchAsync(name, new GitCreateBranchOptions(id));
+                            await repository.CreateBranchAsync(
+                                name,
+                                new GitCreateBranchOptions(id)
+                            );
                         }
                     }),
                     isBranchDeleted: true
@@ -53,16 +56,23 @@ namespace GitOut.Features.Git
             else if (errorLines.Count >= 1)
             {
                 string first = errorLines.First();
-                if (errorLines.Count == 2 && first.StartsWith($"error: The branch '{name.Name}' is not fully merged."))
+                if (
+                    errorLines.Count == 2
+                    && first.StartsWith($"error: The branch '{name.Name}' is not fully merged.")
+                )
                 {
                     return new GitDeleteResult(
                         $"The branch is not fully merged to remote, are you sure you want to delete {name.Name}",
-                        forceDelete: new AsyncCallbackCommand(() => repository.DeleteBranchAsync(name, new GitDeleteBranchOptions(true)))
+                        forceDelete: new AsyncCallbackCommand(() =>
+                            repository.DeleteBranchAsync(name, new GitDeleteBranchOptions(true))
+                        )
                     );
                 }
                 else if (first.StartsWith("error: Cannot delete branch '"))
                 {
-                    return new GitDeleteResult($"Cannot delete branch '{name.Name}' because it is checked out!");
+                    return new GitDeleteResult(
+                        $"Cannot delete branch '{name.Name}' because it is checked out!"
+                    );
                 }
             }
             return new GitDeleteResult("Unknown issue");

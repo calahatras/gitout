@@ -7,10 +7,8 @@ namespace GitOut.Features.Git.Log;
 public sealed class GitStashEventViewModel : INotifyPropertyChanged
 {
     private bool isSelected;
-    public GitStashEventViewModel(
-        GitStash stashEvent,
-        ICommand createBranchCommand
-    )
+
+    public GitStashEventViewModel(GitStash stashEvent, ICommand createBranchCommand)
     {
         Event = stashEvent;
         CreateBranchCommand = createBranchCommand;

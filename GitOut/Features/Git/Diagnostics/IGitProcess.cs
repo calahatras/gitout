@@ -10,7 +10,10 @@ namespace GitOut.Features.Git.Diagnostics
     public interface IGitProcess
     {
         Task<ProcessEventArgs> ExecuteAsync(CancellationToken cancellationToken = default);
-        Task<ProcessEventArgs> ExecuteAsync(StringBuilder writer, CancellationToken cancellationToken = default);
+        Task<ProcessEventArgs> ExecuteAsync(
+            StringBuilder writer,
+            CancellationToken cancellationToken = default
+        );
         Task<Stream> ReadStreamAsync(CancellationToken cancellationToken = default);
         IAsyncEnumerable<string> ReadLinesAsync(CancellationToken cancellationToken = default);
     }

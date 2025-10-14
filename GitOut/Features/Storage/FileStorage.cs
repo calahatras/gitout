@@ -36,7 +36,10 @@ namespace GitOut.Features.Storage
                 sections.Add(key, value);
             }
 
-            string data = JsonSerializer.Serialize(sections, new JsonSerializerOptions { WriteIndented = true });
+            string data = JsonSerializer.Serialize(
+                sections,
+                new JsonSerializerOptions { WriteIndented = true }
+            );
             File.WriteAllText(configFile, data);
         }
     }

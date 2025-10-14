@@ -4,10 +4,10 @@ namespace GitOut.Features.Git.Diff
     {
         None,
         InPlaceEdit, // M
-        CopyEdit,    // C
-        RenameEdit,  // R
-        Create,      // A
-        Delete,      // D
-        Unmerged,    // U
+        CopyEdit, // C
+        RenameEdit, // R
+        Create, // A
+        Delete, // D
+        Unmerged, // U
     }
 }

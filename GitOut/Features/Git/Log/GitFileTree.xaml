@@ -1,137 +1,166 @@
 ﻿<UserControl
-    x:Class="GitOut.Features.Git.Log.GitFileTree"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
-    xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
-    xmlns:files="clr-namespace:GitOut.Features.Git.Files"
-    xmlns:local="clr-namespace:GitOut.Features.Git.Log"
-    xmlns:app="clr-namespace:GitOut.Features.Wpf.Commands"
-    mc:Ignorable="d"
+  x:Class="GitOut.Features.Git.Log.GitFileTree"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+  xmlns:diff="clr-namespace:GitOut.Features.Git.Diff"
+  xmlns:files="clr-namespace:GitOut.Features.Git.Files"
+  xmlns:local="clr-namespace:GitOut.Features.Git.Log"
+  xmlns:app="clr-namespace:GitOut.Features.Wpf.Commands"
+  mc:Ignorable="d"
 >
-    <UserControl.Resources>
-        <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
-        <converters:ToStringConverter x:Key="ToStringConverter" />
-    </UserControl.Resources>
-    <Grid>
-        <TreeView
-            x:Name="FileTree"
-            ItemsSource="{Binding RootFiles, RelativeSource={RelativeSource AncestorType={x:Type local:GitFileTree}}}"
-            Style="{StaticResource MaterialTreeViewStyle}"
+  <UserControl.Resources>
+    <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter" />
+    <converters:ToStringConverter x:Key="ToStringConverter" />
+  </UserControl.Resources>
+  <Grid>
+    <TreeView
+      x:Name="FileTree"
+      ItemsSource="{Binding RootFiles, RelativeSource={RelativeSource AncestorType={x:Type local:GitFileTree}}}"
+      Style="{StaticResource MaterialTreeViewStyle}"
+    >
+      <TreeView.ItemContainerStyle>
+        <Style
+          BasedOn="{StaticResource DefaultTreeViewItemStyle}"
+          TargetType="{x:Type TreeViewItem}"
         >
-            <TreeView.ItemContainerStyle>
-                <Style BasedOn="{StaticResource DefaultTreeViewItemStyle}" TargetType="{x:Type TreeViewItem}">
-                    <Setter Property="ContextMenu">
-                        <Setter.Value>
-                            <ContextMenu>
-                                <MenuItem
-                                    Header="{Binding FileName}"
-                                    HeaderStringFormat="Open {0}"
-                                    Command="{x:Static app:Application.Open}"
-                                    CommandParameter="{Binding FullPath}"
-                                >
-                                    <MenuItem.Icon>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource OpenInNew}" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem
-                                    Header="Copy filename"
-                                    Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding FileName, Converter={StaticResource ToStringConverter}}"
-                                >
-                                    <MenuItem.Icon>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem
-                                    Header="Copy relative path"
-                                    Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding RelativePath, Converter={StaticResource ToStringConverter}}">
-                                    <MenuItem.Icon>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem
-                                    Header="Copy full path"
-                                    Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding FullPath}">
-                                    <MenuItem.Icon>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem
-                                    Header="Copy directory"
-                                    Command="{x:Static app:Application.Copy}"
-                                    CommandParameter="{Binding RelativeDirectory}"
-                                >
-                                    <MenuItem.Icon>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource ContentCopy}"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator />
-                                <MenuItem
-                                    Header="Explore project folder"
-                                    Command="{x:Static app:Application.RevealInExplorer}"
-                                    CommandParameter="{Binding RootPath}"
-                                >
-                                    <MenuItem.Icon>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Folder}"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem
-                                    Header="Explore file folder"
-                                    Command="{x:Static app:Application.RevealInExplorer}"
-                                    CommandParameter="{Binding RelativeDirectory}"
-                                >
-                                    <MenuItem.Icon>
-                                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource FolderOpen}"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </TreeView.ItemContainerStyle>
-            <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type files:GitDirectoryViewModel}" ItemsSource="{Binding}">
-                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                        <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                            <Canvas.LayoutTransform>
-                                <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                            </Canvas.LayoutTransform>
-                            <Path
-                                Fill="{DynamicResource MaterialForegroundBase}"
-                                Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                            />
-                        </Canvas>
-                        <TextBlock Text="{Binding FileName}" />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type files:GitFileViewModel}">
-                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                        <Canvas Width="24" Height="24" Margin="0 0 3 0">
-                            <Canvas.LayoutTransform>
-                                <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                            </Canvas.LayoutTransform>
-                            <Path
-                                Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
-                                Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                            />
-                        </Canvas>
-                        <TextBlock Text="{Binding DisplayName}" />
-                    </StackPanel>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type files:LoadingViewModel}">
-                    <Canvas Style="{StaticResource SpinIconStyle}">
-                        <Path
-                            Fill="{StaticResource MaterialForegroundBase}"
-                            Data="{StaticResource SourceCommitLocal}"
-                        />
-                    </Canvas>
-                </DataTemplate>
-            </TreeView.Resources>
-        </TreeView>
-    </Grid>
+          <Setter Property="ContextMenu">
+            <Setter.Value>
+              <ContextMenu>
+                <MenuItem
+                  Header="{Binding FileName}"
+                  HeaderStringFormat="Open {0}"
+                  Command="{x:Static app:Application.Open}"
+                  CommandParameter="{Binding FullPath}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource OpenInNew}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem
+                  Header="Copy filename"
+                  Command="{x:Static app:Application.Copy}"
+                  CommandParameter="{Binding FileName, Converter={StaticResource ToStringConverter}}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource ContentCopy}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem
+                  Header="Copy relative path"
+                  Command="{x:Static app:Application.Copy}"
+                  CommandParameter="{Binding RelativePath, Converter={StaticResource ToStringConverter}}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource ContentCopy}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem
+                  Header="Copy full path"
+                  Command="{x:Static app:Application.Copy}"
+                  CommandParameter="{Binding FullPath}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource ContentCopy}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem
+                  Header="Copy directory"
+                  Command="{x:Static app:Application.Copy}"
+                  CommandParameter="{Binding RelativeDirectory}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource ContentCopy}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem
+                  Header="Explore project folder"
+                  Command="{x:Static app:Application.RevealInExplorer}"
+                  CommandParameter="{Binding RootPath}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource Folder}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem
+                  Header="Explore file folder"
+                  Command="{x:Static app:Application.RevealInExplorer}"
+                  CommandParameter="{Binding RelativeDirectory}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource FolderOpen}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+              </ContextMenu>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </TreeView.ItemContainerStyle>
+      <TreeView.Resources>
+        <HierarchicalDataTemplate
+          DataType="{x:Type files:GitDirectoryViewModel}"
+          ItemsSource="{Binding}"
+        >
+          <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+            <Canvas Width="24" Height="24" Margin="0 0 3 0">
+              <Canvas.LayoutTransform>
+                <ScaleTransform ScaleX=".6" ScaleY=".6" />
+              </Canvas.LayoutTransform>
+              <Path
+                Fill="{DynamicResource MaterialForegroundBase}"
+                Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+              />
+            </Canvas>
+            <TextBlock Text="{Binding FileName}" />
+          </StackPanel>
+        </HierarchicalDataTemplate>
+        <DataTemplate DataType="{x:Type files:GitFileViewModel}">
+          <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+            <Canvas Width="24" Height="24" Margin="0 0 3 0">
+              <Canvas.LayoutTransform>
+                <ScaleTransform ScaleX=".6" ScaleY=".6" />
+              </Canvas.LayoutTransform>
+              <Path
+                Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
+                Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+              />
+            </Canvas>
+            <TextBlock Text="{Binding DisplayName}" />
+          </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type files:LoadingViewModel}">
+          <Canvas Style="{StaticResource SpinIconStyle}">
+            <Path
+              Fill="{StaticResource MaterialForegroundBase}"
+              Data="{StaticResource SourceCommitLocal}"
+            />
+          </Canvas>
+        </DataTemplate>
+      </TreeView.Resources>
+    </TreeView>
+  </Grid>
 </UserControl>

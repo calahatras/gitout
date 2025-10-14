@@ -44,7 +44,9 @@ namespace GitOut.Features.Settings
             var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
             ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
-            OpenSettingsFolderCommand = new NavigateExternalCommand(new Uri("file://" + Directory.GetParent(SettingsOptions.GetSettingsPath())));
+            OpenSettingsFolderCommand = new NavigateExternalCommand(
+                new Uri("file://" + Directory.GetParent(SettingsOptions.GetSettingsPath()))
+            );
             SearchRootFolderCommand = new NotNullCallbackCommand<string>(
                 folder =>
                 {
@@ -57,15 +59,23 @@ namespace GitOut.Features.Settings
                     SynchronizationContext sync = SynchronizationContext.Current!;
                     Task.Run(() =>
                     {
-                        DirectoryInfo[] gitdirectories = info.GetDirectories(".git", SearchOption.AllDirectories);
-                        sync.Post(s =>
-                        {
-                            snacks.Show($"Found {gitdirectories.Length} repositories");
-                            foreach (DirectoryInfo dir in gitdirectories)
+                        DirectoryInfo[] gitdirectories = info.GetDirectories(
+                            ".git",
+                            SearchOption.AllDirectories
+                        );
+                        sync.Post(
+                            s =>
                             {
-                                validPaths.Add(ValidGitRepositoryPathViewModel.FromGitFolder(dir));
-                            }
-                        }, null);
+                                snacks.Show($"Found {gitdirectories.Length} repositories");
+                                foreach (DirectoryInfo dir in gitdirectories)
+                                {
+                                    validPaths.Add(
+                                        ValidGitRepositoryPathViewModel.FromGitFolder(dir)
+                                    );
+                                }
+                            },
+                            null
+                        );
                     });
                 },
                 folder => !string.IsNullOrEmpty(folder)
@@ -73,21 +83,23 @@ namespace GitOut.Features.Settings
             AddRepositoryCommand = new NotNullCallbackCommand<ValidGitRepositoryPathViewModel>(
                 repository =>
                 {
-                    IGitRepository localrepo = gitFactory.Create(DirectoryPath.Create(repository.WorkingDirectory));
+                    IGitRepository localrepo = gitFactory.Create(
+                        DirectoryPath.Create(repository.WorkingDirectory)
+                    );
                     repositories.Add(localrepo);
                     snacks.Show("Added repository");
-                });
-            ChangeThemeCommand = new CallbackCommand<ThemePaletteViewModel>(
-                theme =>
+                }
+            );
+            ChangeThemeCommand = new CallbackCommand<ThemePaletteViewModel>(theme =>
+            {
+                if (theme is null)
                 {
-                    if (theme is null)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    themes.ChangeTheme(theme);
-                    snacks.ShowSuccess($"Changed theme to {theme.Name}");
-                });
+                themes.ChangeTheme(theme);
+                snacks.ShowSuccess($"Changed theme to {theme.Name}");
+            });
 
             trimLineEndings = stageOptions.CurrentValue.TrimLineEndings;
             tabTransformText = stageOptions.CurrentValue.TabTransformText;
@@ -161,7 +173,11 @@ namespace GitOut.Features.Settings
 
         public void Dispose() => unsubscribeOptions.Dispose();
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {

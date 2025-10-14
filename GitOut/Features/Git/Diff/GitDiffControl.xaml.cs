@@ -12,7 +12,10 @@ using GitOut.Features.Git.Patch;
 
 namespace GitOut.Features.Git.Diff
 {
-    public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunkLineVisitorProvider
+    public partial class GitDiffControl
+        : UserControl,
+            INotifyPropertyChanged,
+            IHunkLineVisitorProvider
     {
         public static readonly DependencyProperty DiffProperty = DependencyProperty.Register(
             nameof(Diff),
@@ -21,19 +24,21 @@ namespace GitOut.Features.Git.Diff
             new PropertyMetadata(OnDiffChanges)
         );
 
-        public static readonly DependencyProperty ShowSpacesAsDotsProperty = DependencyProperty.Register(
-            nameof(ShowSpacesAsDots),
-            typeof(bool),
-            typeof(GitDiffControl),
-            new PropertyMetadata(false, OnSpacesViewModeChanged)
-        );
+        public static readonly DependencyProperty ShowSpacesAsDotsProperty =
+            DependencyProperty.Register(
+                nameof(ShowSpacesAsDots),
+                typeof(bool),
+                typeof(GitDiffControl),
+                new PropertyMetadata(false, OnSpacesViewModeChanged)
+            );
 
-        public static readonly DependencyProperty CurrentContentProperty = DependencyProperty.Register(
-            nameof(CurrentContent),
-            typeof(object),
-            typeof(GitDiffControl),
-            new PropertyMetadata(null)
-        );
+        public static readonly DependencyProperty CurrentContentProperty =
+            DependencyProperty.Register(
+                nameof(CurrentContent),
+                typeof(object),
+                typeof(GitDiffControl),
+                new PropertyMetadata(null)
+            );
 
         public GitDiffControl() => InitializeComponent();
 
@@ -55,17 +60,27 @@ namespace GitOut.Features.Git.Diff
             set => SetValue(ShowSpacesAsDotsProperty, value);
         }
 
-        public Rect SelectionPosition => CurrentContent is GitDiffViewModel document && document.Selection is TextRange selection
-            ? new Rect(selection.Start.GetCharacterRect(LogicalDirection.Forward).TopLeft, selection.End.GetCharacterRect(LogicalDirection.Forward).BottomRight)
-            : Rect.Empty;
+        public Rect SelectionPosition =>
+            CurrentContent is GitDiffViewModel document && document.Selection is TextRange selection
+                ? new Rect(
+                    selection.Start.GetCharacterRect(LogicalDirection.Forward).TopLeft,
+                    selection.End.GetCharacterRect(LogicalDirection.Forward).BottomRight
+                )
+                : Rect.Empty;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public IHunkLineVisitor? GetHunkVisitor(PatchMode mode)
         {
-            if (CurrentContent is GitDiffViewModel document && document.Selection is TextRange selection)
+            if (
+                CurrentContent is GitDiffViewModel document
+                && document.Selection is TextRange selection
+            )
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectionPosition)));
+                PropertyChanged?.Invoke(
+                    this,
+                    new PropertyChangedEventArgs(nameof(SelectionPosition))
+                );
                 Paragraph start = selection.Start.Paragraph;
                 Paragraph end = selection.End.Paragraph;
                 IReadOnlyCollection<(Paragraph, HunkLine)> diffContexts = document.DiffContexts;
@@ -73,14 +88,24 @@ namespace GitOut.Features.Git.Diff
                 int contextOffset = diffContexts.FindIndex(context => context.Item1 == start);
                 if (contextOffset == -1)
                 {
-                    throw new InvalidOperationException("Invalid state, could not find matching paragraph");
+                    throw new InvalidOperationException(
+                        "Invalid state, could not find matching paragraph"
+                    );
                 }
-                int endOffset = diffContexts.FindIndex(contextOffset, context => context.Item1 == end);
+                int endOffset = diffContexts.FindIndex(
+                    contextOffset,
+                    context => context.Item1 == end
+                );
                 if (endOffset == -1)
                 {
                     endOffset = diffContexts.Count - 1;
                 }
-                return new DiffHunkLineVisitor(mode, diffContexts.Select(item => item.Item2), contextOffset, endOffset);
+                return new DiffHunkLineVisitor(
+                    mode,
+                    diffContexts.Select(item => item.Item2),
+                    contextOffset,
+                    endOffset
+                );
             }
             return null;
         }
@@ -104,7 +129,10 @@ namespace GitOut.Features.Git.Diff
             CurrentContent = vm;
         }
 
-        private static async void OnDiffChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static async void OnDiffChanges(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is GitDiffControl control)
             {
@@ -119,14 +147,23 @@ namespace GitOut.Features.Git.Diff
                     {
                         if (IsImageFile(extension))
                         {
-                            if (context.DestinationId is not null && context.SourceId is not null && !context.SourceId.IsEmpty)
+                            if (
+                                context.DestinationId is not null
+                                && context.SourceId is not null
+                                && !context.SourceId.IsEmpty
+                            )
                             {
                                 Stream sourceImage = await context.Blob.GetSourceStreamAsync();
-                                control.CurrentContent = new ImageViewModel(context.Blob.GetBaseStream(), sourceImage);
+                                control.CurrentContent = new ImageViewModel(
+                                    context.Blob.GetBaseStream(),
+                                    sourceImage
+                                );
                             }
                             else
                             {
-                                control.CurrentContent = new ImageViewModel(context.Blob.GetBaseStream());
+                                control.CurrentContent = new ImageViewModel(
+                                    context.Blob.GetBaseStream()
+                                );
                             }
                         }
                     }
@@ -137,21 +174,22 @@ namespace GitOut.Features.Git.Diff
                 }
             }
 
-            static bool IsImageFile(string extension) => new HashSet<string>(new[]
-            {
-                ".bmp",
-                ".gif",
-                ".png",
-                ".jpg",
-                ".jpeg",
-                ".tiff"
-            })
-            .Contains(extension);
+            static bool IsImageFile(string extension) =>
+                new HashSet<string>(
+                    new[] { ".bmp", ".gif", ".png", ".jpg", ".jpeg", ".tiff" }
+                ).Contains(extension);
         }
 
-        private static void OnSpacesViewModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnSpacesViewModeChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
-            if (d is GitDiffControl control && control.Diff is DiffContext context && context.Text is not null)
+            if (
+                d is GitDiffControl control
+                && control.Diff is DiffContext context
+                && context.Text is not null
+            )
             {
                 control.ParseCurrentContent(context.Text.Hunks);
             }

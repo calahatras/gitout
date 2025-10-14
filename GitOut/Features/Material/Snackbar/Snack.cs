@@ -53,7 +53,9 @@ namespace GitOut.Features.Material.Snackbar
             {
                 if (actions.Count > 0)
                 {
-                    throw new InvalidOperationException("Must call Build with action handler if actions are available");
+                    throw new InvalidOperationException(
+                        "Must call Build with action handler if actions are available"
+                    );
                 }
                 TimeSpan delay = duration ?? DefaultDuration;
                 var token = new CancellationTokenSource(delay);
@@ -88,7 +90,11 @@ namespace GitOut.Features.Material.Snackbar
                     token.Token
                 );
                 TimeSpan delay = duration ?? DefaultDuration;
-                _ = Task.Delay(delay, token.Token).ContinueWith(task => commandHandler(null), TaskContinuationOptions.OnlyOnRanToCompletion);
+                _ = Task.Delay(delay, token.Token)
+                    .ContinueWith(
+                        task => commandHandler(null),
+                        TaskContinuationOptions.OnlyOnRanToCompletion
+                    );
                 token.CancelAfter(delay);
                 return snack;
             }

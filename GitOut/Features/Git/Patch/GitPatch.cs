@@ -84,14 +84,18 @@ namespace GitOut.Features.Git.Patch
             }
             do
             {
-                lines.AddRange(visitor
-                    .TraverseSelectionHunks()
-                    .Select(line => PatchLine.CreateLine(
-                        line.Type,
-                        line.Type is DiffLineType.None or DiffLineType.Removed
-                            ? line.StrippedLine
-                            : transform.Transform(line.StrippedLine)
-                    )));
+                lines.AddRange(
+                    visitor
+                        .TraverseSelectionHunks()
+                        .Select(line =>
+                            PatchLine.CreateLine(
+                                line.Type,
+                                line.Type is DiffLineType.None or DiffLineType.Removed
+                                    ? line.StrippedLine
+                                    : transform.Transform(line.StrippedLine)
+                            )
+                        )
+                );
                 if (lines.Count == 0)
                 {
                     throw new InvalidOperationException("Selection resulted in non-existant patch");
@@ -105,13 +109,32 @@ namespace GitOut.Features.Git.Patch
                         {
                             if (postline.Type == DiffLineType.Control)
                             {
-                                lines.Add(PatchLine.CreateLine(DiffLineType.Control, postline.StrippedLine));
+                                lines.Add(
+                                    PatchLine.CreateLine(
+                                        DiffLineType.Control,
+                                        postline.StrippedLine
+                                    )
+                                );
                             }
-                            else if (postline.Type == DiffLineType.None
-                                || ((mode == PatchMode.ResetIndex || mode == PatchMode.ResetWorkspace || mode == PatchMode.AddWorkspace) && postline.Type == DiffLineType.Added)
-                                || (mode == PatchMode.AddIndex && postline.Type == DiffLineType.Removed))
+                            else if (
+                                postline.Type == DiffLineType.None
+                                || (
+                                    (
+                                        mode == PatchMode.ResetIndex
+                                        || mode == PatchMode.ResetWorkspace
+                                        || mode == PatchMode.AddWorkspace
+                                    )
+                                    && postline.Type == DiffLineType.Added
+                                )
+                                || (
+                                    mode == PatchMode.AddIndex
+                                    && postline.Type == DiffLineType.Removed
+                                )
+                            )
                             {
-                                lines.Add(PatchLine.CreateLine(DiffLineType.None, postline.StrippedLine));
+                                lines.Add(
+                                    PatchLine.CreateLine(DiffLineType.None, postline.StrippedLine)
+                                );
                             }
                         }
                     }
@@ -133,9 +156,10 @@ namespace GitOut.Features.Git.Patch
             private int hunkOffset;
             private PatchMode mode;
 
-            public GitPatch Build() => mode == PatchMode.None
-                ? throw new InvalidOperationException("Must set patch mode before building")
-                : new GitPatch(patchBuilder, mode);
+            public GitPatch Build() =>
+                mode == PatchMode.None
+                    ? throw new InvalidOperationException("Must set patch mode before building")
+                    : new GitPatch(patchBuilder, mode);
 
             public GitPatchBuilder CreateHunk(int fromFileRange, IEnumerable<PatchLine> lines)
             {
@@ -150,7 +174,9 @@ namespace GitOut.Features.Git.Patch
                 }
                 if (fromFileRange > 1 && edits[0].Type != DiffLineType.None)
                 {
-                    throw new InvalidOperationException("Cannot create patch hunk if first line is not unmodified");
+                    throw new InvalidOperationException(
+                        "Cannot create patch hunk if first line is not unmodified"
+                    );
                 }
                 int uneditedLines = lines.Count(l => l.Type == DiffLineType.None);
                 int addedLines = lines.Count(l => l.Type == DiffLineType.Added);
@@ -163,7 +189,9 @@ namespace GitOut.Features.Git.Patch
                 }
                 if (mode is PatchMode.AddIndex or PatchMode.AddWorkspace)
                 {
-                    patchBuilder.AppendLine($"@@ -{fromFileRange},{uneditedLines + removedLines} +{fromFileRange + hunkOffset},{uneditedLines + addedLines} @@");
+                    patchBuilder.AppendLine(
+                        $"@@ -{fromFileRange},{uneditedLines + removedLines} +{fromFileRange + hunkOffset},{uneditedLines + addedLines} @@"
+                    );
 
                     int deltaLines = addedLines - removedLines;
                     hunkOffset += deltaLines;
@@ -179,7 +207,9 @@ namespace GitOut.Features.Git.Patch
                             DiffLineType.None => ' ',
                             DiffLineType.Added => '+',
                             DiffLineType.Removed => '-',
-                            _ => throw new ArgumentOutOfRangeException($"Invalid patch type for hunk {line.Type}"),
+                            _ => throw new ArgumentOutOfRangeException(
+                                $"Invalid patch type for hunk {line.Type}"
+                            ),
                         };
                         patchBuilder.Append(editType);
                         patchBuilder.Append(line.Line);
@@ -191,7 +221,9 @@ namespace GitOut.Features.Git.Patch
                 }
                 else
                 {
-                    patchBuilder.AppendLine($"@@ -{fromFileRange},{uneditedLines + addedLines} +{fromFileRange + hunkOffset},{uneditedLines + removedLines} @@");
+                    patchBuilder.AppendLine(
+                        $"@@ -{fromFileRange},{uneditedLines + addedLines} +{fromFileRange + hunkOffset},{uneditedLines + removedLines} @@"
+                    );
 
                     int deltaLines = removedLines - addedLines;
                     hunkOffset += deltaLines;
@@ -207,7 +239,9 @@ namespace GitOut.Features.Git.Patch
                             DiffLineType.None => ' ',
                             DiffLineType.Added => '-',
                             DiffLineType.Removed => '+',
-                            _ => throw new ArgumentOutOfRangeException($"Invalid patch type for hunk {line.Type}"),
+                            _ => throw new ArgumentOutOfRangeException(
+                                $"Invalid patch type for hunk {line.Type}"
+                            ),
                         };
                         patchBuilder.Append(editType);
                         patchBuilder.Append(line.Line);
@@ -220,7 +254,10 @@ namespace GitOut.Features.Git.Patch
                 return this;
             }
 
-            public GitPatchBuilder CreateHeader(RelativeDirectoryPath path, GitStatusChangeType type)
+            public GitPatchBuilder CreateHeader(
+                RelativeDirectoryPath path,
+                GitStatusChangeType type
+            )
             {
                 patchBuilder.AppendLine($"diff --git a/{path} b/{path}");
                 switch (type)
@@ -236,7 +273,9 @@ namespace GitOut.Features.Git.Patch
                     case GitStatusChangeType.Unmerged:
                     case GitStatusChangeType.None:
                     case GitStatusChangeType.Ignored:
-                        throw new InvalidOperationException($"Cannot create diff for change type {type}");
+                        throw new InvalidOperationException(
+                            $"Cannot create diff for change type {type}"
+                        );
                 }
                 patchBuilder.AppendLine($"+++ b/{path}");
                 return this;
@@ -246,7 +285,9 @@ namespace GitOut.Features.Git.Patch
             {
                 if (patchBuilder.Length > 0)
                 {
-                    throw new InvalidOperationException("Cannot set mode after changes have been written");
+                    throw new InvalidOperationException(
+                        "Cannot set mode after changes have been written"
+                    );
                 }
                 this.mode = mode;
                 return this;

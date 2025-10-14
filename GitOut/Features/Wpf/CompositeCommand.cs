@@ -23,7 +23,8 @@ namespace GitOut.Features.Wpf
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public void AddAsync(Func<Task> asyncAction, Func<bool> canAction) => tasks.Add((asyncAction, canAction));
+        public void AddAsync(Func<Task> asyncAction, Func<bool> canAction) =>
+            tasks.Add((asyncAction, canAction));
 
         public void Add(Action action) => actions.Add((action, () => true));
 
@@ -59,16 +60,19 @@ namespace GitOut.Features.Wpf
 #pragma warning restore CA1030 // Use events where appropriate
     }
 
-    public class CompositeCommand<T> : ICommand where T : class
+    public class CompositeCommand<T> : ICommand
+        where T : class
     {
         private readonly List<(Action<T> action, Func<T, bool> canAction)> actions = new();
         private readonly List<(Func<T, Task> actionAsync, Func<T, bool> canAction)> tasks = new();
 
         public CompositeCommand() { }
 
-        public CompositeCommand(Action<T> action) : this() => Add(action);
+        public CompositeCommand(Action<T> action)
+            : this() => Add(action);
 
-        public CompositeCommand(Action<T> action, Func<T, bool> canAction) : this() => Add(action, canAction);
+        public CompositeCommand(Action<T> action, Func<T, bool> canAction)
+            : this() => Add(action, canAction);
 
         public event EventHandler? CanExecuteChanged
         {
@@ -78,17 +82,23 @@ namespace GitOut.Features.Wpf
 
         public void Add(Action<T> action) => actions.Add((action, _ => true));
 
-        public void Add(Action<T> action, Func<T, bool> canAction) => actions.Add((action, canAction));
+        public void Add(Action<T> action, Func<T, bool> canAction) =>
+            actions.Add((action, canAction));
 
-        public void AddAsync(Func<T, Task> asyncaction, Func<T, bool> canAction) => tasks.Add((asyncaction, canAction));
+        public void AddAsync(Func<T, Task> asyncaction, Func<T, bool> canAction) =>
+            tasks.Add((asyncaction, canAction));
 
-        public bool CanExecute(object? parameter) => parameter is T t && actions.Any(a => a.canAction(t) || tasks.Any(a => a.canAction(t)));
+        public bool CanExecute(object? parameter) =>
+            parameter is T t && actions.Any(a => a.canAction(t) || tasks.Any(a => a.canAction(t)));
 
         public async void Execute(object? parameter)
         {
             if (parameter is not T arg)
             {
-                throw new ArgumentException($"Parameter is not of expected type {typeof(T).FullName}", nameof(parameter));
+                throw new ArgumentException(
+                    $"Parameter is not of expected type {typeof(T).FullName}",
+                    nameof(parameter)
+                );
             }
 
             await ExecuteAsync(arg);
@@ -104,7 +114,9 @@ namespace GitOut.Features.Wpf
                 }
             }
 
-            await Task.WhenAll(tasks.Where(t => t.canAction(parameter)).Select(t => t.actionAsync(parameter)));
+            await Task.WhenAll(
+                tasks.Where(t => t.canAction(parameter)).Select(t => t.actionAsync(parameter))
+            );
         }
 
 #pragma warning disable CA1030 // Use events where appropriate

@@ -4,14 +4,17 @@ using System.Threading.Tasks;
 
 namespace GitOut.Features.Collections
 {
-    public class SortedLazyAsyncCollection<T, TArg> : SortedObservableCollection<T>, ILazyAsyncEnumerable<T, TArg>
+    public class SortedLazyAsyncCollection<T, TArg>
+        : SortedObservableCollection<T>,
+            ILazyAsyncEnumerable<T, TArg>
     {
         private readonly Func<TArg, IAsyncEnumerable<T>> factory;
 
         public SortedLazyAsyncCollection(
             Func<TArg, IAsyncEnumerable<T>> factory,
             Func<T, T, int> comparer
-        ) : base(comparer) => this.factory = factory;
+        )
+            : base(comparer) => this.factory = factory;
 
         public bool IsMaterialized { get; private set; }
 

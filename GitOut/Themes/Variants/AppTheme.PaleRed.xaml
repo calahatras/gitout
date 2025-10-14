@@ -1,18 +1,17 @@
 ﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 >
-    <!-- primary -->
-    <Color x:Key="PrimaryHueMidColor" A="255" R="231" G="72" B="85"/>
-    <Color x:Key="PrimaryHueMidForegroundColor" A="255" R="255" G="255" B="255"/>
-
-    <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="#e78890"/>
-    <SolidColorBrush x:Key="PrimaryHueLightForegroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="#e74855"/>
-    <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="#d92231"/>
-    <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="#FFFFFF"/>
-    <!-- accent -->
-    <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#32d981"/>
-    <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF"/>
+  <!-- primary -->
+  <Color x:Key="PrimaryHueMidColor" A="255" R="231" G="72" B="85" />
+  <Color x:Key="PrimaryHueMidForegroundColor" A="255" R="255" G="255" B="255" />
+  <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="#e78890" />
+  <SolidColorBrush x:Key="PrimaryHueLightForegroundBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="#e74855" />
+  <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="#d92231" />
+  <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="#FFFFFF" />
+  <!-- accent -->
+  <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#32d981" />
+  <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF" />
 </ResourceDictionary>

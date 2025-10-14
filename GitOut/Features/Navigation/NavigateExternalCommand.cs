@@ -6,7 +6,8 @@ namespace GitOut.Features.Navigation
 {
     public class NavigateExternalCommand : NavigateExternalCommand<object>
     {
-        public NavigateExternalCommand(Uri uri) : base(uri) { }
+        public NavigateExternalCommand(Uri uri)
+            : base(uri) { }
     }
 
     public class NavigateExternalCommand<TArg> : ICommand
@@ -24,7 +25,8 @@ namespace GitOut.Features.Navigation
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public bool CanExecute(object? parameter) => uri is not null || urilambda!((TArg?)parameter) is not null;
+        public bool CanExecute(object? parameter) =>
+            uri is not null || urilambda!((TArg?)parameter) is not null;
 
         public void Execute(object? parameter)
         {
@@ -38,10 +40,7 @@ namespace GitOut.Features.Navigation
             }
             if (uri.IsAbsoluteUri)
             {
-                var info = new ProcessStartInfo(uri.AbsoluteUri)
-                {
-                    UseShellExecute = true
-                };
+                var info = new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true };
                 using (Process.Start(info)) { }
             }
             else

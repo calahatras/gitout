@@ -1,151 +1,188 @@
 ﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 >
-    <Storyboard x:Key="ExitAnimation">
-        <DoubleAnimation Storyboard.Target="{Binding ElementName='window'}"
-                             Storyboard.TargetProperty="(Window.Opacity)"
-                             Duration="0:0:0.5" From="1" To="0"/>
-    </Storyboard>
-    <Storyboard x:Key="EntryAnimation">
-        <DoubleAnimation Storyboard.Target="{Binding ElementName='window'}"
-                         Storyboard.TargetProperty="(Window.Opacity)"
-                         Duration="0:0:0.5" From="0" To="1"/>
-    </Storyboard>
-
-    <Style x:Key="HeaderRootGridStyle" TargetType="Grid">
-        <Setter Property="Background" Value="White"/>
-    </Style>
-    <Style x:Key="TitleTextStyle" TargetType="{x:Type TextBlock}">
-        <Setter Property="FontFamily" Value="Segoe UI Light"/>
-        <Setter Property="FontSize" Value="22"/>
-        <Setter Property="Opacity" Value="0"/>
-        <Setter Property="RenderTransform">
-            <Setter.Value>
-                <TranslateTransform X="40"/>
-            </Setter.Value>
-        </Setter>
-        <Style.Triggers>
-            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                <EventTrigger.Actions>
-                    <BeginStoryboard>
-                        <Storyboard BeginTime="0:0:0.5">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             From="0" To="1" Duration="0:0:0.8">
-                                <DoubleAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseIn"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(FrameworkElement.RenderTransform).(TranslateTransform.X)"
-                                             Duration="0:0:1" From="50" To="0">
-                                <DoubleAnimation.EasingFunction>
-                                    <ExponentialEase EasingMode="EaseOut"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger.Actions>
-            </EventTrigger>
-            <EventTrigger RoutedEvent="Unloaded">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
-                            <DiscreteDoubleKeyFrame Value="0"/>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="NormalTextStyle" TargetType="{x:Type TextBlock}">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontFamily" Value="Roboto"/>
-    </Style>
-
-    <Style x:Key="SmallTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource NormalTextStyle}">
-        <Setter Property="FontSize" Value="10"/>
-    </Style>
-
-    <Style x:Key="MonoSpacedTextStyle" BasedOn="{StaticResource NormalTextStyle}" TargetType="{x:Type TextBlock}">
-        <Setter Property="FontFamily" Value="Cascadia Code, Consolas, Courier New"/>
-    </Style>
-
-    <Style x:Key="NormalTextBoxStyle" TargetType="{x:Type TextBox}">
-    </Style>
-
-    <Style x:Key="CommandButtonStyle" TargetType="{x:Type Button}">
-        <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Button}">
-                    <ControlTemplate.Resources>
-                        <Storyboard x:Key="MouseOverAnimation" TargetName="ContentContainer">
-                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                            To="#dbdbff" Duration="0:0:0.5">
-                                <ColorAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseOut"/>
-                                </ColorAnimation.EasingFunction>
-                            </ColorAnimation>
-                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                            To="blue" Duration="0:0:0.5">
-                                <ColorAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseOut"/>
-                                </ColorAnimation.EasingFunction>
-                            </ColorAnimation>
-                        </Storyboard>
-                        <Storyboard x:Key="MouseExitAnimation" TargetName="ContentContainer">
-                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                            Duration="0:0:0.1" To="White">
-                                <ColorAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseIn"/>
-                                </ColorAnimation.EasingFunction>
-                            </ColorAnimation>
-                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                            Duration="0:0:0.1" To="DarkGray">
-                                <ColorAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseIn"/>
-                                </ColorAnimation.EasingFunction>
-                            </ColorAnimation>
-                        </Storyboard>
-                    </ControlTemplate.Resources>
-                    <Grid Width="42">
-                        <Grid.RowDefinitions>
-                            <RowDefinition MinHeight="32"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Border x:Name="ContentContainer" Grid.Row="0"
-                                BorderThickness="1.2" CornerRadius="16"
-                                Width="32" Height="32">
-                            <Border.BorderBrush>
-                                <SolidColorBrush Color="DarkGray"/>
-                            </Border.BorderBrush>
-                            <Border.Background>
-                                <SolidColorBrush Color="#12000000"/>
-                            </Border.Background>
-                            <Grid>
-                                <ContentPresenter Content="{TemplateBinding Content}" Margin="4"/>
-                            </Grid>
-                        </Border>
-                        <TextBlock Grid.Row="1"
-                                   Text="{TemplateBinding AutomationProperties.HelpText}"
-                                   FontFamily="{TemplateBinding FontFamily}" FontSize="9"
-                                   Foreground="#666"
-                                   TextAlignment="Center"
-                                   TextWrapping="Wrap"/>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard Storyboard="{StaticResource MouseOverAnimation}"/>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard Storyboard="{StaticResource MouseExitAnimation}"/>
-                            </Trigger.ExitActions>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+  <Storyboard x:Key="ExitAnimation">
+    <DoubleAnimation
+      Storyboard.Target="{Binding ElementName='window'}"
+      Storyboard.TargetProperty="(Window.Opacity)"
+      Duration="0:0:0.5"
+      From="1"
+      To="0"
+    />
+  </Storyboard>
+  <Storyboard x:Key="EntryAnimation">
+    <DoubleAnimation
+      Storyboard.Target="{Binding ElementName='window'}"
+      Storyboard.TargetProperty="(Window.Opacity)"
+      Duration="0:0:0.5"
+      From="0"
+      To="1"
+    />
+  </Storyboard>
+  <Style x:Key="HeaderRootGridStyle" TargetType="Grid">
+    <Setter Property="Background" Value="White" />
+  </Style>
+  <Style x:Key="TitleTextStyle" TargetType="{x:Type TextBlock}">
+    <Setter Property="FontFamily" Value="Segoe UI Light" />
+    <Setter Property="FontSize" Value="22" />
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="RenderTransform">
+      <Setter.Value>
+        <TranslateTransform X="40" />
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+        <EventTrigger.Actions>
+          <BeginStoryboard>
+            <Storyboard BeginTime="0:0:0.5">
+              <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.8"
+              >
+                <DoubleAnimation.EasingFunction>
+                  <QuadraticEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+              </DoubleAnimation>
+              <DoubleAnimation
+                Storyboard.TargetProperty="(FrameworkElement.RenderTransform).(TranslateTransform.X)"
+                Duration="0:0:1"
+                From="50"
+                To="0"
+              >
+                <DoubleAnimation.EasingFunction>
+                  <ExponentialEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+              </DoubleAnimation>
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger.Actions>
+      </EventTrigger>
+      <EventTrigger RoutedEvent="Unloaded">
+        <BeginStoryboard>
+          <Storyboard>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+              <DiscreteDoubleKeyFrame Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+          </Storyboard>
+        </BeginStoryboard>
+      </EventTrigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="NormalTextStyle" TargetType="{x:Type TextBlock}">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontFamily" Value="Roboto" />
+  </Style>
+  <Style
+    x:Key="SmallTextStyle"
+    TargetType="{x:Type TextBlock}"
+    BasedOn="{StaticResource NormalTextStyle}"
+  >
+    <Setter Property="FontSize" Value="10" />
+  </Style>
+  <Style
+    x:Key="MonoSpacedTextStyle"
+    BasedOn="{StaticResource NormalTextStyle}"
+    TargetType="{x:Type TextBlock}"
+  >
+    <Setter Property="FontFamily" Value="Cascadia Code, Consolas, Courier New" />
+  </Style>
+  <Style x:Key="NormalTextBoxStyle" TargetType="{x:Type TextBox}"></Style>
+  <Style x:Key="CommandButtonStyle" TargetType="{x:Type Button}">
+    <Setter Property="FontFamily" Value="Segoe UI" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type Button}">
+          <ControlTemplate.Resources>
+            <Storyboard x:Key="MouseOverAnimation" TargetName="ContentContainer">
+              <ColorAnimation
+                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                To="#dbdbff"
+                Duration="0:0:0.5"
+              >
+                <ColorAnimation.EasingFunction>
+                  <QuadraticEase EasingMode="EaseOut" />
+                </ColorAnimation.EasingFunction>
+              </ColorAnimation>
+              <ColorAnimation
+                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                To="blue"
+                Duration="0:0:0.5"
+              >
+                <ColorAnimation.EasingFunction>
+                  <QuadraticEase EasingMode="EaseOut" />
+                </ColorAnimation.EasingFunction>
+              </ColorAnimation>
+            </Storyboard>
+            <Storyboard x:Key="MouseExitAnimation" TargetName="ContentContainer">
+              <ColorAnimation
+                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                Duration="0:0:0.1"
+                To="White"
+              >
+                <ColorAnimation.EasingFunction>
+                  <QuadraticEase EasingMode="EaseIn" />
+                </ColorAnimation.EasingFunction>
+              </ColorAnimation>
+              <ColorAnimation
+                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                Duration="0:0:0.1"
+                To="DarkGray"
+              >
+                <ColorAnimation.EasingFunction>
+                  <QuadraticEase EasingMode="EaseIn" />
+                </ColorAnimation.EasingFunction>
+              </ColorAnimation>
+            </Storyboard>
+          </ControlTemplate.Resources>
+          <Grid Width="42">
+            <Grid.RowDefinitions>
+              <RowDefinition MinHeight="32" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border
+              x:Name="ContentContainer"
+              Grid.Row="0"
+              BorderThickness="1.2"
+              CornerRadius="16"
+              Width="32"
+              Height="32"
+            >
+              <Border.BorderBrush>
+                <SolidColorBrush Color="DarkGray" />
+              </Border.BorderBrush>
+              <Border.Background>
+                <SolidColorBrush Color="#12000000" />
+              </Border.Background>
+              <Grid>
+                <ContentPresenter Content="{TemplateBinding Content}" Margin="4" />
+              </Grid>
+            </Border>
+            <TextBlock
+              Grid.Row="1"
+              Text="{TemplateBinding AutomationProperties.HelpText}"
+              FontFamily="{TemplateBinding FontFamily}"
+              FontSize="9"
+              Foreground="#666"
+              TextAlignment="Center"
+              TextWrapping="Wrap"
+            />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Trigger.EnterActions>
+                <BeginStoryboard Storyboard="{StaticResource MouseOverAnimation}" />
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard Storyboard="{StaticResource MouseExitAnimation}" />
+              </Trigger.ExitActions>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>

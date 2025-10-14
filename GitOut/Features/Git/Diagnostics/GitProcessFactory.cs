@@ -7,13 +7,10 @@ namespace GitOut.Features.Git.Diagnostics
     {
         private readonly IProcessTelemetryCollector telemetry;
 
-        public GitProcessFactory(
-            IProcessTelemetryCollector telemetry
-        ) => this.telemetry = telemetry;
+        public GitProcessFactory(IProcessTelemetryCollector telemetry) =>
+            this.telemetry = telemetry;
 
-        public IGitProcess Create(
-            DirectoryPath workingDirectory,
-            ProcessOptions arguments
-        ) => new GitProcess(workingDirectory, arguments, telemetry);
+        public IGitProcess Create(DirectoryPath workingDirectory, ProcessOptions arguments) =>
+            new GitProcess(workingDirectory, arguments, telemetry);
     }
 }

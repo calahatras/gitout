@@ -6,6 +6,7 @@ namespace GitOut.Features.Git.Log
 
         public IGitRepository Repository { get; }
 
-        public static GitLogPageOptions OpenRepository(IGitRepository repository) => new(repository);
+        public static GitLogPageOptions OpenRepository(IGitRepository repository) =>
+            new(repository);
     }
 }

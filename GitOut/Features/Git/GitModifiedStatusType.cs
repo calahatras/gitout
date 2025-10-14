@@ -10,6 +10,6 @@ namespace GitOut.Features.Git
         Renamed,
         Copied,
         UpdatedButUnmerged,
-        Untracked
+        Untracked,
     }
 }
