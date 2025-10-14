@@ -5,9 +5,11 @@ namespace GitOut.Features.Wpf
 {
     public class CallbackCommand : CallbackCommand<object>
     {
-        public CallbackCommand(Action execute) : base(o => execute()) { }
+        public CallbackCommand(Action execute)
+            : base(o => execute()) { }
 
-        public CallbackCommand(Action execute, Func<bool> canexecute) : base(o => execute(), o => canexecute()) { }
+        public CallbackCommand(Action execute, Func<bool> canexecute)
+            : base(o => execute(), o => canexecute()) { }
     }
 
     public class CallbackCommand<TArg> : ICommand
@@ -15,7 +17,8 @@ namespace GitOut.Features.Wpf
         private readonly Action<TArg?> execute;
         private readonly Func<TArg?, bool> canexecute;
 
-        public CallbackCommand(Action<TArg?> execute) : this(execute, o => true) { }
+        public CallbackCommand(Action<TArg?> execute)
+            : this(execute, o => true) { }
 
         public CallbackCommand(Action<TArg?> execute, Func<TArg?, bool> canexecute)
         {

@@ -14,7 +14,12 @@ namespace GitOut.Features.Git.Log.Converters
         private const int XOffset = 10;
         private static readonly Size Size = new(6, 6);
 
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(
+            object[] values,
+            Type targetType,
+            object parameter,
+            CultureInfo culture
+        )
         {
             if (
                 values.Length != 2
@@ -30,11 +35,13 @@ namespace GitOut.Features.Git.Log.Converters
             {
                 if (!node.IsCommit)
                 {
-                    paths.Add(CreatePath(
-                        color: node.Color,
-                        useDashedLine: node.BottomLineType == LineType.Dashed,
-                        geometry: CreateTopToBottomGeometry(node, height)
-                    ));
+                    paths.Add(
+                        CreatePath(
+                            color: node.Color,
+                            useDashedLine: node.BottomLineType == LineType.Dashed,
+                            geometry: CreateTopToBottomGeometry(node, height)
+                        )
+                    );
                 }
                 else
                 {
@@ -46,19 +53,23 @@ namespace GitOut.Features.Git.Log.Converters
 
                     if (node.Top is Line upperLine)
                     {
-                        paths.Add(CreatePath(
-                            color: node.Color,
-                            useDashedLine: node.TopLineType == LineType.Dashed,
-                            geometry: CreateUpperGeometry(upperLine, height)
-                        ));
+                        paths.Add(
+                            CreatePath(
+                                color: node.Color,
+                                useDashedLine: node.TopLineType == LineType.Dashed,
+                                geometry: CreateUpperGeometry(upperLine, height)
+                            )
+                        );
                     }
                     if (node.Bottom is Line lowerLine)
                     {
-                        paths.Add(CreatePath(
-                            color: node.Color,
-                            useDashedLine: node.BottomLineType == LineType.Dashed,
-                            geometry: CreateLowerGeometry(lowerLine, height)
-                        ));
+                        paths.Add(
+                            CreatePath(
+                                color: node.Color,
+                                useDashedLine: node.BottomLineType == LineType.Dashed,
+                                geometry: CreateLowerGeometry(lowerLine, height)
+                            )
+                        );
                     }
                 }
             }
@@ -66,16 +77,22 @@ namespace GitOut.Features.Git.Log.Converters
             return paths.ToArray();
         }
 
-        public object[]? ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => null;
+        public object[]? ConvertBack(
+            object value,
+            Type[] targetTypes,
+            object parameter,
+            CultureInfo culture
+        ) => null;
 
-        private static Path CreatePath(Color color, bool useDashedLine, PathGeometry geometry) => new()
-        {
-            Stroke = new SolidColorBrush(color),
-            StrokeThickness = 2,
-            SnapsToDevicePixels = true,
-            Data = geometry,
-            StrokeDashArray = useDashedLine ? new DoubleCollection(new[] { 3d, 1 }) : null
-        };
+        private static Path CreatePath(Color color, bool useDashedLine, PathGeometry geometry) =>
+            new()
+            {
+                Stroke = new SolidColorBrush(color),
+                StrokeThickness = 2,
+                SnapsToDevicePixels = true,
+                Data = geometry,
+                StrokeDashArray = useDashedLine ? new DoubleCollection(new[] { 3d, 1 }) : null,
+            };
 
         private static Path? AddCommitGeometry(GitTreeNode node, double height)
         {
@@ -92,30 +109,43 @@ namespace GitOut.Features.Git.Log.Converters
         }
 
         private static int GetCommitIndex(GitTreeNode node) =>
-            node.Bottom is Line bottomLine && bottomLine.Up == bottomLine.Down
-                ? bottomLine.Up
-                : node.Top is Line topLine && topLine.Up == topLine.Down
-                    ? topLine.Up
-                    : -1;
+            node.Bottom is Line bottomLine && bottomLine.Up == bottomLine.Down ? bottomLine.Up
+            : node.Top is Line topLine && topLine.Up == topLine.Down ? topLine.Up
+            : -1;
 
         private static PathGeometry CreateCommitGeometry(double height, int index)
         {
             var pathGeometry = new PathGeometry();
-            pathGeometry.AddGeometry(new EllipseGeometry(new Point(index * XDistance + XOffset, height / 2), Size.Height / 2, Size.Width / 2));
+            pathGeometry.AddGeometry(
+                new EllipseGeometry(
+                    new Point(index * XDistance + XOffset, height / 2),
+                    Size.Height / 2,
+                    Size.Width / 2
+                )
+            );
             return pathGeometry;
         }
 
         private static PathGeometry CreateStashGeometry(int index, double height)
         {
             var pathFigure = new PathFigure(
-                new Point(index * XDistance + XOffset - (Size.Width * 2 / 3), height / 2 - (Size.Height * 2 / 3)),
+                new Point(
+                    index * XDistance + XOffset - (Size.Width * 2 / 3),
+                    height / 2 - (Size.Height * 2 / 3)
+                ),
                 new[]
                 {
-                    new PolyLineSegment(new[]
-                    {
-                        new Point(index * XDistance + XOffset + (Size.Width * 2 / 3), height / 2 - (Size.Height *2 / 3)),
-                        new Point(index * XDistance + XOffset, height / 2 + (Size.Height / 2)),
-                    }, true),
+                    new PolyLineSegment(
+                        new[]
+                        {
+                            new Point(
+                                index * XDistance + XOffset + (Size.Width * 2 / 3),
+                                height / 2 - (Size.Height * 2 / 3)
+                            ),
+                            new Point(index * XDistance + XOffset, height / 2 + (Size.Height / 2)),
+                        },
+                        true
+                    ),
                 },
                 true
             );
@@ -133,24 +163,33 @@ namespace GitOut.Features.Git.Log.Converters
                 double middleXCoordinate = XOffset + line.Up * XDistance;
                 double middleYCoordinate = height / 2 + offset;
 
-                geometry.Figures.Add(new PathFigure(new Point(middleXCoordinate, middleYCoordinate), new[] { new LineSegment(new Point(bottomXCoordinate, height), true) }, false));
+                geometry.Figures.Add(
+                    new PathFigure(
+                        new Point(middleXCoordinate, middleYCoordinate),
+                        new[] { new LineSegment(new Point(bottomXCoordinate, height), true) },
+                        false
+                    )
+                );
                 return geometry;
             }
 
-            BezierSegment bezierSegment = line.Up < line.Down
-                ? new BezierSegment(
-                    new Point(bottomXCoordinate, height * 3 / 4),
-                    new Point(bottomXCoordinate, height / 2),
-                    new Point(XOffset + line.Up * XDistance + offset + 1, height / 2),
-                    true
-                )
-                : new BezierSegment(
-                    new Point(bottomXCoordinate, height * 3 / 4),
-                    new Point(bottomXCoordinate, height / 2),
-                    new Point(XOffset + line.Up * XDistance - offset, height / 2),
-                    true
-                );
-            geometry.Figures.Add(new PathFigure(new Point(bottomXCoordinate, height), new[] { bezierSegment }, false));
+            BezierSegment bezierSegment =
+                line.Up < line.Down
+                    ? new BezierSegment(
+                        new Point(bottomXCoordinate, height * 3 / 4),
+                        new Point(bottomXCoordinate, height / 2),
+                        new Point(XOffset + line.Up * XDistance + offset + 1, height / 2),
+                        true
+                    )
+                    : new BezierSegment(
+                        new Point(bottomXCoordinate, height * 3 / 4),
+                        new Point(bottomXCoordinate, height / 2),
+                        new Point(XOffset + line.Up * XDistance - offset, height / 2),
+                        true
+                    );
+            geometry.Figures.Add(
+                new PathFigure(new Point(bottomXCoordinate, height), new[] { bezierSegment }, false)
+            );
             return geometry;
         }
 
@@ -164,24 +203,36 @@ namespace GitOut.Features.Git.Log.Converters
             {
                 double middleXCoordinate = XOffset + line.Down * XDistance;
                 double middleYCoordinate = height / 2 - offset + 1;
-                geometry.Figures.Add(new PathFigure(new Point(upperXCoordinate, 0), new[] { new LineSegment(new Point(middleXCoordinate, middleYCoordinate), true) }, false));
+                geometry.Figures.Add(
+                    new PathFigure(
+                        new Point(upperXCoordinate, 0),
+                        new[]
+                        {
+                            new LineSegment(new Point(middleXCoordinate, middleYCoordinate), true),
+                        },
+                        false
+                    )
+                );
                 return geometry;
             }
 
-            BezierSegment bezierSegment = line.Up < line.Down
-                ? new BezierSegment(
-                    new Point(upperXCoordinate, height / 4),
-                    new Point(upperXCoordinate, height / 2),
-                    new Point(XOffset + line.Down * XDistance - offset, height / 2),
-                    true
-                )
-                : new BezierSegment(
-                    new Point(upperXCoordinate, height / 4),
-                    new Point(upperXCoordinate, height / 2),
-                    new Point(XOffset + line.Down * XDistance + offset, height / 2),
-                    true
-                );
-            geometry.Figures.Add(new PathFigure(new Point(upperXCoordinate, 0), new[] { bezierSegment }, false));
+            BezierSegment bezierSegment =
+                line.Up < line.Down
+                    ? new BezierSegment(
+                        new Point(upperXCoordinate, height / 4),
+                        new Point(upperXCoordinate, height / 2),
+                        new Point(XOffset + line.Down * XDistance - offset, height / 2),
+                        true
+                    )
+                    : new BezierSegment(
+                        new Point(upperXCoordinate, height / 4),
+                        new Point(upperXCoordinate, height / 2),
+                        new Point(XOffset + line.Down * XDistance + offset, height / 2),
+                        true
+                    );
+            geometry.Figures.Add(
+                new PathFigure(new Point(upperXCoordinate, 0), new[] { bezierSegment }, false)
+            );
             return geometry;
         }
 
@@ -203,8 +254,18 @@ namespace GitOut.Features.Git.Log.Converters
                 {
                     Figures =
                     {
-                        new PathFigure(new Point(XOffset + XDistance * topLayer.Up, 0), new[] { new LineSegment(new Point(XOffset + XDistance * bottomLayer.Down, height), true) }, false)
-                    }
+                        new PathFigure(
+                            new Point(XOffset + XDistance * topLayer.Up, 0),
+                            new[]
+                            {
+                                new LineSegment(
+                                    new Point(XOffset + XDistance * bottomLayer.Down, height),
+                                    true
+                                ),
+                            },
+                            false
+                        ),
+                    },
                 };
             }
 
@@ -217,9 +278,10 @@ namespace GitOut.Features.Git.Log.Converters
                         new Point(XOffset + bottomLayer.Down * XDistance, height * 0.3),
                         new Point(XOffset + bottomLayer.Down * XDistance, height),
                         true
-                    )
+                    ),
                 },
-                false);
+                false
+            );
 
             return new PathGeometry { Figures = { pathFigure } };
         }

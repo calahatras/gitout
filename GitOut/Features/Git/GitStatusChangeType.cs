@@ -7,6 +7,6 @@
         RenamedOrCopied,
         Unmerged,
         Untracked,
-        Ignored
+        Ignored,
     }
 }

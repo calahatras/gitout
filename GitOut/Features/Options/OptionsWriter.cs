@@ -4,17 +4,14 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Options
 {
-    public class OptionsWriter<T> : IOptionsWriter<T> where T : class, new()
+    public class OptionsWriter<T> : IOptionsWriter<T>
+        where T : class, new()
     {
         private readonly IOptions<T> options;
         private readonly IWritableStorage storage;
         private readonly string section;
 
-        public OptionsWriter(
-            IOptions<T> options,
-            IWritableStorage storage,
-            string section
-        )
+        public OptionsWriter(IOptions<T> options, IWritableStorage storage, string section)
         {
             this.options = options;
             this.storage = storage;

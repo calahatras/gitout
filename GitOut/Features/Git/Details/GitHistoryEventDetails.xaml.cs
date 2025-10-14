@@ -5,29 +5,33 @@ namespace GitOut.Features.Git.Details
 {
     public partial class GitHistoryEventDetails
     {
-        public static readonly DependencyProperty GitHistoryEventProperty = DependencyProperty.Register(
-            nameof(GitHistoryEvent),
-            typeof(GitHistoryEvent),
-            typeof(GitHistoryEventDetails)
-        );
+        public static readonly DependencyProperty GitHistoryEventProperty =
+            DependencyProperty.Register(
+                nameof(GitHistoryEvent),
+                typeof(GitHistoryEvent),
+                typeof(GitHistoryEventDetails)
+            );
 
-        public static readonly DependencyProperty CopyHashCommandProperty = DependencyProperty.Register(
-            nameof(CopyHashCommand),
-            typeof(ICommand),
-            typeof(GitHistoryEventDetails)
-        );
+        public static readonly DependencyProperty CopyHashCommandProperty =
+            DependencyProperty.Register(
+                nameof(CopyHashCommand),
+                typeof(ICommand),
+                typeof(GitHistoryEventDetails)
+            );
 
-        public static readonly DependencyProperty SelectCommitCommandProperty = DependencyProperty.Register(
-            nameof(SelectCommitCommand),
-            typeof(ICommand),
-            typeof(GitHistoryEventDetails)
-        );
+        public static readonly DependencyProperty SelectCommitCommandProperty =
+            DependencyProperty.Register(
+                nameof(SelectCommitCommand),
+                typeof(ICommand),
+                typeof(GitHistoryEventDetails)
+            );
 
-        public static readonly DependencyProperty AppendSelectCommitCommandProperty = DependencyProperty.Register(
-            nameof(AppendSelectCommitCommand),
-            typeof(ICommand),
-            typeof(GitHistoryEventDetails)
-        );
+        public static readonly DependencyProperty AppendSelectCommitCommandProperty =
+            DependencyProperty.Register(
+                nameof(AppendSelectCommitCommand),
+                typeof(ICommand),
+                typeof(GitHistoryEventDetails)
+            );
 
         public GitHistoryEventDetails() => InitializeComponent();
 

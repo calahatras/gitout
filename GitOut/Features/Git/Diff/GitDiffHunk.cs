@@ -38,13 +38,15 @@ namespace GitOut.Features.Git.Diff
 
                 var hunks = lines
                     .Skip(1)
-                    .Select(line => line[0] switch
-                    {
-                        '+' => HunkLine.AsAdded(line, to++),
-                        '-' => HunkLine.AsRemoved(line, from++),
-                        '\\' => HunkLine.AsControl(line, from++, to++),
-                        _ => HunkLine.AsLine(line, from++, to++)
-                    })
+                    .Select(line =>
+                        line[0] switch
+                        {
+                            '+' => HunkLine.AsAdded(line, to++),
+                            '-' => HunkLine.AsRemoved(line, from++),
+                            '\\' => HunkLine.AsControl(line, from++, to++),
+                            _ => HunkLine.AsLine(line, from++, to++),
+                        }
+                    )
                     .ToList();
                 return new GitDiffHunk(headLine, hunks);
             }

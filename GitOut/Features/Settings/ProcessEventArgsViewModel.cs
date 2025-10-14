@@ -8,10 +8,7 @@ namespace GitOut.Features.Settings
 {
     public class ProcessEventArgsViewModel
     {
-        public ProcessEventArgsViewModel(
-            ProcessEventArgs model,
-            ISnackbarService snacks
-        )
+        public ProcessEventArgsViewModel(ProcessEventArgs model, ISnackbarService snacks)
         {
             Input = model.Input;
             Output = model.Output;

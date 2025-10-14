@@ -10,7 +10,11 @@ namespace GitOut.Features.Input
         public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
             sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
-        public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+        public override object ConvertFrom(
+            ITypeDescriptorContext? context,
+            CultureInfo? culture,
+            object value
+        )
         {
             if (value is string str)
             {
@@ -24,7 +28,7 @@ namespace GitOut.Features.Input
                         "ALT" => ModifierKeys.Alt,
                         "SHIFT" => ModifierKeys.Shift,
                         "WIN" => ModifierKeys.Windows,
-                        _ => ModifierKeys.None
+                        _ => ModifierKeys.None,
                     };
                 }
 

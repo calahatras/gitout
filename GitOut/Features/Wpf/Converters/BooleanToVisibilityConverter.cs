@@ -18,7 +18,12 @@ namespace GitOut.Features.Wpf.Converters
             return invert ^ visible ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(
+            object value,
+            Type targetType,
+            object parameter,
+            CultureInfo culture
+        )
         {
             if (targetType != typeof(bool))
             {

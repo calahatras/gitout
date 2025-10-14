@@ -29,7 +29,8 @@ namespace GitOut.Features.Navigation
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public bool CanExecute(object? parameter) => canexecute == null || canexecute((T?)parameter);
+        public bool CanExecute(object? parameter) =>
+            canexecute == null || canexecute((T?)parameter);
 
         public void Execute(object? parameter)
         {

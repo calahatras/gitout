@@ -1,102 +1,107 @@
 ﻿<UserControl
-    x:Class="GitOut.Features.Git.RepositoryList.RepositoryListPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:git="clr-namespace:GitOut.Features.Git"
-    xmlns:text="clr-namespace:GitOut.Features.Text"
-    xmlns:local="clr-namespace:GitOut.Features.Git.RepositoryList"
-    mc:Ignorable="d"
-    d:DataContext="{d:DesignInstance Type={x:Type local:RepositoryListViewModel}}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    x:Name="Root"
+  x:Class="GitOut.Features.Git.RepositoryList.RepositoryListPage"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:git="clr-namespace:GitOut.Features.Git"
+  xmlns:text="clr-namespace:GitOut.Features.Text"
+  xmlns:local="clr-namespace:GitOut.Features.Git.RepositoryList"
+  mc:Ignorable="d"
+  d:DataContext="{d:DesignInstance Type={x:Type local:RepositoryListViewModel}}"
+  d:DesignHeight="450"
+  d:DesignWidth="800"
+  x:Name="Root"
 >
-    <Grid
-        Style="{StaticResource LayoutRootGridStyle}"
-    >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid Style="{StaticResource MaterialToolbarStyle}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="Repositories"/>
-            <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
-                <ToolBar>
-                    <Button
-                        Style="{StaticResource MaterialIconButtonStyle}"
-                        Command="{Binding AddRepositoryCommand}"
-                        ToolTip="Add repository"
-                    >
-                        <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource DatabasePlus}"/>
-                    </Button>
-                </ToolBar>
-            </ToolBarTray>
-        </Grid>
-        <Grid Grid.Row="1" Margin="32">
-            <Grid.Resources>
-                <local:RepositoryQueryMatcher x:Key="RepositoryMatcher"/>
-            </Grid.Resources>
-            <StackPanel>
-                <StackPanel.Style>
-                    <Style TargetType="{x:Type StackPanel}">
-                        <Setter Property="Visibility" Value="Hidden" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Repositories.Count, Mode=OneWay}" Value="0">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-                <TextBlock Style="{StaticResource PrimaryTextStyle}" Text="No repositories added"/>
-                <TextBlock Style="{StaticResource NormalTextStyle}" Text="Open settings to add some"/>
-            </StackPanel>
-            <text:Autocomplete
-                Header="Search repository name"
-                SearchQuery="{Binding SearchQuery}"
-                ItemsSource="{Binding Repositories}"
-                QueryMatcher="{StaticResource RepositoryMatcher}"
-                CancelCommand="{Binding ClearCommand}"
-                ItemSelectedCommand="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                DropCommand="{Binding DropCommand}"
-            >
-                <text:Autocomplete.Style>
-                    <Style TargetType="{x:Type text:Autocomplete}">
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Repositories.Count, Mode=OneWay}" Value="0">
-                                <Setter Property="Visibility" Value="Hidden" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </text:Autocomplete.Style>
-                <text:Autocomplete.ItemTemplate>
-                    <DataTemplate DataType="{x:Type git:IGitRepository}">
-                        <Grid>
-                            <Grid.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem
-                                        Header="Remove repository from list"
-                                        Command="{Binding DataContext.RemoveRepositoryCommand, Source={x:Reference Name=Root}}"
-                                        CommandParameter="{Binding}"
-                                    />
-                                </ContextMenu>
-                            </Grid.ContextMenu>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Text="{Binding Name}" />
-                            <TextBlock Grid.Row="1" Text="{Binding WorkingDirectory.Directory}" Style="{StaticResource SecondaryTextStyle}" />
-                        </Grid>
-                    </DataTemplate>
-                </text:Autocomplete.ItemTemplate>
-            </text:Autocomplete>
-        </Grid>
+  <Grid Style="{StaticResource LayoutRootGridStyle}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <Grid Style="{StaticResource MaterialToolbarStyle}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="Repositories" />
+      <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
+        <ToolBar>
+          <Button
+            Style="{StaticResource MaterialIconButtonStyle}"
+            Command="{Binding AddRepositoryCommand}"
+            ToolTip="Add repository"
+          >
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource DatabasePlus}"
+            />
+          </Button>
+        </ToolBar>
+      </ToolBarTray>
     </Grid>
+    <Grid Grid.Row="1" Margin="32">
+      <Grid.Resources>
+        <local:RepositoryQueryMatcher x:Key="RepositoryMatcher" />
+      </Grid.Resources>
+      <StackPanel>
+        <StackPanel.Style>
+          <Style TargetType="{x:Type StackPanel}">
+            <Setter Property="Visibility" Value="Hidden" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Repositories.Count, Mode=OneWay}" Value="0">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <TextBlock Style="{StaticResource PrimaryTextStyle}" Text="No repositories added" />
+        <TextBlock Style="{StaticResource NormalTextStyle}" Text="Open settings to add some" />
+      </StackPanel>
+      <text:Autocomplete
+        Header="Search repository name"
+        SearchQuery="{Binding SearchQuery}"
+        ItemsSource="{Binding Repositories}"
+        QueryMatcher="{StaticResource RepositoryMatcher}"
+        CancelCommand="{Binding ClearCommand}"
+        ItemSelectedCommand="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        DropCommand="{Binding DropCommand}"
+      >
+        <text:Autocomplete.Style>
+          <Style TargetType="{x:Type text:Autocomplete}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Repositories.Count, Mode=OneWay}" Value="0">
+                <Setter Property="Visibility" Value="Hidden" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </text:Autocomplete.Style>
+        <text:Autocomplete.ItemTemplate>
+          <DataTemplate DataType="{x:Type git:IGitRepository}">
+            <Grid>
+              <Grid.ContextMenu>
+                <ContextMenu>
+                  <MenuItem
+                    Header="Remove repository from list"
+                    Command="{Binding DataContext.RemoveRepositoryCommand, Source={x:Reference Name=Root}}"
+                    CommandParameter="{Binding}"
+                  />
+                </ContextMenu>
+              </Grid.ContextMenu>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+              </Grid.RowDefinitions>
+              <TextBlock Text="{Binding Name}" />
+              <TextBlock
+                Grid.Row="1"
+                Text="{Binding WorkingDirectory.Directory}"
+                Style="{StaticResource SecondaryTextStyle}"
+              />
+            </Grid>
+          </DataTemplate>
+        </text:Autocomplete.ItemTemplate>
+      </text:Autocomplete>
+    </Grid>
+  </Grid>
 </UserControl>

@@ -10,7 +10,10 @@ using GitOut.Features.IO;
 
 namespace GitOut.Features.Git.Files
 {
-    public class GitDirectoryViewModel : IGitDirectoryEntryViewModel, INotifyCollectionChanged, INotifyPropertyChanged
+    public class GitDirectoryViewModel
+        : IGitDirectoryEntryViewModel,
+            INotifyCollectionChanged,
+            INotifyPropertyChanged
     {
         private readonly IGitRepository repository;
         private readonly ICollection<IGitFileEntryViewModel> entries;
@@ -35,20 +38,48 @@ namespace GitOut.Features.Git.Files
             FileName fileName,
             RelativeDirectoryPath parent,
             IEnumerable<IGitFileEntryViewModel> children
-        ) : this(repository, fileName, parent, new SortedObservableCollection<IGitFileEntryViewModel>(children, IGitDirectoryEntryViewModel.CompareItems)) { }
+        )
+            : this(
+                repository,
+                fileName,
+                parent,
+                new SortedObservableCollection<IGitFileEntryViewModel>(
+                    children,
+                    IGitDirectoryEntryViewModel.CompareItems
+                )
+            ) { }
 
         private GitDirectoryViewModel(
             IGitRepository repository,
             FileName fileName,
             RelativeDirectoryPath parent,
             Func<RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
-        ) : this(repository, fileName, parent, new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(lookup, IGitDirectoryEntryViewModel.CompareItems) { LoadingViewModel.Proxy }) { }
+        )
+            : this(
+                repository,
+                fileName,
+                parent,
+                new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
+                    lookup,
+                    IGitDirectoryEntryViewModel.CompareItems
+                )
+                {
+                    LoadingViewModel.Proxy,
+                }
+            ) { }
 
         public RelativeDirectoryPath Path { get; }
         public string RootPath => repository.WorkingDirectory.ToString();
         public string RelativePath => FullPath[RootPath.ToString().Length..];
         public string RelativeDirectory => FullPath[..^FileName.ToString().Length];
-        public string FullPath => System.IO.Path.Combine(repository.WorkingDirectory.ToString(), Path.ToString(), System.IO.Path.GetFileName(FileName.ToString().Replace("/", "\\", StringComparison.InvariantCulture)));
+        public string FullPath =>
+            System.IO.Path.Combine(
+                repository.WorkingDirectory.ToString(),
+                Path.ToString(),
+                System.IO.Path.GetFileName(
+                    FileName.ToString().Replace("/", "\\", StringComparison.InvariantCulture)
+                )
+            );
 
         public FileName FileName { get; }
         public string IconResourceKey => IsExpanded ? "FolderOpen" : "Folder";
@@ -59,8 +90,19 @@ namespace GitOut.Features.Git.Files
             {
                 if (SetProperty(ref isExpanded, value))
                 {
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IconResourceKey)));
-                    if (value && entries is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy && !lazy.IsMaterialized)
+                    PropertyChanged?.Invoke(
+                        this,
+                        new PropertyChangedEventArgs(nameof(IconResourceKey))
+                    );
+                    if (
+                        value
+                        && entries
+                            is ILazyAsyncEnumerable<
+                                IGitFileEntryViewModel,
+                                RelativeDirectoryPath
+                            > lazy
+                        && !lazy.IsMaterialized
+                    )
                     {
 #pragma warning disable CA2012 // Use ValueTasks correctly
                         _ = lazy.MaterializeAsync(Path.Append(FileName.ToString())).AsTask();
@@ -78,27 +120,59 @@ namespace GitOut.Features.Git.Files
         public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
         public IEnumerator<IGitFileEntryViewModel> GetEnumerator() => entries.GetEnumerator();
+
         IEnumerator IEnumerable.GetEnumerator() => entries.GetEnumerator();
 
         public static GitDirectoryViewModel Snapshot(
             IGitRepository repository,
             GitFileEntry file,
             RelativeDirectoryPath parent,
-            Func<GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
-        ) => file.Type != GitFileType.Tree
-            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitDirectoryViewModel(repository, file.FileName, parent, relativePath => lookup(file.Id, relativePath));
+            Func<
+                GitObjectId,
+                RelativeDirectoryPath,
+                IAsyncEnumerable<IGitFileEntryViewModel>
+            > lookup
+        ) =>
+            file.Type != GitFileType.Tree
+                ? throw new ArgumentException(
+                    $"Invalid file type for directory {file.Type}",
+                    nameof(file)
+                )
+                : new GitDirectoryViewModel(
+                    repository,
+                    file.FileName,
+                    parent,
+                    relativePath => lookup(file.Id, relativePath)
+                );
 
         public static GitDirectoryViewModel Difference(
             IGitRepository repository,
             GitDiffFileEntry file,
             RelativeDirectoryPath parent,
-            Func<GitObjectId, GitObjectId, RelativeDirectoryPath, IAsyncEnumerable<IGitFileEntryViewModel>> lookup
-        ) => file.FileType != GitFileType.Tree
-            ? throw new ArgumentException($"Invalid file type for directory {file.Type}", nameof(file))
-            : new GitDirectoryViewModel(repository, file.Source.FileName, parent, relativePath => lookup(file.Source.Id, file.Destination.Id, relativePath));
+            Func<
+                GitObjectId,
+                GitObjectId,
+                RelativeDirectoryPath,
+                IAsyncEnumerable<IGitFileEntryViewModel>
+            > lookup
+        ) =>
+            file.FileType != GitFileType.Tree
+                ? throw new ArgumentException(
+                    $"Invalid file type for directory {file.Type}",
+                    nameof(file)
+                )
+                : new GitDirectoryViewModel(
+                    repository,
+                    file.Source.FileName,
+                    parent,
+                    relativePath => lookup(file.Source.Id, file.Destination.Id, relativePath)
+                );
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {

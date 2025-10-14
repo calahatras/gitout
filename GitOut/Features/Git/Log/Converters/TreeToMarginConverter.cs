@@ -17,14 +17,20 @@ namespace GitOut.Features.Git.Log.Converters
                 return DependencyProperty.UnsetValue;
             }
 
-            int maxIndex = gitTreeEvent.Nodes
-                .SelectMany(n => new[] { n.Top?.Up ?? 0, n.Top?.Down ?? 0, n.Bottom?.Down ?? 0 })
+            int maxIndex = gitTreeEvent
+                .Nodes.SelectMany(n =>
+                    new[] { n.Top?.Up ?? 0, n.Top?.Down ?? 0, n.Bottom?.Down ?? 0 }
+                )
                 .Max();
 
             return new Thickness(10 + (maxIndex + 1) * Distance, 0, 10, 0);
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => Binding.DoNothing;
+        public object ConvertBack(
+            object value,
+            Type targetType,
+            object parameter,
+            CultureInfo culture
+        ) => Binding.DoNothing;
     }
 }

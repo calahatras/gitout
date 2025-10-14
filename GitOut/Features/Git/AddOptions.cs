@@ -17,6 +17,7 @@ namespace GitOut.Features.Git
         }
 
         public static IAddOptionsBuilder Builder() => new AddOptionsBuilder();
+
         public static AddOptions None => new(false);
 
         private class AddOptionsBuilder : IAddOptionsBuilder
@@ -24,6 +25,7 @@ namespace GitOut.Features.Git
             private bool intentToAdd;
 
             public AddOptions Build() => new(intentToAdd);
+
             public IAddOptionsBuilder WithIntent()
             {
                 intentToAdd = true;

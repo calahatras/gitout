@@ -16,17 +16,19 @@ namespace GitOut.Features.Text
 {
     public partial class Autocomplete : UserControl
     {
-        public static readonly DependencyProperty CancelCommandProperty = DependencyProperty.Register(
-            nameof(CancelCommand),
-            typeof(ICommand),
-            typeof(Autocomplete)
-        );
+        public static readonly DependencyProperty CancelCommandProperty =
+            DependencyProperty.Register(
+                nameof(CancelCommand),
+                typeof(ICommand),
+                typeof(Autocomplete)
+            );
 
-        public static readonly DependencyProperty ItemSelectedCommandProperty = DependencyProperty.Register(
-            nameof(ItemSelectedCommand),
-            typeof(ICommand),
-            typeof(Autocomplete)
-        );
+        public static readonly DependencyProperty ItemSelectedCommandProperty =
+            DependencyProperty.Register(
+                nameof(ItemSelectedCommand),
+                typeof(ICommand),
+                typeof(Autocomplete)
+            );
 
         public static readonly DependencyProperty DropCommandProperty = DependencyProperty.Register(
             nameof(DropCommand),
@@ -41,12 +43,13 @@ namespace GitOut.Features.Text
             new PropertyMetadata("Search")
         );
 
-        public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register(
-            nameof(SelectedIndex),
-            typeof(int),
-            typeof(Autocomplete),
-            new PropertyMetadata(0)
-        );
+        public static readonly DependencyProperty SelectedIndexProperty =
+            DependencyProperty.Register(
+                nameof(SelectedIndex),
+                typeof(int),
+                typeof(Autocomplete),
+                new PropertyMetadata(0)
+            );
 
         public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(
             nameof(ItemsSource),
@@ -55,24 +58,30 @@ namespace GitOut.Features.Text
             new FrameworkPropertyMetadata(null, OnItemsSourceCollectionChanged)
         );
 
-        public static readonly DependencyProperty ItemTemplateProperty = DependencyProperty.Register(
-            nameof(ItemTemplate),
-            typeof(DataTemplate),
-            typeof(Autocomplete)
-        );
+        public static readonly DependencyProperty ItemTemplateProperty =
+            DependencyProperty.Register(
+                nameof(ItemTemplate),
+                typeof(DataTemplate),
+                typeof(Autocomplete)
+            );
 
-        public static readonly DependencyProperty QueryMatcherProperty = DependencyProperty.Register(
-            nameof(QueryMatcher),
-            typeof(IValueConverter),
-            typeof(Autocomplete),
-            new PropertyMetadata(null, OnQueryMatcherChanged)
-        );
+        public static readonly DependencyProperty QueryMatcherProperty =
+            DependencyProperty.Register(
+                nameof(QueryMatcher),
+                typeof(IValueConverter),
+                typeof(Autocomplete),
+                new PropertyMetadata(null, OnQueryMatcherChanged)
+            );
 
         public static readonly DependencyProperty SearchQueryProperty = DependencyProperty.Register(
             nameof(SearchQuery),
             typeof(string),
             typeof(Autocomplete),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSearchQueryChanged)
+            new FrameworkPropertyMetadata(
+                null,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnSearchQueryChanged
+            )
         );
 
         private readonly object localItemsLock = new();
@@ -228,7 +237,11 @@ namespace GitOut.Features.Text
                                 return;
                             }
 
-                            for (int index = e.NewStartingIndex, i = 0; i < e.NewItems.Count; ++i, ++index)
+                            for (
+                                int index = e.NewStartingIndex, i = 0;
+                                i < e.NewItems.Count;
+                                ++i, ++index
+                            )
                             {
                                 localItems.Insert(index, e.NewItems[i]);
                             }
@@ -264,18 +277,30 @@ namespace GitOut.Features.Text
             }
         }
 
-        private static void OnQueryMatcherChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnQueryMatcherChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is Autocomplete control)
             {
                 control.localView.Filter = item =>
                     e.NewValue is not IValueConverter converter
                     || control.SearchQuery is null
-                    || (bool)converter.Convert(item, typeof(bool), control.SearchQuery.ToUpperInvariant(), CultureInfo.CurrentCulture);
+                    || (bool)
+                        converter.Convert(
+                            item,
+                            typeof(bool),
+                            control.SearchQuery.ToUpperInvariant(),
+                            CultureInfo.CurrentCulture
+                        );
             }
         }
 
-        private static void OnSearchQueryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnSearchQueryChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is Autocomplete control)
             {
@@ -283,7 +308,10 @@ namespace GitOut.Features.Text
             }
         }
 
-        private static void OnItemsSourceCollectionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnItemsSourceCollectionChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is Autocomplete control)
             {

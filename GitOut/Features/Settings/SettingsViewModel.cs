@@ -54,14 +54,18 @@ namespace GitOut.Features.Settings
                 {
                     Command = new CallbackCommand(() => CurrentContent = general),
                     IconResourceKey = "Cog",
-                    Name = "Settings"
+                    Name = "Settings",
                 },
                 new MenuItem
                 {
-                    Command = new CallbackCommand(() => CurrentContent = (process ??= new ProcessSettingsViewModel(telemetry, snacks))),
+                    Command = new CallbackCommand(() =>
+                        CurrentContent = (
+                            process ??= new ProcessSettingsViewModel(telemetry, snacks)
+                        )
+                    ),
                     IconResourceKey = "Git",
-                    Name = "Git execution log"
-                }
+                    Name = "Git execution log",
+                },
             };
             MenuItems = CollectionViewSource.GetDefaultView(menuItems);
         }
@@ -84,7 +88,11 @@ namespace GitOut.Features.Settings
             process?.Dispose();
         }
 
-        private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private void SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {

@@ -20,10 +20,11 @@ namespace GitOut.Features.Settings
             ISnackbarService snacks
         )
         {
-            processEvents = new ObservableCollection<ProcessEventArgsViewModel>(telemetry.Events.Select(CreateViewModel));
+            processEvents = new ObservableCollection<ProcessEventArgsViewModel>(
+                telemetry.Events.Select(CreateViewModel)
+            );
             streamSubscription = telemetry
-                .EventsStream
-                .Select(CreateViewModel)
+                .EventsStream.Select(CreateViewModel)
                 .Subscribe(item =>
                 {
                     lock (processEventsLock)

@@ -19,7 +19,9 @@ namespace GitOut.Features.Collections
                 Add(item);
             }
             suppressNotification = false;
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)
+            );
         }
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)

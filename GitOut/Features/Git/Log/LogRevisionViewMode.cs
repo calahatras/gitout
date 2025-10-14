@@ -5,6 +5,6 @@
         None,
         CurrentRevision,
         Diff,
-        DiffInline
+        DiffInline,
     }
 }

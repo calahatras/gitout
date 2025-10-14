@@ -18,7 +18,12 @@ namespace GitOut.Features.Wpf.Converters
             return utc.ToLocalTime();
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(
+            object value,
+            Type targetType,
+            object parameter,
+            CultureInfo culture
+        )
         {
             if (value is not DateTimeOffset localtime)
             {

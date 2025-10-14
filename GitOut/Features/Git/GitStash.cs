@@ -14,19 +14,14 @@ namespace GitOut.Features.Git
             string subject,
             string body,
             int stashIndex
-        ) : base(
-            id,
-            parentId,
-            mergeParent,
-            authorDate,
-            author,
-            subject,
-            body
-        ) => StashIndex = stashIndex;
+        )
+            : base(id, parentId, mergeParent, authorDate, author, subject, body) =>
+            StashIndex = stashIndex;
 
         public int StashIndex { get; }
 
-        public static IGitHistoryEventBuilder<GitStash> Builder(int stashIndex) => new GitStashBuilder(stashIndex);
+        public static IGitHistoryEventBuilder<GitStash> Builder(int stashIndex) =>
+            new GitStashBuilder(stashIndex);
 
         private class GitStashBuilder : IGitHistoryEventBuilder<GitStash>
         {
@@ -43,19 +38,39 @@ namespace GitOut.Features.Git
 
             public GitStashBuilder(int stashIndex) => this.stashIndex = stashIndex;
 
-            public GitStash Build() => new(
-                hash ?? throw new ArgumentNullException(nameof(hash), "Hash must not be null"),
-                parent ?? throw new InvalidOperationException("Parent ID must be set when building stash"),
-                mergeParent,
-                authorDate ?? throw new ArgumentNullException(nameof(authorDate), "Author date must not be null"),
-                GitAuthor.Create(
-                    authorName ?? throw new ArgumentNullException(nameof(authorName), "Author name must not be null"),
-                    authorEmail ?? throw new ArgumentNullException(nameof(authorEmail), "Author email must not be null")
-                ),
-                subject ?? throw new ArgumentNullException(nameof(subject), "Subject must not be null"),
-                bodyBuilder.ToString(),
-                stashIndex
-            );
+            public GitStash Build() =>
+                new(
+                    hash ?? throw new ArgumentNullException(nameof(hash), "Hash must not be null"),
+                    parent
+                        ?? throw new InvalidOperationException(
+                            "Parent ID must be set when building stash"
+                        ),
+                    mergeParent,
+                    authorDate
+                        ?? throw new ArgumentNullException(
+                            nameof(authorDate),
+                            "Author date must not be null"
+                        ),
+                    GitAuthor.Create(
+                        authorName
+                            ?? throw new ArgumentNullException(
+                                nameof(authorName),
+                                "Author name must not be null"
+                            ),
+                        authorEmail
+                            ?? throw new ArgumentNullException(
+                                nameof(authorEmail),
+                                "Author email must not be null"
+                            )
+                    ),
+                    subject
+                        ?? throw new ArgumentNullException(
+                            nameof(subject),
+                            "Subject must not be null"
+                        ),
+                    bodyBuilder.ToString(),
+                    stashIndex
+                );
 
             public IGitHistoryEventBuilder<GitStash> BuildBody(string body)
             {

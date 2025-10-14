@@ -2,7 +2,9 @@ using System.Collections.Generic;
 
 namespace GitOut.Features.Git.Files
 {
-    public interface IGitDirectoryEntryViewModel : IReadOnlyCollection<IGitFileEntryViewModel>, IGitFileEntryViewModel
+    public interface IGitDirectoryEntryViewModel
+        : IReadOnlyCollection<IGitFileEntryViewModel>,
+            IGitFileEntryViewModel
     {
         bool IsExpanded { get; set; }
 

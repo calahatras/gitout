@@ -11,7 +11,10 @@ namespace GitOut.Features.IO
             char[] invalidCharacters = Path.GetInvalidFileNameChars();
             if (filename.Any(invalidCharacters.Contains))
             {
-                throw new ArgumentException("File name contains invalid characters", nameof(filename));
+                throw new ArgumentException(
+                    "File name contains invalid characters",
+                    nameof(filename)
+                );
             }
 
             Name = filename;

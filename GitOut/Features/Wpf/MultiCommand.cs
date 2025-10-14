@@ -42,6 +42,7 @@ namespace GitOut.Features.Wpf
 
         public event EventHandler? CanExecuteChanged;
 
-        private void OnCanExecuteChanged(object? sender, EventArgs e) => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        private void OnCanExecuteChanged(object? sender, EventArgs e) =>
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 }

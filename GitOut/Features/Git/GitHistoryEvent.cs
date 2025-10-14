@@ -42,7 +42,8 @@ namespace GitOut.Features.Git
         public IList<GitBranchName> Branches { get; } = new List<GitBranchName>();
         public IList<GitHistoryEvent> Children { get; } = new List<GitHistoryEvent>();
 
-        public static IGitHistoryEventBuilder<GitHistoryEvent> Builder() => new GitHistoryEventBuilder();
+        public static IGitHistoryEventBuilder<GitHistoryEvent> Builder() =>
+            new GitHistoryEventBuilder();
 
         public void ResolveParents(IDictionary<GitCommitId, GitHistoryEvent> commits)
         {
@@ -51,7 +52,10 @@ namespace GitOut.Features.Git
                 Parent = commit;
                 Parent.Children.Add(this);
             }
-            if (mergeParent is not null && commits.TryGetValue(mergeParent, out GitHistoryEvent? mergeCommit))
+            if (
+                mergeParent is not null
+                && commits.TryGetValue(mergeParent, out GitHistoryEvent? mergeCommit)
+            )
             {
                 MergedParent = mergeCommit;
                 MergedParent.Children.Add(this);
@@ -70,18 +74,35 @@ namespace GitOut.Features.Git
             private string? authorEmail;
             private string? subject;
 
-            public GitHistoryEvent Build() => new(
-                hash ?? throw new ArgumentNullException(nameof(hash), "Hash must not be null"),
-                parent,
-                mergeParent,
-                authorDate ?? throw new ArgumentNullException(nameof(authorDate), "Author date must not be null"),
-                GitAuthor.Create(
-                    authorName ?? throw new ArgumentNullException(nameof(authorName), "Author name must not be null"),
-                    authorEmail ?? throw new ArgumentNullException(nameof(authorEmail), "Author email must not be null")
-                ),
-                subject ?? throw new ArgumentNullException(nameof(subject), "Subject must not be null"),
-                bodyBuilder.ToString()
-            );
+            public GitHistoryEvent Build() =>
+                new(
+                    hash ?? throw new ArgumentNullException(nameof(hash), "Hash must not be null"),
+                    parent,
+                    mergeParent,
+                    authorDate
+                        ?? throw new ArgumentNullException(
+                            nameof(authorDate),
+                            "Author date must not be null"
+                        ),
+                    GitAuthor.Create(
+                        authorName
+                            ?? throw new ArgumentNullException(
+                                nameof(authorName),
+                                "Author name must not be null"
+                            ),
+                        authorEmail
+                            ?? throw new ArgumentNullException(
+                                nameof(authorEmail),
+                                "Author email must not be null"
+                            )
+                    ),
+                    subject
+                        ?? throw new ArgumentNullException(
+                            nameof(subject),
+                            "Subject must not be null"
+                        ),
+                    bodyBuilder.ToString()
+                );
 
             public IGitHistoryEventBuilder<GitHistoryEvent> BuildBody(string body)
             {

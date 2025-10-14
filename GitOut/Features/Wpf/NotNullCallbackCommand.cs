@@ -8,7 +8,8 @@ namespace GitOut.Features.Wpf
         private readonly Action<TArg> execute;
         private readonly Func<TArg, bool> canexecute;
 
-        public NotNullCallbackCommand(Action<TArg> execute) : this(execute, o => true) { }
+        public NotNullCallbackCommand(Action<TArg> execute)
+            : this(execute, o => true) { }
 
         public NotNullCallbackCommand(Action<TArg> execute, Func<TArg, bool> canexecute)
         {
@@ -22,7 +23,8 @@ namespace GitOut.Features.Wpf
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public bool CanExecute(object? parameter) => parameter is not null && canexecute((TArg)parameter);
+        public bool CanExecute(object? parameter) =>
+            parameter is not null && canexecute((TArg)parameter);
 
         public void Execute(object? parameter)
         {

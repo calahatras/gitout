@@ -4,6 +4,6 @@
     {
         None,
         Tree,
-        Blob
+        Blob,
     }
 }

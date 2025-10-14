@@ -6,6 +6,6 @@ namespace GitOut.Features.Git
         Header,
         Added,
         Removed,
-        Control
+        Control,
     }
 }

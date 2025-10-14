@@ -1,6 +1,7 @@
 namespace GitOut.Features.Git
 {
-    public interface IGitHistoryEventBuilder<T> where T : GitHistoryEvent
+    public interface IGitHistoryEventBuilder<T>
+        where T : GitHistoryEvent
     {
         IGitHistoryEventBuilder<T> BuildBody(string body);
         IGitHistoryEventBuilder<T> ParseHash(string hashes);

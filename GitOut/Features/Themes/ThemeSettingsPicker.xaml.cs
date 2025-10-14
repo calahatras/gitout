@@ -10,11 +10,12 @@ namespace GitOut.Features.Themes
 {
     public partial class ThemeSettingsPicker : UserControl
     {
-        public static readonly DependencyProperty SelectThemeCommandProperty = DependencyProperty.Register(
-            nameof(SelectThemeCommand),
-            typeof(ICommand),
-            typeof(ThemeSettingsPicker)
-        );
+        public static readonly DependencyProperty SelectThemeCommandProperty =
+            DependencyProperty.Register(
+                nameof(SelectThemeCommand),
+                typeof(ICommand),
+                typeof(ThemeSettingsPicker)
+            );
 
         public ThemeSettingsPicker()
         {

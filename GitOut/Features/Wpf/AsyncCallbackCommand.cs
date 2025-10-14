@@ -6,9 +6,11 @@ namespace GitOut.Features.Wpf
 {
     public class AsyncCallbackCommand : AsyncCallbackCommand<object>
     {
-        public AsyncCallbackCommand(Func<Task> execute) : base(_ => execute()) { }
+        public AsyncCallbackCommand(Func<Task> execute)
+            : base(_ => execute()) { }
 
-        public AsyncCallbackCommand(Func<Task> execute, Func<bool> canExecute) : base(_ => execute(), _ => canExecute()) { }
+        public AsyncCallbackCommand(Func<Task> execute, Func<bool> canExecute)
+            : base(_ => execute(), _ => canExecute()) { }
     }
 
     public class AsyncCallbackCommand<TArg> : ICommand
@@ -16,7 +18,8 @@ namespace GitOut.Features.Wpf
         private readonly Func<TArg?, Task> execute;
         private readonly Func<TArg?, bool> canExecute;
 
-        public AsyncCallbackCommand(Func<TArg?, Task> execute) : this(execute, o => true) { }
+        public AsyncCallbackCommand(Func<TArg?, Task> execute)
+            : this(execute, o => true) { }
 
         public AsyncCallbackCommand(Func<TArg?, Task> execute, Func<TArg?, bool> canExecute)
         {

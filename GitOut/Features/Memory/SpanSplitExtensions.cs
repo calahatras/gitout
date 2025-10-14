@@ -7,9 +7,14 @@ namespace GitOut.Features.Memory
     {
         public static Range[] Split(this ReadOnlySpan<char> span) => Split(span, ' ');
 
-        public static Range[] Split(this ReadOnlySpan<char> span, char separator) => Split(span, separator, StringSplitOptions.None);
+        public static Range[] Split(this ReadOnlySpan<char> span, char separator) =>
+            Split(span, separator, StringSplitOptions.None);
 
-        public static Range[] Split(this ReadOnlySpan<char> span, char separator, StringSplitOptions options)
+        public static Range[] Split(
+            this ReadOnlySpan<char> span,
+            char separator,
+            StringSplitOptions options
+        )
         {
             var ranges = new List<Range>();
             int previousIndex = 0;
@@ -18,10 +23,17 @@ namespace GitOut.Features.Memory
             {
                 if (span[currentIndex] == separator)
                 {
-                    if (currentIndex - previousIndex > 1 || (options & StringSplitOptions.RemoveEmptyEntries) != StringSplitOptions.RemoveEmptyEntries)
+                    if (
+                        currentIndex - previousIndex > 1
+                        || (options & StringSplitOptions.RemoveEmptyEntries)
+                            != StringSplitOptions.RemoveEmptyEntries
+                    )
                     {
                         int endIndex = currentIndex;
-                        if ((options & StringSplitOptions.TrimEntries) == StringSplitOptions.TrimEntries)
+                        if (
+                            (options & StringSplitOptions.TrimEntries)
+                            == StringSplitOptions.TrimEntries
+                        )
                         {
                             while (span[previousIndex] == ' ')
                             {
@@ -37,7 +49,11 @@ namespace GitOut.Features.Memory
                     previousIndex = currentIndex + 1;
                 }
             }
-            if (endPos - previousIndex > 1 || (options & StringSplitOptions.RemoveEmptyEntries) != StringSplitOptions.RemoveEmptyEntries)
+            if (
+                endPos - previousIndex > 1
+                || (options & StringSplitOptions.RemoveEmptyEntries)
+                    != StringSplitOptions.RemoveEmptyEntries
+            )
             {
                 int lastEndIndex = endPos;
                 if ((options & StringSplitOptions.TrimEntries) == StringSplitOptions.TrimEntries)

@@ -17,7 +17,10 @@ namespace GitOut.Features.Git
             services.AddSingleton<IProcessTelemetryCollector, ProcessTelemetryCollector>();
             services.AddScoped<IProcessFactory<IGitProcess>, GitProcessFactory>();
             services.AddScoped<IGitRepositoryFactory, GitRepositoryFactory>();
-            services.AddScoped<IGitRepositoryWatcherProvider, GitRepositoryFileSystemWatcherProvider>();
+            services.AddScoped<
+                IGitRepositoryWatcherProvider,
+                GitRepositoryFileSystemWatcherProvider
+            >();
             services.AddTransient<GitLogPage>();
             services.AddTransient<GitLogViewModel>();
             services.AddTransient<GitStagePage>();

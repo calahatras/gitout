@@ -86,7 +86,13 @@ namespace GitOut.Features.Wpf
             DragMove();
         }
 
-        private IntPtr WindowResizedHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        private IntPtr WindowResizedHook(
+            IntPtr hwnd,
+            int msg,
+            IntPtr wParam,
+            IntPtr lParam,
+            ref bool handled
+        )
         {
             const int WM_EXITSIZEMOVE = 0x232;
             if (msg == WM_EXITSIZEMOVE)
@@ -100,8 +106,7 @@ namespace GitOut.Features.Wpf
         {
             double left = SystemParameters.VirtualScreenLeft;
             double right = SystemParameters.VirtualScreenWidth;
-            if (Left > right
-                || Left + ActualWidth < left)
+            if (Left > right || Left + ActualWidth < left)
             {
                 Left = 10;
                 Top = 10;

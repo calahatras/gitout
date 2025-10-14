@@ -13,28 +13,36 @@ namespace GitOut.Features.Git.Diff
                 case DiffLineType.Header:
                     if (line[0] != '@')
                     {
-                        throw new InvalidOperationException($"Invalid start of line for header {line}");
+                        throw new InvalidOperationException(
+                            $"Invalid start of line for header {line}"
+                        );
                     }
                     StrippedLine = line[1..];
                     break;
                 case DiffLineType.Added:
                     if (line[0] != '+')
                     {
-                        throw new InvalidOperationException($"Invalid start of line for added {line}");
+                        throw new InvalidOperationException(
+                            $"Invalid start of line for added {line}"
+                        );
                     }
                     StrippedLine = line[1..];
                     break;
                 case DiffLineType.Removed:
                     if (line[0] != '-')
                     {
-                        throw new InvalidOperationException($"Invalid start of line for removed {line}");
+                        throw new InvalidOperationException(
+                            $"Invalid start of line for removed {line}"
+                        );
                     }
                     StrippedLine = line[1..];
                     break;
                 case DiffLineType.Control:
                     if (line[0] != '\\')
                     {
-                        throw new InvalidOperationException($"Invalid start of line for control {line}");
+                        throw new InvalidOperationException(
+                            $"Invalid start of line for control {line}"
+                        );
                     }
                     StrippedLine = line;
                     break;
@@ -42,7 +50,9 @@ namespace GitOut.Features.Git.Diff
                 default:
                     if (line.Length > 0 && line[0] != ' ')
                     {
-                        throw new InvalidOperationException($"Invalid start of line for ordinal {line}");
+                        throw new InvalidOperationException(
+                            $"Invalid start of line for ordinal {line}"
+                        );
                     }
                     StrippedLine = line.Length > 0 ? line[1..] : line;
                     break;
@@ -57,10 +67,19 @@ namespace GitOut.Features.Git.Diff
         public string StrippedLine { get; }
         public DiffLineType Type { get; }
 
-        public static HunkLine AsHead(string line, int fromIndex, int toIndex) => new(DiffLineType.Header, line, fromIndex, toIndex);
-        public static HunkLine AsLine(string line, int fromIndex, int toIndex) => new(DiffLineType.None, line, fromIndex, toIndex);
-        public static HunkLine AsControl(string line, int fromIndex, int toIndex) => new(DiffLineType.Control, line, fromIndex, toIndex);
-        public static HunkLine AsAdded(string line, int toIndex) => new(DiffLineType.Added, line, null, toIndex);
-        public static HunkLine AsRemoved(string line, int fromIndex) => new(DiffLineType.Removed, line, fromIndex, null);
+        public static HunkLine AsHead(string line, int fromIndex, int toIndex) =>
+            new(DiffLineType.Header, line, fromIndex, toIndex);
+
+        public static HunkLine AsLine(string line, int fromIndex, int toIndex) =>
+            new(DiffLineType.None, line, fromIndex, toIndex);
+
+        public static HunkLine AsControl(string line, int fromIndex, int toIndex) =>
+            new(DiffLineType.Control, line, fromIndex, toIndex);
+
+        public static HunkLine AsAdded(string line, int toIndex) =>
+            new(DiffLineType.Added, line, null, toIndex);
+
+        public static HunkLine AsRemoved(string line, int fromIndex) =>
+            new(DiffLineType.Removed, line, fromIndex, null);
     }
 }

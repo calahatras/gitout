@@ -17,11 +17,21 @@ namespace GitOut.Features.Git.Stage
 
         private string text;
 
-        public EditPatchViewModel(int fromRangeIndex, IEnumerable<HunkLine> lines, HunkLine preline, HunkLine postline)
+        public EditPatchViewModel(
+            int fromRangeIndex,
+            IEnumerable<HunkLine> lines,
+            HunkLine preline,
+            HunkLine postline
+        )
         {
             this.fromRangeIndex = fromRangeIndex;
             this.lines = lines;
-            text = string.Join(Environment.NewLine, lines.Where(line => line.Type != DiffLineType.Removed).Select(line => line.StrippedLine));
+            text = string.Join(
+                Environment.NewLine,
+                lines
+                    .Where(line => line.Type != DiffLineType.Removed)
+                    .Select(line => line.StrippedLine)
+            );
             this.preline = preline;
             this.postline = postline;
         }
@@ -34,7 +44,8 @@ namespace GitOut.Features.Git.Stage
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public IHunkLineVisitor GetHunkVisitor(PatchMode mode) => new EditPatchHunkLineVisitor(this);
+        public IHunkLineVisitor GetHunkVisitor(PatchMode mode) =>
+            new EditPatchHunkLineVisitor(this);
 
         public static EditPatchViewModel StageFrom(IHunkLineVisitor visitor)
         {
@@ -65,7 +76,11 @@ namespace GitOut.Features.Git.Stage
             return new EditPatchViewModel(fromRangeIndex, lines, preline, postline);
         }
 
-        private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetProperty<T>(
+            ref T prop,
+            T value,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             if (!ReferenceEquals(prop, value))
             {
@@ -80,20 +95,36 @@ namespace GitOut.Features.Git.Stage
         {
             private readonly EditPatchViewModel parent;
 
-            public EditPatchHunkLineVisitor(EditPatchViewModel editPatchViewModel) => parent = editPatchViewModel;
+            public EditPatchHunkLineVisitor(EditPatchViewModel editPatchViewModel) =>
+                parent = editPatchViewModel;
 
             public bool IsDone => true;
 
             public HunkLine Current => throw new NotImplementedException();
 
             public HunkLine FindPostpositionHunk() => parent.postline;
+
             public HunkLine FindPrepositionHunk() => parent.preline;
-            public IEnumerable<HunkLine> TraverseSelectionHunks() => parent.Text
-                .Split(Environment.NewLine)
-                .Select((line, index) => HunkLine.AsAdded($"+{line}", parent.fromRangeIndex + index))
-                .Concat(parent.lines
-                .Where(line => line.Type == DiffLineType.None || line.Type == DiffLineType.Removed)
-                .Select((line, index) => HunkLine.AsRemoved($"-{line.StrippedLine}", parent.fromRangeIndex + index)));
+
+            public IEnumerable<HunkLine> TraverseSelectionHunks() =>
+                parent
+                    .Text.Split(Environment.NewLine)
+                    .Select(
+                        (line, index) => HunkLine.AsAdded($"+{line}", parent.fromRangeIndex + index)
+                    )
+                    .Concat(
+                        parent
+                            .lines.Where(line =>
+                                line.Type == DiffLineType.None || line.Type == DiffLineType.Removed
+                            )
+                            .Select(
+                                (line, index) =>
+                                    HunkLine.AsRemoved(
+                                        $"-{line.StrippedLine}",
+                                        parent.fromRangeIndex + index
+                                    )
+                            )
+                    );
         }
     }
 }

@@ -30,14 +30,25 @@ namespace GitOut.Features.Git.Diff
             {
                 if (IsBinaryFile)
                 {
-                    return new GitDiffResult(new BlobDiffResult(stream ?? throw new InvalidOperationException("Cannot create binary diff without stream")));
+                    return new GitDiffResult(
+                        new BlobDiffResult(
+                            stream
+                                ?? throw new InvalidOperationException(
+                                    "Cannot create binary diff without stream"
+                                )
+                        )
+                    );
                 }
                 if (header is null)
                 {
                     // Note: if parts.Count is 3 then we have an empty file
                     return parts.Count > 3
-                        ? throw new InvalidOperationException("Expected header and parts but none was found")
-                        : new GitDiffResult(new TextDiffResult(string.Empty, Array.Empty<GitDiffHunk>()));
+                        ? throw new InvalidOperationException(
+                            "Expected header and parts but none was found"
+                        )
+                        : new GitDiffResult(
+                            new TextDiffResult(string.Empty, Array.Empty<GitDiffHunk>())
+                        );
                 }
                 var lastHunk = GitDiffHunk.Parse(parts);
                 hunks.Add(lastHunk);
@@ -63,7 +74,9 @@ namespace GitOut.Features.Git.Diff
                             content.Add(line);
                         }
                     }
-                    Feed($"{GitDiffHunk.HunkIdentifier} -1,{content.Count} +1,{content.Count} {GitDiffHunk.HunkIdentifier}");
+                    Feed(
+                        $"{GitDiffHunk.HunkIdentifier} -1,{content.Count} +1,{content.Count} {GitDiffHunk.HunkIdentifier}"
+                    );
                     char diffChar = type == GitStatusChangeType.Untracked ? '+' : ' ';
                     foreach (string line in content)
                     {

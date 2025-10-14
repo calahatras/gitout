@@ -13,12 +13,13 @@ namespace GitOut.Features.Git.Log
             typeof(INotifyCollectionChanged),
             typeof(GitFileTree)
         );
-        public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(
-            nameof(SelectedItem),
-            typeof(object),
-            typeof(GitFileTree),
-            new PropertyMetadata(null, OnSelectedItemChanged)
-        );
+        public static readonly DependencyProperty SelectedItemProperty =
+            DependencyProperty.Register(
+                nameof(SelectedItem),
+                typeof(object),
+                typeof(GitFileTree),
+                new PropertyMetadata(null, OnSelectedItemChanged)
+            );
 
         public GitFileTree()
         {
@@ -38,7 +39,10 @@ namespace GitOut.Features.Git.Log
             set => SetValue(RootFilesProperty, value);
         }
 
-        private static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnSelectedItemChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is GitFileTree control)
             {
@@ -59,7 +63,10 @@ namespace GitOut.Features.Git.Log
                     DependencyObject childContainer = generator.ContainerFromItem(item);
                     if (childContainer is TreeViewItem childTreeViewItem)
                     {
-                        if (childTreeViewItem.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+                        if (
+                            childTreeViewItem.ItemContainerGenerator.Status
+                            == GeneratorStatus.ContainersGenerated
+                        )
                         {
                             if (FocusChild(childTreeViewItem.ItemContainerGenerator, child))
                             {
@@ -68,7 +75,8 @@ namespace GitOut.Features.Git.Log
                         }
                         else
                         {
-                            childTreeViewItem.ItemContainerGenerator.StatusChanged += OnContainerStatusChanged;
+                            childTreeViewItem.ItemContainerGenerator.StatusChanged +=
+                                OnContainerStatusChanged;
                         }
                     }
                 }
@@ -77,7 +85,10 @@ namespace GitOut.Features.Git.Log
 
             void OnContainerStatusChanged(object? sender, EventArgs args)
             {
-                if (sender is ItemContainerGenerator generator && generator.Status == GeneratorStatus.ContainersGenerated)
+                if (
+                    sender is ItemContainerGenerator generator
+                    && generator.Status == GeneratorStatus.ContainersGenerated
+                )
                 {
                     FocusChild(generator, e.NewValue);
                     generator.StatusChanged -= OnContainerStatusChanged;

@@ -13,22 +13,34 @@ namespace GitOut.Features.Material.Progress
             nameof(Diameter),
             typeof(double),
             typeof(CircularProgressIndicator),
-            new FrameworkPropertyMetadata(32d, FrameworkPropertyMetadataOptions.AffectsMeasure, OnDiameterChanged)
+            new FrameworkPropertyMetadata(
+                32d,
+                FrameworkPropertyMetadataOptions.AffectsMeasure,
+                OnDiameterChanged
+            )
         );
 
         public static readonly DependencyProperty StrokeProperty = DependencyProperty.Register(
             nameof(Stroke),
             typeof(Brush),
             typeof(CircularProgressIndicator),
-            new FrameworkPropertyMetadata(Brushes.White, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(
+                Brushes.White,
+                FrameworkPropertyMetadataOptions.AffectsRender
+            )
         );
 
-        public static readonly DependencyProperty StrokeThicknessProperty = DependencyProperty.Register(
-            nameof(StrokeThickness),
-            typeof(double),
-            typeof(CircularProgressIndicator),
-            new FrameworkPropertyMetadata(3d, FrameworkPropertyMetadataOptions.None, OnStrokeThicknessChanged)
-        );
+        public static readonly DependencyProperty StrokeThicknessProperty =
+            DependencyProperty.Register(
+                nameof(StrokeThickness),
+                typeof(double),
+                typeof(CircularProgressIndicator),
+                new FrameworkPropertyMetadata(
+                    3d,
+                    FrameworkPropertyMetadataOptions.None,
+                    OnStrokeThicknessChanged
+                )
+            );
 
         public static readonly DependencyProperty ScaleProperty = DependencyProperty.Register(
             nameof(Scale),
@@ -37,19 +49,21 @@ namespace GitOut.Features.Material.Progress
             new FrameworkPropertyMetadata(1d, FrameworkPropertyMetadataOptions.AffectsParentMeasure)
         );
 
-        public static readonly DependencyProperty ScaledStrokeThicknessProperty = DependencyProperty.Register(
-            nameof(ScaledStrokeThickness),
-            typeof(double),
-            typeof(CircularProgressIndicator),
-            new FrameworkPropertyMetadata(3d, FrameworkPropertyMetadataOptions.AffectsRender)
-        );
+        public static readonly DependencyProperty ScaledStrokeThicknessProperty =
+            DependencyProperty.Register(
+                nameof(ScaledStrokeThickness),
+                typeof(double),
+                typeof(CircularProgressIndicator),
+                new FrameworkPropertyMetadata(3d, FrameworkPropertyMetadataOptions.AffectsRender)
+            );
 
-        public static readonly DependencyProperty ShowProgressProperty = DependencyProperty.Register(
-            nameof(ShowProgress),
-            typeof(bool),
-            typeof(CircularProgressIndicator),
-            new PropertyMetadata(false, OnShowProgressChanged)
-        );
+        public static readonly DependencyProperty ShowProgressProperty =
+            DependencyProperty.Register(
+                nameof(ShowProgress),
+                typeof(bool),
+                typeof(CircularProgressIndicator),
+                new PropertyMetadata(false, OnShowProgressChanged)
+            );
 
         private readonly ThrottleTimer<bool> debounceShowProgress;
 
@@ -75,7 +89,8 @@ namespace GitOut.Features.Material.Progress
                     {
                         CreateExitAnimation();
                     }
-                });
+                }
+            );
         }
 
         protected override void OnInitialized(EventArgs e)
@@ -128,7 +143,7 @@ namespace GitOut.Features.Material.Progress
             )
             {
                 EasingFunction = new ExponentialEase(),
-                BeginTime = TimeSpan.FromMilliseconds(150)
+                BeginTime = TimeSpan.FromMilliseconds(150),
             };
             Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath(OpacityProperty));
             var widthAnimation = new DoubleAnimation(
@@ -136,7 +151,7 @@ namespace GitOut.Features.Material.Progress
                 new Duration(TimeSpan.FromMilliseconds(200))
             )
             {
-                EasingFunction = new ExponentialEase()
+                EasingFunction = new ExponentialEase(),
             };
             Storyboard.SetTargetProperty(widthAnimation, new PropertyPath(WidthProperty));
             var story = new Storyboard();
@@ -149,21 +164,15 @@ namespace GitOut.Features.Material.Progress
         {
             var opacityTiming = TimeSpan.FromMilliseconds(300);
             var widthTiming = TimeSpan.FromMilliseconds(200);
-            var opacityAnimation = new DoubleAnimation(
-                0,
-                new Duration(opacityTiming)
-            )
-            {
-                EasingFunction = new ExponentialEase()
-            };
-            Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath(OpacityProperty));
-            var widthAnimation = new DoubleAnimation(
-                0,
-                new Duration(widthTiming)
-            )
+            var opacityAnimation = new DoubleAnimation(0, new Duration(opacityTiming))
             {
                 EasingFunction = new ExponentialEase(),
-                BeginTime = opacityTiming
+            };
+            Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath(OpacityProperty));
+            var widthAnimation = new DoubleAnimation(0, new Duration(widthTiming))
+            {
+                EasingFunction = new ExponentialEase(),
+                BeginTime = opacityTiming,
             };
             Storyboard.SetTargetProperty(widthAnimation, new PropertyPath(WidthProperty));
             var story = new Storyboard();
@@ -172,7 +181,10 @@ namespace GitOut.Features.Material.Progress
             BeginStoryboard(story);
         }
 
-        private static void OnDiameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDiameterChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is CircularProgressIndicator circle)
             {
@@ -183,7 +195,10 @@ namespace GitOut.Features.Material.Progress
             }
         }
 
-        private static void OnStrokeThicknessChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnStrokeThicknessChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is CircularProgressIndicator circle)
             {
@@ -192,7 +207,10 @@ namespace GitOut.Features.Material.Progress
             }
         }
 
-        private static void OnShowProgressChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnShowProgressChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is CircularProgressIndicator circle && e.NewValue is bool value)
             {
@@ -208,15 +226,16 @@ namespace GitOut.Features.Material.Progress
 
             private T? lastValue;
 
-            public ThrottleTimer(
-                TimeSpan throttleTime,
-                Action<T> init,
-                Action<T> update
-            )
+            public ThrottleTimer(TimeSpan throttleTime, Action<T> init, Action<T> update)
             {
                 this.init = init;
                 this.update = update;
-                t = new DispatcherTimer(throttleTime, DispatcherPriority.Normal, OnThrottled, Application.Current.Dispatcher);
+                t = new DispatcherTimer(
+                    throttleTime,
+                    DispatcherPriority.Normal,
+                    OnThrottled,
+                    Application.Current.Dispatcher
+                );
             }
 
             public void Update(T value)

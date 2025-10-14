@@ -6,6 +6,6 @@ namespace GitOut.Features.Git.Patch
         AddIndex,
         AddWorkspace,
         ResetIndex,
-        ResetWorkspace
+        ResetWorkspace,
     }
 }

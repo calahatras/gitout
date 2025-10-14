@@ -52,21 +52,33 @@ namespace GitOut.Features.Git.Diff
         private void CopySelectedText(object sender, ExecutedRoutedEventArgs e)
         {
             e.Handled = true;
-            Clipboard.SetText(HunksViewer.Selection.Text.Replace('\u00B7', ' '), TextDataFormat.UnicodeText);
+            Clipboard.SetText(
+                HunksViewer.Selection.Text.Replace('\u00B7', ' '),
+                TextDataFormat.UnicodeText
+            );
         }
 
-        private static void OnDocumentUpdated(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDocumentUpdated(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             if (d is TextDiffControl textControl)
             {
-                SynchronizationContext.Current?.Post(d =>
-                {
-                    var control = (TextDiffControl)d!;
-                    if (control.DataContext is IDocumentSelectionViewModel vm && control.HunksViewer.Document == e.NewValue)
+                SynchronizationContext.Current?.Post(
+                    d =>
                     {
-                        vm.Selection = control.HunksViewer.Selection;
-                    }
-                }, textControl);
+                        var control = (TextDiffControl)d!;
+                        if (
+                            control.DataContext is IDocumentSelectionViewModel vm
+                            && control.HunksViewer.Document == e.NewValue
+                        )
+                        {
+                            vm.Selection = control.HunksViewer.Selection;
+                        }
+                    },
+                    textControl
+                );
             }
         }
     }

@@ -22,21 +22,19 @@ namespace GitOut.Features.Git.Log
                 o => true,
                 System.Windows.TextDataFormat.UnicodeText
             );
-            CheckoutBranchCommand = new AsyncCallbackCommand(
-                async () =>
+            CheckoutBranchCommand = new AsyncCallbackCommand(async () =>
+            {
+                try
                 {
-                    try
-                    {
-                        await repository.CheckoutBranchAsync(model);
-                        notifier.NotifyLogChanged();
-                        snack.ShowSuccess($"Checked out branch '{Name}'");
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        snack.ShowError(e.Message, e, TimeSpan.FromSeconds(5));
-                    }
+                    await repository.CheckoutBranchAsync(model);
+                    notifier.NotifyLogChanged();
+                    snack.ShowSuccess($"Checked out branch '{Name}'");
                 }
-            );
+                catch (InvalidOperationException e)
+                {
+                    snack.ShowError(e.Message, e, TimeSpan.FromSeconds(5));
+                }
+            });
             DeleteBranchCommand = new AsyncCallbackCommand(
                 async () =>
                 {
@@ -47,7 +45,8 @@ namespace GitOut.Features.Git.Log
                     }
                     const string undoActionText = "UNDO";
                     const string forceDeleteActionText = "FORCE";
-                    ISnackBuilder? builder = Snack.Builder()
+                    ISnackBuilder? builder = Snack
+                        .Builder()
                         .WithMessage(result.Message)
                         .WithDuration(Timeout.InfiniteTimeSpan);
                     if (result.UndoCommand is not null)
@@ -63,8 +62,12 @@ namespace GitOut.Features.Git.Log
                     {
                         switch (action.Text)
                         {
-                            case undoActionText: result.UndoCommand!.Execute(null); break;
-                            case forceDeleteActionText: result.ForceDeleteCommand!.Execute(null); break;
+                            case undoActionText:
+                                result.UndoCommand!.Execute(null);
+                                break;
+                            case forceDeleteActionText:
+                                result.ForceDeleteCommand!.Execute(null);
+                                break;
                         }
                         notifier.NotifyLogChanged();
                     }

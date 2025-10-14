@@ -25,8 +25,16 @@ namespace GitOut.Features.IO
             }
 
             Directory = path;
-            string[] segments = Directory.Trim(GitDirectorySeparatorChar).Split(GitDirectorySeparatorChar);
-            parent = new Lazy<RelativeDirectoryPath>(() => segments[..^1].Length == 0 ? Root : new RelativeDirectoryPath(string.Join(GitDirectorySeparatorChar, segments[..^1])));
+            string[] segments = Directory
+                .Trim(GitDirectorySeparatorChar)
+                .Split(GitDirectorySeparatorChar);
+            parent = new Lazy<RelativeDirectoryPath>(() =>
+                segments[..^1].Length == 0
+                    ? Root
+                    : new RelativeDirectoryPath(
+                        string.Join(GitDirectorySeparatorChar, segments[..^1])
+                    )
+            );
             Segments = segments;
             Name = FileName.Create(segments[^1] ?? string.Empty);
         }
@@ -39,6 +47,10 @@ namespace GitOut.Features.IO
         public override string ToString() => Directory;
 
         public static RelativeDirectoryPath Create(string path) => new(path);
-        internal RelativeDirectoryPath Append(string directoryName) => new($"{Directory}{(string.IsNullOrWhiteSpace(Directory) ? string.Empty : GitDirectorySeparatorChar)}{directoryName}");
+
+        internal RelativeDirectoryPath Append(string directoryName) =>
+            new(
+                $"{Directory}{(string.IsNullOrWhiteSpace(Directory) ? string.Empty : GitDirectorySeparatorChar)}{directoryName}"
+            );
     }
 }

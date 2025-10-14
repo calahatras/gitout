@@ -29,7 +29,10 @@ namespace GitOut.Features.Git.Diff
         {
             if (line.Length < 98)
             {
-                throw new ArgumentException($"Line must be longer than 100 chars, was {line.Length}", nameof(line));
+                throw new ArgumentException(
+                    $"Line must be longer than 100 chars, was {line.Length}",
+                    nameof(line)
+                );
             }
 
             _ = Enum.TryParse(new string(line[4..5]), out PosixFileModes sourceUser);
@@ -51,14 +54,16 @@ namespace GitOut.Features.Git.Diff
                 "A" => GitDiffType.Create,
                 "D" => GitDiffType.Delete,
                 "U" => GitDiffType.Unmerged,
-                _ => GitDiffType.None
+                _ => GitDiffType.None,
             };
 
-            GitFileType fileType = new string(type == GitDiffType.Create ? line[8..11] : line[1..4]) switch
+            GitFileType fileType = new string(
+                type == GitDiffType.Create ? line[8..11] : line[1..4]
+            ) switch
             {
                 "100" => GitFileType.Blob,
                 "040" => GitFileType.Tree,
-                _ => GitFileType.None
+                _ => GitFileType.None,
             };
 
             return new GitDiffFileEntryBuilder(
@@ -102,7 +107,9 @@ namespace GitOut.Features.Git.Diff
             {
                 if (Type is GitDiffType.CopyEdit or GitDiffType.RenameEdit)
                 {
-                    throw new InvalidOperationException("Cannot build file entry for copy or rename without destination path");
+                    throw new InvalidOperationException(
+                        "Cannot build file entry for copy or rename without destination path"
+                    );
                 }
                 var path = RelativeDirectoryPath.Create(sourcePath);
                 return new GitDiffFileEntry(

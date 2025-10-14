@@ -11,8 +11,9 @@ public sealed class TextPromptViewModel
 
     public TextPromptViewModel(INavigationService navigation)
     {
-        options = navigation.GetOptions<TextPromptOptions>(typeof(TextPromptPage).FullName!)
-                ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
+        options =
+            navigation.GetOptions<TextPromptOptions>(typeof(TextPromptPage).FullName!)
+            ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
         CancelCommand = new CallbackCommand(navigation.Close);
         SetResultCommand = new NotNullCallbackCommand<string>(
             input => navigation.Close(options.ResultConverter?.Invoke(input) ?? input),

@@ -6,13 +6,19 @@ using System.ComponentModel;
 
 namespace GitOut.Features.Collections
 {
-    public class SortedObservableCollection<T> : ICollection<T>, IReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
+    public class SortedObservableCollection<T>
+        : ICollection<T>,
+            IReadOnlyCollection<T>,
+            INotifyCollectionChanged,
+            INotifyPropertyChanged
     {
         private readonly Func<T, T, int> comparer;
         private readonly IList<T> backingCollection = new List<T>();
 
         public SortedObservableCollection(Func<T, T, int> comparer) => this.comparer = comparer;
-        public SortedObservableCollection(IEnumerable<T> initialItems, Func<T, T, int> comparer) : this(comparer)
+
+        public SortedObservableCollection(IEnumerable<T> initialItems, Func<T, T, int> comparer)
+            : this(comparer)
         {
             foreach (T item in initialItems)
             {
@@ -39,7 +45,10 @@ namespace GitOut.Features.Collections
         public void Clear()
         {
             backingCollection.Clear();
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            CollectionChanged?.Invoke(
+                this,
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)
+            );
         }
 
         public bool Contains(T item)
@@ -47,12 +56,17 @@ namespace GitOut.Features.Collections
             int index = FindSortedIndex(item);
             return backingCollection.Count >= index && backingCollection[index]!.Equals(item);
         }
+
         public int IndexOf(T item) => FindSortedIndex(item);
 
         public bool Remove(T item)
         {
             int index = FindSortedIndex(item);
-            if (backingCollection.Count < index || backingCollection[index] is not T t || !t.Equals(item))
+            if (
+                backingCollection.Count < index
+                || backingCollection[index] is not T t
+                || !t.Equals(item)
+            )
             {
                 return false;
             }
@@ -64,18 +78,31 @@ namespace GitOut.Features.Collections
         {
             T item = backingCollection[index];
             backingCollection.RemoveAt(index);
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+            CollectionChanged?.Invoke(
+                this,
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Remove,
+                    item,
+                    index
+                )
+            );
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
 
-        public void CopyTo(T[] array, int arrayIndex) => backingCollection.CopyTo(array, arrayIndex);
+        public void CopyTo(T[] array, int arrayIndex) =>
+            backingCollection.CopyTo(array, arrayIndex);
 
         public IEnumerator<T> GetEnumerator() => backingCollection.GetEnumerator();
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
         private void Insert(int index, T item)
         {
             backingCollection.Insert(index, item);
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
+            CollectionChanged?.Invoke(
+                this,
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index)
+            );
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
 

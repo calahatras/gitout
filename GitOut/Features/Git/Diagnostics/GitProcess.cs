@@ -30,9 +30,13 @@ namespace GitOut.Features.Git.Diagnostics
             this.telemetry = telemetry;
         }
 
-        public Task<ProcessEventArgs> ExecuteAsync(CancellationToken cancellationToken = default) => ExecuteAsync(new StringBuilder(), cancellationToken);
+        public Task<ProcessEventArgs> ExecuteAsync(CancellationToken cancellationToken = default) =>
+            ExecuteAsync(new StringBuilder(), cancellationToken);
 
-        public async Task<ProcessEventArgs> ExecuteAsync(StringBuilder writer, CancellationToken cancellationToken = default)
+        public async Task<ProcessEventArgs> ExecuteAsync(
+            StringBuilder writer,
+            CancellationToken cancellationToken = default
+        )
         {
             using var exec = new Process
             {
@@ -46,8 +50,8 @@ namespace GitOut.Features.Git.Diagnostics
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = workingDirectory.Directory
-                }
+                    WorkingDirectory = workingDirectory.Directory,
+                },
             };
             exec.Start();
 
@@ -75,7 +79,9 @@ namespace GitOut.Features.Git.Diagnostics
             bool isSuccessful = await source.Task;
 
             TimeSpan duration = exec.ExitTime - exec.StartTime;
-            Trace.WriteLine($"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms");
+            Trace.WriteLine(
+                $"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms"
+            );
             var args = new ProcessEventArgs(
                 CommandLineExecutable,
                 workingDirectory,
@@ -128,30 +134,36 @@ namespace GitOut.Features.Git.Diagnostics
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = workingDirectory.Directory
-                }
+                    WorkingDirectory = workingDirectory.Directory,
+                },
             };
             exec.Start();
 
             var stream = new MemoryStream();
             await exec.StandardOutput.BaseStream.CopyToAsync(stream, cancellationToken);
             exec.WaitForExit();
-            Trace.WriteLine($"Running command {arguments.Arguments}: {(exec.ExitTime - exec.StartTime).TotalMilliseconds}ms");
+            Trace.WriteLine(
+                $"Running command {arguments.Arguments}: {(exec.ExitTime - exec.StartTime).TotalMilliseconds}ms"
+            );
             stream.Position = 0;
-            telemetry.Report(new ProcessEventArgs(
-                CommandLineExecutable,
-                workingDirectory,
-                arguments,
-                new DateTimeOffset(exec.StartTime),
-                exec.ExitTime - exec.StartTime,
-                new StringBuilder(),
-                new string[] { "Read stream" },
-                Array.Empty<string>()
-            ));
+            telemetry.Report(
+                new ProcessEventArgs(
+                    CommandLineExecutable,
+                    workingDirectory,
+                    arguments,
+                    new DateTimeOffset(exec.StartTime),
+                    exec.ExitTime - exec.StartTime,
+                    new StringBuilder(),
+                    new string[] { "Read stream" },
+                    Array.Empty<string>()
+                )
+            );
             return stream;
         }
 
-        public async IAsyncEnumerable<string> ReadLinesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<string> ReadLinesAsync(
+            [EnumeratorCancellation] CancellationToken cancellationToken = default
+        )
         {
             var dataCounter = new CountdownEvent(3);
             var dataReceivedEvent = new ManualResetEventSlim(false);
@@ -167,8 +179,8 @@ namespace GitOut.Features.Git.Diagnostics
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = workingDirectory.Directory
-                }
+                    WorkingDirectory = workingDirectory.Directory,
+                },
             };
             var output = new List<string>();
             var error = new List<string>();
@@ -196,16 +208,20 @@ namespace GitOut.Features.Git.Diagnostics
             }
             queue.Complete();
             TimeSpan duration = exec.ExitTime - exec.StartTime;
-            Trace.WriteLine($"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms");
-            telemetry.Report(new ProcessEventArgs(
-                CommandLineExecutable,
-                workingDirectory,
-                arguments,
-                new DateTimeOffset(exec.StartTime),
-                duration,
-                new StringBuilder(),
-                output.AsReadOnly(),
-                error.AsReadOnly())
+            Trace.WriteLine(
+                $"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms"
+            );
+            telemetry.Report(
+                new ProcessEventArgs(
+                    CommandLineExecutable,
+                    workingDirectory,
+                    arguments,
+                    new DateTimeOffset(exec.StartTime),
+                    duration,
+                    new StringBuilder(),
+                    output.AsReadOnly(),
+                    error.AsReadOnly()
+                )
             );
 
             void OnHandleOutputData(object sender, DataReceivedEventArgs e)

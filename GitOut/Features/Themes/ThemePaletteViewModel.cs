@@ -46,23 +46,27 @@ namespace GitOut.Features.Themes
         public Brush SecondaryAccentBrush { get; }
         public Brush SecondaryAccentForegroundBrush { get; }
 
-        public static ThemePaletteViewModel CreateDefaultTheme() => new(
-            "Default",
-            SystemParameters.WindowGlassColor,
-            Colors.White,
-            SystemParameters.WindowGlassBrush,
-            Brushes.White,
-            SystemParameters.WindowGlassBrush,
-            Brushes.White,
-            SystemParameters.WindowGlassBrush,
-            Brushes.White,
-            SystemParameters.WindowGlassBrush,
-            Brushes.White
-        );
+        public static ThemePaletteViewModel CreateDefaultTheme() =>
+            new(
+                "Default",
+                SystemParameters.WindowGlassColor,
+                Colors.White,
+                SystemParameters.WindowGlassBrush,
+                Brushes.White,
+                SystemParameters.WindowGlassBrush,
+                Brushes.White,
+                SystemParameters.WindowGlassBrush,
+                Brushes.White,
+                SystemParameters.WindowGlassBrush,
+                Brushes.White
+            );
 
         public static ThemePaletteViewModel CreateThemeFromResource(FileName resourceName)
         {
-            var uri = new Uri($"pack://application:,,,/Themes/variants/AppTheme.{resourceName.Name}.xaml", UriKind.RelativeOrAbsolute);
+            var uri = new Uri(
+                $"pack://application:,,,/Themes/variants/AppTheme.{resourceName.Name}.xaml",
+                UriKind.RelativeOrAbsolute
+            );
             var resource = new ResourceDictionary() { Source = uri };
             return new ThemePaletteViewModel(
                 resourceName.Name,

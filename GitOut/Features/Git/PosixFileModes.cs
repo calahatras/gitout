@@ -8,6 +8,6 @@ namespace GitOut.Features.Git
         None,
         Execute = 1,
         Write = 2,
-        Read = 4
+        Read = 4,
     }
 }

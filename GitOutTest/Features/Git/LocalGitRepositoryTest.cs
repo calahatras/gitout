@@ -28,11 +28,21 @@ namespace GitOut.Features.Git
             GitObjectId change1 = GitCommitId.FromHash(new string('b', 40));
             GitObjectId change2 = GitCommitId.FromHash(new string('c', 40));
 
-            IAsyncEnumerable<GitDiffFileEntry> result = actor.ListDiffChangesAsync(change1, change2, null);
+            IAsyncEnumerable<GitDiffFileEntry> result = actor.ListDiffChangesAsync(
+                change1,
+                change2,
+                null
+            );
             await foreach (GitDiffFileEntry item in result) { }
 
-            Assert.That(capturedProcessOptions.Values[0].Arguments, Is.EqualTo("--no-optional-locks diff-tree --no-color -z cccccccccccccccccccccccccccccccccccccccc bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
-            A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).MustHaveHappenedOnceExactly();
+            Assert.That(
+                capturedProcessOptions.Values[0].Arguments,
+                Is.EqualTo(
+                    "--no-optional-locks diff-tree --no-color -z cccccccccccccccccccccccccccccccccccccccc bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                )
+            );
+            A.CallTo(() => processFactory.Create(path, capturedProcessOptions._))
+                .MustHaveHappenedOnceExactly();
         }
     }
 }
