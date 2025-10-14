@@ -142,7 +142,10 @@ public class CSharpSyntaxHighlighter : ISyntaxHighlighter
         );
         foreach (IDecoratedMatch match in matches)
         {
-            yield return match.Apply(line);
+            foreach (Run run in match.Apply(line))
+            {
+                yield return run;
+            }
         }
     }
 
@@ -186,7 +189,7 @@ public class CSharpSyntaxHighlighter : ISyntaxHighlighter
         public int Offset { get; }
         public int EndIndex { get; }
 
-        public Run Apply(string line) => new(line[Offset..EndIndex]);
+        public IEnumerable<Run> Apply(string line) => new List<Run> { new(line[Offset..EndIndex]) };
     }
 
     private class ColorAppliedMatch : IDecoratedMatch
@@ -203,6 +206,7 @@ public class CSharpSyntaxHighlighter : ISyntaxHighlighter
         public int Index { get; }
         public int Length { get; }
 
-        public Run Apply(string line) => new(line[Index..(Index + Length)]) { Foreground = color };
+        public IEnumerable<Run> Apply(string line) =>
+            [new(line[Index..(Index + Length)]) { Foreground = color }];
     }
 }

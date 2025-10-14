@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using GitOut.Features.Git.Files;
 using GitOut.Features.Text;
 
 namespace GitOut.Features.Git.Diff;
@@ -32,10 +33,17 @@ public class GitDiffViewModel : IDocumentSelectionViewModel
 
     public static GitDiffViewModel ParseDiff(
         IEnumerable<GitDiffHunk> result,
+        FileExtension extension,
         DiffDisplayOptions display
     )
     {
-        ISyntaxHighlighter highlighter = new CSharpSyntaxHighlighter();
+        ISyntaxHighlighter highlighter = extension.Value switch
+        {
+            ".html" => new HtmlSyntaxHighlighter(),
+            ".xml" => new HtmlSyntaxHighlighter(),
+            ".xaml" => new HtmlSyntaxHighlighter(),
+            _ => new CSharpSyntaxHighlighter(),
+        };
 
         var document = new FlowDocument
         {

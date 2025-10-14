@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using GitOut.Features.Collections;
+using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Patch;
 
 namespace GitOut.Features.Git.Diff;
@@ -24,6 +25,13 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
         ".tiff",
         ".webp",
     };
+
+    public static readonly DependencyProperty FileExtensionProperty = DependencyProperty.Register(
+        nameof(FileExtension),
+        typeof(FileExtension),
+        typeof(GitDiffControl),
+        new PropertyMetadata(null)
+    );
 
     public static readonly DependencyProperty DiffProperty = DependencyProperty.Register(
         nameof(Diff),
@@ -59,6 +67,12 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
     {
         get => (DiffContext)GetValue(DiffProperty);
         set => SetValue(DiffProperty, value);
+    }
+
+    public FileExtension? FileExtension
+    {
+        get => (FileExtension)GetValue(FileExtensionProperty);
+        set => SetValue(FileExtensionProperty, value);
     }
 
     public bool ShowSpacesAsDots
@@ -126,7 +140,7 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
                 (Brush)Application.Current.Resources["MaterialLightDividers"],
                 (Brush)Application.Current.Resources["MaterialGray400"]
             );
-        var vm = GitDiffViewModel.ParseDiff(hunks, display);
+        var vm = GitDiffViewModel.ParseDiff(hunks, FileExtension!, display);
         CurrentContent = vm;
     }
 
@@ -143,10 +157,10 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
             }
             else if (e.NewValue is DiffContext context)
             {
-                string extension = context.FileExtension;
+                control.FileExtension = context.FileExtension;
                 if (context.Blob is not null)
                 {
-                    if (IsImageFile(extension))
+                    if (IsImageFile(control.FileExtension))
                     {
                         if (
                             context.DestinationId is not null
@@ -175,7 +189,7 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
             }
         }
 
-        static bool IsImageFile(string extension) => ImageFileExtensions.Contains(extension);
+        static bool IsImageFile(FileExtension extension) => ImageFileExtensions.Contains(extension.Value);
     }
 
     private static void OnSpacesViewModeChanged(

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using GitOut.Features.Git.Files;
 using GitOut.Features.IO;
 
 namespace GitOut.Features.Git.Diff;
@@ -8,7 +9,7 @@ public class DiffContext
 {
     private DiffContext(FileInfo info, GitFileId? source, GitFileId? destination)
     {
-        FileExtension = info.Extension;
+        FileExtension = FileExtension.FromFileInfo(info);
         SourceId = source;
         DestinationId = destination;
     }
@@ -29,7 +30,7 @@ public class DiffContext
     )
         : this(info, source, destination) => Text = result;
 
-    public string FileExtension { get; }
+    public FileExtension FileExtension { get; }
 
     public GitFileId? SourceId { get; }
     public GitFileId? DestinationId { get; }
