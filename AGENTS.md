@@ -1,7 +1,7 @@
 # Gitout
 
 Gitout is a graphical tool to use git which is a version control system.
-It features varios views from which a user can run git commands from the UI
+It features various views from which a user can run git commands from the UI
 
 - Workspaces - a list of git folders.
 - Log - a version tree with a list of git commits each displaying a subject line, date, and author. A user can select commits and compare them, showing file versions and changes.
