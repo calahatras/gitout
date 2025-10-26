@@ -450,13 +450,21 @@
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="1">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
                       <Button
                         Style="{StaticResource MaterialButtonStyle}"
                         Command="{Binding FetchRemotesCommand}"
                       >
-                                                FETCH
-                                            </Button
+                        FETCH
+                      </Button
+                      >
+                      <Button
+                        Style="{StaticResource MaterialButtonStyle}"
+                        Command="{Binding PruneRemotesCommand}"
+                        ToolTip="Prune selected remotes"
+                      >
+                        PRUNE
+                      </Button
                       >
                     </StackPanel>
                   </Grid>

@@ -119,6 +119,10 @@ namespace GitOut.Features.Git
         public Task FetchAsync(GitRemote remote) =>
             CreateProcess(ProcessOptions.FromArguments($"fetch {remote.Name}")).ExecuteAsync();
 
+        public Task PruneRemoteAsync(GitRemote remote) =>
+            CreateProcess(ProcessOptions.FromArguments($"remote prune {remote.Name}"))
+                .ExecuteAsync();
+
         public async Task<IEnumerable<GitHistoryEvent>> LogAsync(LogOptions options)
         {
             var historyByCommitId = new Dictionary<GitCommitId, GitHistoryEvent>();

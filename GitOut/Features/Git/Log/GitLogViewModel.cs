@@ -185,6 +185,7 @@ namespace GitOut.Features.Git.Log
             });
 
             FetchRemotesCommand = new AsyncCallbackCommand(FetchRemotesAsync);
+            PruneRemotesCommand = new AsyncCallbackCommand(PruneRemotesAsync);
             CheckoutCommitCommand = new AsyncCallbackCommand<GitCommitId>(
                 async id =>
                 {
@@ -422,6 +423,7 @@ namespace GitOut.Features.Git.Log
         public ICommand NavigateToStageAreaCommand { get; }
         public ICommand RefreshStatusCommand { get; }
         public ICommand FetchRemotesCommand { get; }
+        public ICommand PruneRemotesCommand { get; }
         public ICommand CheckoutCommitCommand { get; }
         public ICommand CheckoutBranchCommand { get; }
         public ICommand RevealInExplorerCommand { get; }
@@ -491,6 +493,21 @@ namespace GitOut.Features.Git.Log
                 }
             }
             snack.ShowSuccess("Fetched all selected remotes");
+            await CheckRepositoryStatusAsync();
+            IsWorking = false;
+        }
+
+        private async Task PruneRemotesAsync()
+        {
+            IsWorking = true;
+            foreach (GitRemoteViewModel remote in remotes)
+            {
+                if (remote.IsSelected)
+                {
+                    await Repository.PruneRemoteAsync(remote.Model);
+                }
+            }
+            snack.ShowSuccess("Pruned all selected remotes");
             await CheckRepositoryStatusAsync();
             IsWorking = false;
         }
