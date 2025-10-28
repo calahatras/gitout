@@ -20,6 +20,7 @@ namespace GitOut.Features.Git
         IAsyncEnumerable<GitRemote> GetRemotesAsync();
 
         Task FetchAsync(GitRemote remote);
+        Task PruneRemoteAsync(GitRemote remote);
         Task<IEnumerable<GitHistoryEvent>> LogAsync(LogOptions options);
         IAsyncEnumerable<GitStash> StashListAsync();
         Task<GitStatusResult> StatusAsync();
