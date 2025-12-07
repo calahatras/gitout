@@ -24,6 +24,7 @@ using GitOut.Features.Navigation;
 using GitOut.Features.Text;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
+using static GitOut.Features.Wpf.SyncFile.SyncFileBehavior;
 
 namespace GitOut.Features.Git.Stage;
 
@@ -42,6 +43,7 @@ public class GitStageViewModel
     private readonly object workspaceFilesLock = new();
     private readonly ObservableCollection<StatusChangeViewModel> indexFiles = new();
     private readonly object indexFilesLock = new();
+    private readonly FileSync? commitMessageSync;
 
     private StatusChangeViewModel? selectedChange;
     private DiffContext? selectedDiffResult;
@@ -157,7 +159,14 @@ public class GitStageViewModel
             PatchEditSelectionAsync,
             () => editHunk is not null
         );
+
+        commitMessageSync = new FileSync(
+            Path.Combine(Repository.WorkingDirectory.Directory, ".gitout", "commit_message"),
+            OnCommitMessageUpdate
+        );
     }
+
+    private void OnCommitMessageUpdate(string updatedText) => CommitMessage = updatedText;
 
     public IGitRepository Repository { get; }
 
@@ -212,7 +221,14 @@ public class GitStageViewModel
     public string CommitMessage
     {
         get => commitMessage;
-        set => SetProperty(ref commitMessage, value);
+        set
+        {
+            if (commitMessageSync is not null)
+            {
+                commitMessageSync.Current = value;
+            }
+            SetProperty(ref commitMessage, value);
+        }
     }
 
     public string NewBranchName
@@ -414,6 +430,7 @@ public class GitStageViewModel
             cancelRefreshSnack?.Dispose();
             repositoryWatcher.Dispose();
             stagingOptionsHandle.Dispose();
+            commitMessageSync?.Dispose();
         }
     }
 
