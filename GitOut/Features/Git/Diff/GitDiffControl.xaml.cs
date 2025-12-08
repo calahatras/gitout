@@ -176,7 +176,7 @@ namespace GitOut.Features.Git.Diff
 
             static bool IsImageFile(string extension) =>
                 new HashSet<string>(
-                    new[] { ".bmp", ".gif", ".png", ".jpg", ".jpeg", ".tiff" }
+                    new[] { ".bmp", ".gif", ".png", ".jpg", ".jpeg", ".tiff", ".webp" }
                 ).Contains(extension);
         }
 
