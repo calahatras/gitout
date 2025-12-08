@@ -45,11 +45,11 @@ namespace GitOut.Features.Git.Files
 
         public RelativeDirectoryPath Path { get; }
         public string RootPath => repository.WorkingDirectory.ToString();
-        public string RelativePath => FullPath[RootPath.Length..];
+        public string RelativePath => FullPath[(RootPath.Length+1)..];
         public string RelativeDirectory =>
             System.IO.Path.Combine(
                 RootPath,
-                Path.ToString().Replace("/", "\\", StringComparison.InvariantCulture)
+                Path.ToString().Replace("\\", "/", StringComparison.InvariantCulture)
             );
         public string FullPath =>
             System
@@ -58,7 +58,7 @@ namespace GitOut.Features.Git.Files
                     Path.ToString(),
                     System.IO.Path.GetFileName(FileName.ToString())
                 )
-                .Replace('/', '\\');
+                .Replace('\\', '/');
         public FileName FileName { get; }
         public GitDiffType Status { get; }
         public string DisplayName { get; }
