@@ -57,8 +57,8 @@ namespace GitOut.Features.Git
             {
                 string first = errorLines.First();
                 if (
-                    errorLines.Count == 2
-                    && first.StartsWith($"error: The branch '{name.Name}' is not fully merged.")
+                    errorLines.Count == 3
+                    && first.StartsWith($"error: the branch '{name.Name}' is not fully merged")
                 )
                 {
                     return new GitDeleteResult(
