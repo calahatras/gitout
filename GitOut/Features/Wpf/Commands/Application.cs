@@ -1,3 +1,4 @@
+#pragma warning disable CA1031
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;

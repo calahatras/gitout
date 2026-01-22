@@ -8,7 +8,7 @@ using System.Windows.Shapes;
 
 namespace GitOut.Features.Git.Log.Converters
 {
-    internal class NodesToPathConverter : IMultiValueConverter
+    public class NodesToPathConverter : IMultiValueConverter
     {
         private const int XDistance = 15;
         private const int XOffset = 10;

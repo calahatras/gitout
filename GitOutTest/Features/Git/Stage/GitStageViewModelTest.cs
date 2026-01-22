@@ -1,3 +1,4 @@
+#pragma warning disable CA1506
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -467,6 +468,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -555,6 +559,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -643,6 +650,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -731,6 +741,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -819,6 +832,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -910,6 +926,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1005,6 +1024,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1095,6 +1117,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1187,6 +1212,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1297,6 +1325,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1396,6 +1427,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.StageSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1497,6 +1531,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.IndexFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.IndexFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.ResetSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1605,6 +1642,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.ResetSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1711,6 +1751,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.ResetSelectedTextCommand.Execute(document);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._)).MustHaveHappenedOnceExactly();
             Assert.That(
@@ -1818,6 +1861,9 @@ namespace GitOut.Features.Git.Stage
             actor.Navigated(NavigationType.Initial);
             actor.WorkspaceFiles.MoveCurrentToFirst();
             actor.SelectedChange = (StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem;
+            A.CallTo(() => repository.DiffAsync(A<RelativeDirectoryPath>._, A<DiffOptions>._))
+                .Returns(result);
+
             actor.ResetSelectedTextCommand.Execute(document);
             actor.UndoPatchCommand.Execute(null);
             A.CallTo(() => repository.ApplyAsync(capturedGitPatch._))
