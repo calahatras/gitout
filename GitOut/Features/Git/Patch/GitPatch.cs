@@ -42,46 +42,7 @@ namespace GitOut.Features.Git.Patch
             builder.CreateHeader(path, type);
             var lines = new List<PatchLine>();
             HunkLine preline = visitor.FindPrepositionHunk();
-            int fromRangeIndex;
-            if (mode is PatchMode.AddIndex or PatchMode.AddWorkspace)
-            {
-                switch (preline.Type)
-                {
-                    case DiffLineType.Header:
-                        fromRangeIndex = preline.FromIndex!.Value;
-                        break;
-                    case DiffLineType.Removed:
-                    case DiffLineType.None:
-                        fromRangeIndex = preline.FromIndex!.Value;
-                        lines.Add(PatchLine.CreateLine(DiffLineType.None, preline.StrippedLine));
-                        break;
-                    default:
-                        throw new InvalidOperationException("Preline is not of expected type");
-                }
-            }
-            else if (mode is PatchMode.ResetIndex or PatchMode.ResetWorkspace)
-            {
-                switch (preline.Type)
-                {
-                    case DiffLineType.Header:
-                        fromRangeIndex = preline.FromIndex!.Value;
-                        break;
-                    case DiffLineType.None:
-                        fromRangeIndex = preline.FromIndex!.Value;
-                        lines.Add(PatchLine.CreateLine(DiffLineType.None, preline.StrippedLine));
-                        break;
-                    case DiffLineType.Added:
-                        fromRangeIndex = preline.ToIndex!.Value;
-                        lines.Add(PatchLine.CreateLine(DiffLineType.None, preline.StrippedLine));
-                        break;
-                    default:
-                        throw new InvalidOperationException("Preline is not of expected type");
-                }
-            }
-            else
-            {
-                throw new ArgumentException($"Unrecognized PatchMode {mode}", nameof(mode));
-            }
+            int fromRangeIndex = ProcessPreLine(mode, preline, lines);
             do
             {
                 lines.AddRange(
@@ -102,42 +63,7 @@ namespace GitOut.Features.Git.Patch
                 }
                 if (visitor.IsDone)
                 {
-                    if (lines[^1].Type != DiffLineType.None)
-                    {
-                        HunkLine? postline = visitor.FindPostpositionHunk();
-                        if (postline is not null)
-                        {
-                            if (postline.Type == DiffLineType.Control)
-                            {
-                                lines.Add(
-                                    PatchLine.CreateLine(
-                                        DiffLineType.Control,
-                                        postline.StrippedLine
-                                    )
-                                );
-                            }
-                            else if (
-                                postline.Type == DiffLineType.None
-                                || (
-                                    (
-                                        mode == PatchMode.ResetIndex
-                                        || mode == PatchMode.ResetWorkspace
-                                        || mode == PatchMode.AddWorkspace
-                                    )
-                                    && postline.Type == DiffLineType.Added
-                                )
-                                || (
-                                    mode == PatchMode.AddIndex
-                                    && postline.Type == DiffLineType.Removed
-                                )
-                            )
-                            {
-                                lines.Add(
-                                    PatchLine.CreateLine(DiffLineType.None, postline.StrippedLine)
-                                );
-                            }
-                        }
-                    }
+                    ProcessPostLine(mode, visitor, lines);
                 }
                 builder.CreateHunk(fromRangeIndex, lines);
                 lines.Clear();
@@ -148,6 +74,69 @@ namespace GitOut.Features.Git.Patch
             } while (!visitor.IsDone);
 
             return builder.Build();
+        }
+
+        private static int ProcessPreLine(PatchMode mode, HunkLine preline, List<PatchLine> lines)
+        {
+            if (mode is PatchMode.AddIndex or PatchMode.AddWorkspace)
+            {
+                switch (preline.Type)
+                {
+                    case DiffLineType.Header:
+                        return preline.FromIndex!.Value;
+                    case DiffLineType.Removed:
+                    case DiffLineType.None:
+                        lines.Add(PatchLine.CreateLine(DiffLineType.None, preline.StrippedLine));
+                        return preline.FromIndex!.Value;
+                    default:
+                        throw new InvalidOperationException("Preline is not of expected type");
+                }
+            }
+
+            if (mode is PatchMode.ResetIndex or PatchMode.ResetWorkspace)
+            {
+                switch (preline.Type)
+                {
+                    case DiffLineType.Header:
+                        return preline.FromIndex!.Value;
+                    case DiffLineType.None:
+                        lines.Add(PatchLine.CreateLine(DiffLineType.None, preline.StrippedLine));
+                        return preline.FromIndex!.Value;
+                    case DiffLineType.Added:
+                        lines.Add(PatchLine.CreateLine(DiffLineType.None, preline.StrippedLine));
+                        return preline.ToIndex!.Value;
+                    default:
+                        throw new InvalidOperationException("Preline is not of expected type");
+                }
+            }
+
+            throw new ArgumentException($"Unrecognized PatchMode {mode}", nameof(mode));
+        }
+
+        private static void ProcessPostLine(PatchMode mode, IHunkLineVisitor visitor, List<PatchLine> lines)
+        {
+            if (lines.Count > 0 && lines[^1].Type != DiffLineType.None)
+            {
+                HunkLine? postline = visitor.FindPostpositionHunk();
+                if (postline is not null)
+                {
+                    if (postline.Type == DiffLineType.Control)
+                    {
+                        lines.Add(PatchLine.CreateLine(DiffLineType.Control, postline.StrippedLine));
+                    }
+                    else if (
+                        postline.Type == DiffLineType.None
+                        || (
+                            (mode == PatchMode.ResetIndex || mode == PatchMode.ResetWorkspace || mode == PatchMode.AddWorkspace)
+                            && postline.Type == DiffLineType.Added
+                        )
+                        || (mode == PatchMode.AddIndex && postline.Type == DiffLineType.Removed)
+                    )
+                    {
+                        lines.Add(PatchLine.CreateLine(DiffLineType.None, postline.StrippedLine));
+                    }
+                }
+            }
         }
 
         private class GitPatchBuilder
