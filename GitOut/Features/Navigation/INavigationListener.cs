@@ -1,7 +1,6 @@
-﻿namespace GitOut.Features.Navigation
+namespace GitOut.Features.Navigation;
+
+public interface INavigationListener
 {
-    public interface INavigationListener
-    {
-        void Navigated(NavigationType type);
-    }
+    void Navigated(NavigationType type);
 }

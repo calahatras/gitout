@@ -1,8 +1,7 @@
-namespace GitOut.Features.Navigation
+namespace GitOut.Features.Navigation;
+
+public interface INavigationFallback
 {
-    public interface INavigationFallback
-    {
-        string FallbackPageName { get; }
-        object? FallbackOptions { get; }
-    }
+    string FallbackPageName { get; }
+    object? FallbackOptions { get; }
 }

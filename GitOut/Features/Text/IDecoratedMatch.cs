@@ -1,9 +1,8 @@
 using System.Windows.Documents;
 
-namespace GitOut.Features.Text
+namespace GitOut.Features.Text;
+
+public interface IDecoratedMatch
 {
-    public interface IDecoratedMatch
-    {
-        Run Apply(string line);
-    }
+    Run Apply(string line);
 }

@@ -1,11 +1,10 @@
-namespace GitOut.Features.Git.Patch
+namespace GitOut.Features.Git.Patch;
+
+public enum PatchMode
 {
-    public enum PatchMode
-    {
-        None,
-        AddIndex,
-        AddWorkspace,
-        ResetIndex,
-        ResetWorkspace,
-    }
+    None,
+    AddIndex,
+    AddWorkspace,
+    ResetIndex,
+    ResetWorkspace,
 }

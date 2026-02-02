@@ -1,8 +1,7 @@
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public interface IAddOptionsBuilder
 {
-    public interface IAddOptionsBuilder
-    {
-        AddOptions Build();
-        IAddOptionsBuilder WithIntent();
-    }
+    AddOptions Build();
+    IAddOptionsBuilder WithIntent();
 }

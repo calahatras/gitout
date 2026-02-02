@@ -1,8 +1,7 @@
-namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public enum LogViewMode
 {
-    public enum LogViewMode
-    {
-        None,
-        Files,
-    }
+    None,
+    Files,
 }

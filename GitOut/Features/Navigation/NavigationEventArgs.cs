@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.Windows.Controls;
 
-namespace GitOut.Features.Navigation
-{
-    public class NavigationEventArgs : EventArgs
-    {
-        public NavigationEventArgs(ContentControl control) => Control = control;
+namespace GitOut.Features.Navigation;
 
-        public ContentControl Control { get; }
-    }
+public class NavigationEventArgs : EventArgs
+{
+    public NavigationEventArgs(ContentControl control) => Control = control;
+
+    public ContentControl Control { get; }
 }

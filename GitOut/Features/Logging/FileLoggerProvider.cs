@@ -1,15 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
-namespace GitOut.Features.Logging
+namespace GitOut.Features.Logging;
+
+public sealed class FileLoggerProvider : ILoggerProvider
 {
-    public sealed class FileLoggerProvider : ILoggerProvider
-    {
-        private readonly string path;
+    private readonly string path;
 
-        public FileLoggerProvider(string path) => this.path = path;
+    public FileLoggerProvider(string path) => this.path = path;
 
-        public ILogger CreateLogger(string categoryName) => new FileLogger(path);
+    public ILogger CreateLogger(string categoryName) => new FileLogger(path);
 
-        public void Dispose() { }
-    }
+    public void Dispose() { }
 }

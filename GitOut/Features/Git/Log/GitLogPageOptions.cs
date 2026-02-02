@@ -1,12 +1,10 @@
-namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public class GitLogPageOptions
 {
-    public class GitLogPageOptions
-    {
-        public GitLogPageOptions(IGitRepository repository) => Repository = repository;
+    public GitLogPageOptions(IGitRepository repository) => Repository = repository;
 
-        public IGitRepository Repository { get; }
+    public IGitRepository Repository { get; }
 
-        public static GitLogPageOptions OpenRepository(IGitRepository repository) =>
-            new(repository);
-    }
+    public static GitLogPageOptions OpenRepository(IGitRepository repository) => new(repository);
 }

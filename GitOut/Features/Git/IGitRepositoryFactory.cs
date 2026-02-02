@@ -1,9 +1,8 @@
 using GitOut.Features.IO;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public interface IGitRepositoryFactory
 {
-    public interface IGitRepositoryFactory
-    {
-        IGitRepository Create(DirectoryPath path);
-    }
+    IGitRepository Create(DirectoryPath path);
 }

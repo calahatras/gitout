@@ -1,7 +1,6 @@
-﻿namespace GitOut.Features.Storage
+namespace GitOut.Features.Storage;
+
+public interface IWritableStorage
 {
-    public interface IWritableStorage
-    {
-        void Write(string key, object value);
-    }
+    void Write(string key, object value);
 }

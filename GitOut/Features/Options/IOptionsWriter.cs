@@ -1,9 +1,8 @@
 using System;
 
-namespace GitOut.Features.Options
+namespace GitOut.Features.Options;
+
+public interface IOptionsWriter<T>
 {
-    public interface IOptionsWriter<T>
-    {
-        void Update(Action<T> modifier);
-    }
+    void Update(Action<T> modifier);
 }

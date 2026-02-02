@@ -1,49 +1,47 @@
 using System;
 using System.Windows.Input;
 
-namespace GitOut.Features.Navigation
+namespace GitOut.Features.Navigation;
+
+public class NavigateLocalCommand<T> : ICommand
 {
-    public class NavigateLocalCommand<T> : ICommand
+    private readonly INavigationService navigation;
+    private readonly string pagename;
+    private readonly Func<T?, object>? options;
+    private readonly Func<T?, bool>? canexecute;
+
+    public NavigateLocalCommand(
+        INavigationService navigation,
+        string pagename,
+        Func<T?, object>? options = null,
+        Func<T?, bool>? canexecute = null
+    )
     {
-        private readonly INavigationService navigation;
-        private readonly string pagename;
-        private readonly Func<T?, object>? options;
-        private readonly Func<T?, bool>? canexecute;
+        this.navigation = navigation;
+        this.pagename = pagename;
+        this.options = options;
+        this.canexecute = canexecute;
+    }
 
-        public NavigateLocalCommand(
-            INavigationService navigation,
-            string pagename,
-            Func<T?, object>? options = null,
-            Func<T?, bool>? canexecute = null
-        )
+    public event EventHandler? CanExecuteChanged
+    {
+        add => CommandManager.RequerySuggested += value;
+        remove => CommandManager.RequerySuggested -= value;
+    }
+
+    public bool CanExecute(object? parameter) => canexecute == null || canexecute((T?)parameter);
+
+    public void Execute(object? parameter)
+    {
+        object? pageOptions = options == null ? null : options((T?)parameter);
+        bool newWindow = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+        if (newWindow)
         {
-            this.navigation = navigation;
-            this.pagename = pagename;
-            this.options = options;
-            this.canexecute = canexecute;
+            navigation.NavigateNewWindow(pagename, pageOptions);
         }
-
-        public event EventHandler? CanExecuteChanged
+        else
         {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
-
-        public bool CanExecute(object? parameter) =>
-            canexecute == null || canexecute((T?)parameter);
-
-        public void Execute(object? parameter)
-        {
-            object? pageOptions = options == null ? null : options((T?)parameter);
-            bool newWindow = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
-            if (newWindow)
-            {
-                navigation.NavigateNewWindow(pagename, pageOptions);
-            }
-            else
-            {
-                navigation.Navigate(pagename, pageOptions);
-            }
+            navigation.Navigate(pagename, pageOptions);
         }
     }
 }

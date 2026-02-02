@@ -2,76 +2,73 @@ using System;
 using System.IO;
 using GitOut.Features.Git;
 
-namespace GitOut.Features.IO
+namespace GitOut.Features.IO;
+
+public class GitRepositoryFileSystemWatcherProvider : IGitRepositoryWatcherProvider
 {
-    public class GitRepositoryFileSystemWatcherProvider : IGitRepositoryWatcherProvider
+    public IRepositoryWatcher PrepareWatchRepositoryChanges(
+        IGitRepository repository,
+        RepositoryWatcherOptions options
+    ) =>
+        new RepositoryWatcher(
+            new FileSystemWatcher(repository.WorkingDirectory.Directory)
+            {
+                IncludeSubdirectories = true,
+                NotifyFilter =
+                    NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName,
+            },
+            options
+        );
+
+    private class RepositoryWatcher : IRepositoryWatcher
     {
-        public IRepositoryWatcher PrepareWatchRepositoryChanges(
-            IGitRepository repository,
-            RepositoryWatcherOptions options
-        ) =>
-            new RepositoryWatcher(
-                new FileSystemWatcher(repository.WorkingDirectory.Directory)
-                {
-                    IncludeSubdirectories = true,
-                    NotifyFilter =
-                        NotifyFilters.LastWrite
-                        | NotifyFilters.CreationTime
-                        | NotifyFilters.FileName,
-                },
-                options
-            );
+        private readonly FileSystemWatcher watcher;
+        private readonly RepositoryWatcherOptions options;
 
-        private class RepositoryWatcher : IRepositoryWatcher
+        public RepositoryWatcher(FileSystemWatcher watcher, RepositoryWatcherOptions options)
         {
-            private readonly FileSystemWatcher watcher;
-            private readonly RepositoryWatcherOptions options;
+            this.watcher = watcher;
+            this.options = options;
+            watcher.Changed += OnFileSystemChanges;
+            watcher.Created += OnFileSystemChanges;
+            watcher.Deleted += OnFileSystemChanges;
+        }
 
-            public RepositoryWatcher(FileSystemWatcher watcher, RepositoryWatcherOptions options)
+        public bool EnableRaisingEvents
+        {
+            get => watcher.EnableRaisingEvents;
+            set => watcher.EnableRaisingEvents = value;
+        }
+
+        public event RepositoryWatcherEventHandler? Events;
+
+        public void Dispose()
+        {
+            watcher.Changed -= OnFileSystemChanges;
+            watcher.Created -= OnFileSystemChanges;
+            watcher.Deleted -= OnFileSystemChanges;
+            watcher.Dispose();
+        }
+
+        private void OnFileSystemChanges(object sender, FileSystemEventArgs args)
+        {
+            if (args.Name is null)
             {
-                this.watcher = watcher;
-                this.options = options;
-                watcher.Changed += OnFileSystemChanges;
-                watcher.Created += OnFileSystemChanges;
-                watcher.Deleted += OnFileSystemChanges;
+                return;
             }
 
-            public bool EnableRaisingEvents
+            bool isGitFolder = args.Name.StartsWith(".git");
+            if (
+                (isGitFolder && options.HasFlag(RepositoryWatcherOptions.GitFolder))
+                || (!isGitFolder && options.HasFlag(RepositoryWatcherOptions.Workspace))
+            )
             {
-                get => watcher.EnableRaisingEvents;
-                set => watcher.EnableRaisingEvents = value;
-            }
-
-            public event RepositoryWatcherEventHandler? Events;
-
-            public void Dispose()
-            {
-                watcher.Changed -= OnFileSystemChanges;
-                watcher.Created -= OnFileSystemChanges;
-                watcher.Deleted -= OnFileSystemChanges;
-                watcher.Dispose();
-            }
-
-            private void OnFileSystemChanges(object sender, FileSystemEventArgs args)
-            {
-                if (args.Name is null)
-                {
-                    return;
-                }
-
-                bool isGitFolder = args.Name.StartsWith(".git");
-                if (
-                    isGitFolder && options.HasFlag(RepositoryWatcherOptions.GitFolder)
-                    || (!isGitFolder && options.HasFlag(RepositoryWatcherOptions.Workspace))
-                )
-                {
-                    Events?.Invoke(
-                        this,
-                        new RepositoryWatcherEventArgs(
-                            args.Name.Replace("\\", "/", StringComparison.Ordinal)
-                        )
-                    );
-                }
+                Events?.Invoke(
+                    this,
+                    new RepositoryWatcherEventArgs(
+                        args.Name.Replace("\\", "/", StringComparison.Ordinal)
+                    )
+                );
             }
         }
     }

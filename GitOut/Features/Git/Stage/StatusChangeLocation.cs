@@ -1,9 +1,8 @@
-﻿namespace GitOut.Features.Git.Stage
+namespace GitOut.Features.Git.Stage;
+
+public enum StatusChangeLocation
 {
-    public enum StatusChangeLocation
-    {
-        None,
-        Workspace,
-        Index,
-    }
+    None,
+    Workspace,
+    Index,
 }
