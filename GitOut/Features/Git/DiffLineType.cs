@@ -1,11 +1,10 @@
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public enum DiffLineType
 {
-    public enum DiffLineType
-    {
-        None,
-        Header,
-        Added,
-        Removed,
-        Control,
-    }
+    None,
+    Header,
+    Added,
+    Removed,
+    Control,
 }

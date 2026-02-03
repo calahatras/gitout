@@ -1,10 +1,9 @@
-﻿namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public enum LogRevisionViewMode
 {
-    public enum LogRevisionViewMode
-    {
-        None,
-        CurrentRevision,
-        Diff,
-        DiffInline,
-    }
+    None,
+    CurrentRevision,
+    Diff,
+    DiffInline,
 }

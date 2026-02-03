@@ -1,15 +1,14 @@
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public enum GitModifiedStatusType
 {
-    public enum GitModifiedStatusType
-    {
-        None,
-        Unmodified,
-        Modified,
-        Added,
-        Deleted,
-        Renamed,
-        Copied,
-        UpdatedButUnmerged,
-        Untracked,
-    }
+    None,
+    Unmodified,
+    Modified,
+    Added,
+    Deleted,
+    Renamed,
+    Copied,
+    UpdatedButUnmerged,
+    Untracked,
 }

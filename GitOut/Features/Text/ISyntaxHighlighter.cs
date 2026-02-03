@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Windows.Documents;
 
-namespace GitOut.Features.Text
+namespace GitOut.Features.Text;
+
+public interface ISyntaxHighlighter
 {
-    public interface ISyntaxHighlighter
-    {
-        IEnumerable<Paragraph> Highlight(IEnumerable<string> document, ILineDecorator decorator);
-    }
+    IEnumerable<Paragraph> Highlight(IEnumerable<string> document, ILineDecorator decorator);
 }

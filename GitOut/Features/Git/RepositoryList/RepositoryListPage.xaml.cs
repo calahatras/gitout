@@ -1,13 +1,12 @@
-﻿using System.Windows.Controls;
+using System.Windows.Controls;
 
-namespace GitOut.Features.Git.RepositoryList
+namespace GitOut.Features.Git.RepositoryList;
+
+public partial class RepositoryListPage : UserControl
 {
-    public partial class RepositoryListPage : UserControl
+    public RepositoryListPage(RepositoryListViewModel dataContext)
     {
-        public RepositoryListPage(RepositoryListViewModel dataContext)
-        {
-            InitializeComponent();
-            DataContext = dataContext;
-        }
+        InitializeComponent();
+        DataContext = dataContext;
     }
 }

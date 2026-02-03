@@ -1,19 +1,18 @@
 using System;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public class GitCommitId : GitObjectId, IEquatable<GitCommitId>
 {
-    public class GitCommitId : GitObjectId, IEquatable<GitCommitId>
-    {
-        private GitCommitId(string hash)
-            : base(hash) { }
+    private GitCommitId(string hash)
+        : base(hash) { }
 
-        public override int GetHashCode() => base.GetHashCode();
+    public override int GetHashCode() => base.GetHashCode();
 
-        public bool Equals(GitCommitId? obj) =>
-            obj is not null && Hash.Equals(obj.Hash, StringComparison.Ordinal);
+    public bool Equals(GitCommitId? obj) =>
+        obj is not null && Hash.Equals(obj.Hash, StringComparison.Ordinal);
 
-        public override bool Equals(object? obj) => obj is GitCommitId other && Equals(other);
+    public override bool Equals(object? obj) => obj is GitCommitId other && Equals(other);
 
-        public static GitCommitId FromHash(ReadOnlySpan<char> hash) => new(hash.ToString());
-    }
+    public static GitCommitId FromHash(ReadOnlySpan<char> hash) => new(hash.ToString());
 }

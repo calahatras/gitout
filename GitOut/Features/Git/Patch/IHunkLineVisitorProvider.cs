@@ -1,7 +1,6 @@
-namespace GitOut.Features.Git.Patch
+namespace GitOut.Features.Git.Patch;
+
+public interface IHunkLineVisitorProvider
 {
-    public interface IHunkLineVisitorProvider
-    {
-        IHunkLineVisitor? GetHunkVisitor(PatchMode mode);
-    }
+    IHunkLineVisitor? GetHunkVisitor(PatchMode mode);
 }

@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace GitOut.Features.Git.Storage
-{
-    public interface IGitRepositoryStorage
-    {
-        IObservable<IEnumerable<IGitRepository>> Repositories { get; }
+namespace GitOut.Features.Git.Storage;
 
-        void Add(IGitRepository repository);
-        void AddRange(IEnumerable<IGitRepository> repositories);
-        void Remove(IGitRepository repository);
-    }
+public interface IGitRepositoryStorage
+{
+    IObservable<IEnumerable<IGitRepository>> Repositories { get; }
+
+    void Add(IGitRepository repository);
+    void AddRange(IEnumerable<IGitRepository> repositories);
+    void Remove(IGitRepository repository);
 }

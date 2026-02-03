@@ -1,15 +1,14 @@
-namespace GitOut.Features.Git.Diff
-{
-    public class LineNumberViewModel
-    {
-        public LineNumberViewModel(int? workingTreeLineNumber, int? indexLineNumber)
-        {
-            WorkingTreeLineNumber = workingTreeLineNumber;
-            IndexLineNumber = indexLineNumber;
-        }
+namespace GitOut.Features.Git.Diff;
 
-        public int? WorkingTreeLineNumber { get; }
-        public int? IndexLineNumber { get; }
-        public bool IsDifferent => WorkingTreeLineNumber != IndexLineNumber;
+public class LineNumberViewModel
+{
+    public LineNumberViewModel(int? workingTreeLineNumber, int? indexLineNumber)
+    {
+        WorkingTreeLineNumber = workingTreeLineNumber;
+        IndexLineNumber = indexLineNumber;
     }
+
+    public int? WorkingTreeLineNumber { get; }
+    public int? IndexLineNumber { get; }
+    public bool IsDifferent => WorkingTreeLineNumber != IndexLineNumber;
 }

@@ -1,7 +1,6 @@
-namespace GitOut.Features.Wpf.Commands
+namespace GitOut.Features.Wpf.Commands;
+
+public static class Navigate
 {
-    public static class Navigate
-    {
-        public static CompositeCommand Back { get; } = new CompositeCommand();
-    }
+    public static CompositeCommand Back { get; } = new CompositeCommand();
 }

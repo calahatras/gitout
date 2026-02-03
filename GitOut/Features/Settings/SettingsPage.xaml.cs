@@ -1,13 +1,12 @@
-﻿using System.Windows.Controls;
+using System.Windows.Controls;
 
-namespace GitOut.Features.Settings
+namespace GitOut.Features.Settings;
+
+public partial class SettingsPage : UserControl
 {
-    public partial class SettingsPage : UserControl
+    public SettingsPage(SettingsViewModel dataContext)
     {
-        public SettingsPage(SettingsViewModel dataContext)
-        {
-            InitializeComponent();
-            DataContext = dataContext;
-        }
+        InitializeComponent();
+        DataContext = dataContext;
     }
 }

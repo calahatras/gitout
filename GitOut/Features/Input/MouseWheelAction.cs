@@ -1,9 +1,8 @@
-namespace GitOut.Features.Input
+namespace GitOut.Features.Input;
+
+public enum MouseWheelAction
 {
-    public enum MouseWheelAction
-    {
-        None,
-        MouseWheelUp,
-        MouseWheelDown,
-    }
+    None,
+    MouseWheelUp,
+    MouseWheelDown,
 }

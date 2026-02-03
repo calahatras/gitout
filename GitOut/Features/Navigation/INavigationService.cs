@@ -1,28 +1,27 @@
 using System;
 
-namespace GitOut.Features.Navigation
+namespace GitOut.Features.Navigation;
+
+public interface INavigationService
 {
-    public interface INavigationService
-    {
-        string? CurrentPage { get; }
+    string? CurrentPage { get; }
 
-        event EventHandler<EventArgs>? Closed;
-        event EventHandler<NavigationEventArgs> NavigationRequested;
+    event EventHandler<EventArgs>? Closed;
+    event EventHandler<NavigationEventArgs> NavigationRequested;
 
-        T? GetOptions<T>(string pageName)
-            where T : class;
-        T? GetDialogResult<T>()
-            where T : class;
+    T? GetOptions<T>(string pageName)
+        where T : class;
+    T? GetDialogResult<T>()
+        where T : class;
 
-        void Close();
-        void Close<T>(T? result)
-            where T : class;
+    void Close();
+    void Close<T>(T? result)
+        where T : class;
 
-        void Navigate(string page, object? options);
-        INavigationService NavigateNewWindow(
-            string pageName,
-            object? options,
-            NavigationOverrideOptions? overrideOptions = default
-        );
-    }
+    void Navigate(string page, object? options);
+    INavigationService NavigateNewWindow(
+        string pageName,
+        object? options,
+        NavigationOverrideOptions? overrideOptions = default
+    );
 }

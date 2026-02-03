@@ -5,61 +5,60 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using GitOut.Features.Material.Snackbar;
 
-namespace GitOut.Features.Wpf.Commands
+namespace GitOut.Features.Wpf.Commands;
+
+public class Application
 {
-    public class Application
+    private readonly ISnackbarService snack;
+
+    public Application(ISnackbarService snack)
     {
-        private readonly ISnackbarService snack;
+        this.snack = snack;
 
-        public Application(ISnackbarService snack)
+        Open = new CompositeCommand<string>(OnOpen);
+        Copy = new CompositeCommand<string>(OnCopy);
+        RevealInExplorer = new CompositeCommand<string>(OnRevealInExplorer);
+    }
+
+    public static CompositeCommand<string>? Open { get; private set; }
+    public static CompositeCommand<string>? Copy { get; private set; }
+    public static CompositeCommand<string>? RevealInExplorer { get; private set; }
+
+    private void OnOpen(string path)
+    {
+        try
         {
-            this.snack = snack;
-
-            Open = new CompositeCommand<string>(OnOpen);
-            Copy = new CompositeCommand<string>(OnCopy);
-            RevealInExplorer = new CompositeCommand<string>(OnRevealInExplorer);
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
+            snack.Show($"started {path}");
         }
-
-        public static CompositeCommand<string>? Open { get; private set; }
-        public static CompositeCommand<string>? Copy { get; private set; }
-        public static CompositeCommand<string>? RevealInExplorer { get; private set; }
-
-        private void OnOpen(string path)
+        catch (Exception e)
         {
-            try
-            {
-                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
-                snack.Show($"started {path}");
-            }
-            catch (Exception e)
-            {
-                snack.ShowError(e.Message, e);
-            }
+            snack.ShowError(e.Message, e);
         }
+    }
 
-        private void OnCopy(string text)
+    private void OnCopy(string text)
+    {
+        try
         {
-            try
-            {
-                Clipboard.SetText(text, TextDataFormat.UnicodeText);
-                snack.ShowSuccess($"Copied {text} to clipboard");
-            }
-            catch (COMException comException)
-            {
-                snack.ShowError(comException.Message, comException);
-            }
+            Clipboard.SetText(text, TextDataFormat.UnicodeText);
+            snack.ShowSuccess($"Copied {text} to clipboard");
         }
-
-        private void OnRevealInExplorer(string path)
+        catch (COMException comException)
         {
-            try
-            {
-                Process.Start("explorer.exe", $"/s,{path}").Dispose();
-            }
-            catch (Exception e)
-            {
-                snack.ShowError(e.Message, e);
-            }
+            snack.ShowError(comException.Message, comException);
+        }
+    }
+
+    private void OnRevealInExplorer(string path)
+    {
+        try
+        {
+            Process.Start("explorer.exe", $"/s,{path}").Dispose();
+        }
+        catch (Exception e)
+        {
+            snack.ShowError(e.Message, e);
         }
     }
 }

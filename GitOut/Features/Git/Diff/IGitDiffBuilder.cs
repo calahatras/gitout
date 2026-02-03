@@ -1,13 +1,12 @@
 using System.IO;
 
-namespace GitOut.Features.Git.Diff
-{
-    public interface IGitDiffBuilder
-    {
-        bool IsBinaryFile { get; }
+namespace GitOut.Features.Git.Diff;
 
-        GitDiffResult Build();
-        IGitDiffBuilder Feed(Stream stream, GitStatusChangeType type = GitStatusChangeType.None);
-        IGitDiffBuilder Feed(string line);
-    }
+public interface IGitDiffBuilder
+{
+    bool IsBinaryFile { get; }
+
+    GitDiffResult Build();
+    IGitDiffBuilder Feed(Stream stream, GitStatusChangeType type = GitStatusChangeType.None);
+    IGitDiffBuilder Feed(string line);
 }

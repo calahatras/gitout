@@ -1,9 +1,8 @@
-﻿namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public enum LineType
 {
-    public enum LineType
-    {
-        None,
-        Solid,
-        Dashed,
-    }
+    None,
+    Solid,
+    Dashed,
 }

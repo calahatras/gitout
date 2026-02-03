@@ -1,9 +1,8 @@
 using System.Windows.Documents;
 
-namespace GitOut.Features.Text
+namespace GitOut.Features.Text;
+
+public interface ILineDecorator
 {
-    public interface ILineDecorator
-    {
-        void Decorate(TextElement paragraph, int lineNumber);
-    }
+    void Decorate(TextElement paragraph, int lineNumber);
 }

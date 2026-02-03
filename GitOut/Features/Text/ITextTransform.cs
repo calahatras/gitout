@@ -1,7 +1,6 @@
-namespace GitOut.Features.Text
+namespace GitOut.Features.Text;
+
+public interface ITextTransform
 {
-    public interface ITextTransform
-    {
-        string Transform(string input);
-    }
+    string Transform(string input);
 }

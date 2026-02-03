@@ -20,172 +20,165 @@ using GitOut.Features.Themes;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 
-namespace GitOut.Features.Settings
+namespace GitOut.Features.Settings;
+
+public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposable
 {
-    public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposable
+    private readonly IOptionsWriter<GitStageOptions> storage;
+    private readonly IDisposable unsubscribeOptions;
+    private bool useTransparentBackground = true;
+    private bool trimLineEndings;
+    private bool showSpacesAsDots;
+    private string tabTransformText;
+
+    public GeneralSettingsViewModel(
+        ISnackbarService snacks,
+        IThemeService themes,
+        IGitRepositoryStorage repositories,
+        IGitRepositoryFactory gitFactory,
+        IOptionsMonitor<GitStageOptions> stageOptions,
+        IOptionsWriter<GitStageOptions> storage
+    )
     {
-        private readonly IOptionsWriter<GitStageOptions> storage;
-        private readonly IDisposable unsubscribeOptions;
-        private bool useTransparentBackground = true;
-        private bool trimLineEndings;
-        private bool showSpacesAsDots;
-        private string tabTransformText;
+        this.storage = storage;
+        var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
+        ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
-        public GeneralSettingsViewModel(
-            ISnackbarService snacks,
-            IThemeService themes,
-            IGitRepositoryStorage repositories,
-            IGitRepositoryFactory gitFactory,
-            IOptionsMonitor<GitStageOptions> stageOptions,
-            IOptionsWriter<GitStageOptions> storage
-        )
-        {
-            this.storage = storage;
-            var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
-            ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
-
-            OpenSettingsFolderCommand = new NavigateExternalCommand(
-                new Uri("file://" + Directory.GetParent(SettingsOptions.GetSettingsPath()))
-            );
-            SearchRootFolderCommand = new NotNullCallbackCommand<string>(
-                folder =>
-                {
-                    var info = new DirectoryInfo(folder);
-                    if (!info.Exists)
-                    {
-                        snacks.Show("Folder does not exist");
-                        return;
-                    }
-                    SynchronizationContext sync = SynchronizationContext.Current!;
-                    Task.Run(() =>
-                    {
-                        DirectoryInfo[] gitdirectories = info.GetDirectories(
-                            ".git",
-                            SearchOption.AllDirectories
-                        );
-                        sync.Post(
-                            s =>
-                            {
-                                snacks.Show($"Found {gitdirectories.Length} repositories");
-                                foreach (DirectoryInfo dir in gitdirectories)
-                                {
-                                    validPaths.Add(
-                                        ValidGitRepositoryPathViewModel.FromGitFolder(dir)
-                                    );
-                                }
-                            },
-                            null
-                        );
-                    });
-                },
-                folder => !string.IsNullOrEmpty(folder)
-            );
-            AddRepositoryCommand = new NotNullCallbackCommand<ValidGitRepositoryPathViewModel>(
-                repository =>
-                {
-                    IGitRepository localrepo = gitFactory.Create(
-                        DirectoryPath.Create(repository.WorkingDirectory)
-                    );
-                    repositories.Add(localrepo);
-                    snacks.Show("Added repository");
-                }
-            );
-            ChangeThemeCommand = new CallbackCommand<ThemePaletteViewModel>(theme =>
+        OpenSettingsFolderCommand = new NavigateExternalCommand(
+            new Uri("file://" + Directory.GetParent(SettingsOptions.GetSettingsPath()))
+        );
+        SearchRootFolderCommand = new NotNullCallbackCommand<string>(
+            folder =>
             {
-                if (theme is null)
+                var info = new DirectoryInfo(folder);
+                if (!info.Exists)
                 {
+                    snacks.Show("Folder does not exist");
                     return;
                 }
-
-                themes.ChangeTheme(theme);
-                snacks.ShowSuccess($"Changed theme to {theme.Name}");
-            });
-
-            trimLineEndings = stageOptions.CurrentValue.TrimLineEndings;
-            tabTransformText = stageOptions.CurrentValue.TabTransformText;
-            showSpacesAsDots = stageOptions.CurrentValue.ShowSpacesAsDots;
-            unsubscribeOptions = stageOptions.OnChange(value =>
-            {
-                SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
-                SetProperty(ref tabTransformText, value.TabTransformText, nameof(TabTransformText));
-                SetProperty(ref trimLineEndings, value.TrimLineEndings, nameof(TrimLineEndings));
-            });
-        }
-
-        public ICollectionView ValidRepositoryPaths { get; }
-
-        public bool UseTransparentBackground
-        {
-            get => useTransparentBackground;
-            set
-            {
-                if (SetProperty(ref useTransparentBackground, value))
+                SynchronizationContext sync = SynchronizationContext.Current!;
+                Task.Run(() =>
                 {
-                    Application.Current.Resources["MaterialBackgroundBackground"] = value
-                        ? new SolidColorBrush(Color.FromArgb(98, 48, 48, 48))
-                        : new SolidColorBrush(Color.FromArgb(255, 48, 48, 48));
-                }
-            }
-        }
-
-        public bool ShowSpacesAsDots
-        {
-            get => showSpacesAsDots;
-            set
+                    DirectoryInfo[] gitdirectories = info.GetDirectories(
+                        ".git",
+                        SearchOption.AllDirectories
+                    );
+                    sync.Post(
+                        s =>
+                        {
+                            snacks.Show($"Found {gitdirectories.Length} repositories");
+                            foreach (DirectoryInfo dir in gitdirectories)
+                            {
+                                validPaths.Add(ValidGitRepositoryPathViewModel.FromGitFolder(dir));
+                            }
+                        },
+                        null
+                    );
+                });
+            },
+            folder => !string.IsNullOrEmpty(folder)
+        );
+        AddRepositoryCommand = new NotNullCallbackCommand<ValidGitRepositoryPathViewModel>(
+            repository =>
             {
-                if (SetProperty(ref showSpacesAsDots, value))
-                {
-                    storage.Update(snapshot => snapshot.ShowSpacesAsDots = value);
-                }
+                IGitRepository localrepo = gitFactory.Create(
+                    DirectoryPath.Create(repository.WorkingDirectory)
+                );
+                repositories.Add(localrepo);
+                snacks.Show("Added repository");
             }
-        }
-
-        public bool TrimLineEndings
+        );
+        ChangeThemeCommand = new CallbackCommand<ThemePaletteViewModel>(theme =>
         {
-            get => trimLineEndings;
-            set
+            if (theme is null)
             {
-                if (SetProperty(ref trimLineEndings, value))
-                {
-                    storage.Update(snapshot => snapshot.TrimLineEndings = value);
-                }
+                return;
             }
-        }
 
-        public string TabTransformText
+            themes.ChangeTheme(theme);
+            snacks.ShowSuccess($"Changed theme to {theme.Name}");
+        });
+
+        trimLineEndings = stageOptions.CurrentValue.TrimLineEndings;
+        tabTransformText = stageOptions.CurrentValue.TabTransformText;
+        showSpacesAsDots = stageOptions.CurrentValue.ShowSpacesAsDots;
+        unsubscribeOptions = stageOptions.OnChange(value =>
         {
-            get => tabTransformText;
-            set
-            {
-                if (SetProperty(ref tabTransformText, value))
-                {
-                    storage.Update(snapshot => snapshot.TabTransformText = value);
-                }
-            }
-        }
+            SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
+            SetProperty(ref tabTransformText, value.TabTransformText, nameof(TabTransformText));
+            SetProperty(ref trimLineEndings, value.TrimLineEndings, nameof(TrimLineEndings));
+        });
+    }
 
-        public ICommand OpenSettingsFolderCommand { get; }
-        public ICommand SearchRootFolderCommand { get; }
-        public ICommand AddRepositoryCommand { get; }
-        public ICommand ChangeThemeCommand { get; }
+    public ICollectionView ValidRepositoryPaths { get; }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void Dispose() => unsubscribeOptions.Dispose();
-
-        private bool SetProperty<T>(
-            ref T prop,
-            T value,
-            [CallerMemberName] string? propertyName = null
-        )
+    public bool UseTransparentBackground
+    {
+        get => useTransparentBackground;
+        set
         {
-            if (!ReferenceEquals(prop, value))
+            if (SetProperty(ref useTransparentBackground, value))
             {
-                prop = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                return true;
+                Application.Current.Resources["MaterialBackgroundBackground"] = value
+                    ? new SolidColorBrush(Color.FromArgb(98, 48, 48, 48))
+                    : new SolidColorBrush(Color.FromArgb(255, 48, 48, 48));
             }
-            return false;
         }
+    }
+
+    public bool ShowSpacesAsDots
+    {
+        get => showSpacesAsDots;
+        set
+        {
+            if (SetProperty(ref showSpacesAsDots, value))
+            {
+                storage.Update(snapshot => snapshot.ShowSpacesAsDots = value);
+            }
+        }
+    }
+
+    public bool TrimLineEndings
+    {
+        get => trimLineEndings;
+        set
+        {
+            if (SetProperty(ref trimLineEndings, value))
+            {
+                storage.Update(snapshot => snapshot.TrimLineEndings = value);
+            }
+        }
+    }
+
+    public string TabTransformText
+    {
+        get => tabTransformText;
+        set
+        {
+            if (SetProperty(ref tabTransformText, value))
+            {
+                storage.Update(snapshot => snapshot.TabTransformText = value);
+            }
+        }
+    }
+
+    public ICommand OpenSettingsFolderCommand { get; }
+    public ICommand SearchRootFolderCommand { get; }
+    public ICommand AddRepositoryCommand { get; }
+    public ICommand ChangeThemeCommand { get; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void Dispose() => unsubscribeOptions.Dispose();
+
+    private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (!ReferenceEquals(prop, value))
+        {
+            prop = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+        return false;
     }
 }

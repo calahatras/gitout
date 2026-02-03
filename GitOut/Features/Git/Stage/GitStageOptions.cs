@@ -1,11 +1,10 @@
-namespace GitOut.Features.Git.Stage
-{
-    public class GitStageOptions
-    {
-        public const string SectionKey = "staging";
+namespace GitOut.Features.Git.Stage;
 
-        public bool TrimLineEndings { get; set; }
-        public bool ShowSpacesAsDots { get; set; }
-        public string TabTransformText { get; set; } = "  ";
-    }
+public class GitStageOptions
+{
+    public const string SectionKey = "staging";
+
+    public bool TrimLineEndings { get; set; }
+    public bool ShowSpacesAsDots { get; set; }
+    public string TabTransformText { get; set; } = "  ";
 }

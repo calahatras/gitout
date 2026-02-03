@@ -1,10 +1,9 @@
-﻿namespace GitOut.Features.Git.Log
-{
-    public struct Line
-    {
-        public Line(int up, int down) => (Up, Down) = (up, down);
+namespace GitOut.Features.Git.Log;
 
-        public int Up { get; }
-        public int Down { get; }
-    }
+public readonly struct Line
+{
+    public Line(int up, int down) => (Up, Down) = (up, down);
+
+    public int Up { get; }
+    public int Down { get; }
 }

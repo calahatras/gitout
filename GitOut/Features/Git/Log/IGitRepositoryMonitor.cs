@@ -1,10 +1,9 @@
 using System;
 
-namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public interface IGitRepositoryMonitor
 {
-    public interface IGitRepositoryMonitor
-    {
-        event EventHandler LogChanged;
-        IGitRepositoryNotifier CreateCallback();
-    }
+    event EventHandler LogChanged;
+    IGitRepositoryNotifier CreateCallback();
 }

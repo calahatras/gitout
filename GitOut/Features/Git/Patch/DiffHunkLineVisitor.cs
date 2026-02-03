@@ -3,98 +3,97 @@ using System.Collections.Generic;
 using System.Linq;
 using GitOut.Features.Git.Diff;
 
-namespace GitOut.Features.Git.Patch
+namespace GitOut.Features.Git.Patch;
+
+public class DiffHunkLineVisitor : IHunkLineVisitor
 {
-    public class DiffHunkLineVisitor : IHunkLineVisitor
+    private readonly PatchMode mode;
+    private readonly IList<HunkLine> diffContexts;
+    private readonly int endOffset;
+    private int currentOffset;
+
+    public DiffHunkLineVisitor(
+        PatchMode mode,
+        IEnumerable<HunkLine> diffContexts,
+        int startOffset,
+        int endOffset
+    )
     {
-        private readonly PatchMode mode;
-        private readonly IList<HunkLine> diffContexts;
-        private readonly int endOffset;
-        private int currentOffset;
+        this.mode = mode;
+        this.diffContexts = diffContexts.ToList();
+        this.endOffset = endOffset;
+        currentOffset = startOffset;
+    }
 
-        public DiffHunkLineVisitor(
-            PatchMode mode,
-            IEnumerable<HunkLine> diffContexts,
-            int startOffset,
-            int endOffset
-        )
+    public bool IsDone => currentOffset >= endOffset;
+    public HunkLine Current => diffContexts[currentOffset];
+
+    public HunkLine FindPrepositionHunk()
+    {
+        if (diffContexts[currentOffset].Type == DiffLineType.Header)
         {
-            this.mode = mode;
-            this.diffContexts = diffContexts.ToList();
-            this.endOffset = endOffset;
-            currentOffset = startOffset;
+            // user selected a header line; increment offset so that we actually get index from header line and not previous hunk
+            ++currentOffset;
         }
-
-        public bool IsDone => currentOffset >= endOffset;
-        public HunkLine Current => diffContexts[currentOffset];
-
-        public HunkLine FindPrepositionHunk()
+        for (int startOffset = currentOffset - 1; startOffset >= 0; --startOffset)
         {
-            if (diffContexts[currentOffset].Type == DiffLineType.Header)
+            HunkLine line = diffContexts[startOffset];
+            if (
+                line.Type == DiffLineType.Header
+                || line.Type == DiffLineType.None
+                || (line.Type == DiffLineType.Removed && mode == PatchMode.AddIndex)
+                || (
+                    line.Type == DiffLineType.Added
+                    && (
+                        mode == PatchMode.ResetIndex
+                        || mode == PatchMode.ResetWorkspace
+                        || mode == PatchMode.AddWorkspace
+                    )
+                )
+            )
             {
-                // user selected a header line; increment offset so that we actually get index from header line and not previous hunk
+                return line;
+            }
+        }
+        throw new InvalidOperationException("Could not find start hunk");
+    }
+
+    public IEnumerable<HunkLine> TraverseSelectionHunks()
+    {
+        for (; currentOffset <= endOffset; ++currentOffset)
+        {
+            HunkLine line = diffContexts[currentOffset];
+            if (line.Type == DiffLineType.Header)
+            {
                 ++currentOffset;
+                yield break;
             }
-            for (int startOffset = currentOffset - 1; startOffset >= 0; --startOffset)
-            {
-                HunkLine line = diffContexts[startOffset];
-                if (
-                    line.Type == DiffLineType.Header
-                    || line.Type == DiffLineType.None
-                    || (line.Type == DiffLineType.Removed && mode == PatchMode.AddIndex)
-                    || (
-                        line.Type == DiffLineType.Added
-                        && (
-                            mode == PatchMode.ResetIndex
-                            || mode == PatchMode.ResetWorkspace
-                            || mode == PatchMode.AddWorkspace
-                        )
+            yield return line;
+        }
+    }
+
+    public HunkLine? FindPostpositionHunk()
+    {
+        for (; currentOffset < diffContexts.Count; ++currentOffset)
+        {
+            HunkLine line = diffContexts[currentOffset];
+            if (
+                line.Type == DiffLineType.None
+                || line.Type == DiffLineType.Control
+                || (line.Type == DiffLineType.Removed && mode == PatchMode.AddIndex)
+                || (
+                    line.Type == DiffLineType.Added
+                    && (
+                        mode == PatchMode.ResetIndex
+                        || mode == PatchMode.ResetWorkspace
+                        || mode == PatchMode.AddWorkspace
                     )
                 )
-                {
-                    return line;
-                }
-            }
-            throw new InvalidOperationException("Could not find start hunk");
-        }
-
-        public IEnumerable<HunkLine> TraverseSelectionHunks()
-        {
-            for (; currentOffset <= endOffset; ++currentOffset)
+            )
             {
-                HunkLine line = diffContexts[currentOffset];
-                if (line.Type == DiffLineType.Header)
-                {
-                    ++currentOffset;
-                    yield break;
-                }
-                yield return line;
+                return line;
             }
         }
-
-        public HunkLine? FindPostpositionHunk()
-        {
-            for (; currentOffset < diffContexts.Count; ++currentOffset)
-            {
-                HunkLine line = diffContexts[currentOffset];
-                if (
-                    line.Type == DiffLineType.None
-                    || line.Type == DiffLineType.Control
-                    || (line.Type == DiffLineType.Removed && mode == PatchMode.AddIndex)
-                    || (
-                        line.Type == DiffLineType.Added
-                        && (
-                            mode == PatchMode.ResetIndex
-                            || mode == PatchMode.ResetWorkspace
-                            || mode == PatchMode.AddWorkspace
-                        )
-                    )
-                )
-                {
-                    return line;
-                }
-            }
-            return null;
-        }
+        return null;
     }
 }

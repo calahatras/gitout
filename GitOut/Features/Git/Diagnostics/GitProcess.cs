@@ -10,247 +10,242 @@ using System.Threading.Tasks.Dataflow;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.IO;
 
-namespace GitOut.Features.Git.Diagnostics
+namespace GitOut.Features.Git.Diagnostics;
+
+public class GitProcess : IGitProcess
 {
-    public class GitProcess : IGitProcess
+    private const string CommandLineExecutable = "git";
+    private readonly DirectoryPath workingDirectory;
+    private readonly ProcessOptions arguments;
+    private readonly IProcessTelemetryCollector telemetry;
+
+    public GitProcess(
+        DirectoryPath workingDirectory,
+        ProcessOptions arguments,
+        IProcessTelemetryCollector telemetry
+    )
     {
-        private const string CommandLineExecutable = "git";
-        private readonly DirectoryPath workingDirectory;
-        private readonly ProcessOptions arguments;
-        private readonly IProcessTelemetryCollector telemetry;
+        this.workingDirectory = workingDirectory;
+        this.arguments = arguments;
+        this.telemetry = telemetry;
+    }
 
-        public GitProcess(
-            DirectoryPath workingDirectory,
-            ProcessOptions arguments,
-            IProcessTelemetryCollector telemetry
-        )
+    public Task<ProcessEventArgs> ExecuteAsync(CancellationToken cancellationToken = default) =>
+        ExecuteAsync(new StringBuilder(), cancellationToken);
+
+    public async Task<ProcessEventArgs> ExecuteAsync(
+        StringBuilder writer,
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var exec = new Process
         {
-            this.workingDirectory = workingDirectory;
-            this.arguments = arguments;
-            this.telemetry = telemetry;
+            EnableRaisingEvents = true,
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = CommandLineExecutable,
+                Arguments = arguments.Arguments,
+                RedirectStandardInput = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = workingDirectory.Directory,
+            },
+        };
+        exec.Start();
+
+        var source = new TaskCompletionSource<bool>();
+        var output = new List<string>();
+        var error = new List<string>();
+        exec.OutputDataReceived += OnHandleOutputData;
+        exec.ErrorDataReceived += OnHandleErrorData;
+        exec.Exited += (sender, e) => source.SetResult(string.IsNullOrEmpty(error.ToString()));
+
+        exec.BeginErrorReadLine();
+        exec.BeginOutputReadLine();
+
+        if (cancellationToken != CancellationToken.None)
+        {
+            cancellationToken.Register(source.SetCanceled);
         }
-
-        public Task<ProcessEventArgs> ExecuteAsync(CancellationToken cancellationToken = default) =>
-            ExecuteAsync(new StringBuilder(), cancellationToken);
-
-        public async Task<ProcessEventArgs> ExecuteAsync(
-            StringBuilder writer,
-            CancellationToken cancellationToken = default
-        )
+        Trace.WriteLine("Writing to stream:");
+        Trace.WriteLine(writer.ToString());
+        Trace.WriteLine("======");
+        using (StreamWriter processInput = exec.StandardInput)
         {
-            using var exec = new Process
+            await processInput.WriteAsync(writer, cancellationToken);
+        }
+        bool isSuccessful = await source.Task;
+
+        TimeSpan duration = exec.ExitTime - exec.StartTime;
+        Trace.WriteLine($"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms");
+        var args = new ProcessEventArgs(
+            CommandLineExecutable,
+            workingDirectory,
+            arguments,
+            new DateTimeOffset(exec.StartTime),
+            duration,
+            writer,
+            output.AsReadOnly(),
+            error.AsReadOnly()
+        );
+        telemetry.Report(args);
+        if (!isSuccessful)
+        {
+            foreach (string line in error)
             {
-                EnableRaisingEvents = true,
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = CommandLineExecutable,
-                    Arguments = arguments.Arguments,
-                    RedirectStandardInput = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WorkingDirectory = workingDirectory.Directory,
-                },
-            };
-            exec.Start();
-
-            var source = new TaskCompletionSource<bool>();
-            var output = new List<string>();
-            var error = new List<string>();
-            exec.OutputDataReceived += OnHandleOutputData;
-            exec.ErrorDataReceived += OnHandleErrorData;
-            exec.Exited += (sender, e) => source.SetResult(string.IsNullOrEmpty(error.ToString()));
-
-            exec.BeginErrorReadLine();
-            exec.BeginOutputReadLine();
-
-            if (cancellationToken != CancellationToken.None)
-            {
-                cancellationToken.Register(source.SetCanceled);
+                Trace.WriteLine(line);
             }
-            Trace.WriteLine("Writing to stream:");
-            Trace.WriteLine(writer.ToString());
-            Trace.WriteLine("======");
-            using (StreamWriter processInput = exec.StandardInput)
-            {
-                await processInput.WriteAsync(writer, cancellationToken);
-            }
-            bool isSuccessful = await source.Task;
+        }
+        return args;
 
-            TimeSpan duration = exec.ExitTime - exec.StartTime;
-            Trace.WriteLine(
-                $"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms"
-            );
-            var args = new ProcessEventArgs(
+        void OnHandleOutputData(object sender, DataReceivedEventArgs e)
+        {
+            string? data = e.Data;
+            if (data is not null)
+            {
+                output.AddRange(data.Split('\0'));
+                Trace.WriteLine($"{data}");
+            }
+        }
+        void OnHandleErrorData(object sender, DataReceivedEventArgs e)
+        {
+            string? data = e.Data;
+            if (data is not null)
+            {
+                error.Add(data);
+                Trace.WriteLine($"{data}");
+            }
+        }
+    }
+
+    public async Task<Stream> ReadStreamAsync(CancellationToken cancellationToken = default)
+    {
+        using var exec = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = CommandLineExecutable,
+                Arguments = arguments.Arguments,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = workingDirectory.Directory,
+            },
+        };
+        exec.Start();
+
+        var stream = new MemoryStream();
+        await exec.StandardOutput.BaseStream.CopyToAsync(stream, cancellationToken);
+        exec.WaitForExit();
+        Trace.WriteLine(
+            $"Running command {arguments.Arguments}: {(exec.ExitTime - exec.StartTime).TotalMilliseconds}ms"
+        );
+        stream.Position = 0;
+        telemetry.Report(
+            new ProcessEventArgs(
+                CommandLineExecutable,
+                workingDirectory,
+                arguments,
+                new DateTimeOffset(exec.StartTime),
+                exec.ExitTime - exec.StartTime,
+                new StringBuilder(),
+                new string[] { "Read stream" },
+                Array.Empty<string>()
+            )
+        );
+        return stream;
+    }
+
+    public async IAsyncEnumerable<string> ReadLinesAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
+    {
+        var dataCounter = new CountdownEvent(3);
+        var dataReceivedEvent = new ManualResetEventSlim(false);
+        using var exec = new Process
+        {
+            EnableRaisingEvents = true,
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = CommandLineExecutable,
+                StandardOutputEncoding = Encoding.UTF8,
+                Arguments = arguments.Arguments,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = workingDirectory.Directory,
+            },
+        };
+        var output = new List<string>();
+        var error = new List<string>();
+        var queue = new BufferBlock<string>();
+        exec.OutputDataReceived += OnHandleOutputData;
+        exec.ErrorDataReceived += OnHandleErrorData;
+        exec.Exited += (sender, e) => dataCounter.Signal();
+        exec.Start();
+
+        exec.BeginErrorReadLine();
+        exec.BeginOutputReadLine();
+
+        dataReceivedEvent.Wait(cancellationToken);
+        while (!dataCounter.IsSet || queue.Count > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (queue.TryReceive(out string? item))
+            {
+                yield return item;
+            }
+            else
+            {
+                await Task.Yield();
+            }
+        }
+        queue.Complete();
+        TimeSpan duration = exec.ExitTime - exec.StartTime;
+        Trace.WriteLine($"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms");
+        telemetry.Report(
+            new ProcessEventArgs(
                 CommandLineExecutable,
                 workingDirectory,
                 arguments,
                 new DateTimeOffset(exec.StartTime),
                 duration,
-                writer,
+                new StringBuilder(),
                 output.AsReadOnly(),
                 error.AsReadOnly()
-            );
-            telemetry.Report(args);
-            if (!isSuccessful)
-            {
-                foreach (string line in error)
-                {
-                    Trace.WriteLine(line);
-                }
-            }
-            return args;
+            )
+        );
 
-            void OnHandleOutputData(object sender, DataReceivedEventArgs e)
-            {
-                string? data = e.Data;
-                if (data is not null)
-                {
-                    output.AddRange(data.Split('\0'));
-                    Trace.WriteLine($"{data}");
-                }
-            }
-            void OnHandleErrorData(object sender, DataReceivedEventArgs e)
-            {
-                string? data = e.Data;
-                if (data is not null)
-                {
-                    error.Add(data);
-                    Trace.WriteLine($"{data}");
-                }
-            }
-        }
-
-        public async Task<Stream> ReadStreamAsync(CancellationToken cancellationToken = default)
+        void OnHandleOutputData(object sender, DataReceivedEventArgs e)
         {
-            using var exec = new Process
+            string? data = e.Data;
+            if (data is null)
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = CommandLineExecutable,
-                    Arguments = arguments.Arguments,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WorkingDirectory = workingDirectory.Directory,
-                },
-            };
-            exec.Start();
-
-            var stream = new MemoryStream();
-            await exec.StandardOutput.BaseStream.CopyToAsync(stream, cancellationToken);
-            exec.WaitForExit();
-            Trace.WriteLine(
-                $"Running command {arguments.Arguments}: {(exec.ExitTime - exec.StartTime).TotalMilliseconds}ms"
-            );
-            stream.Position = 0;
-            telemetry.Report(
-                new ProcessEventArgs(
-                    CommandLineExecutable,
-                    workingDirectory,
-                    arguments,
-                    new DateTimeOffset(exec.StartTime),
-                    exec.ExitTime - exec.StartTime,
-                    new StringBuilder(),
-                    new string[] { "Read stream" },
-                    Array.Empty<string>()
-                )
-            );
-            return stream;
+                dataCounter.Signal();
+            }
+            else
+            {
+                output.AddRange(data.Split('\0'));
+                queue.Post(data);
+            }
+            dataReceivedEvent.Set();
         }
-
-        public async IAsyncEnumerable<string> ReadLinesAsync(
-            [EnumeratorCancellation] CancellationToken cancellationToken = default
-        )
+        void OnHandleErrorData(object sender, DataReceivedEventArgs e)
         {
-            var dataCounter = new CountdownEvent(3);
-            var dataReceivedEvent = new ManualResetEventSlim(false);
-            using var exec = new Process
+            string? data = e.Data;
+            if (data is null)
             {
-                EnableRaisingEvents = true,
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = CommandLineExecutable,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    Arguments = arguments.Arguments,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WorkingDirectory = workingDirectory.Directory,
-                },
-            };
-            var output = new List<string>();
-            var error = new List<string>();
-            var queue = new BufferBlock<string>();
-            exec.OutputDataReceived += OnHandleOutputData;
-            exec.ErrorDataReceived += OnHandleErrorData;
-            exec.Exited += (sender, e) => dataCounter.Signal();
-            exec.Start();
-
-            exec.BeginErrorReadLine();
-            exec.BeginOutputReadLine();
-
-            dataReceivedEvent.Wait(cancellationToken);
-            while (!dataCounter.IsSet || queue.Count > 0)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (queue.TryReceive(out string? item))
-                {
-                    yield return item;
-                }
-                else
-                {
-                    await Task.Yield();
-                }
+                dataCounter.Signal();
             }
-            queue.Complete();
-            TimeSpan duration = exec.ExitTime - exec.StartTime;
-            Trace.WriteLine(
-                $"Running command {arguments.Arguments}: {duration.TotalMilliseconds}ms"
-            );
-            telemetry.Report(
-                new ProcessEventArgs(
-                    CommandLineExecutable,
-                    workingDirectory,
-                    arguments,
-                    new DateTimeOffset(exec.StartTime),
-                    duration,
-                    new StringBuilder(),
-                    output.AsReadOnly(),
-                    error.AsReadOnly()
-                )
-            );
-
-            void OnHandleOutputData(object sender, DataReceivedEventArgs e)
+            else
             {
-                string? data = e.Data;
-                if (data is null)
-                {
-                    dataCounter.Signal();
-                }
-                else
-                {
-                    output.AddRange(data.Split('\0'));
-                    queue.Post(data);
-                }
-                dataReceivedEvent.Set();
+                error.Add(data);
             }
-            void OnHandleErrorData(object sender, DataReceivedEventArgs e)
-            {
-                string? data = e.Data;
-                if (data is null)
-                {
-                    dataCounter.Signal();
-                }
-                else
-                {
-                    error.Add(data);
-                }
-                dataReceivedEvent.Set();
-            }
+            dataReceivedEvent.Set();
         }
     }
 }

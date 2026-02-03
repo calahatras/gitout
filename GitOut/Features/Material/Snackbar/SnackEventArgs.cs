@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 
-namespace GitOut.Features.Material.Snackbar
+namespace GitOut.Features.Material.Snackbar;
+
+public class SnackEventArgs : EventArgs
 {
-    public class SnackEventArgs : EventArgs
-    {
-        public SnackEventArgs(Snack snack) => Snack = snack;
+    public SnackEventArgs(Snack snack) => Snack = snack;
 
-        public Snack Snack { get; set; }
-    }
+    public Snack Snack { get; set; }
 }

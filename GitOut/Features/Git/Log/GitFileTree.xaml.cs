@@ -4,95 +4,93 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 
-namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public partial class GitFileTree : UserControl
 {
-    public partial class GitFileTree : UserControl
+    public static readonly DependencyProperty RootFilesProperty = DependencyProperty.Register(
+        nameof(RootFiles),
+        typeof(INotifyCollectionChanged),
+        typeof(GitFileTree)
+    );
+    public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(
+        nameof(SelectedItem),
+        typeof(object),
+        typeof(GitFileTree),
+        new PropertyMetadata(null, OnSelectedItemChanged)
+    );
+
+    public GitFileTree()
     {
-        public static readonly DependencyProperty RootFilesProperty = DependencyProperty.Register(
-            nameof(RootFiles),
-            typeof(INotifyCollectionChanged),
-            typeof(GitFileTree)
-        );
-        public static readonly DependencyProperty SelectedItemProperty =
-            DependencyProperty.Register(
-                nameof(SelectedItem),
-                typeof(object),
-                typeof(GitFileTree),
-                new PropertyMetadata(null, OnSelectedItemChanged)
-            );
+        InitializeComponent();
+        FileTree.SelectedItemChanged += (sender, args) => SelectedItem = args.NewValue;
+    }
 
-        public GitFileTree()
+    public object SelectedItem
+    {
+        get => GetValue(SelectedItemProperty);
+        set => SetValue(SelectedItemProperty, value);
+    }
+
+    public INotifyCollectionChanged RootFiles
+    {
+        get => (INotifyCollectionChanged)GetValue(RootFilesProperty);
+        set => SetValue(RootFilesProperty, value);
+    }
+
+    private static void OnSelectedItemChanged(
+        DependencyObject d,
+        DependencyPropertyChangedEventArgs e
+    )
+    {
+        if (d is GitFileTree control)
         {
-            InitializeComponent();
-            FileTree.SelectedItemChanged += (sender, args) => SelectedItem = args.NewValue;
+            FocusChild(control.FileTree.ItemContainerGenerator, e.NewValue);
         }
 
-        public object SelectedItem
+        bool FocusChild(ItemContainerGenerator generator, object child)
         {
-            get => GetValue(SelectedItemProperty);
-            set => SetValue(SelectedItemProperty, value);
-        }
-
-        public INotifyCollectionChanged RootFiles
-        {
-            get => (INotifyCollectionChanged)GetValue(RootFilesProperty);
-            set => SetValue(RootFilesProperty, value);
-        }
-
-        private static void OnSelectedItemChanged(
-            DependencyObject d,
-            DependencyPropertyChangedEventArgs e
-        )
-        {
-            if (d is GitFileTree control)
+            DependencyObject container = generator.ContainerFromItem(child);
+            if (container is TreeViewItem treeViewItem)
             {
-                FocusChild(control.FileTree.ItemContainerGenerator, e.NewValue);
+                treeViewItem.Focus();
+                return true;
             }
 
-            bool FocusChild(ItemContainerGenerator generator, object child)
+            foreach (object? item in generator.Items)
             {
-                DependencyObject container = generator.ContainerFromItem(child);
-                if (container is TreeViewItem treeViewItem)
+                DependencyObject childContainer = generator.ContainerFromItem(item);
+                if (childContainer is TreeViewItem childTreeViewItem)
                 {
-                    treeViewItem.Focus();
-                    return true;
-                }
-
-                foreach (object? item in generator.Items)
-                {
-                    DependencyObject childContainer = generator.ContainerFromItem(item);
-                    if (childContainer is TreeViewItem childTreeViewItem)
+                    if (
+                        childTreeViewItem.ItemContainerGenerator.Status
+                        == GeneratorStatus.ContainersGenerated
+                    )
                     {
-                        if (
-                            childTreeViewItem.ItemContainerGenerator.Status
-                            == GeneratorStatus.ContainersGenerated
-                        )
+                        if (FocusChild(childTreeViewItem.ItemContainerGenerator, child))
                         {
-                            if (FocusChild(childTreeViewItem.ItemContainerGenerator, child))
-                            {
-                                return true;
-                            }
-                        }
-                        else
-                        {
-                            childTreeViewItem.ItemContainerGenerator.StatusChanged +=
-                                OnContainerStatusChanged;
+                            return true;
                         }
                     }
+                    else
+                    {
+                        childTreeViewItem.ItemContainerGenerator.StatusChanged +=
+                            OnContainerStatusChanged;
+                    }
                 }
-                return false;
             }
+            return false;
+        }
 
-            void OnContainerStatusChanged(object? sender, EventArgs args)
+        void OnContainerStatusChanged(object? sender, EventArgs args)
+        {
+            if (
+                sender is ItemContainerGenerator generator
+                && generator.Status == GeneratorStatus.ContainersGenerated
+            )
             {
-                if (
-                    sender is ItemContainerGenerator generator
-                    && generator.Status == GeneratorStatus.ContainersGenerated
-                )
-                {
-                    FocusChild(generator, e.NewValue);
-                    generator.StatusChanged -= OnContainerStatusChanged;
-                }
+                FocusChild(generator, e.NewValue);
+                generator.StatusChanged -= OnContainerStatusChanged;
             }
         }
     }

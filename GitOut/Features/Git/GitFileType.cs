@@ -1,9 +1,8 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public enum GitFileType
 {
-    public enum GitFileType
-    {
-        None,
-        Tree,
-        Blob,
-    }
+    None,
+    Tree,
+    Blob,
 }

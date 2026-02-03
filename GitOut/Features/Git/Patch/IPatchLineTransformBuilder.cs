@@ -1,11 +1,10 @@
 using GitOut.Features.Text;
 
-namespace GitOut.Features.Git.Patch
+namespace GitOut.Features.Git.Patch;
+
+public interface IPatchLineTransformBuilder
 {
-    public interface IPatchLineTransformBuilder
-    {
-        ITextTransform Build();
-        IPatchLineTransformBuilder TrimLines();
-        IPatchLineTransformBuilder ConvertTabsToSpaces(string replacement);
-    }
+    ITextTransform Build();
+    IPatchLineTransformBuilder TrimLines();
+    IPatchLineTransformBuilder ConvertTabsToSpaces(string replacement);
 }
