@@ -31,6 +31,11 @@ public interface IGitRepository
     );
     Task<GitDiffResult> DiffAsync(GitFileId source, GitFileId target, DiffOptions options);
     Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options);
+    Task<GitDiffResult> DiffAsync(
+        RelativeDirectoryPath source,
+        RelativeDirectoryPath destination,
+        DiffOptions options
+    );
     IAsyncEnumerable<GitFileEntry> ListTreeAsync(GitObjectId id, DiffOptions? options = default);
     Stream GetUntrackedBlobStream(RelativeDirectoryPath path);
     Task<Stream> GetBlobStreamAsync(GitFileId file);
