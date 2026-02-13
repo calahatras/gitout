@@ -1231,12 +1231,19 @@ public class GitStageViewModel
             _ = optionsBuilder.IgnoreAllSpace();
         }
 
-        SelectedDiffResult = await DiffContext.DiffFilesAsync(
-            Repository,
-            selected[0].Model.Path,
-            selected[1].Model.Path,
-            optionsBuilder.Build()
-        );
+        try
+        {
+            SelectedDiffResult = await DiffContext.DiffFilesAsync(
+                Repository,
+                selected[0].Model.Path,
+                selected[1].Model.Path,
+                optionsBuilder.Build()
+            );
+        }
+        catch (Exception e)
+        {
+            snack.ShowError("Failed to diff files", e);
+        }
     }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
