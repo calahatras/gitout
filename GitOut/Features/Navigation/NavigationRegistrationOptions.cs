@@ -1,7 +1,6 @@
-namespace GitOut.Features.Navigation
+namespace GitOut.Features.Navigation;
+
+public class NavigationRegistrationOptions
 {
-    public class NavigationRegistrationOptions
-    {
-        public string? StartupType { get; set; }
-    }
+    public string? StartupType { get; set; }
 }

@@ -1,4 +1,3 @@
-namespace GitOut.Features.Git
-{
-    public record GitDeleteBranchOptions(bool ForceDelete);
-}
+namespace GitOut.Features.Git;
+
+public record GitDeleteBranchOptions(bool ForceDelete);

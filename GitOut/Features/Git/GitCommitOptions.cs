@@ -1,27 +1,23 @@
 using System;
 
-namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public class GitCommitOptions
 {
-    public class GitCommitOptions
+    private GitCommitOptions(bool amend, string message)
     {
-        private GitCommitOptions(bool amend, string message)
+        if (message.Length == 0)
         {
-            if (message.Length == 0)
-            {
-                throw new ArgumentException(
-                    "Message must be more than 0 characters",
-                    nameof(message)
-                );
-            }
-            Amend = amend;
-            Message = message;
+            throw new ArgumentException("Message must be more than 0 characters", nameof(message));
         }
-
-        public bool Amend { get; }
-        public string Message { get; }
-
-        public static GitCommitOptions AmendLatest(string message) => new(true, message);
-
-        public static GitCommitOptions CreateCommit(string message) => new(false, message);
+        Amend = amend;
+        Message = message;
     }
+
+    public bool Amend { get; }
+    public string Message { get; }
+
+    public static GitCommitOptions AmendLatest(string message) => new(true, message);
+
+    public static GitCommitOptions CreateCommit(string message) => new(false, message);
 }

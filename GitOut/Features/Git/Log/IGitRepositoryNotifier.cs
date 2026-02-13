@@ -1,7 +1,6 @@
-namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public interface IGitRepositoryNotifier
 {
-    public interface IGitRepositoryNotifier
-    {
-        void NotifyLogChanged();
-    }
+    void NotifyLogChanged();
 }

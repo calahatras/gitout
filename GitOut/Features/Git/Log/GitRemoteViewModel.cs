@@ -1,44 +1,39 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace GitOut.Features.Git.Log
+namespace GitOut.Features.Git.Log;
+
+public class GitRemoteViewModel : INotifyPropertyChanged
 {
-    public class GitRemoteViewModel : INotifyPropertyChanged
+    private bool isSelected;
+
+    public GitRemoteViewModel(GitRemote model, bool isSelected)
     {
-        private bool isSelected;
+        Name = model.Name;
+        Model = model;
+        this.isSelected = isSelected;
+    }
 
-        public GitRemoteViewModel(GitRemote model, bool isSelected)
+    public string Name { get; }
+    public bool IsSelected
+    {
+        get => isSelected;
+        set => SetProperty(ref isSelected, value);
+    }
+    public GitRemote Model { get; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public static GitRemoteViewModel From(GitRemote model) => new(model, isSelected: true);
+
+    private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (!ReferenceEquals(prop, value))
         {
-            Name = model.Name;
-            Model = model;
-            this.isSelected = isSelected;
+            prop = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
         }
-
-        public string Name { get; }
-        public bool IsSelected
-        {
-            get => isSelected;
-            set => SetProperty(ref isSelected, value);
-        }
-        public GitRemote Model { get; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public static GitRemoteViewModel From(GitRemote model) => new(model, isSelected: true);
-
-        private bool SetProperty<T>(
-            ref T prop,
-            T value,
-            [CallerMemberName] string? propertyName = null
-        )
-        {
-            if (!ReferenceEquals(prop, value))
-            {
-                prop = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                return true;
-            }
-            return false;
-        }
+        return false;
     }
 }

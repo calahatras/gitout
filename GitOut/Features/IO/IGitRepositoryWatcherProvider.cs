@@ -1,12 +1,11 @@
 using GitOut.Features.Git;
 
-namespace GitOut.Features.IO
+namespace GitOut.Features.IO;
+
+public interface IGitRepositoryWatcherProvider
 {
-    public interface IGitRepositoryWatcherProvider
-    {
-        IRepositoryWatcher PrepareWatchRepositoryChanges(
-            IGitRepository repository,
-            RepositoryWatcherOptions options = RepositoryWatcherOptions.All
-        );
-    }
+    IRepositoryWatcher PrepareWatchRepositoryChanges(
+        IGitRepository repository,
+        RepositoryWatcherOptions options = RepositoryWatcherOptions.All
+    );
 }

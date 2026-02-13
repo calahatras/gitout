@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 
-namespace GitOut.Features.Wpf
+namespace GitOut.Features.Wpf;
+
+public interface ITitleService
 {
-    public interface ITitleService
-    {
-        string? Title { get; set; }
+    string? Title { get; set; }
 
-        event EventHandler<TitleChangedEventArgs>? TitleChanged;
-    }
+    event EventHandler<TitleChangedEventArgs>? TitleChanged;
 }

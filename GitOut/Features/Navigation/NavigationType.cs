@@ -1,12 +1,11 @@
-namespace GitOut.Features.Navigation
+namespace GitOut.Features.Navigation;
+
+public enum NavigationType
 {
-    public enum NavigationType
-    {
-        None,
-        Initial,
-        NavigatedBack,
-        NavigatedLeave,
-        Activated,
-        Deactivated,
-    }
+    None,
+    Initial,
+    NavigatedBack,
+    NavigatedLeave,
+    Activated,
+    Deactivated,
 }

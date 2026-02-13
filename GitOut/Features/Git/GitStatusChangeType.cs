@@ -1,12 +1,11 @@
-﻿namespace GitOut.Features.Git
+namespace GitOut.Features.Git;
+
+public enum GitStatusChangeType
 {
-    public enum GitStatusChangeType
-    {
-        None,
-        Ordinary,
-        RenamedOrCopied,
-        Unmerged,
-        Untracked,
-        Ignored,
-    }
+    None,
+    Ordinary,
+    RenamedOrCopied,
+    Unmerged,
+    Untracked,
+    Ignored,
 }

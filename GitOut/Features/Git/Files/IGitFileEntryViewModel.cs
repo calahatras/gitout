@@ -1,12 +1,11 @@
 using GitOut.Features.IO;
 
-namespace GitOut.Features.Git.Files
+namespace GitOut.Features.Git.Files;
+
+public interface IGitFileEntryViewModel
 {
-    public interface IGitFileEntryViewModel
-    {
-        RelativeDirectoryPath Path { get; }
-        FileName FileName { get; }
-        string FullPath { get; }
-        string IconResourceKey { get; }
-    }
+    RelativeDirectoryPath Path { get; }
+    FileName FileName { get; }
+    string FullPath { get; }
+    string IconResourceKey { get; }
 }

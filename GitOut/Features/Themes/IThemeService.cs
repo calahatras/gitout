@@ -1,10 +1,9 @@
-﻿using System.Windows;
+using System.Windows;
 
-namespace GitOut.Features.Themes
+namespace GitOut.Features.Themes;
+
+public interface IThemeService
 {
-    public interface IThemeService
-    {
-        void ChangeTheme(ThemePaletteViewModel theme);
-        void RegisterResourceProvider(ResourceDictionary resources);
-    }
+    void ChangeTheme(ThemePaletteViewModel theme);
+    void RegisterResourceProvider(ResourceDictionary resources);
 }

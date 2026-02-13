@@ -69,7 +69,7 @@ Use the `dotnet test` tool to run all tests.
 ### Formatting
 
 - Apply code-formatting style defined in `.editorconfig` and/or csharpier.
-- Prefer file-scoped namespace declarations and single-line using directives.
+- Use file-scoped namespace declarations and single-line using directives.
 - Use pattern matching and switch expressions wherever possible.
 - Use `nameof` instead of string literals when referring to member names.
 - Ensure that XML doc comments are created for any public APIs. When applicable, include `<example>` and `<code>` documentation in the comments.
@@ -128,3 +128,9 @@ Use the `dotnet test` tool to run all tests.
 - Explain the differences between manual Dockerfile creation and .NET's container publishing features.
 - Explain CI/CD pipelines for NET applications.
 - Show how to implement health checks and readiness probes.
+
+## Maintenance
+
+Update this file when you learn new information about the project, or if assumptions you made are proven wrong.
+If new implementations of features are added, if any core changes are made, update this file to reflect the changes.
+
