@@ -28,10 +28,14 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 {
     private readonly IOptionsWriter<GitStageOptions> storage;
     private readonly IOptionsWriter<GitLogOptions> logStorage;
+    private readonly IOptionsWriter<WorktreeOptions> worktreeStorage;
+    private readonly IOptionsWriter<GitGeneralOptions> generalStorage;
+    private readonly IDisposable? unsubscribeGeneralOptions;
     private readonly IDisposable? unsubscribeOptions;
     private readonly IDisposable? unsubscribeLogOptions;
     private readonly IDisposable? unsubscribeWorktreeOptions;
-    private readonly IOptionsWriter<WorktreeOptions> worktreeStorage;
+    private string? defaultEditorPath;
+    private bool useTransparentBackground = true;
     private bool trimLineEndings;
     private bool showSpacesAsDots;
     private string tabTransformText;
@@ -48,6 +52,8 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         IOptionsWriter<GitStageOptions> storage,
         IOptionsMonitor<GitLogOptions> logOptions,
         IOptionsWriter<GitLogOptions> logStorage,
+        IOptionsMonitor<GitGeneralOptions> generalOptions,
+        IOptionsWriter<GitGeneralOptions> generalStorage,
         IOptionsMonitor<KeyboardShortcutsOptions> shortcutsOptions,
         IOptionsWriter<KeyboardShortcutsOptions> shortcutsWriter,
         IOptionsMonitor<WorktreeOptions> worktreeOptions,
@@ -57,6 +63,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         this.storage = storage;
         this.logStorage = logStorage;
         this.storage = storage;
+        this.generalStorage = generalStorage;
         this.worktreeStorage = worktreeStorage;
 
         ShortcutsSettings = new KeyboardShortcutsSettingsViewModel(
@@ -154,6 +161,10 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
                 nameof(DefaultWorktreePrefixPath)
             )
         );
+        defaultEditorPath = generalOptions.CurrentValue.DefaultEditorPath;
+        unsubscribeGeneralOptions = generalOptions.OnChange(value =>
+            SetProperty(ref defaultEditorPath, value.DefaultEditorPath, nameof(DefaultEditorPath))
+        );
     }
 
     public ICollectionView ValidRepositoryPaths { get; }
@@ -234,6 +245,17 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
             }
         }
     }
+    public string? DefaultEditorPath
+    {
+        get => defaultEditorPath;
+        set
+        {
+            if (SetProperty(ref defaultEditorPath, value))
+            {
+                generalStorage.Update(snapshot => snapshot.DefaultEditorPath = value);
+            }
+        }
+    }
 
     public string DefaultWorktreePrefixPath
     {
@@ -271,10 +293,11 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 
     public void Dispose()
     {
-        unsubscribeOptions?.Dispose();
-        unsubscribeLogOptions?.Dispose();
+        unsubscribeOptions.Dispose();
+        unsubscribeLogOptions.Dispose();
         unsubscribeWorktreeOptions?.Dispose();
-        ShortcutsSettings.Dispose();
+        unsubscribeGeneralOptions?.Dispose();
+        ShortcutsSettings?.Dispose();
     }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)

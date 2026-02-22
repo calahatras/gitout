@@ -157,6 +157,16 @@
             </Border>
             <Border Style="{StaticResource CardPanelStyle}">
               <StackPanel>
+                <TextBlock Style="{StaticResource Header6TextStyle}" Text="Editor" />
+                <TextBox
+                  Style="{StaticResource MaterialInputStyle}"
+                  AutomationProperties.HelpText="Default Editor Path"
+                  Text="{Binding DefaultEditorPath, UpdateSourceTrigger=PropertyChanged}"
+                />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardPanelStyle}">
+              <StackPanel>
                 <TextBlock Style="{StaticResource Header6TextStyle}" Text="Repositories" />
                 <Grid VerticalAlignment="Center">
                   <Grid.ColumnDefinitions>

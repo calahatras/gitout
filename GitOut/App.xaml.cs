@@ -131,6 +131,9 @@ public partial class App : Application
         services
             .AddWritableOptions<KeyboardShortcutsOptions>()
             .Bind(context.Configuration, KeyboardShortcutsOptions.SectionKey);
+        services
+            .AddWritableOptions<GitGeneralOptions>()
+            .Bind(context.Configuration, GitGeneralOptions.SectionKey);
 
         services
             .AddWritableOptions<WorktreeOptions>()
