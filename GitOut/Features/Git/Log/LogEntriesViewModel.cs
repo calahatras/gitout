@@ -35,17 +35,21 @@ public class LogEntriesViewModel : INotifyPropertyChanged
     private IGitFileEntryViewModel? selectedItem;
     private LogRevisionViewMode viewMode = LogRevisionViewMode.CurrentRevision;
 
+    private readonly DiffOptions? options;
+
     private LogEntriesViewModel(
         GitHistoryEvent root,
         IGitRepository repository,
         IGitRepositoryNotifier notifier,
-        ISnackbarService snack
+        ISnackbarService snack,
+        DiffOptions? options = null
     )
     {
         Root = root;
         this.repository = repository;
         this.notifier = notifier;
         this.snack = snack;
+        this.options = options;
         allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
             _ => ListAllFilesAsync(),
             IGitDirectoryEntryViewModel.CompareItems
@@ -65,7 +69,8 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                     diff?.Id ?? root.ParentId,
                     root.Id,
                     repository,
-                    RelativeDirectoryPath.Root
+                    RelativeDirectoryPath.Root,
+                    options
                 ),
             IGitDirectoryEntryViewModel.CompareItems
         );
@@ -78,7 +83,8 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                 GitFileEntryViewModelFactory.DiffAllAsync(
                     diff?.Id ?? root.ParentId,
                     root.Id,
-                    repository
+                    repository,
+                    options
                 ),
             IGitDirectoryEntryViewModel.CompareItems
         );
@@ -100,9 +106,10 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         GitHistoryEvent diff,
         IGitRepository repository,
         IGitRepositoryNotifier notifier,
-        ISnackbarService snack
+        ISnackbarService snack,
+        DiffOptions? options = null
     )
-        : this(root, repository, notifier, snack) => this.diff = diff;
+        : this(root, repository, notifier, snack, options) => this.diff = diff;
 
     public GitHistoryEvent Root { get; }
 
@@ -177,7 +184,8 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         IGitRepository repository,
         IGitRepositoryNotifier notifier,
         ISnackbarService snack,
-        LogRevisionViewMode mode
+        LogRevisionViewMode mode,
+        DiffOptions? options = null
     )
         where T : GitHistoryEvent
     {
@@ -189,11 +197,18 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         if (entries.Count == 1)
         {
             // single item, show file content and diff against parent
-            context = new LogEntriesViewModel(entries[0], repository, notifier, snack);
+            context = new LogEntriesViewModel(entries[0], repository, notifier, snack, options);
         }
         else //if (entries.Count == 2)
         {
-            context = new LogEntriesViewModel(entries[0], entries[1], repository, notifier, snack);
+            context = new LogEntriesViewModel(
+                entries[0],
+                entries[1],
+                repository,
+                notifier,
+                snack,
+                options
+            );
         }
         context.ViewMode = mode;
         return context;
@@ -202,7 +217,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
     public LogEntriesViewModel SwapEntries() =>
         diff is null
             ? throw new InvalidOperationException("Cannot swap entries when diff is not set")
-            : new LogEntriesViewModel(diff, Root, repository, notifier, snack)
+            : new LogEntriesViewModel(diff, Root, repository, notifier, snack, options)
             {
                 selectedItem = selectedItem,
                 ViewMode = ViewMode,

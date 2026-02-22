@@ -14,6 +14,8 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
 
     private DiffContext? result;
 
+    private readonly DiffOptions options;
+
     private GitFileViewModel(
         IGitRepository repository,
         RelativeDirectoryPath path,
@@ -21,10 +23,12 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
         string displayName,
         GitFileId sourceId,
         GitFileId? destinationId = null,
-        GitDiffType diffType = GitDiffType.None
+        GitDiffType diffType = GitDiffType.None,
+        DiffOptions? options = null
     )
     {
         this.repository = repository;
+        this.options = options ?? DiffOptions.Builder().Build();
         Path = path;
         FileName = fileName;
         DisplayName = displayName;
@@ -84,7 +88,8 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
     public static GitFileViewModel Snapshot(
         IGitRepository repository,
         GitFileEntry file,
-        RelativeDirectoryPath relativePath
+        RelativeDirectoryPath relativePath,
+        DiffOptions? options = null
     ) =>
         file.Type != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
@@ -93,13 +98,17 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
                 relativePath,
                 file.FileName,
                 file.FileName.ToString(),
-                file.Id
+                file.Id,
+                null,
+                GitDiffType.None,
+                options
             );
 
     public static GitFileViewModel Difference(
         IGitRepository repository,
         GitDiffFileEntry file,
-        RelativeDirectoryPath relativePath
+        RelativeDirectoryPath relativePath,
+        DiffOptions? options = null
     ) =>
         file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
@@ -110,12 +119,14 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
                 file.Source.FileName.ToString(),
                 file.Source.Id,
                 file.Destination.Id,
-                file.Type
+                file.Type,
+                options
             );
 
     public static GitFileViewModel RelativeDifference(
         IGitRepository repository,
-        GitDiffFileEntry file
+        GitDiffFileEntry file,
+        DiffOptions? options = null
     ) =>
         file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
@@ -131,14 +142,22 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
                     .Replace('\\', '/'),
                 file.Source.Id,
                 file.Destination.Id,
-                file.Type
+                file.Type,
+                options
             );
 
     private async Task RefreshDiffAsync()
     {
         result = destinationId is null
             ? await DiffContext.SnapshotFileAsync(repository, Path, FileName, sourceId)
-            : await DiffContext.DiffFileAsync(repository, Path, FileName, sourceId, destinationId);
+            : await DiffContext.DiffFileAsync(
+                repository,
+                Path,
+                FileName,
+                sourceId,
+                destinationId,
+                options
+            );
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
     }
 }

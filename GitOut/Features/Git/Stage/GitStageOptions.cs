@@ -6,5 +6,6 @@ public class GitStageOptions
 
     public bool TrimLineEndings { get; set; }
     public bool ShowSpacesAsDots { get; set; }
+    public bool IgnoreWhitespace { get; set; }
     public string TabTransformText { get; set; } = "  ";
 }
