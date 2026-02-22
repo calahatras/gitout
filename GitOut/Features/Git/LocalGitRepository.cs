@@ -817,6 +817,42 @@ public sealed class LocalGitRepository : IGitRepository
     private IGitProcess CreateProcess(ProcessOptions arguments) =>
         processFactory.Create(WorkingDirectory, arguments);
 
+    public async Task<GitCheckIgnoreResult?> CheckIgnoreAsync(string path)
+    {
+        IGitProcess check = CreateProcess(
+            ProcessOptions.FromArguments($"check-ignore -v -n -- \"{path}\"")
+        );
+        try
+        {
+            await foreach (string line in check.ReadLinesAsync())
+            {
+                // Format: <source>:<linenr>:<pattern>\t<pathname>
+                // Use regex to handle potential colons in source path (e.g. Windows absolute paths)
+                System.Text.RegularExpressions.Match match =
+                    System.Text.RegularExpressions.Regex.Match(
+                        line,
+                        @"^(?<source>.*):(?<line>\d+):(?<pattern>.*)\t(?<path>.*)$"
+                    );
+                if (match.Success && int.TryParse(match.Groups["line"].Value, out int lineNumber))
+                {
+                    return new GitCheckIgnoreResult(
+                        match.Groups["source"].Value,
+                        lineNumber,
+                        match.Groups["pattern"].Value
+                    );
+                }
+            }
+        }
+#pragma warning disable CA1031 // Do not catch general exception types
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
+        {
+            // If the path is NOT ignored, git check-ignore returns exit code 1.
+            return null;
+        }
+        return null;
+    }
+
     private static async IAsyncEnumerable<T> ParseHistoryLines<T>(
         IAsyncEnumerable<string> lines,
         Func<IGitHistoryEventBuilder<T>> factory

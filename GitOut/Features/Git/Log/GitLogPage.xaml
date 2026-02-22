@@ -947,6 +947,11 @@
             </Grid>
           </Button>
         </ToolBar>
+        <ToolBar ToolBar.OverflowMode="Never">
+          <Button Command="{Binding NavigateToGitIgnoreCommand}" ToolTip="Manage gitignore">
+            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource EyeOff}" />
+          </Button>
+        </ToolBar>
       </ToolBarTray>
     </Grid>
     <Grid

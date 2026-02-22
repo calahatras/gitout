@@ -15,6 +15,7 @@ using System.Windows.Media;
 using GitOut.Features.Collections;
 using GitOut.Features.Git.CherryPick;
 using GitOut.Features.Git.Files;
+using GitOut.Features.Git.Ignore;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Worktree;
@@ -173,6 +174,12 @@ public class GitLogViewModel
             await RefreshStashListAsync();
         });
         RefreshStashesCommand = new AsyncCallbackCommand(RefreshStashListAsync);
+        NavigateToGitIgnoreCommand = new NavigateLocalCommand<object>(
+            navigation,
+            typeof(GitIgnorePage).FullName!,
+            e => GitIgnorePageOptions.Open(Repository)
+        );
+
         RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
 
         ApplyStashCommand = new AsyncCallbackCommand<GitStashEventViewModel?>(async vm =>
@@ -966,6 +973,7 @@ public class GitLogViewModel
     public ICommand NavigateToStageAreaCommand { get; }
     public ICommand CreateStashCommand { get; }
     public ICommand RefreshStashesCommand { get; }
+    public ICommand NavigateToGitIgnoreCommand { get; }
     public ICommand RefreshStatusCommand { get; }
     public ICommand ApplyStashCommand { get; }
     public ICommand PopStashCommand { get; }

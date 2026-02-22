@@ -68,6 +68,7 @@ public interface IGitRepository
     Task CherryPickAbortAsync();
     Task CherryPickQuitAsync();
     Task RestoreWorkspaceAsync(GitStatusChange change);
+    Task<GitCheckIgnoreResult?> CheckIgnoreAsync(string path);
 
     IAsyncEnumerable<GitWorktree> WorktreeListAsync();
     Task WorktreeAddAsync(GitWorktreeAddOptions options);

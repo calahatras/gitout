@@ -134,3 +134,8 @@ Use the `dotnet test` tool to run all tests.
 Update this file when you learn new information about the project, or if assumptions you made are proven wrong.
 If new implementations of features are added, if any core changes are made, update this file to reflect the changes.
 
+### Lessons Learned
+
+- **Architecture & DI**: New features should introduce specific services (e.g., `IGitIgnoreService`) registered in DI, rather than embedding logic in ViewModels. This keeps ViewModels focused on presentation and state.
+- **Git Abstraction**: All git operations must flow through `IGitRepository` / `LocalGitRepository`. Do not execute processes directly in ViewModels; extending the repository interface is the correct pattern.
+- **UI Consistency**: New views must strictly adhere to the application's existing visual language. For example, list items in the Stage view use a specific height (`22px`) and style. Always mimic existing successful views (`GitStagePage`) rather than creating new styles.

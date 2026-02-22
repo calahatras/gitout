@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using GitOut.Features.Git;
+using GitOut.Features.Git.Ignore;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
@@ -109,6 +110,7 @@ public partial class App : Application
         _ = services.AddScoped<ITitleService, TitleService>();
         _ = services.AddSingleton<IWritableStorage, FileStorage>();
         _ = services.AddScoped<Features.Wpf.Commands.Application>();
+        _ = services.AddScoped<IGitIgnoreService, GitIgnoreService>();
 
         services.AddSettingsFeature();
         services.AddGitFeature();

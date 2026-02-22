@@ -15,6 +15,7 @@ using System.Windows.Input;
 using GitOut.Features.Collections;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Files;
+using GitOut.Features.Git.Ignore;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
@@ -55,6 +56,7 @@ public class GitStageViewModel
     public GitStageViewModel(
         INavigationService navigation,
         ITitleService title,
+        IGitIgnoreService ignoreService,
         IGitRepositoryWatcherProvider watchProvider,
         ISnackbarService snack,
         IOptionsMonitor<GitStageOptions> stagingOptions
@@ -146,6 +148,16 @@ public class GitStageViewModel
         PatchEditTextCommand = new AsyncCallbackCommand(
             PatchEditSelectionAsync,
             () => EditHunk is not null
+        );
+        IgnoreFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(
+            async change =>
+            {
+                if (change is null)
+                    return;
+                await ignoreService.AddRuleAsync(Repository, change.Model.Path.ToString());
+                await GetRepositoryStatusAsync();
+            },
+            change => change is not null && change.Model.Type == GitStatusChangeType.Untracked
         );
         DiffSelectedFilesCommand = new AsyncCallbackCommand(
             DiffSelectedFilesAsync,
@@ -366,6 +378,7 @@ public class GitStageViewModel
     public ICommand CommitCommand { get; }
     public ICommand CancelEditTextCommand { get; }
     public ICommand PatchEditTextCommand { get; }
+    public ICommand IgnoreFileCommand { get; }
     public ICommand DiffSelectedFilesCommand { get; }
     public ICommand DecreaseContextLinesCommand { get; }
     public ICommand IncreaseContextLinesCommand { get; }

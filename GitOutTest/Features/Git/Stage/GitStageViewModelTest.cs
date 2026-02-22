@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FakeItEasy;
 using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Ignore;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
@@ -40,11 +41,12 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         actor.Navigated(NavigationType.Initial);
 
@@ -96,11 +98,12 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         actor.Navigated(NavigationType.Initial);
         actor.RefreshStatusCommand.Execute(null);
@@ -152,11 +155,12 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         actor.Navigated(NavigationType.Initial);
 
@@ -210,11 +214,12 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -284,11 +289,12 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -366,11 +372,12 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -445,6 +452,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -460,7 +468,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -534,6 +542,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false, TrimLineEndings = true });
@@ -549,7 +558,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -623,6 +632,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -638,7 +648,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -712,6 +722,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -727,7 +738,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -801,6 +812,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -816,7 +828,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -893,6 +905,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -908,7 +921,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -989,6 +1002,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1004,7 +1018,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1080,6 +1094,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1095,7 +1110,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1173,6 +1188,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1188,7 +1204,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1284,6 +1300,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1299,7 +1316,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1384,6 +1401,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1399,7 +1417,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1486,6 +1504,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1501,7 +1520,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1584,6 +1603,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1608,7 +1628,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1689,6 +1709,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1713,7 +1734,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
@@ -1795,6 +1816,7 @@ public class GitStageViewModelTest
             )
             .Returns(watch);
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        IGitIgnoreService ignore = A.Fake<IGitIgnoreService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
@@ -1819,7 +1841,7 @@ public class GitStageViewModelTest
                 )
             );
 
-        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var actor = new GitStageViewModel(navigation, title, ignore, watchProvider, snack, options);
 
         // initialize workspace files with initial change
         actor.Navigated(NavigationType.Initial);
