@@ -157,6 +157,12 @@ public class GitStageViewModel
             PatchEditSelectionAsync,
             () => editHunk is not null
         );
+        DiffSelectedFilesCommand = new AsyncCallbackCommand(
+            DiffSelectedFilesAsync,
+            () =>
+                workspaceFiles.Count(x => x.IsSelected) == 2
+                || indexFiles.Count(x => x.IsSelected) == 2
+        );
     }
 
     public IGitRepository Repository { get; }
@@ -322,6 +328,7 @@ public class GitStageViewModel
     public ICommand CommitCommand { get; }
     public ICommand CancelEditTextCommand { get; }
     public ICommand PatchEditTextCommand { get; }
+    public ICommand DiffSelectedFilesCommand { get; }
 
     public string FallbackPageName => typeof(GitLogPage).FullName!;
     public object? FallbackOptions => GitLogPageOptions.OpenRepository(Repository);
@@ -1079,6 +1086,28 @@ public class GitStageViewModel
             {
                 indexFiles.Insert(index, StatusChangeViewModel.AsStaged(change));
             }
+        }
+    }
+
+    private async Task DiffSelectedFilesAsync()
+    {
+        var selected = workspaceFiles.Where(x => x.IsSelected).ToList();
+        if (selected.Count != 2)
+        {
+            selected = indexFiles.Where(x => x.IsSelected).ToList();
+        }
+
+        try
+        {
+            SelectedDiffResult = await DiffContext.DiffFilesAsync(
+                Repository,
+                selected[0].Model.Path,
+                selected[1].Model.Path
+            );
+        }
+        catch (Exception e)
+        {
+            snack.ShowError("Failed to diff files", e);
         }
     }
 

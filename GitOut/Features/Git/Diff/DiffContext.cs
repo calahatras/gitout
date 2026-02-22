@@ -102,6 +102,21 @@ public class DiffContext
             destinationId
         );
 
+    public static async Task<DiffContext> DiffFilesAsync(
+        IGitRepository repository,
+        RelativeDirectoryPath source,
+        RelativeDirectoryPath destination
+    ) =>
+        CreateFromResult(
+            repository,
+            new FileInfo(
+                Path.Combine(repository.WorkingDirectory.Directory, destination.ToString())
+            ),
+            await repository.DiffAsync(source, destination, DiffOptions.Builder().Build()),
+            null,
+            null
+        );
+
     private static DiffContext CreateFromResult(
         IGitRepository repository,
         FileInfo info,
