@@ -151,7 +151,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                     $"stash-{model.StashIndex}",
                     "Branch name",
                     GitBranchName.IsValid,
-                    GitBranchName.CreateLocal
+                    GitBranchName.CreateLocal,
+                    "Create branch"
                 ),
                 new NavigationOverrideOptions(
                     PromptSize,
@@ -225,6 +226,47 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             },
             () => checkoutBranchName is not null && GitBranchName.IsValid(checkoutBranchName)
         );
+
+        CreateBranchFromCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
+        {
+            INavigationService child = navigation.NavigateNewWindow(
+                typeof(TextPromptPage).FullName!,
+                new TextPromptOptions(
+                    string.Empty,
+                    "Branch name",
+                    GitBranchName.IsValid,
+                    GitBranchName.CreateLocal,
+                    "Create branch",
+                    "CREATE"
+                ),
+                new NavigationOverrideOptions(
+                    PromptSize,
+                    PromptOffset,
+                    IsModal: true,
+                    IsStatusBarVisible: false
+                )
+            );
+            child.Closed += async (sender, args) =>
+            {
+                GitBranchName? branchName = child.GetDialogResult<GitBranchName>();
+                if (branchName is not null)
+                {
+                    try
+                    {
+                        await Repository.CreateBranchAsync(
+                            branchName,
+                            new GitCreateBranchOptions(commit.Id)
+                        );
+                        await CheckRepositoryStatusAsync();
+                        snack.ShowSuccess($"Created branch {branchName.Name}");
+                    }
+                    catch (InvalidOperationException ioe)
+                    {
+                        snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
+                    }
+                }
+            };
+        });
 
         RevealInExplorerCommand = new CallbackCommand(() =>
             Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose()
@@ -421,6 +463,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public ICommand RefreshStatusCommand { get; }
     public ICommand FetchRemotesCommand { get; }
     public ICommand PruneRemotesCommand { get; }
+    public ICommand CreateBranchFromCommitCommand { get; }
     public ICommand CheckoutCommitCommand { get; }
     public ICommand CheckoutBranchCommand { get; }
     public ICommand RevealInExplorerCommand { get; }
