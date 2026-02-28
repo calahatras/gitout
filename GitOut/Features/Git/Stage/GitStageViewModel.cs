@@ -1097,18 +1097,11 @@ public class GitStageViewModel
             selected = indexFiles.Where(x => x.IsSelected).ToList();
         }
 
-        try
-        {
-            SelectedDiffResult = await DiffContext.DiffFilesAsync(
-                Repository,
-                selected[0].Model.Path,
-                selected[1].Model.Path
-            );
-        }
-        catch (Exception e)
-        {
-            snack.ShowError("Failed to diff files", e);
-        }
+        SelectedDiffResult = await DiffContext.DiffFilesAsync(
+            Repository,
+            selected[0].Model.Path,
+            selected[1].Model.Path
+        );
     }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
