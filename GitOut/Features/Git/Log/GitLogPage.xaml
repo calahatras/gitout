@@ -618,6 +618,23 @@
                   </CheckBox>
                   <CheckBox
                     Style="{StaticResource PopoverCheckboxListItemStyle}"
+                    IsChecked="{Binding IgnoreWhitespace}"
+                  >
+                    <StackPanel Orientation="Horizontal">
+                      <Canvas Width="24" Height="24" Margin="0 0 3 0">
+                        <Canvas.LayoutTransform>
+                          <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                        </Canvas.LayoutTransform>
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource KeyboardSpace}"
+                        />
+                      </Canvas>
+                      <TextBlock Text="Ignore whitespace" />
+                    </StackPanel>
+                  </CheckBox>
+                  <CheckBox
+                    Style="{StaticResource PopoverCheckboxListItemStyle}"
                     IsChecked="{Binding IncludeStashes}"
                   >
                     <StackPanel Orientation="Horizontal">

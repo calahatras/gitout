@@ -37,10 +37,13 @@ public static class GitFileEntryViewModelFactory
         GitObjectId? root,
         GitObjectId diff,
         IGitRepository repository,
-        RelativeDirectoryPath currentPath
+        RelativeDirectoryPath currentPath,
+        DiffOptions? options = null
     )
     {
-        await foreach (GitDiffFileEntry entry in repository.ListDiffChangesAsync(diff, root))
+        await foreach (
+            GitDiffFileEntry entry in repository.ListDiffChangesAsync(diff, root, options)
+        )
         {
             IGitFileEntryViewModel viewmodel = entry.FileType switch
             {
@@ -57,10 +60,21 @@ public static class GitFileEntryViewModelFactory
                                 relativePath
                             ),
                             GitDiffType.Delete => ListIdAsync(treeId, repository, relativePath),
-                            _ => DiffIdAsync(treeId, destinationId, repository, relativePath),
+                            _ => DiffIdAsync(
+                                treeId,
+                                destinationId,
+                                repository,
+                                relativePath,
+                                options
+                            ),
                         }
                 ),
-                GitFileType.Blob => GitFileViewModel.Difference(repository, entry, currentPath),
+                GitFileType.Blob => GitFileViewModel.Difference(
+                    repository,
+                    entry,
+                    currentPath,
+                    options
+                ),
                 _ => throw new ArgumentOutOfRangeException(
                     $"Cannot create viewmodel for invalid type {entry.FileType}",
                     nameof(entry)
@@ -73,20 +87,27 @@ public static class GitFileEntryViewModelFactory
     public static async IAsyncEnumerable<IGitFileEntryViewModel> DiffAllAsync(
         GitCommitId? root,
         GitCommitId diff,
-        IGitRepository repository
+        IGitRepository repository,
+        DiffOptions? options = null
     )
     {
+        IDiffOptionsBuilder builder = DiffOptions.Builder().Recursive();
+        if (options?.Cached == true)
+        {
+            builder.Cached();
+        }
+        if (options?.IgnoreAllSpace == true)
+        {
+            builder.IgnoreAllSpace();
+        }
+
         await foreach (
-            GitDiffFileEntry entry in repository.ListDiffChangesAsync(
-                diff,
-                root,
-                DiffOptions.Builder().Recursive().Build()
-            )
+            GitDiffFileEntry entry in repository.ListDiffChangesAsync(diff, root, builder.Build())
         )
         {
             IGitFileEntryViewModel viewmodel = entry.FileType switch
             {
-                GitFileType.Blob => GitFileViewModel.RelativeDifference(repository, entry),
+                GitFileType.Blob => GitFileViewModel.RelativeDifference(repository, entry, options),
                 _ => throw new ArgumentOutOfRangeException(
                     $"Cannot create viewmodel for invalid type {entry.FileType}",
                     nameof(entry)

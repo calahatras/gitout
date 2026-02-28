@@ -52,6 +52,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private bool includeRemotes = true;
     private bool suppressSelectedLogEntriesCollectionChanged;
     private bool showSpacesAsDots;
+    private bool ignoreWhitespace;
     private bool isStashesVisible;
     private bool isSearchDisplayed;
     private bool isCheckoutBranchVisible;
@@ -78,9 +79,12 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         this.snack = snack;
         this.updateStageOptions = updateStageOptions;
         showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
+        ignoreWhitespace = stagingOptions.CurrentValue.IgnoreWhitespace;
         settingsMonitorHandle = stagingOptions.OnChange(options =>
-            SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots))
-        );
+        {
+            SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
+            SetProperty(ref ignoreWhitespace, options.IgnoreWhitespace, nameof(IgnoreWhitespace));
+        });
         GitLogPageOptions options =
             navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
             ?? throw new InvalidOperationException("Options may not be null");
@@ -123,7 +127,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 Repository,
                 monitor.CreateCallback(),
                 snack,
-                RevisionViewMode
+                RevisionViewMode,
+                ignoreWhitespace ? DiffOptions.Builder().IgnoreAllSpace().Build() : null
             );
             ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
             if (selectedLogEntries.Count >= 2)
@@ -138,7 +143,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 Repository,
                 monitor.CreateCallback(),
                 snack,
-                RevisionViewMode
+                RevisionViewMode,
+                ignoreWhitespace ? DiffOptions.Builder().IgnoreAllSpace().Build() : null
             );
             ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
         };
@@ -323,6 +329,31 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             if (SetProperty(ref showSpacesAsDots, value))
             {
                 updateStageOptions.Update(snap => snap.ShowSpacesAsDots = value);
+            }
+        }
+    }
+
+    public bool IgnoreWhitespace
+    {
+        get => ignoreWhitespace;
+        set
+        {
+            if (SetProperty(ref ignoreWhitespace, value))
+            {
+                updateStageOptions.Update(snap => snap.IgnoreWhitespace = value);
+                if (SelectedContext is not null)
+                {
+                    SelectedContext = LogEntriesViewModel.CreateContext<GitHistoryEvent>(
+                        selectedLogEntries.Count > 0
+                            ? selectedLogEntries.Select(vm => vm.Event).ToList()
+                            : selectedStashEntries.Select(vm => (GitHistoryEvent)vm.Event).ToList(),
+                        Repository,
+                        monitor.CreateCallback(),
+                        snack,
+                        RevisionViewMode,
+                        value ? DiffOptions.Builder().IgnoreAllSpace().Build() : null
+                    );
+                }
             }
         }
     }

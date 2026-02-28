@@ -86,7 +86,8 @@ public class DiffContext
         RelativeDirectoryPath directory,
         FileName file,
         GitFileId sourceId,
-        GitFileId destinationId
+        GitFileId destinationId,
+        DiffOptions options
     ) =>
         CreateFromResult(
             repository,
@@ -97,7 +98,7 @@ public class DiffContext
                     file.ToString()
                 )
             ),
-            await repository.DiffAsync(sourceId, destinationId, DiffOptions.Builder().Build()),
+            await repository.DiffAsync(sourceId, destinationId, options),
             sourceId,
             destinationId
         );
