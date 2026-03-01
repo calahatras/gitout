@@ -62,6 +62,9 @@ public class GitStageViewModel
     private bool selectedFileHasChanges;
     private bool refreshAutomatically;
 
+    private int contextLines = 3;
+    private bool showWholeFile;
+
     private string commitMessage = string.Empty;
     private string newBranchName = string.Empty;
     private string cachedCommitMessage = string.Empty;
@@ -163,6 +166,12 @@ public class GitStageViewModel
                 workspaceFiles.Count(x => x.IsSelected) == 2
                 || indexFiles.Count(x => x.IsSelected) == 2
         );
+        DecreaseContextLinesCommand = new CallbackCommand(() =>
+            ContextLines = Math.Max(0, ContextLines - 1)
+        );
+        IncreaseContextLinesCommand = new CallbackCommand(() =>
+            ContextLines = Math.Min(100, ContextLines + 1)
+        );
     }
 
     public IGitRepository Repository { get; }
@@ -181,6 +190,36 @@ public class GitStageViewModel
         set
         {
             if (SetProperty(ref diffWhitespace, value))
+            {
+                if (selectedChange is not null)
+                {
+                    _ = ExecuteDiffAsync();
+                }
+            }
+        }
+    }
+
+    public int ContextLines
+    {
+        get => contextLines;
+        set
+        {
+            if (SetProperty(ref contextLines, value))
+            {
+                if (selectedChange is not null)
+                {
+                    _ = ExecuteDiffAsync();
+                }
+            }
+        }
+    }
+
+    public bool ShowWholeFile
+    {
+        get => showWholeFile;
+        set
+        {
+            if (SetProperty(ref showWholeFile, value))
             {
                 if (selectedChange is not null)
                 {
@@ -329,6 +368,8 @@ public class GitStageViewModel
     public ICommand CancelEditTextCommand { get; }
     public ICommand PatchEditTextCommand { get; }
     public ICommand DiffSelectedFilesCommand { get; }
+    public ICommand DecreaseContextLinesCommand { get; }
+    public ICommand IncreaseContextLinesCommand { get; }
 
     public string FallbackPageName => typeof(GitLogPage).FullName!;
     public object? FallbackOptions => GitLogPageOptions.OpenRepository(Repository);
@@ -518,6 +559,7 @@ public class GitStageViewModel
         {
             optionsBuilder.Cached();
         }
+        optionsBuilder.ContextLines(showWholeFile ? 999999 : contextLines);
         SelectedDiffResult = await DiffContext.DiffAsync(
             Repository,
             change,
