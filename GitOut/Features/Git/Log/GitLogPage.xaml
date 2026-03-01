@@ -88,6 +88,11 @@
         </MenuItem.ItemContainerStyle>
       </MenuItem>
       <Separator />
+      <MenuItem Header="Cherry pick" IsEnabled="{Binding HasSelectedLogEntries}">
+        <MenuItem Header="Cherry pick" Command="{Binding CherryPickCommand}" />
+        <MenuItem Header="Cherry pick advanced..." Command="{Binding CherryPickAdvancedCommand}" />
+      </MenuItem>
+      <Separator />
       <MenuItem
         Header="Reset to here and amend (squash)"
         ToolTipService.ShowOnDisabled="True"

@@ -139,6 +139,10 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             }
 
             RefreshSelectedContext();
+            PropertyChanged?.Invoke(
+                this,
+                new PropertyChangedEventArgs(nameof(HasSelectedLogEntries))
+            );
         };
         selectedStashEntries.CollectionChanged += (sender, args) => RefreshSelectedContext();
 
@@ -223,6 +227,36 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 }
             },
             () => checkoutBranchName is not null && GitBranchName.IsValid(checkoutBranchName)
+        );
+
+        CherryPickCommand = new AsyncCallbackCommand(
+            () => ExecuteCherryPickAsync(null),
+            () => selectedLogEntries.Count > 0
+        );
+
+        CherryPickAdvancedCommand = new CallbackCommand(
+            () =>
+            {
+                INavigationService child = navigation.NavigateNewWindow(
+                    typeof(CherryPickOptionsPage).FullName!,
+                    null,
+                    new NavigationOverrideOptions(
+                        new Size(400, 300),
+                        PromptOffset,
+                        IsModal: true,
+                        IsStatusBarVisible: false
+                    )
+                );
+                child.Closed += async (sender, args) =>
+                {
+                    GitCherryPickOptions? options = child.GetDialogResult<GitCherryPickOptions>();
+                    if (options is not null)
+                    {
+                        await ExecuteCherryPickAsync(options);
+                    }
+                };
+            },
+            () => selectedLogEntries.Count > 0
         );
 
         RevealInExplorerCommand = new CallbackCommand(() =>
@@ -425,6 +459,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         private set => SetProperty(ref changesCount, value);
     }
 
+    public bool HasSelectedLogEntries => selectedLogEntries.Count > 0;
+
     public ICollectionView ActiveStashes { get; }
     public ICollectionView Entries { get; }
     public ICollectionView Remotes { get; }
@@ -495,6 +531,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public ICommand RefreshStatusCommand { get; }
     public ICommand FetchRemotesCommand { get; }
     public ICommand PruneRemotesCommand { get; }
+    public ICommand CherryPickCommand { get; }
+    public ICommand CherryPickAdvancedCommand { get; }
     public ICommand CheckoutCommitCommand { get; }
     public ICommand CheckoutBranchCommand { get; }
     public ICommand RevealInExplorerCommand { get; }
@@ -736,6 +774,77 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         {
             SelectedContext = null;
             ViewMode = LogViewMode.None;
+        }
+    }
+
+    private async Task ExecuteCherryPickAsync(GitCherryPickOptions? options)
+    {
+        IsWorking = true;
+        try
+        {
+            IEnumerable<string> references = selectedLogEntries.Select(e => e.Event.Id.Hash);
+            await Repository.CherryPickAsync(references, options);
+            snack.ShowSuccess("Cherry-pick completed successfully");
+        }
+        catch (InvalidOperationException ex)
+        {
+            await HandleCherryPickErrorAsync(ex.Message);
+        }
+        finally
+        {
+            await CheckRepositoryStatusAsync();
+            IsWorking = false;
+        }
+    }
+
+    private async Task HandleCherryPickErrorAsync(string errorMessage)
+    {
+        const string continueAction = "CONTINUE";
+        const string skipAction = "SKIP";
+        const string abortAction = "ABORT";
+
+        SnackAction? action = await snack.ShowAsync(
+            Snack
+                .Builder()
+                .WithMessage(
+                    $"Cherry-pick conflict: {errorMessage}. Please resolve conflicts and choose an action."
+                )
+                .WithDuration(TimeSpan.FromMinutes(10))
+                .AddAction(continueAction)
+                .AddAction(skipAction)
+                .AddAction(abortAction)
+        );
+
+        if (action is null)
+            return;
+
+        IsWorking = true;
+        try
+        {
+            if (action.Text == continueAction)
+            {
+                await Repository.CherryPickContinueAsync();
+                snack.ShowSuccess("Cherry-pick continued");
+            }
+            else if (action.Text == skipAction)
+            {
+                await Repository.CherryPickSkipAsync();
+                snack.ShowSuccess("Cherry-pick skipped");
+            }
+            else if (action.Text == abortAction)
+            {
+                await Repository.CherryPickAbortAsync();
+                snack.ShowSuccess("Cherry-pick aborted");
+            }
+        }
+        catch (InvalidOperationException e)
+        {
+            snack.ShowError(e.Message, e, TimeSpan.FromSeconds(10));
+        }
+        finally
+        {
+            await CheckRepositoryStatusAsync();
+            IsWorking = false;
         }
     }
 

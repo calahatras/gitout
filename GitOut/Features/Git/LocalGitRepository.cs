@@ -595,6 +595,98 @@ public sealed class LocalGitRepository : IGitRepository
             .ExecuteAsync();
     }
 
+    public async Task CherryPickAsync(
+        IEnumerable<string> references,
+        GitCherryPickOptions? options = null
+    )
+    {
+        IProcessOptionsBuilder arguments = ProcessOptions.Builder().Append("cherry-pick");
+
+        if (options is not null)
+        {
+            if (options.Edit)
+            {
+                arguments.Append("--edit");
+            }
+
+            if (options.NoCommit)
+            {
+                arguments.Append("--no-commit");
+            }
+
+            if (options.MainlineParentNumber.HasValue)
+            {
+                arguments.AppendRange("-m", options.MainlineParentNumber.Value.ToString());
+            }
+
+            if (options.AppendCherryPickLine)
+            {
+                arguments.Append("-x");
+            }
+
+            if (options.FastForward)
+            {
+                arguments.Append("--ff");
+            }
+        }
+
+        arguments.AppendRange(references);
+
+        ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
+        if (args.ErrorLines.Count > 0)
+        {
+            throw new InvalidOperationException($"Cherry-pick failed: {args.Error}");
+        }
+    }
+
+    public async Task CherryPickContinueAsync()
+    {
+        ProcessEventArgs args = await CreateProcess(
+                ProcessOptions.FromArguments("cherry-pick --continue")
+            )
+            .ExecuteAsync();
+        if (args.ErrorLines.Count > 0)
+        {
+            throw new InvalidOperationException($"Cherry-pick continue failed: {args.Error}");
+        }
+    }
+
+    public async Task CherryPickSkipAsync()
+    {
+        ProcessEventArgs args = await CreateProcess(
+                ProcessOptions.FromArguments("cherry-pick --skip")
+            )
+            .ExecuteAsync();
+        if (args.ErrorLines.Count > 0)
+        {
+            throw new InvalidOperationException($"Cherry-pick skip failed: {args.Error}");
+        }
+    }
+
+    public async Task CherryPickAbortAsync()
+    {
+        ProcessEventArgs args = await CreateProcess(
+                ProcessOptions.FromArguments("cherry-pick --abort")
+            )
+            .ExecuteAsync();
+        if (args.ErrorLines.Count > 0)
+        {
+            throw new InvalidOperationException($"Cherry-pick abort failed: {args.Error}");
+        }
+    }
+
+    public async Task CherryPickQuitAsync()
+    {
+        ProcessEventArgs args = await CreateProcess(
+                ProcessOptions.FromArguments("cherry-pick --quit")
+            )
+            .ExecuteAsync();
+        if (args.ErrorLines.Count > 0)
+        {
+            throw new InvalidOperationException($"Cherry-pick quit failed: {args.Error}");
+        }
+    }
+
     public Task RestoreWorkspaceAsync(GitStatusChange change) =>
         CreateProcess(ProcessOptions.FromArguments($"restore -- {change.Path}")).ExecuteAsync();
 
