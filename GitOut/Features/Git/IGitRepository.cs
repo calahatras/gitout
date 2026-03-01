@@ -57,5 +57,10 @@ public interface IGitRepository
     Task ApplyAsync(GitPatch patch);
     Task StashIndexAsync();
     Task CommitAsync(GitCommitOptions options);
+    Task CherryPickAsync(IEnumerable<string> references, GitCherryPickOptions? options = null);
+    Task CherryPickContinueAsync();
+    Task CherryPickSkipAsync();
+    Task CherryPickAbortAsync();
+    Task CherryPickQuitAsync();
     Task RestoreWorkspaceAsync(GitStatusChange change);
 }
