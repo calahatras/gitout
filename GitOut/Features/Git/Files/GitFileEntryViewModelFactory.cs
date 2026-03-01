@@ -41,9 +41,7 @@ public static class GitFileEntryViewModelFactory
         DiffOptions? options = null
     )
     {
-        await foreach (
-            GitDiffFileEntry entry in repository.ListDiffChangesAsync(diff, root)
-        )
+        await foreach (GitDiffFileEntry entry in repository.ListDiffChangesAsync(diff, root))
         {
             IGitFileEntryViewModel viewmodel = entry.FileType switch
             {

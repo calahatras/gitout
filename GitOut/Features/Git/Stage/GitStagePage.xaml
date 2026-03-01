@@ -155,7 +155,6 @@
               Data="{StaticResource UndoVariant}"
             />
           </Button>
-          <Separator />
           <ToggleButton
             IsChecked="{Binding RefreshAutomatically}"
             ToolTip="Auto renew file changes"
@@ -165,13 +164,43 @@
               Data="{StaticResource AutoRenew}"
             />
           </ToggleButton>
+          <Separator Style="{StaticResource MaterialVerticalDivider}" />
+          <Button Command="{Binding DecreaseContextLinesCommand}" ToolTip="Decrease context lines">
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource PlaylistMinus}"
+            />
+          </Button>
+          <Button Command="{Binding IncreaseContextLinesCommand}" ToolTip="Increase context lines">
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource PlaylistPlus}"
+            />
+          </Button>
+          <ToggleButton IsChecked="{Binding ShowWholeFile}" ToolTip="Show entire file">
+            <Path Fill="{DynamicResource MaterialForegroundBase}">
+              <Path.Style>
+                <Style TargetType="{x:Type Path}">
+                  <Setter Property="Data" Value="{StaticResource ProjectorScreenVariantOff}" />
+                  <Style.Triggers>
+                    <DataTrigger
+                      Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+                      Value="True"
+                    >
+                      <Setter Property="Data" Value="{StaticResource ProjectorScreenVariant}" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Path.Style>
+            </Path>
+          </ToggleButton>
+          <Separator Style="{StaticResource MaterialVerticalDivider}" />
           <ToggleButton IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
             <Path
               Fill="{DynamicResource MaterialForegroundBase}"
               Data="{StaticResource KeyboardSpace}"
             />
           </ToggleButton>
-          <Separator />
           <Button Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
             <Path
               Fill="{DynamicResource MaterialForegroundBase}"

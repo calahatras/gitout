@@ -150,7 +150,10 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                     LogRevisionViewMode.DiffInline => flattenedDiffFiles,
                     _ => throw new InvalidOperationException($"Invalid view mode: {value}"),
                 };
-                if (source is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy)
+                if (
+                    source
+                    is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy
+                )
                 {
                     SynchronizationContext? context = SynchronizationContext.Current;
                     ValueTask t = lazy.MaterializeAsync(RelativeDirectoryPath.Root);

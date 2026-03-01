@@ -188,9 +188,7 @@ public sealed class LocalGitRepository : IGitRepository
             var id = GitCommitId.FromHash(parts[0]);
             if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? logitem))
             {
-                GitBranchName? upstream = parts.Length == 3
-                    ? GitBranchName.Create(parts[2])
-                    : null;
+                GitBranchName? upstream = parts.Length == 3 ? GitBranchName.Create(parts[2]) : null;
                 var branch = GitBranchName.Create(parts[1], upstream);
                 logitem.Branches.Add(branch);
             }
