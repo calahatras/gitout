@@ -361,6 +361,29 @@ public sealed class LocalGitRepository : IGitRepository
         return builder.Build();
     }
 
+    public async Task<GitDiffResult> DiffAsync(
+        RelativeDirectoryPath source,
+        RelativeDirectoryPath destination,
+        DiffOptions options
+    )
+    {
+        string argumentBuilder =
+            $"--no-optional-locks diff --no-index --no-color {string.Join(" ", options.GetArguments())} -- {source} {destination}";
+        var args = ProcessOptions.FromArguments(argumentBuilder);
+
+        IGitProcess diff = CreateProcess(args);
+        IGitDiffBuilder builder = GitDiffResult.Builder();
+        await foreach (string line in diff.ReadLinesAsync())
+        {
+            builder.Feed(line);
+        }
+        if (builder.IsBinaryFile)
+        {
+            builder.Feed(GetUntrackedBlobStream(destination));
+        }
+        return builder.Build();
+    }
+
     public async IAsyncEnumerable<GitFileEntry> ListTreeAsync(GitObjectId id, DiffOptions? options)
     {
         IProcessOptionsBuilder builder = ProcessOptions.Builder().AppendRange("ls-tree", "-z");

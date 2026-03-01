@@ -44,4 +44,31 @@ public class LocalGitRepositoryTest
         A.CallTo(() => processFactory.Create(path, capturedProcessOptions._))
             .MustHaveHappenedOnceExactly();
     }
+
+    [Test]
+    public async Task DiffAsyncShouldUseNoIndexForTwoFiles()
+    {
+        var path = DirectoryPath.Create("c:\\path\\to\\repo");
+
+        IProcessFactory<IGitProcess> processFactory = A.Fake<IProcessFactory<IGitProcess>>();
+        IGitProcess process = A.Fake<IGitProcess>();
+        string[] output = [];
+        A.CallTo(() => process.ReadLinesAsync(default)).Returns(output.ToAsyncEnumerable());
+        Captured<ProcessOptions> capturedProcessOptions = A.Captured<ProcessOptions>();
+        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
+
+        var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
+
+        RelativeDirectoryPath source = RelativeDirectoryPath.Create("file1.txt");
+        RelativeDirectoryPath destination = RelativeDirectoryPath.Create("file2.txt");
+
+        await actor.DiffAsync(source, destination, DiffOptions.Builder().Build());
+
+        Assert.That(
+            capturedProcessOptions.Values[0].Arguments,
+            Is.EqualTo("--no-optional-locks diff --no-index --no-color  -- file1.txt file2.txt")
+        );
+        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._))
+            .MustHaveHappenedOnceExactly();
+    }
 }
