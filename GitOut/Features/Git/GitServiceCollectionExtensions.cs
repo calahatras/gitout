@@ -27,5 +27,7 @@ public static class GitServiceCollectionExtensions
         _ = services.AddTransient<GitStageViewModel>();
         _ = services.AddTransient<RepositoryListPage>();
         _ = services.AddTransient<RepositoryListViewModel>();
+        _ = services.AddTransient<CherryPickOptionsPage>();
+        _ = services.AddTransient<CherryPickOptionsViewModel>();
     }
 }
