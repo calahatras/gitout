@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -13,6 +14,8 @@ using GitOut.Features.Collections;
 using GitOut.Features.Git.Files;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
+using GitOut.Features.Navigation;
+using GitOut.Features.Text.Editor;
 using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Git.Log;
@@ -23,6 +26,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
     private readonly IGitRepository repository;
     private readonly IGitRepositoryNotifier notifier;
     private readonly ISnackbarService snack;
+    private readonly INavigationService navigation;
 
     private readonly CollectionViewSource currentSource;
 
@@ -42,6 +46,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         IGitRepository repository,
         IGitRepositoryNotifier notifier,
         ISnackbarService snack,
+        INavigationService navigation,
         DiffOptions? options = null
     )
     {
@@ -49,6 +54,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         this.repository = repository;
         this.notifier = notifier;
         this.snack = snack;
+        this.navigation = navigation;
         this.options = options;
         allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
             _ => ListAllFilesAsync(),
@@ -99,6 +105,27 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         HasBranches = Branches.Count > 0;
 
         SelectFileCommand = new CallbackCommand<IGitFileEntryViewModel>(SelectItem);
+        EditFileCommand = new CallbackCommand<IGitFileEntryViewModel>(
+            entry =>
+            {
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                {
+                    navigation.NavigateNewWindow(
+                        typeof(TextEditorPage).FullName!,
+                        new TextEditorOptions(entry!.FullPath, entry.FileName.ToString()),
+                        new NavigationOverrideOptions(new Size(800, 600), new Point(100, 100))
+                    );
+                }
+                else
+                {
+                    navigation.Navigate(
+                        typeof(TextEditorPage).FullName!,
+                        new TextEditorOptions(entry!.FullPath, entry.FileName.ToString())
+                    );
+                }
+            },
+            entry => entry is not null
+        );
     }
 
     private LogEntriesViewModel(
@@ -107,9 +134,10 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         IGitRepository repository,
         IGitRepositoryNotifier notifier,
         ISnackbarService snack,
+        INavigationService navigation,
         DiffOptions? options = null
     )
-        : this(root, repository, notifier, snack, options) => this.diff = diff;
+        : this(root, repository, notifier, snack, navigation, options) => this.diff = diff;
 
     public GitHistoryEvent Root { get; }
 
@@ -134,6 +162,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         set => SetProperty(ref selectedItem, value);
     }
     public ICommand SelectFileCommand { get; }
+    public ICommand EditFileCommand { get; }
 
     public LogRevisionViewMode ViewMode
     {
@@ -184,6 +213,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         IGitRepository repository,
         IGitRepositoryNotifier notifier,
         ISnackbarService snack,
+        INavigationService navigation,
         LogRevisionViewMode mode,
         DiffOptions? options = null,
         IGitFileEntryViewModel? previousSelection = null
@@ -198,7 +228,14 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         if (entries.Count == 1)
         {
             // single item, show file content and diff against parent
-            context = new LogEntriesViewModel(entries[0], repository, notifier, snack, options);
+            context = new LogEntriesViewModel(
+                entries[0],
+                repository,
+                notifier,
+                snack,
+                navigation,
+                options
+            );
         }
         else //if (entries.Count == 2)
         {
@@ -208,6 +245,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                 repository,
                 notifier,
                 snack,
+                navigation,
                 options
             );
         }
@@ -219,7 +257,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
     public LogEntriesViewModel SwapEntries() =>
         diff is null
             ? throw new InvalidOperationException("Cannot swap entries when diff is not set")
-            : new LogEntriesViewModel(diff, Root, repository, notifier, snack, options)
+            : new LogEntriesViewModel(diff, Root, repository, notifier, snack, navigation, options)
             {
                 selectedItem = selectedItem,
                 ViewMode = ViewMode,

@@ -19,6 +19,7 @@ using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Options;
 using GitOut.Features.Text;
+using GitOut.Features.Text.Editor;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 
@@ -45,6 +46,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private readonly IRepositoryWatcher repositoryWatcher;
     private readonly GitRepositoryMonitor monitor;
     private readonly IDisposable settingsMonitorHandle;
+    private readonly INavigationService navigation;
 
     private readonly ICommand createStashBranchCommand;
 
@@ -81,6 +83,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     )
     {
         this.snack = snack;
+        this.navigation = navigation;
         this.updateStageOptions = updateStageOptions;
         showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
         ignoreWhitespace = stagingOptions.CurrentValue.IgnoreWhitespace;
@@ -292,6 +295,28 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         );
         CloseAutocompleteCommand = new CallbackCommand(() => IsSearchDisplayed = false);
         ShowSearchFilesCommand = new CallbackCommand(() => IsSearchDisplayed = true);
+
+        EditConfigCommand = new AsyncCallbackCommand<GitConfigScope>(async scope =>
+        {
+            string configPath = await Repository.GetConfigPathAsync(scope).ConfigureAwait(true);
+            string title = scope == GitConfigScope.Local ? "Local Git Config" : "Global Git Config";
+
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                navigation.NavigateNewWindow(
+                    typeof(TextEditorPage).FullName!,
+                    new TextEditorOptions(configPath, title),
+                    new NavigationOverrideOptions(new Size(800, 600), new Point(100, 100))
+                );
+            }
+            else
+            {
+                navigation.Navigate(
+                    typeof(TextEditorPage).FullName!,
+                    new TextEditorOptions(configPath, title)
+                );
+            }
+        });
     }
 
     public bool IncludeStashes
@@ -485,6 +510,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public ICommand SwapCommitsCommand { get; }
     public ICommand DecreaseContextLinesCommand { get; }
     public ICommand IncreaseContextLinesCommand { get; }
+    public ICommand EditConfigCommand { get; }
 
     public string FallbackPageName => typeof(RepositoryListPage).FullName!;
     public object? FallbackOptions => null;
@@ -685,6 +711,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 Repository,
                 monitor.CreateCallback(),
                 snack,
+                navigation,
                 RevisionViewMode,
                 builder.Build(),
                 previousSelection
@@ -698,6 +725,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 Repository,
                 monitor.CreateCallback(),
                 snack,
+                navigation,
                 RevisionViewMode,
                 builder.Build(),
                 previousSelection

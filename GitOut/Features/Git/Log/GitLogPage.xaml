@@ -418,6 +418,40 @@
             </MenuItem>
           </Menu>
           <Separator />
+          <Menu ToolBar.OverflowMode="AsNeeded">
+            <MenuItem ToolTip="Git Configuration">
+              <MenuItem.Icon>
+                <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Cog}" />
+              </MenuItem.Icon>
+              <MenuItem.Items>
+                <MenuItem
+                  Header="Edit local config"
+                  Command="{Binding EditConfigCommand}"
+                  CommandParameter="{x:Static git:GitConfigScope.Local}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource FileDocumentEdit}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem
+                  Header="Edit global config"
+                  Command="{Binding EditConfigCommand}"
+                  CommandParameter="{x:Static git:GitConfigScope.Global}"
+                >
+                  <MenuItem.Icon>
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource FileDocumentEdit}"
+                    />
+                  </MenuItem.Icon>
+                </MenuItem>
+              </MenuItem.Items>
+            </MenuItem>
+          </Menu>
+          <Separator />
           <ToggleButton x:Name="Remotes" ToolBar.OverflowMode="Never" ToolTip="Remotes">
             <Path
               Fill="{DynamicResource MaterialForegroundBase}"
@@ -939,8 +973,9 @@
         <local:GitFileTree
           x:Name="FileTree"
           Grid.Row="1"
-          RootFiles="{Binding SelectedContext.RootFiles, Mode=OneWay}"
-          SelectedItem="{Binding SelectedContext.SelectedItem, Mode=TwoWay}"
+          DataContext="{Binding SelectedContext}"
+          RootFiles="{Binding RootFiles, Mode=OneWay}"
+          SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
         />
         <Popup
           AllowsTransparency="True"

@@ -22,6 +22,7 @@ using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Native.Shell32;
 using GitOut.Features.Navigation;
 using GitOut.Features.Text;
+using GitOut.Features.Text.Editor;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 
@@ -143,6 +144,40 @@ public class GitStageViewModel
             PrepareEditSelection,
             CanModifySelection
         );
+        EditFileCommand = new CallbackCommand<object>(entry =>
+        {
+            string fullPath;
+            string fileName;
+
+            if (entry is IGitFileEntryViewModel fileEntry)
+            {
+                fullPath = fileEntry.FullPath;
+                fileName = fileEntry.FileName.ToString();
+            }
+            else if (entry is StatusChangeViewModel statusChange)
+            {
+                fullPath = statusChange.FullPath;
+                fileName = System.IO.Path.GetFileName(statusChange.FullPath);
+            }
+            else
+            {
+                return;
+            }
+
+            var options = new TextEditorOptions(fullPath, fileName);
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                navigation.NavigateNewWindow(
+                    typeof(TextEditorPage).FullName!,
+                    options,
+                    new NavigationOverrideOptions(new Size(800, 600), new Point(100, 100))
+                );
+            }
+            else
+            {
+                navigation.Navigate(typeof(TextEditorPage).FullName!, options);
+            }
+        });
         UndoPatchCommand = new AsyncCallbackCommand(UndoPatchAsync, () => undoPatch is not null);
         AddAllCommand = new AsyncCallbackCommand(
             StageAllFilesAsync,
@@ -352,6 +387,7 @@ public class GitStageViewModel
     public ICommand ResetSelectedTextCommand { get; }
     public ICommand StageSelectedTextCommand { get; }
     public ICommand EditSelectedTextCommand { get; }
+    public ICommand EditFileCommand { get; }
     public ICommand UndoPatchCommand { get; }
     public ICommand ResetHeadCommand { get; }
     public ICommand StashIndexCommand { get; }

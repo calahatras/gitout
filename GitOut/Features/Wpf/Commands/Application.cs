@@ -54,7 +54,7 @@ public class Application
     {
         try
         {
-            Process.Start("explorer.exe", $"/s,{path}").Dispose();
+            Process.Start("explorer.exe", $"/select,{path}").Dispose();
         }
         catch (Exception e)
         {
