@@ -191,10 +191,7 @@ public class GitStageViewModel
         {
             if (SetProperty(ref diffWhitespace, value))
             {
-                if (selectedChange is not null)
-                {
-                    _ = ExecuteDiffAsync();
-                }
+                _ = ExecuteCurrentDiffAsync();
             }
         }
     }
@@ -206,10 +203,7 @@ public class GitStageViewModel
         {
             if (SetProperty(ref contextLines, value))
             {
-                if (selectedChange is not null)
-                {
-                    _ = ExecuteDiffAsync();
-                }
+                _ = ExecuteCurrentDiffAsync();
             }
         }
     }
@@ -221,10 +215,7 @@ public class GitStageViewModel
         {
             if (SetProperty(ref showWholeFile, value))
             {
-                if (selectedChange is not null)
-                {
-                    _ = ExecuteDiffAsync();
-                }
+                _ = ExecuteCurrentDiffAsync();
             }
         }
     }
@@ -409,11 +400,20 @@ public class GitStageViewModel
                         ParseStatus(await Repository.StatusAsync());
                     }
 
-                    if (selectedFileHasChanges && selectedChange is not null)
+                    if (
+                        selectedFileHasChanges
+                        && (selectedChange is not null || selectedAmendChange is not null)
+                    )
                     {
                         if (refreshAutomatically)
                         {
-                            await ExecuteDiffAsync();
+                            if (
+                                selectedChange is null
+                                || selectedChange.Location == StatusChangeLocation.Workspace
+                            )
+                            {
+                                await ExecuteCurrentDiffAsync();
+                            }
                         }
                         else
                         {
@@ -437,7 +437,14 @@ public class GitStageViewModel
                                         SnackAction? selectedAction = task.Result;
                                         if (selectedAction?.Text == refreshText)
                                         {
-                                            await ExecuteDiffAsync();
+                                            if (
+                                                selectedChange is null
+                                                || selectedChange.Location
+                                                    == StatusChangeLocation.Workspace
+                                            )
+                                            {
+                                                await ExecuteCurrentDiffAsync();
+                                            }
                                         }
                                     }
                                 );
@@ -483,9 +490,9 @@ public class GitStageViewModel
     private async Task GetRepositoryStatusAsync()
     {
         ParseStatus(await Repository.StatusAsync());
-        if (selectedChange is not null)
+        if (selectedChange is null || selectedChange.Location == StatusChangeLocation.Workspace)
         {
-            await ExecuteDiffAsync();
+            await ExecuteCurrentDiffAsync();
         }
     }
 
@@ -507,9 +514,23 @@ public class GitStageViewModel
 
     private void RefreshAmendList(GitHistoryEvent head)
     {
+        IDiffOptionsBuilder optionsBuilder = DiffOptions
+            .Builder()
+            .ContextLines(showWholeFile ? 999999 : contextLines);
+        if (diffWhitespace)
+        {
+            optionsBuilder.IgnoreAllSpace();
+        }
+        DiffOptions options = optionsBuilder.Build();
+
         var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
             relativePath =>
-                GitFileEntryViewModelFactory.DiffAllAsync(head.ParentId, head.Id, Repository),
+                GitFileEntryViewModelFactory.DiffAllAsync(
+                    head.ParentId,
+                    head.Id,
+                    Repository,
+                    options
+                ),
             IGitDirectoryEntryViewModel.CompareItems
         );
 
@@ -517,10 +538,40 @@ public class GitStageViewModel
         AmendFiles = CollectionViewSource.GetDefaultView(logFiles);
     }
 
+    private async Task ExecuteCurrentDiffAsync()
+    {
+        var selectedLocal = workspaceFiles.Where(x => x.IsSelected).ToList();
+        if (selectedLocal.Count != 2)
+        {
+            selectedLocal = indexFiles.Where(x => x.IsSelected).ToList();
+        }
+
+        if (selectedLocal.Count == 2)
+        {
+            await DiffSelectedFilesAsync();
+        }
+        else if (selectedChange is not null)
+        {
+            await ExecuteDiffAsync();
+        }
+        else if (selectedAmendChange is not null)
+        {
+            ExecuteAmendDiff();
+        }
+    }
+
     private void ExecuteAmendDiff()
     {
         if (selectedAmendChange is GitFileViewModel viewmodel)
         {
+            IDiffOptionsBuilder optionsBuilder = DiffOptions
+                .Builder()
+                .ContextLines(showWholeFile ? 999999 : contextLines);
+            if (diffWhitespace)
+            {
+                optionsBuilder.IgnoreAllSpace();
+            }
+            viewmodel.UpdateOptions(optionsBuilder.Build());
             SelectedDiffResult = viewmodel.DiffResult;
         }
     }
@@ -1139,10 +1190,19 @@ public class GitStageViewModel
             selected = indexFiles.Where(x => x.IsSelected).ToList();
         }
 
+        IDiffOptionsBuilder optionsBuilder = DiffOptions
+            .Builder()
+            .ContextLines(showWholeFile ? 999999 : contextLines);
+        if (diffWhitespace)
+        {
+            optionsBuilder.IgnoreAllSpace();
+        }
+
         SelectedDiffResult = await DiffContext.DiffFilesAsync(
             Repository,
             selected[0].Model.Path,
-            selected[1].Model.Path
+            selected[1].Model.Path,
+            optionsBuilder.Build()
         );
     }
 

@@ -14,6 +14,17 @@ namespace GitOut.Features.Git.Diff;
 
 public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunkLineVisitorProvider
 {
+    private static readonly string[] ImageFileExtensions = new[]
+    {
+        ".bmp",
+        ".gif",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".tiff",
+        ".webp",
+    };
+
     public static readonly DependencyProperty DiffProperty = DependencyProperty.Register(
         nameof(Diff),
         typeof(DiffContext),
@@ -164,10 +175,7 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
             }
         }
 
-        static bool IsImageFile(string extension) =>
-            new HashSet<string>(
-                new[] { ".bmp", ".gif", ".png", ".jpg", ".jpeg", ".tiff", ".webp" }
-            ).Contains(extension);
+        static bool IsImageFile(string extension) => ImageFileExtensions.Contains(extension);
     }
 
     private static void OnSpacesViewModeChanged(

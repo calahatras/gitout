@@ -990,21 +990,72 @@
                     Style="{StaticResource MaterialToolbarHeaderStyle}"
                     Text="{Binding FileName}"
                   />
-                  <Canvas
+                  <StackPanel
                     Grid.Column="1"
-                    Width="24"
-                    Height="24"
-                    Margin="0 0 8 0"
-                    ToolTip="{Binding Status}"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    Margin="0 0 24 0"
                   >
-                    <Canvas.LayoutTransform>
-                      <ScaleTransform ScaleX=".6" ScaleY=".6" />
-                    </Canvas.LayoutTransform>
-                    <Path
-                      Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
-                      Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
-                    />
-                  </Canvas>
+                    <Separator Style="{StaticResource MaterialVerticalDivider}" />
+                    <Button
+                      Style="{StaticResource MaterialIconButtonStyle}"
+                      Command="{Binding DataContext.DecreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                      ToolTip="Decrease context lines"
+                    >
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource PlaylistMinus}"
+                      />
+                    </Button>
+                    <Button
+                      Style="{StaticResource MaterialIconButtonStyle}"
+                      Command="{Binding DataContext.IncreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                      ToolTip="Increase context lines"
+                    >
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource PlaylistPlus}"
+                      />
+                    </Button>
+                    <Separator Style="{StaticResource MaterialVerticalDivider}" />
+                    <ToggleButton
+                      Style="{StaticResource MaterialIconToggleButtonStyle}"
+                      IsChecked="{Binding DataContext.ShowWholeFile, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                      ToolTip="Show entire file"
+                    >
+                      <Path Fill="{DynamicResource MaterialForegroundBase}">
+                        <Path.Style>
+                          <Style TargetType="{x:Type Path}">
+                            <Setter
+                              Property="Data"
+                              Value="{StaticResource ProjectorScreenVariantOff}"
+                            />
+                            <Style.Triggers>
+                              <DataTrigger
+                                Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+                                Value="True"
+                              >
+                                <Setter
+                                  Property="Data"
+                                  Value="{StaticResource ProjectorScreenVariant}"
+                                />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </Path.Style>
+                      </Path>
+                    </ToggleButton>
+                    <Separator Style="{StaticResource MaterialVerticalDivider}" />
+                    <Canvas Width="24" Height="24" ToolTip="{Binding Status}">
+                      <Canvas.LayoutTransform>
+                        <ScaleTransform ScaleX=".6" ScaleY=".6" />
+                      </Canvas.LayoutTransform>
+                      <Path
+                        Fill="{Binding Status, Converter={StaticResource DiffTypeToBrushConverter}}"
+                        Data="{Binding IconResourceKey, Converter={converters:StaticResourceConverter}}"
+                      />
+                    </Canvas>
+                  </StackPanel>
                 </Grid>
                 <diff:GitDiffControl
                   Grid.Row="1"
