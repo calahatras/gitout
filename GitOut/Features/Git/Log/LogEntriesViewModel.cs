@@ -185,7 +185,8 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         IGitRepositoryNotifier notifier,
         ISnackbarService snack,
         LogRevisionViewMode mode,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        IGitFileEntryViewModel? previousSelection = null
     )
         where T : GitHistoryEvent
     {
@@ -210,6 +211,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                 options
             );
         }
+        context.selectedItem = previousSelection;
         context.ViewMode = mode;
         return context;
     }
