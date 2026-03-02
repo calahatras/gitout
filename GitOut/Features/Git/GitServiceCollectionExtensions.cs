@@ -5,6 +5,7 @@ using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
+using GitOut.Features.Text.Editor;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GitOut.Features.Git;
@@ -24,5 +25,7 @@ public static class GitServiceCollectionExtensions
         services.AddTransient<GitStageViewModel>();
         services.AddTransient<RepositoryListPage>();
         services.AddTransient<RepositoryListViewModel>();
+        services.AddTransient<TextEditorViewModel>();
+        services.AddTransient<TextEditorPage>();
     }
 }

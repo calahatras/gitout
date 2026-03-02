@@ -57,6 +57,37 @@ public sealed class LocalGitRepository : IGitRepository
         return null;
     }
 
+    public async Task<string> GetConfigPathAsync(GitConfigScope scope)
+    {
+        if (scope == GitConfigScope.Local)
+        {
+            return Path.Combine(WorkingDirectory.Directory, ".git", "config");
+        }
+
+        IGitProcess config = CreateProcess(
+            ProcessOptions.FromArguments("config --global --list --show-origin")
+        );
+        await foreach (string line in config.ReadLinesAsync())
+        {
+            if (line.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
+            {
+                int tabIndex = line.IndexOf('\t');
+                if (tabIndex > 5)
+                {
+                    string path = line[5..tabIndex];
+                    if (path.StartsWith("\"") && path.EndsWith("\""))
+                    {
+                        path = path[1..^1];
+                    }
+                    return path;
+                }
+            }
+        }
+
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return Path.Combine(home, ".gitconfig");
+    }
+
     public async Task<GitHistoryEvent> GetHeadAsync()
     {
         IGitProcess log = CreateProcess(

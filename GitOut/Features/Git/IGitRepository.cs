@@ -16,6 +16,8 @@ public interface IGitRepository
 
     Task<bool> IsInsideWorkTree();
     Task<GitCommitId?> GetCommitIdAsync(string reference);
+    Task<string> GetConfigPathAsync(GitConfigScope scope);
+
     Task<GitHistoryEvent> GetHeadAsync();
     IAsyncEnumerable<GitRemote> GetRemotesAsync();
 

@@ -6,6 +6,7 @@ using FakeItEasy;
 using GitOut.Features.Git.Files;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
+using GitOut.Features.Navigation;
 using NUnit.Framework;
 
 namespace GitOut.Features.Git.Log;
@@ -43,12 +44,14 @@ public class LogEntriesViewModelTest
         A.CallTo(() => repository.ListTreeAsync(root.Id, capturedDiffOptions._))
             .Returns(entries.ToAsyncEnumerable());
         ISnackbarService snack = A.Fake<ISnackbarService>();
+        INavigationService navigation = A.Fake<INavigationService>();
 
         var actor = LogEntriesViewModel.CreateContext(
             new List<GitHistoryEvent>([root]),
             repository,
             notifier,
             snack,
+            navigation,
             LogRevisionViewMode.CurrentRevision
         );
         Assert.That(actor, Is.Not.Null);
