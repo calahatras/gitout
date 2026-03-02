@@ -10,57 +10,59 @@
   d:DesignWidth="400"
   d:DataContext="{d:DesignInstance Type={x:Type local:CherryPickOptionsViewModel}}"
 >
-  <Grid Style="{StaticResource LayoutRootGridStyle}">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
-    <StackPanel Margin="8">
-      <CheckBox
-        Style="{StaticResource MaterialCheckBoxStyle}"
-        Margin="0 4"
-        IsChecked="{Binding Edit}"
-        Content="Edit"
-      />
-      <CheckBox
-        Style="{StaticResource MaterialCheckBoxStyle}"
-        Margin="0 4"
-        IsChecked="{Binding NoCommit}"
-        Content="No commit"
-      />
-      <CheckBox
-        Style="{StaticResource MaterialCheckBoxStyle}"
-        Margin="0 4"
-        IsChecked="{Binding AppendCherryPickLine}"
-        Content="Append cherry-pick line"
-      />
-      <CheckBox
-        Style="{StaticResource MaterialCheckBoxStyle}"
-        Margin="0 4"
-        IsChecked="{Binding FastForward}"
-        Content="Fast forward"
-      />
-      <TextBlock
-        Style="{StaticResource NormalTextStyle}"
-        Margin="0 12 0 4"
-        Text="Mainline parent number (e.g. 1 for merge commits):"
-      />
-      <TextBox
-        Style="{StaticResource MaterialFormInputStyle}"
-        Text="{Binding MainlineParentNumber, UpdateSourceTrigger=PropertyChanged}"
-      />
-    </StackPanel>
-    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-      <Button
-        Style="{StaticResource MaterialButtonStyle}"
-        Command="{Binding CancelCommand}"
-        Content="CANCEL"
-      />
-      <Button
-        Style="{StaticResource MaterialButtonStyle}"
-        Command="{Binding SetResultCommand}"
-        Content="CHERRY PICK"
-      />
-    </StackPanel>
-  </Grid>
+  <Border CornerRadius="8" Background="{DynamicResource MaterialBackgroundBackground}">
+    <Grid Style="{StaticResource LayoutRootGridStyle}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <StackPanel Margin="24 28">
+        <CheckBox
+          Style="{StaticResource MaterialCheckBoxStyle}"
+          Margin="0 4"
+          IsChecked="{Binding Edit}"
+          Content="Edit"
+        />
+        <CheckBox
+          Style="{StaticResource MaterialCheckBoxStyle}"
+          Margin="0 4"
+          IsChecked="{Binding NoCommit}"
+          Content="No commit"
+        />
+        <CheckBox
+          Style="{StaticResource MaterialCheckBoxStyle}"
+          Margin="0 4"
+          IsChecked="{Binding AppendCherryPickLine}"
+          Content="Append cherry-pick line"
+        />
+        <CheckBox
+          Style="{StaticResource MaterialCheckBoxStyle}"
+          Margin="0 4"
+          IsChecked="{Binding FastForward}"
+          Content="Fast forward"
+        />
+        <TextBlock
+          Style="{StaticResource NormalTextStyle}"
+          Margin="0 12 0 4"
+          Text="Mainline parent number (e.g. 1 for merge commits):"
+        />
+        <TextBox
+          Style="{StaticResource MaterialFormInputStyle}"
+          Text="{Binding MainlineParentNumber, UpdateSourceTrigger=PropertyChanged}"
+        />
+      </StackPanel>
+      <StackPanel Grid.Row="1" Margin="8 0" Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button
+          Style="{StaticResource MaterialButtonStyle}"
+          Command="{Binding CancelCommand}"
+          Content="CANCEL"
+        />
+        <Button
+          Style="{StaticResource MaterialButtonStyle}"
+          Command="{Binding SetResultCommand}"
+          Content="CHERRY PICK"
+        />
+      </StackPanel>
+    </Grid>
+  </Border>
 </UserControl>
