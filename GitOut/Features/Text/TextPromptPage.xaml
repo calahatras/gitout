@@ -23,14 +23,14 @@
     />
     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
       <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelCommand}"
-        >Cancel</Button
+        >CANCEL</Button
       >
       <Button
         Style="{StaticResource MaterialButtonStyle}"
+        Content="{Binding ConfirmButtonText}"
         Command="{Binding SetResultCommand}"
         CommandParameter="{Binding Text, ElementName=FileNameInput}"
-        >OK</Button
-      >
+      />
     </StackPanel>
   </Grid>
 </UserControl>

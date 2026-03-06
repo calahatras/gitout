@@ -69,6 +69,12 @@
       </MenuItem>
       <Separator />
       <MenuItem
+        Header="Create branch"
+        Command="{Binding CreateBranchFromCommitCommand}"
+        CommandParameter="{Binding SelectedContext.Root}"
+        IsEnabled="{Binding SelectedContext.IsSingleSelection}"
+      />
+      <MenuItem
         Header="Checkout commit (detached)"
         Command="{Binding CheckoutCommitCommand}"
         CommandParameter="{Binding SelectedContext.Root.Id}"
