@@ -246,6 +246,18 @@
                 </Grid>
               </StackPanel>
             </Border>
+            <Border Style="{StaticResource CardPanelStyle}">
+              <StackPanel>
+                <TextBlock Text="Git worktrees" Style="{StaticResource Header6TextStyle}" />
+                <Grid Margin="0 10 0 0">
+                  <TextBox
+                    Style="{StaticResource MaterialInputStyle}"
+                    AutomationProperties.HelpText="Default project path pattern (.gitout/worktrees/&lt;name&gt;)"
+                    Text="{Binding DefaultWorktreePrefixPath, UpdateSourceTrigger=PropertyChanged}"
+                  />
+                </Grid>
+              </StackPanel>
+            </Border>
           </StackPanel>
         </Grid>
       </ScrollViewer>

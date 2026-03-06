@@ -34,6 +34,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
         IGitRepositoryFactory gitFactory,
         IOptionsMonitor<GitStageOptions> stageOptions,
         IOptionsWriter<GitStageOptions> storage,
+        IOptionsMonitor<WorktreeOptions> worktreeOptions,
+        IOptionsWriter<WorktreeOptions> worktreeStorage,
         IProcessTelemetryCollector telemetry
     )
     {
@@ -45,7 +47,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
             repositories,
             gitFactory,
             stageOptions,
-            storage
+            storage,
+            worktreeOptions,
+            worktreeStorage
         );
         content = general;
         MenuItem[] menuItems = new[]

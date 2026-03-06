@@ -25,11 +25,14 @@ namespace GitOut.Features.Settings;
 public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly IOptionsWriter<GitStageOptions> storage;
+    private readonly IOptionsWriter<WorktreeOptions> worktreeStorage;
     private readonly IDisposable unsubscribeOptions;
+    private readonly IDisposable unsubscribeWorktreeOptions;
     private bool useTransparentBackground = true;
     private bool trimLineEndings;
     private bool showSpacesAsDots;
     private string tabTransformText;
+    private string defaultWorktreePrefixPath;
 
     public GeneralSettingsViewModel(
         ISnackbarService snacks,
@@ -37,10 +40,13 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         IGitRepositoryStorage repositories,
         IGitRepositoryFactory gitFactory,
         IOptionsMonitor<GitStageOptions> stageOptions,
-        IOptionsWriter<GitStageOptions> storage
+        IOptionsWriter<GitStageOptions> storage,
+        IOptionsMonitor<WorktreeOptions> worktreeOptions,
+        IOptionsWriter<WorktreeOptions> worktreeStorage
     )
     {
         this.storage = storage;
+        this.worktreeStorage = worktreeStorage;
         var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
         ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
@@ -108,6 +114,12 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
             SetProperty(ref tabTransformText, value.TabTransformText, nameof(TabTransformText));
             SetProperty(ref trimLineEndings, value.TrimLineEndings, nameof(TrimLineEndings));
         });
+
+        defaultWorktreePrefixPath = worktreeOptions.CurrentValue.DefaultPrefixPath;
+        unsubscribeWorktreeOptions = worktreeOptions.OnChange(value =>
+        {
+            SetProperty(ref defaultWorktreePrefixPath, value.DefaultPrefixPath, nameof(DefaultWorktreePrefixPath));
+        });
     }
 
     public ICollectionView ValidRepositoryPaths { get; }
@@ -162,6 +174,18 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         }
     }
 
+    public string DefaultWorktreePrefixPath
+    {
+        get => defaultWorktreePrefixPath;
+        set
+        {
+            if (SetProperty(ref defaultWorktreePrefixPath, value))
+            {
+                worktreeStorage.Update(snapshot => snapshot.DefaultPrefixPath = value);
+            }
+        }
+    }
+
     public ICommand OpenSettingsFolderCommand { get; }
     public ICommand SearchRootFolderCommand { get; }
     public ICommand AddRepositoryCommand { get; }
@@ -169,7 +193,11 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void Dispose() => unsubscribeOptions.Dispose();
+    public void Dispose()
+    {
+        unsubscribeOptions.Dispose();
+        unsubscribeWorktreeOptions.Dispose();
+    }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
     {

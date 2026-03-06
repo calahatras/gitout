@@ -8,6 +8,7 @@ using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
+using GitOut.Features.Git.Worktree;
 using GitOut.Features.IO;
 using GitOut.Features.Memory;
 
@@ -242,8 +243,13 @@ public sealed class LocalGitRepository : IGitRepository
         return CachedStatus;
     }
 
-    public Stream GetUntrackedBlobStream(RelativeDirectoryPath path) =>
-        File.OpenRead(Path.Combine(WorkingDirectory.Directory, path.ToString()));
+    public Stream GetUntrackedBlobStream(RelativeDirectoryPath path)
+    {
+        string filePath = Path.Combine(WorkingDirectory.Directory, path.ToString());
+        return File.Exists(filePath)
+            ? File.OpenRead(filePath)
+            : MemoryStream.Null;
+    }
 
     public Task<Stream> GetBlobStreamAsync(GitFileId file) =>
         CreateProcess(ProcessOptions.FromArguments($"cat-file blob \"{file}\"")).ReadStreamAsync();
@@ -582,6 +588,91 @@ public sealed class LocalGitRepository : IGitRepository
             ProcessOptions.FromArguments(argumentsBuilder.ToString())
         );
         return apply.ExecuteAsync(patch.Writer);
+    }
+
+    public async IAsyncEnumerable<GitWorktree> WorktreeListAsync()
+    {
+        IGitProcess worktrees = CreateProcess(ProcessOptions.FromArguments("worktree list --porcelain"));
+
+        string? path = null;
+        GitObjectId? hash = null;
+        GitBranchName? branch = null;
+
+        await foreach (string line in worktrees.ReadLinesAsync())
+        {
+            if (string.IsNullOrEmpty(line))
+            {
+                if (path is not null && hash is not null)
+                {
+                    yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.Create("HEAD"));
+                }
+                path = null;
+                hash = null;
+                branch = null;
+                continue;
+            }
+
+            if (line.StartsWith("worktree "))
+            {
+                path = line[9..];
+            }
+            else if (line.StartsWith("HEAD "))
+            {
+                hash = GitCommitId.FromHash(line.AsSpan()[5..]);
+            }
+            else if (line.StartsWith("branch "))
+            {
+                branch = GitBranchName.Create(line[7..]);
+            }
+        }
+
+        if (path is not null && hash is not null)
+        {
+            yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.Create("HEAD"));
+        }
+    }
+
+    public async Task WorktreeAddAsync(GitWorktreeAddOptions options)
+    {
+        IProcessOptionsBuilder arguments = ProcessOptions.Builder();
+        arguments.Append("worktree add");
+
+        if (options.CreateBranch)
+        {
+            arguments.Append("-b");
+        }
+
+        if (options.Branch is not null)
+        {
+            arguments.Append(options.Branch.Name);
+        }
+
+        arguments.Append(options.Path.Directory);
+
+        if (options.Commit is not null)
+        {
+            arguments.Append(options.Commit.Hash);
+        }
+
+        ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
+        if (args.ErrorLines.Count > 0 && args.ErrorLines.Any(line => line.StartsWith("fatal:", StringComparison.OrdinalIgnoreCase) || line.StartsWith("error:", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException($"Could not add worktree: {args.Error}");
+        }
+    }
+
+    public async Task WorktreeRemoveAsync(DirectoryPath path)
+    {
+        IProcessOptionsBuilder arguments = ProcessOptions.Builder();
+        arguments.Append("worktree remove");
+        arguments.Append("--force");
+        arguments.Append(path.Directory);
+
+        ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
+        if (args.ErrorLines.Count > 0)
+        {
+            throw new InvalidOperationException($"Could not remove worktree: {args.Error}");
+        }
     }
 
     public static LocalGitRepository InitializeFromPath(

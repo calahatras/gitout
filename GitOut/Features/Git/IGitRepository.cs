@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
+using GitOut.Features.Git.Worktree;
 using GitOut.Features.IO;
 
 namespace GitOut.Features.Git;
@@ -58,4 +59,8 @@ public interface IGitRepository
     Task StashIndexAsync();
     Task CommitAsync(GitCommitOptions options);
     Task RestoreWorkspaceAsync(GitStatusChange change);
+
+    IAsyncEnumerable<GitWorktree> WorktreeListAsync();
+    Task WorktreeAddAsync(GitWorktreeAddOptions options);
+    Task WorktreeRemoveAsync(DirectoryPath path);
 }
