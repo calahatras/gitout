@@ -37,6 +37,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
         IOptionsWriter<GitStageOptions> storage,
         IOptionsMonitor<GitLogOptions> logOptions,
         IOptionsWriter<GitLogOptions> logStorage,
+        IOptionsMonitor<WorktreeOptions> worktreeOptions,
+        IOptionsWriter<WorktreeOptions> worktreeStorage,
         IProcessTelemetryCollector telemetry
     )
     {
@@ -50,7 +52,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
             stageOptions,
             storage,
             logOptions,
-            logStorage
+            logStorage,
+            worktreeOptions,
+            worktreeStorage
         );
         content = general;
         MenuItem[] menuItems = new[]
