@@ -46,7 +46,8 @@ public class GitDirectoryViewModel
                 children,
                 IGitDirectoryEntryViewModel.CompareItems
             )
-        ) { }
+        )
+    { }
 
     private GitDirectoryViewModel(
         IGitRepository repository,
@@ -65,7 +66,8 @@ public class GitDirectoryViewModel
             {
                 LoadingViewModel.Proxy,
             }
-        ) { }
+        )
+    { }
 
     public RelativeDirectoryPath Path { get; }
     public string RootPath => repository.WorkingDirectory.ToString();

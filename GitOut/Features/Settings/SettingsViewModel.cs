@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Data;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git;
+using GitOut.Features.Git.Hooks;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
@@ -42,6 +43,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
         IOptionsWriter<KeyboardShortcutsOptions> shortcutsWriter,
         IOptionsMonitor<WorktreeOptions> worktreeOptions,
         IOptionsWriter<WorktreeOptions> worktreeStorage,
+        IShellProvider shells,
+        IOptionsMonitor<GitHooksOptions> hooksOptions,
+        IOptionsWriter<GitHooksOptions> hooksStorage,
         IProcessTelemetryCollector telemetry
     )
     {
@@ -59,7 +63,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
             shortcutsOptions,
             shortcutsWriter,
             worktreeOptions,
-            worktreeStorage
+            worktreeStorage,
+            shells,
+            hooksOptions,
+            hooksStorage
         );
         content = general;
         MenuItem[] menuItems = new[]

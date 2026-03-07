@@ -84,6 +84,12 @@
               <Grid.ContextMenu>
                 <ContextMenu>
                   <MenuItem
+                    Header="Manage Git Hooks"
+                    Command="{Binding DataContext.NavigateToHooksCommand, Source={x:Reference Name=Root}}"
+                    CommandParameter="{Binding}"
+                  />
+                  <Separator />
+                  <MenuItem
                     Header="Remove repository from list"
                     Command="{Binding DataContext.RemoveRepositoryCommand, Source={x:Reference Name=Root}}"
                     CommandParameter="{Binding}"

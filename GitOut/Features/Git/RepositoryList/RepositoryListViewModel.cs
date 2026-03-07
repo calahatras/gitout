@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using GitOut.Features.Collections;
+using GitOut.Features.Git.Hooks;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
@@ -43,6 +44,13 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
             navigation,
             typeof(GitLogPage).FullName!,
             repository => GitLogPageOptions.OpenRepository(repository!),
+            repository => repository is not null
+        );
+
+        NavigateToHooksCommand = new NavigateLocalCommand<IGitRepository>(
+            navigation,
+            typeof(GitHooksPage).FullName!,
+            repository => GitHooksPageOptions.OpenRepository(repository!),
             repository => repository is not null
         );
 
@@ -159,6 +167,7 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public ICommand NavigateToLogCommand { get; }
+    public ICommand NavigateToHooksCommand { get; }
     public ICommand AddRepositoryCommand { get; }
     public ICommand RemoveRepositoryCommand { get; }
     public ICommand ClearCommand { get; }

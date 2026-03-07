@@ -387,6 +387,80 @@
       </Setter.Value>
     </Setter>
   </Style>
+  <Style x:Key="MaterialComboBoxStyle" TargetType="{x:Type ComboBox}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialLightDividers}" />
+    <Setter Property="BorderThickness" Value="0 0 0 1" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+    <Setter Property="Padding" Value="0 4" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type ComboBox}">
+          <Grid>
+            <!-- Toggle Button for the dropdown -->
+            <ToggleButton 
+              Name="ToggleButton" 
+              BorderBrush="{TemplateBinding BorderBrush}"
+              BorderThickness="{TemplateBinding BorderThickness}"
+              Background="{TemplateBinding Background}"
+              Foreground="{TemplateBinding Foreground}"
+              IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+              ClickMode="Press">
+              <ToggleButton.Template>
+                <ControlTemplate TargetType="ToggleButton">
+                  <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <Path x:Name="Arrow" Grid.Column="1" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0,4,0" Data="M 0 0 L 4 4 L 8 0 Z" />
+                    </Grid>
+                  </Border>
+                </ControlTemplate>
+              </ToggleButton.Template>
+            </ToggleButton>
+            
+            <ContentPresenter Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            
+            <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" Focusable="False" PopupAnimation="Slide">
+              <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                <Border x:Name="DropDownBorder" Background="{DynamicResource MaterialBackgroundCard}" BorderThickness="1" BorderBrush="{DynamicResource MaterialLightDividers}" />
+                <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                  <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                </ScrollViewer>
+              </Grid>
+            </Popup>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="ItemContainerStyle">
+      <Setter.Value>
+        <Style TargetType="{x:Type ComboBoxItem}">
+          <Setter Property="Foreground" Value="{DynamicResource MaterialForegroundBase}" />
+          <Setter Property="Padding" Value="8 4" />
+          <Setter Property="Template">
+            <Setter.Value>
+              <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                <Border Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                  <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="IsHighlighted" Value="true">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialBackgroundHover}" />
+                  </Trigger>
+                  <Trigger Property="IsSelected" Value="true">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialBackgroundSelectedButton}" />
+                  </Trigger>
+                </ControlTemplate.Triggers>
+              </ControlTemplate>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </Setter.Value>
+    </Setter>
+  </Style>
   <Style
     x:Key="MaterialFormInputStyle"
     TargetType="{x:Type TextBox}"

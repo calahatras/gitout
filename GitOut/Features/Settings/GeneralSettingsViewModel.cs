@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using GitOut.Features.Git;
+using GitOut.Features.Git.Hooks;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
@@ -27,6 +29,7 @@ namespace GitOut.Features.Settings;
 public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly IOptionsWriter<GitStageOptions> storage;
+    private readonly IOptionsWriter<GitHooksOptions> hooksStorage;
     private readonly IOptionsWriter<GitLogOptions> logStorage;
     private readonly IDisposable? unsubscribeOptions;
     private readonly IDisposable? unsubscribeLogOptions;
@@ -51,7 +54,10 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         IOptionsMonitor<KeyboardShortcutsOptions> shortcutsOptions,
         IOptionsWriter<KeyboardShortcutsOptions> shortcutsWriter,
         IOptionsMonitor<WorktreeOptions> worktreeOptions,
-        IOptionsWriter<WorktreeOptions> worktreeStorage
+        IOptionsWriter<WorktreeOptions> worktreeStorage,
+        IShellProvider shellProvider,
+        IOptionsMonitor<GitHooksOptions> hooksOptions,
+        IOptionsWriter<GitHooksOptions> hooksStorage
     )
     {
         this.storage = storage;
@@ -63,6 +69,8 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
             shortcutsOptions,
             shortcutsWriter
         );
+        this.storage = storage;
+        this.hooksStorage = hooksStorage;
         var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
         ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
@@ -154,6 +162,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
                 nameof(DefaultWorktreePrefixPath)
             )
         );
+        LoadShellsAsync(shellProvider, hooksOptions.CurrentValue.PreferredShellPath);
     }
 
     public ICollectionView ValidRepositoryPaths { get; }
@@ -223,6 +232,26 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         }
     }
 
+    public System.Collections.Generic.IEnumerable<ShellPath> AvailableShells
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = [];
+
+    public ShellPath? SelectedShell
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                hooksStorage.Update(snapshot =>
+                    snapshot.PreferredShellPath = value?.Path ?? string.Empty
+                );
+            }
+        }
+    }
+
     public LogRevisionViewMode DefaultMultiRevisionViewMode
     {
         get => defaultMultiRevisionViewMode;
@@ -286,5 +315,16 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
             return true;
         }
         return false;
+    }
+
+    private async void LoadShellsAsync(IShellProvider provider, string preferredShellPath)
+    {
+        var list = new System.Collections.Generic.List<ShellPath>();
+        await foreach (ShellPath shell in provider.FindAvailableShellsAsync())
+        {
+            list.Add(shell);
+        }
+        AvailableShells = list;
+        SelectedShell = list.FirstOrDefault(x => x.Path == preferredShellPath);
     }
 }

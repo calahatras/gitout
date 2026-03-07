@@ -395,6 +395,20 @@
                 </Grid>
               </StackPanel>
             </Border>
+            <Border Style="{StaticResource CardPanelStyle}">
+              <StackPanel>
+                <TextBlock Text="Git Hooks" Style="{StaticResource Header6TextStyle}" />
+                <Grid Margin="0 10 0 0">
+                  <ComboBox
+                    ItemsSource="{Binding AvailableShells}"
+                    SelectedItem="{Binding SelectedShell}"
+                    DisplayMemberPath="Name"
+                    AutomationProperties.HelpText="Preferred Hook Shell"
+                    Style="{StaticResource MaterialComboBoxStyle}"
+                  />
+                </Grid>
+              </StackPanel>
+            </Border>
           </StackPanel>
         </Grid>
       </ScrollViewer>

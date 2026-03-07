@@ -77,10 +77,7 @@ public partial class KeyRecorderControl : System.Windows.Controls.UserControl
         UpdateDisplay();
 
         Window? w = window ?? Window.GetWindow(this);
-        if (w is not null)
-        {
-            w.PreviewKeyDown -= OnWindowPreviewKeyDown;
-        }
+        w?.PreviewKeyDown -= OnWindowPreviewKeyDown;
     }
 
     private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)

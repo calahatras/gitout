@@ -59,9 +59,9 @@ public sealed class ProcessSettingsViewModel : IDisposable, INotifyPropertyChang
 
     private bool FilterReport(object item) =>
         string.IsNullOrWhiteSpace(SearchText)
-        || item is ProcessEventArgsViewModel report
+        || (item is ProcessEventArgsViewModel report
             && (
                 report.ProcessName.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
                 || report.Arguments.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
-            );
+            ));
 }

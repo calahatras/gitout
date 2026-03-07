@@ -1,6 +1,7 @@
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.CherryPick;
 using GitOut.Features.Git.Diagnostics;
+using GitOut.Features.Git.Hooks;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
@@ -22,6 +23,10 @@ public static class GitServiceCollectionExtensions
             IGitRepositoryWatcherProvider,
             GitRepositoryFileSystemWatcherProvider
         >();
+        _ = services.AddScoped<IShellProvider, SystemShellProvider>();
+        _ = services.AddScoped<IGitHookManager, GitHookManager>();
+        _ = services.AddTransient<GitHooksPage>();
+        _ = services.AddTransient<GitHooksViewModel>();
         _ = services.AddTransient<GitLogPage>();
         _ = services.AddTransient<GitLogViewModel>();
         _ = services.AddTransient<GitStagePage>();

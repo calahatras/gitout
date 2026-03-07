@@ -1,0 +1,33 @@
+namespace GitOut.Features.Git.Hooks;
+
+public enum GitHookType
+{
+    ApplyPatchMsg,
+    PreApplyPatch,
+    PostApplyPatch,
+    PreCommit,
+    PreMergeCommit,
+    PrepareCommitMsg,
+    CommitMsg,
+    PostCommit,
+    PreRebase,
+    PostCheckout,
+    PostMerge,
+    PrePush,
+    PreReceive,
+    Update,
+    ProcReceive,
+    PostReceive,
+    PostUpdate,
+    ReferenceTransaction,
+    PushToCheckout,
+    PreAutoGc,
+    PostRewrite,
+    SendEmailValidate,
+    FsmonitorWatchman,
+    P4Changelist,
+    P4PrepareChangelist,
+    P4PostChangelist,
+    P4PreSubmit,
+    PostIndexChange,
+}
