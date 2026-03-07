@@ -250,11 +250,33 @@
               <StackPanel>
                 <TextBlock Text="Git worktrees" Style="{StaticResource Header6TextStyle}" />
                 <Grid Margin="0 10 0 0">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
                   <TextBox
                     Style="{StaticResource MaterialInputStyle}"
                     AutomationProperties.HelpText="Default project path pattern (.gitout/worktrees/&lt;name&gt;)"
                     Text="{Binding DefaultWorktreePrefixPath, UpdateSourceTrigger=PropertyChanged}"
                   />
+                  <TextBlock
+                    Grid.Row="1"
+                    Foreground="{DynamicResource Removed}"
+                    Text="{Binding DefaultWorktreePrefixPathError}"
+                  >
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock" BasedOn="{StaticResource HintTextStyle}">
+                        <Style.Triggers>
+                          <DataTrigger
+                            Binding="{Binding DefaultWorktreePrefixPathError.Length}"
+                            Value="0"
+                          >
+                            <Setter Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
                 </Grid>
               </StackPanel>
             </Border>

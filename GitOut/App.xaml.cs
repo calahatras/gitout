@@ -110,6 +110,9 @@ public partial class App : Application
         services
             .AddWritableOptions<GitStageOptions>()
             .Bind(context.Configuration, GitStageOptions.SectionKey);
+        services
+            .AddWritableOptions<WorktreeOptions>()
+            .Bind(context.Configuration, WorktreeOptions.SectionKey);
         services.AddLogging();
 
         services.AddHostedService<Bootstrap>();

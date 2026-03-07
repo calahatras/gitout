@@ -33,6 +33,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
     private bool showSpacesAsDots;
     private string tabTransformText;
     private string defaultWorktreePrefixPath;
+    private string defaultWorktreePrefixPathError = string.Empty;
 
     public GeneralSettingsViewModel(
         ISnackbarService snacks,
@@ -181,9 +182,23 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         {
             if (SetProperty(ref defaultWorktreePrefixPath, value))
             {
-                worktreeStorage.Update(snapshot => snapshot.DefaultPrefixPath = value);
+                if (value.Contains("<name>", StringComparison.OrdinalIgnoreCase))
+                {
+                    DefaultWorktreePrefixPathError = string.Empty;
+                    worktreeStorage.Update(snapshot => snapshot.DefaultPrefixPath = value);
+                }
+                else
+                {
+                    DefaultWorktreePrefixPathError = "Path must contain <name> which will be replaced by the worktree name";
+                }
             }
         }
+    }
+
+    public string DefaultWorktreePrefixPathError
+    {
+        get => defaultWorktreePrefixPathError;
+        set => SetProperty(ref defaultWorktreePrefixPathError, value);
     }
 
     public ICommand OpenSettingsFolderCommand { get; }

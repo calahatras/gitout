@@ -50,6 +50,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private readonly GitRepositoryMonitor monitor;
     private readonly IGitRepositoryFactory repositoryFactory;
     private readonly IDisposable settingsMonitorHandle;
+    private readonly IDisposable worktreeOptionsMonitorHandle;
 
     private readonly ICommand createStashBranchCommand;
 
@@ -61,7 +62,6 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private bool ignoreWhitespace;
     private bool isStashesVisible;
     private bool isWorktreesVisible;
-    private bool isCreateWorktreeVisible;
     private bool isSearchDisplayed;
     private bool isCheckoutBranchVisible;
     private LogViewMode viewMode = LogViewMode.None;
@@ -71,7 +71,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
 
     private string? checkoutBranchName;
     private string newWorktreeName = string.Empty;
-    private readonly string defaultWorktreePrefixPath = string.Empty;
+    private string defaultWorktreePrefixPath = string.Empty;
     private GitTreeEvent? entryInView;
     private bool hasChanges;
 
@@ -99,6 +99,11 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             SetProperty(ref ignoreWhitespace, options.IgnoreWhitespace, nameof(IgnoreWhitespace));
         });
         defaultWorktreePrefixPath = worktreeOptions.CurrentValue.DefaultPrefixPath;
+        worktreeOptionsMonitorHandle = worktreeOptions.OnChange(options => 
+        {
+            defaultWorktreePrefixPath = options.DefaultPrefixPath;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewWorktreePath)));
+        });
         GitLogPageOptions options =
             navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
             ?? throw new InvalidOperationException("Options may not be null");
@@ -309,13 +314,13 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         CreateWorktreeCommand = new AsyncCallbackCommand(
             async () =>
             {
-                IsCreateWorktreeVisible = false;
                 IsWorktreesVisible = false;
                 try
                 {
-                    var directory = DirectoryPath.Create(System.IO.Path.Combine(Repository.WorkingDirectory.Directory, newWorktreeName));
+                    string path = NewWorktreePath;
+                    var directory = DirectoryPath.Create(System.IO.Path.Combine(Repository.WorkingDirectory.Directory, path));
                     var options = GitWorktreeAddOptions.Builder(directory);
-                    var branchName = GitBranchName.CreateLocal(System.IO.Path.GetFileName(newWorktreeName));
+                    var branchName = GitBranchName.CreateLocal(System.IO.Path.GetFileName(path));
 
                     await Repository.WorktreeAddAsync(new GitWorktreeAddOptions(directory)
                     {
@@ -326,7 +331,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                     snack.ShowSuccess($"Worktree {branchName.Name} created");
                     await RefreshWorktreesAsync();
 
-                    IGitRepository newRepo = repositoryFactory.Create(DirectoryPath.Create(newWorktreeName));
+                    IGitRepository newRepo = repositoryFactory.Create(DirectoryPath.Create(path));
                     navigation.Navigate(typeof(GitLogPage).FullName!, GitLogPageOptions.OpenRepository(newRepo));
                 }
                 catch (ArgumentException e)
@@ -445,7 +450,6 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         );
         CloseAutocompleteCommand = new CallbackCommand(() => IsSearchDisplayed = false);
         ShowSearchFilesCommand = new CallbackCommand(() => IsSearchDisplayed = true);
-        ShowCreateWorktreeCommand = new CallbackCommand(() => IsCreateWorktreeVisible = true);
     }
 
     public bool IncludeStashes
@@ -521,18 +525,6 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         set => SetProperty(ref isCheckoutBranchVisible, value);
     }
 
-    public bool IsCreateWorktreeVisible
-    {
-        get => isCreateWorktreeVisible;
-        set
-        {
-            if (SetProperty(ref isCreateWorktreeVisible, value) && value)
-            {
-                NewWorktreeName = defaultWorktreePrefixPath.Replace("<name>", MonikerGenerator.Generate(), StringComparison.Ordinal);
-            }
-        }
-    }
-
     public bool IsWorking
     {
         get => isWorking;
@@ -601,6 +593,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         {
             if (SetProperty(ref isWorktreesVisible, value) && value)
             {
+                NewWorktreeName = MonikerGenerator.Generate();
                 _ = RefreshWorktreesAsync();
             }
         }
@@ -627,8 +620,16 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public string NewWorktreeName
     {
         get => newWorktreeName;
-        set => SetProperty(ref newWorktreeName, value);
+        set
+        {
+            if (SetProperty(ref newWorktreeName, value))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewWorktreePath)));
+            }
+        }
     }
+
+    public string NewWorktreePath => defaultWorktreePrefixPath.Replace("<name>", newWorktreeName, StringComparison.Ordinal);
 
     public ICommand NavigateToStageAreaCommand { get; }
     public ICommand RefreshStatusCommand { get; }
@@ -640,7 +641,6 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public ICommand SwitchWorktreeCommand { get; }
     public ICommand RemoveWorktreeCommand { get; }
     public ICommand CreateWorktreeCommand { get; }
-    public ICommand ShowCreateWorktreeCommand { get; }
     public ICommand RevealInExplorerCommand { get; }
     public ICommand CopyContentCommand { get; }
     public ICommand CopyCommitHashCommand { get; }
@@ -674,6 +674,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 repositoryWatcher.Dispose();
                 monitor.LogChanged -= OnLogChanged;
                 settingsMonitorHandle.Dispose();
+                worktreeOptionsMonitorHandle.Dispose();
                 break;
             case NavigationType.Deactivated:
                 repositoryWatcher.EnableRaisingEvents = true;
