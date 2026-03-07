@@ -451,7 +451,10 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         {
             if (SetProperty(ref contextLines, value))
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxContextLines)));
+                PropertyChanged?.Invoke(
+                    this,
+                    new PropertyChangedEventArgs(nameof(MaxContextLines))
+                );
                 if (SelectedContext is not null)
                 {
                     RefreshSelectedContext();
