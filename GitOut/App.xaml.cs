@@ -114,6 +114,9 @@ public partial class App : Application
         services
             .AddWritableOptions<GitLogOptions>()
             .Bind(context.Configuration, GitLogOptions.SectionKey);
+        services
+            .AddWritableOptions<WorktreeOptions>()
+            .Bind(context.Configuration, WorktreeOptions.SectionKey);
         _ = services.AddLogging();
 
         _ = services.AddHostedService<Bootstrap>();

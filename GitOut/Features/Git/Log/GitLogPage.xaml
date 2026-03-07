@@ -567,11 +567,13 @@
               </Border>
             </Grid>
           </Popup>
-          <ToggleButton x:Name="Worktrees" ToolBar.OverflowMode="Never" ToolTip="Worktrees" IsChecked="{Binding IsWorktreesVisible}">
-            <Path
-              Fill="{DynamicResource MaterialForegroundBase}"
-              Data="{StaticResource Forest}"
-            />
+          <ToggleButton
+            x:Name="Worktrees"
+            ToolBar.OverflowMode="Never"
+            ToolTip="Worktrees"
+            IsChecked="{Binding IsWorktreesVisible}"
+          >
+            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Forest}" />
           </ToggleButton>
           <Popup
             ToolBar.OverflowMode="Never"
@@ -594,26 +596,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                   </Grid.RowDefinitions>
-                  <Grid Grid.Row="0" Margin="8 4">
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                      <Button
-                        Style="{StaticResource MaterialButtonStyle}"
-                        Visibility="{Binding DataContext.IsCreateWorktreeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True}"
-                        ToolTip="Create worktree"
-                      >
-                        <Button.InputBindings>
-                          <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.ShowCreateWorktreeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-                        </Button.InputBindings>
-                        CREATE
-                      </Button>
-                    </StackPanel>
-                  </Grid>
-                  <Border Visibility="{Binding DataContext.IsCreateWorktreeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}" />
-                  <Grid Visibility="{Binding DataContext.IsCreateWorktreeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="2" Margin="16">
+                  <Grid Grid.Row="0" Margin="16 16 16 16">
                     <Grid.RowDefinitions>
                       <RowDefinition Height="Auto" />
                       <RowDefinition Height="Auto" />
@@ -622,21 +605,30 @@
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox
-                      Style="{StaticResource MaterialInputStyle}"
-                      AutomationProperties.HelpText="Worktree directory path"
-                      Text="{Binding DataContext.NewWorktreeName, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
-                    />
-                    <StackPanel VerticalAlignment="Top" Grid.Column="1">
+                    <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                      <TextBox
+                        Style="{StaticResource MaterialInputStyle}"
+                        AutomationProperties.HelpText="Name"
+                        Text="{Binding DataContext.NewWorktreeName, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                      />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom">
                       <Button
                         Style="{StaticResource MaterialButtonStyle}"
                         Content="CREATE"
                         Command="{Binding DataContext.CreateWorktreeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                       />
                     </StackPanel>
+                    <TextBlock
+                      Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Text="{Binding DataContext.NewWorktreePath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      Style="{StaticResource HintTextStyle}"
+                    />
                   </Grid>
+                  <Border Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}" />
                   <ListView
-                    Visibility="{Binding DataContext.IsCreateWorktreeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True}"
                     Grid.Row="2"
                     Style="{StaticResource MaterialListStyle}"
                     ItemsSource="{Binding ActiveWorktrees}"
