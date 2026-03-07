@@ -451,6 +451,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         {
             if (SetProperty(ref contextLines, value))
             {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxContextLines)));
                 if (SelectedContext is not null)
                 {
                     RefreshSelectedContext();
@@ -458,6 +459,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             }
         }
     }
+
+    public int MaxContextLines => Math.Max(20, contextLines);
 
     public bool ShowWholeFile
     {

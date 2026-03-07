@@ -203,10 +203,13 @@ public class GitStageViewModel
         {
             if (SetProperty(ref contextLines, value))
             {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxContextLines)));
                 _ = ExecuteCurrentDiffAsync();
             }
         }
     }
+
+    public int MaxContextLines => Math.Max(20, contextLines);
 
     public bool ShowWholeFile
     {

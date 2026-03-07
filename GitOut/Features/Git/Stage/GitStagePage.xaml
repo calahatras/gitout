@@ -165,18 +165,67 @@
             />
           </ToggleButton>
           <Separator Style="{StaticResource MaterialVerticalDivider}" />
-          <Button Command="{Binding DecreaseContextLinesCommand}" ToolTip="Decrease context lines">
+          <ToggleButton x:Name="ContextLinesOptions" ToolTip="Context lines">
             <Path
               Fill="{DynamicResource MaterialForegroundBase}"
-              Data="{StaticResource PlaylistMinus}"
+              Data="{StaticResource FormatLineSpacing}"
             />
-          </Button>
-          <Button Command="{Binding IncreaseContextLinesCommand}" ToolTip="Increase context lines">
-            <Path
-              Fill="{DynamicResource MaterialForegroundBase}"
-              Data="{StaticResource PlaylistPlus}"
-            />
-          </Button>
+          </ToggleButton>
+          <Popup
+            StaysOpen="False"
+            AllowsTransparency="True"
+            IsOpen="{Binding IsChecked, ElementName=ContextLinesOptions}"
+            PopupAnimation="Fade"
+            Placement="Bottom"
+          >
+            <Grid>
+              <Border
+                Style="{StaticResource CardPanelStyle}"
+                MinWidth="200"
+                Margin="16 8"
+                Padding="8"
+              >
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Button
+                    Style="{StaticResource MaterialIconButtonStyle}"
+                    Command="{Binding DecreaseContextLinesCommand}"
+                    ToolTip="Decrease context lines"
+                  >
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource Minus}"
+                    />
+                  </Button>
+                  <Slider
+                    Grid.Column="1"
+                    Margin="8 0"
+                    Minimum="0"
+                    Maximum="{Binding MaxContextLines}"
+                    Value="{Binding ContextLines, Delay=400}"
+                    TickFrequency="1"
+                    IsSnapToTickEnabled="True"
+                    VerticalAlignment="Center"
+                  />
+                  <Button
+                    Grid.Column="2"
+                    Style="{StaticResource MaterialIconButtonStyle}"
+                    Command="{Binding IncreaseContextLinesCommand}"
+                    ToolTip="Increase context lines"
+                  >
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource Plus}"
+                    />
+                  </Button>
+                </Grid>
+              </Border>
+            </Grid>
+          </Popup>
           <ToggleButton IsChecked="{Binding ShowWholeFile}" ToolTip="Show entire file">
             <Path Fill="{DynamicResource MaterialForegroundBase}">
               <Path.Style>
