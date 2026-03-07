@@ -1003,26 +1003,67 @@
                     Margin="0 0 24 0"
                   >
                     <Separator Style="{StaticResource MaterialVerticalDivider}" />
-                    <Button
-                      Style="{StaticResource MaterialIconButtonStyle}"
-                      Command="{Binding DataContext.DecreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
-                      ToolTip="Decrease context lines"
-                    >
+                    <ToggleButton x:Name="ContextLinesOptions" ToolTip="Context lines" Margin="4 0">
                       <Path
                         Fill="{DynamicResource MaterialForegroundBase}"
-                        Data="{StaticResource PlaylistMinus}"
+                        Data="{StaticResource FormatLineSpacing}"
                       />
-                    </Button>
-                    <Button
-                      Style="{StaticResource MaterialIconButtonStyle}"
-                      Command="{Binding DataContext.IncreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
-                      ToolTip="Increase context lines"
+                    </ToggleButton>
+                    <Popup
+                      StaysOpen="False"
+                      AllowsTransparency="True"
+                      IsOpen="{Binding IsChecked, ElementName=ContextLinesOptions}"
+                      PopupAnimation="Fade"
+                      Placement="Bottom"
                     >
-                      <Path
-                        Fill="{DynamicResource MaterialForegroundBase}"
-                        Data="{StaticResource PlaylistPlus}"
-                      />
-                    </Button>
+                      <Grid>
+                        <Border
+                          Style="{StaticResource CardPanelStyle}"
+                          MinWidth="200"
+                          Margin="16 8"
+                          Padding="8"
+                        >
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="Auto" />
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button
+                              Style="{StaticResource MaterialIconButtonStyle}"
+                              Command="{Binding DataContext.DecreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                              ToolTip="Decrease context lines"
+                            >
+                              <Path
+                                Fill="{DynamicResource MaterialForegroundBase}"
+                                Data="{StaticResource Minus}"
+                              />
+                            </Button>
+                            <Slider
+                              Grid.Column="1"
+                              Margin="8 0"
+                              Minimum="0"
+                              Maximum="{Binding DataContext.MaxContextLines, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                              Value="{Binding DataContext.ContextLines, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}, Delay=400}"
+                              TickFrequency="1"
+                              IsSnapToTickEnabled="True"
+                              VerticalAlignment="Center"
+                            />
+                            <Button
+                              Grid.Column="2"
+                              Style="{StaticResource MaterialIconButtonStyle}"
+                              Command="{Binding DataContext.IncreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                              ToolTip="Increase context lines"
+                            >
+                              <Path
+                                Fill="{DynamicResource MaterialForegroundBase}"
+                                Data="{StaticResource Plus}"
+                              />
+                            </Button>
+                          </Grid>
+                        </Border>
+                      </Grid>
+                    </Popup>
                     <Separator Style="{StaticResource MaterialVerticalDivider}" />
                     <ToggleButton
                       Style="{StaticResource MaterialIconToggleButtonStyle}"
