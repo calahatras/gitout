@@ -1003,7 +1003,12 @@
                     Margin="0 0 24 0"
                   >
                     <Separator Style="{StaticResource MaterialVerticalDivider}" />
-                    <ToggleButton x:Name="ContextLinesOptions" ToolTip="Context lines" Margin="4 0">
+                    <ToggleButton
+                      x:Name="ContextLinesOptions"
+                      Style="{StaticResource MaterialIconToggleButtonStyle}"
+                      ToolTip="Context lines"
+                      Margin="4 0"
+                    >
                       <Path
                         Fill="{DynamicResource MaterialForegroundBase}"
                         Data="{StaticResource FormatLineSpacing}"
@@ -1028,11 +1033,13 @@
                               <ColumnDefinition Width="Auto" />
                               <ColumnDefinition Width="*" />
                               <ColumnDefinition Width="Auto" />
+                              <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Button
                               Style="{StaticResource MaterialIconButtonStyle}"
                               Command="{Binding DataContext.DecreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
                               ToolTip="Decrease context lines"
+                              VerticalAlignment="Center"
                             >
                               <Path
                                 Fill="{DynamicResource MaterialForegroundBase}"
@@ -1041,6 +1048,8 @@
                             </Button>
                             <Slider
                               Grid.Column="1"
+                              Style="{StaticResource MaterialSliderStyle}"
+                              Width="120"
                               Margin="8 0"
                               Minimum="0"
                               Maximum="{Binding DataContext.MaxContextLines, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
@@ -1049,11 +1058,22 @@
                               IsSnapToTickEnabled="True"
                               VerticalAlignment="Center"
                             />
-                            <Button
+                            <TextBox
                               Grid.Column="2"
+                              Style="{StaticResource NarrowMaterialInputStyle}"
+                              Margin="4 0 8 0"
+                              Width="32"
+                              TextAlignment="Center"
+                              Text="{Binding DataContext.ContextLines, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}, UpdateSourceTrigger=PropertyChanged, Delay=400}"
+                              VerticalAlignment="Center"
+                              ToolTip="Current context lines"
+                            />
+                            <Button
+                              Grid.Column="3"
                               Style="{StaticResource MaterialIconButtonStyle}"
                               Command="{Binding DataContext.IncreaseContextLinesCommand, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
                               ToolTip="Increase context lines"
+                              VerticalAlignment="Center"
                             >
                               <Path
                                 Fill="{DynamicResource MaterialForegroundBase}"

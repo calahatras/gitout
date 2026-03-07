@@ -165,7 +165,7 @@
             />
           </ToggleButton>
           <Separator Style="{StaticResource MaterialVerticalDivider}" />
-          <ToggleButton x:Name="ContextLinesOptions" ToolTip="Context lines">
+          <ToggleButton x:Name="ContextLinesOptions" Style="{StaticResource MaterialIconToggleButtonStyle}" ToolTip="Context lines">
             <Path
               Fill="{DynamicResource MaterialForegroundBase}"
               Data="{StaticResource FormatLineSpacing}"
@@ -190,11 +190,13 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
                   <Button
                     Style="{StaticResource MaterialIconButtonStyle}"
                     Command="{Binding DecreaseContextLinesCommand}"
                     ToolTip="Decrease context lines"
+                    VerticalAlignment="Center"
                   >
                     <Path
                       Fill="{DynamicResource MaterialForegroundBase}"
@@ -203,6 +205,8 @@
                   </Button>
                   <Slider
                     Grid.Column="1"
+                    Style="{StaticResource MaterialSliderStyle}"
+                    Width="120"
                     Margin="8 0"
                     Minimum="0"
                     Maximum="{Binding MaxContextLines}"
@@ -211,11 +215,22 @@
                     IsSnapToTickEnabled="True"
                     VerticalAlignment="Center"
                   />
-                  <Button
+                  <TextBox
                     Grid.Column="2"
+                    Style="{StaticResource NarrowMaterialInputStyle}"
+                    Margin="4 0 8 0"
+                    Width="24"
+                    TextAlignment="Center"
+                    Text="{Binding ContextLines, UpdateSourceTrigger=PropertyChanged, Delay=400}"
+                    VerticalAlignment="Center"
+                    ToolTip="Current context lines"
+                  />
+                  <Button
+                    Grid.Column="3"
                     Style="{StaticResource MaterialIconButtonStyle}"
                     Command="{Binding IncreaseContextLinesCommand}"
                     ToolTip="Increase context lines"
+                    VerticalAlignment="Center"
                   >
                     <Path
                       Fill="{DynamicResource MaterialForegroundBase}"
