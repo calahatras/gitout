@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using GitOut.Features.Collections;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
@@ -27,6 +28,17 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
 {
     private static readonly Size PromptSize = new(400, 150);
     private static readonly Point PromptOffset = new(80, 60);
+
+    private static readonly Brush AuthorHighlightBrush;
+    private static readonly Brush UpstreamHighlightBrush;
+
+    static GitLogViewModel()
+    {
+        AuthorHighlightBrush = new SolidColorBrush(Color.FromArgb(80, 255, 200, 50));
+        AuthorHighlightBrush.Freeze();
+        UpstreamHighlightBrush = new SolidColorBrush(Color.FromArgb(60, 0, 255, 255));
+        UpstreamHighlightBrush.Freeze();
+    }
 
     private readonly object activeStashesLock = new();
     private readonly ObservableCollection<GitStashEventViewModel> activeStashes = new();
@@ -53,6 +65,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private bool suppressSelectedLogEntriesCollectionChanged;
     private bool showSpacesAsDots;
     private bool ignoreWhitespace;
+    private bool highlightAuthor;
+    private bool highlightUpstreamBranch;
     private bool isStashesVisible;
     private bool isSearchDisplayed;
     private bool isCheckoutBranchVisible;
@@ -135,6 +149,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             {
                 RevisionViewMode = LogRevisionViewMode.Diff;
             }
+            UpdateHighlights();
         };
         selectedStashEntries.CollectionChanged += (sender, args) =>
         {
@@ -404,6 +419,30 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         }
     }
 
+    public bool HighlightAuthor
+    {
+        get => highlightAuthor;
+        set
+        {
+            if (SetProperty(ref highlightAuthor, value))
+            {
+                UpdateHighlights();
+            }
+        }
+    }
+
+    public bool HighlightUpstreamBranch
+    {
+        get => highlightUpstreamBranch;
+        set
+        {
+            if (SetProperty(ref highlightUpstreamBranch, value))
+            {
+                UpdateHighlights();
+            }
+        }
+    }
+
     public bool IsSearchDisplayed
     {
         get => isSearchDisplayed;
@@ -635,6 +674,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         }
         GitStatusResult status = await Repository.StatusAsync().ConfigureAwait(false);
         ChangesCount = status.Changes.Count;
+        UpdateHighlights();
         IsWorking = false;
     }
 
@@ -689,6 +729,50 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             );
             await CheckRepositoryStatusAsync();
             IsWorking = false;
+        }
+    }
+
+    private void UpdateHighlights()
+    {
+        GitHistoryEvent? selected =
+            selectedLogEntries.Count > 0 ? selectedLogEntries[0].Event : null;
+
+        string? highlightEmail =
+            highlightAuthor && selected is not null ? selected.Author.Email : null;
+
+        GitCommitId? highlightUpstreamId = null;
+        if (highlightUpstreamBranch && selected is not null)
+        {
+            foreach (GitBranchName branch in selected.Branches)
+            {
+                if (branch.Upstream is not null)
+                {
+                    GitTreeEvent? upstreamEvent = entries.FirstOrDefault(e =>
+                        e.Event.Branches.Any(b =>
+                            b.Type == branch.Upstream.Type && b.Name == branch.Upstream.Name
+                        )
+                    );
+                    if (upstreamEvent is not null && upstreamEvent.Event.Id != selected.Id)
+                    {
+                        highlightUpstreamId = upstreamEvent.Event.Id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        foreach (GitTreeEvent entry in entries)
+        {
+            Brush? brush = null;
+            if (highlightEmail is not null && entry.Event.Author.Email == highlightEmail)
+            {
+                brush = AuthorHighlightBrush;
+            }
+            else if (highlightUpstreamId is not null && entry.Event.Id == highlightUpstreamId)
+            {
+                brush = UpstreamHighlightBrush;
+            }
+            entry.HighlightBrush = brush;
         }
     }
 

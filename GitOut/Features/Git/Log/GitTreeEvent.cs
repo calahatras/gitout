@@ -25,6 +25,7 @@ public class GitTreeEvent : INotifyPropertyChanged
     private int commitIndex = -1;
     private int colorIndex;
     private bool isSelected;
+    private Brush? highlightBrush;
 
     public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
 
@@ -47,6 +48,12 @@ public class GitTreeEvent : INotifyPropertyChanged
     {
         get => isSelected;
         set => SetProperty(ref isSelected, value);
+    }
+
+    public Brush? HighlightBrush
+    {
+        get => highlightBrush;
+        set => SetProperty(ref highlightBrush, value);
     }
 
     public int StashIndex => Event is GitStash stash ? stash.StashIndex : -1;
