@@ -5,7 +5,7 @@ using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 
-namespace GitOut.Features.Git.Log;
+namespace GitOut.Features.Git.CherryPick;
 
 public sealed class CherryPickOptionsViewModel : INotifyPropertyChanged
 {
@@ -17,18 +17,11 @@ public sealed class CherryPickOptionsViewModel : INotifyPropertyChanged
 
     public CherryPickOptionsViewModel(
         INavigationService navigation,
-        ITitleService title,
-        IOptionsSnapshot<GitCherryPickOptions> options
+        ITitleService title
     )
     {
         title.Title = "Cherry pick options";
-        GitCherryPickOptions current = options.Value;
-        edit = current.Edit;
-        noCommit = current.NoCommit;
-        mainlineParentNumber = current.MainlineParentNumber ?? 0;
-        appendCherryPickLine = current.AppendCherryPickLine;
-        fastForward = current.FastForward;
-
+        CherryPickPrepareOptions? prepared = navigation.GetOptions<CherryPickPrepareOptions>(typeof(CherryPickOptionsPage).FullName!);
         CancelCommand = new CallbackCommand(navigation.Close);
         SetResultCommand = new CallbackCommand(() =>
             navigation.Close(

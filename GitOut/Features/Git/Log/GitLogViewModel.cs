@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using GitOut.Features.Collections;
 using GitOut.Features.Git.Files;
+using GitOut.Features.Git.CherryPick;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.IO;
@@ -329,12 +330,13 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             {
                 INavigationService child = navigation.NavigateNewWindow(
                     typeof(CherryPickOptionsPage).FullName!,
-                    null,
+                    new CherryPickPrepareOptions(selectedLogEntries),
                     new NavigationOverrideOptions(
-                        new Size(400, 300),
+                        new Size(400, 330),
                         PromptOffset,
                         IsModal: true,
-                        IsStatusBarVisible: false
+                        IsStatusBarVisible: false,
+                        IsTransparent: true
                     )
                 );
                 child.Closed += async (sender, args) =>
