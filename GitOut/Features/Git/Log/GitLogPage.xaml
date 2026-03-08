@@ -677,6 +677,50 @@
               </Border>
             </Grid>
           </Popup>
+          <ToggleButton x:Name="Highlights" ToolBar.OverflowMode="Never" ToolTip="Highlights">
+            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Marker}" />
+          </ToggleButton>
+          <Popup
+            ToolBar.OverflowMode="Never"
+            StaysOpen="False"
+            AllowsTransparency="True"
+            IsOpen="{Binding IsChecked, ElementName=Highlights}"
+            PopupAnimation="Fade"
+            Placement="Bottom"
+          >
+            <Grid>
+              <Grid.Resources>
+                <Style
+                  x:Key="PopoverCheckboxListItemStyle"
+                  TargetType="{x:Type CheckBox}"
+                  BasedOn="{StaticResource MaterialCheckBoxStyle}"
+                >
+                  <Setter Property="Margin" Value="0 8" />
+                </Style>
+              </Grid.Resources>
+              <Border
+                Style="{StaticResource CardPanelStyle}"
+                MinWidth="180"
+                Margin="16 8"
+                Padding="8 0"
+              >
+                <StackPanel Margin="8 16">
+                  <CheckBox
+                    Style="{StaticResource PopoverCheckboxListItemStyle}"
+                    IsChecked="{Binding HighlightAuthor}"
+                  >
+                    <TextBlock Text="Highlight author" />
+                  </CheckBox>
+                  <CheckBox
+                    Style="{StaticResource PopoverCheckboxListItemStyle}"
+                    IsChecked="{Binding HighlightUpstreamBranch}"
+                  >
+                    <TextBlock Text="Highlight upstream" />
+                  </CheckBox>
+                </StackPanel>
+              </Border>
+            </Grid>
+          </Popup>
           <Button
             ToolBar.OverflowMode="Never"
             Command="{Binding RefreshStatusCommand}"
@@ -789,7 +833,7 @@
           </ListView.ItemContainerStyle>
           <ListView.ItemTemplate>
             <DataTemplate DataType="{x:Type local:GitTreeEvent}">
-              <Grid x:Name="outerGrid" Height="28">
+              <Grid x:Name="outerGrid" Height="28" Background="{Binding HighlightBrush}">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="Auto" />
                   <ColumnDefinition Width="*" />

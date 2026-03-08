@@ -175,15 +175,23 @@ public sealed class LocalGitRepository : IGitRepository
 
         IGitProcess branches = CreateProcess(
             ProcessOptions.FromArguments(
-                "for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname)\""
+                "for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname) %(upstream)\""
             )
         );
         await foreach (string line in branches.ReadLinesAsync())
         {
-            var id = GitCommitId.FromHash(line.AsSpan()[..40]);
+            string[] parts = line.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 2)
+            {
+                continue;
+            }
+            var id = GitCommitId.FromHash(parts[0]);
             if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? logitem))
             {
-                var branch = GitBranchName.Create(line[41..]);
+                GitBranchName? upstream = parts.Length == 3
+                    ? GitBranchName.Create(parts[2])
+                    : null;
+                var branch = GitBranchName.Create(parts[1], upstream);
                 logitem.Branches.Add(branch);
             }
         }

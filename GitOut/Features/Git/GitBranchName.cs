@@ -12,7 +12,7 @@ public class GitBranchName
         "^[\\w\\d](?:[\\w\\d\\-+@&\\/\\{}.\\(\\)]+)(?<![\\/\\.])$"
     );
 
-    private GitBranchName(string type, string name)
+    private GitBranchName(string type, string name, GitBranchName? upstream = null)
     {
         if (name.Length <= 1)
         {
@@ -24,6 +24,7 @@ public class GitBranchName
         }
         Type = type;
         Name = name;
+        Upstream = upstream;
         IconResource = type switch
         {
             LocalBranchType => "SourceCommitLocal",
@@ -34,6 +35,7 @@ public class GitBranchName
 
     public string Type { get; }
     public string Name { get; }
+    public GitBranchName? Upstream { get; }
 
     public string IconResource { get; }
 
@@ -44,7 +46,7 @@ public class GitBranchName
     public static bool IsValid(string? name) =>
         name is not null && name.Length > 1 && ValidBranchName.IsMatch(name);
 
-    public static GitBranchName Create(string name)
+    public static GitBranchName Create(string name, GitBranchName? upstream = null)
     {
         if (!name.StartsWith("refs"))
         {
@@ -52,8 +54,8 @@ public class GitBranchName
         }
         string[] parts = name.Split('/', 3);
         return parts.Length > 2
-            ? new GitBranchName(parts[1], parts[2])
-            : new GitBranchName(parts[1], parts[1]);
+            ? new GitBranchName(parts[1], parts[2], upstream)
+            : new GitBranchName(parts[1], parts[1], upstream);
     }
 
     public static GitBranchName CreateLocal(string name) => new(LocalBranchType, name);
