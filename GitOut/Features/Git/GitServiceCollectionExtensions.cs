@@ -1,4 +1,5 @@
 using GitOut.Features.Diagnostics;
+using GitOut.Features.Git.CherryPick;
 using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;

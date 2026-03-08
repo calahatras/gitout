@@ -6,5 +6,6 @@ public sealed record NavigationOverrideOptions(
     Size WindowSize,
     Point Offset,
     bool IsModal = false,
-    bool IsStatusBarVisible = true
+    bool IsStatusBarVisible = true,
+    bool IsTransparent = false
 );
