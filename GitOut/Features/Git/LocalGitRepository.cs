@@ -516,6 +516,7 @@ public sealed class LocalGitRepository : IGitRepository
                 || message == $"Switched to a new branch '{name.Name}'"
                 || message == $"Already on '{name}'"
                 || message.StartsWith("Previous HEAD position was ")
+                || message.StartsWith("Note: switching to")
             )
             {
                 return;
