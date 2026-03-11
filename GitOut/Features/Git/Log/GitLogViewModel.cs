@@ -290,7 +290,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                     typeof(CherryPickOptionsPage).FullName!,
                     new CherryPickPrepareOptions(selectedLogEntries),
                     new NavigationOverrideOptions(
-                        new Size(400, 330),
+                        new Size(400, 290),
                         PromptOffset,
                         IsModal: true,
                         IsStatusBarVisible: false,
@@ -766,7 +766,9 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         );
 
         if (action is null)
+        {
             return;
+        }
 
         IsWorking = true;
         try

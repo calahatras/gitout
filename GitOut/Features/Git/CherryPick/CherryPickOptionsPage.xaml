@@ -6,7 +6,7 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="clr-namespace:GitOut.Features.Git.CherryPick"
   mc:Ignorable="d"
-  d:DesignHeight="300"
+  d:DesignHeight="290"
   d:DesignWidth="400"
   d:DataContext="{d:DesignInstance Type={x:Type local:CherryPickOptionsViewModel}}"
 >
@@ -16,40 +16,43 @@
         <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
-      <StackPanel Margin="24 28">
-        <TextBlock Text="Cherry pick commits" Style="{StaticResource Header5TextStyle}"  />
-        <CheckBox
-          Style="{StaticResource MaterialCheckBoxStyle}"
-          Margin="0 4"
-          IsChecked="{Binding Edit}"
-          Content="Edit"
-        />
-        <CheckBox
-          Style="{StaticResource MaterialCheckBoxStyle}"
-          Margin="0 4"
-          IsChecked="{Binding NoCommit}"
-          Content="No commit"
-        />
-        <CheckBox
-          Style="{StaticResource MaterialCheckBoxStyle}"
-          Margin="0 4"
-          IsChecked="{Binding AppendCherryPickLine}"
-          Content="Append cherry-pick line"
-        />
-        <CheckBox
-          Style="{StaticResource MaterialCheckBoxStyle}"
-          Margin="0 4"
-          IsChecked="{Binding FastForward}"
-          Content="Fast forward"
-        />
-        <TextBlock
-          Style="{StaticResource NormalTextStyle}"
-          Margin="0 12 0 4"
-          Text="Mainline parent number (e.g. 1 for merge commits):"
-        />
+      <StackPanel Margin="24 32 24 0">
+        <TextBlock Text="Cherry pick commits" Style="{StaticResource Header5TextStyle}" />
+        <StackPanel Margin="8">
+          <CheckBox
+            Style="{StaticResource MaterialCheckBoxStyle}"
+            Margin="0 4"
+            IsChecked="{Binding Edit}"
+            Content="Edit"
+            ToolTip="Opens the commit message in an editor before committing. If not set, the original commit message will be used."
+          />
+          <CheckBox
+            Style="{StaticResource MaterialCheckBoxStyle}"
+            Margin="0 4"
+            IsChecked="{Binding NoCommit}"
+            Content="No commit"
+            ToolTip="Applies the changes from the commit without creating a new commit. You can then review the changes and create a commit manually."
+          />
+          <CheckBox
+            Style="{StaticResource MaterialCheckBoxStyle}"
+            Margin="0 4"
+            IsChecked="{Binding AppendCherryPickLine}"
+            Content="Append cherry-pick line"
+            ToolTip="Appends a line to the commit message indicating the original commit hash and message. This can be useful for tracking the source of the changes when cherry-picking commits across branches."
+          />
+          <CheckBox
+            Style="{StaticResource MaterialCheckBoxStyle}"
+            Margin="0 4"
+            IsChecked="{Binding FastForward}"
+            Content="Fast forward"
+            ToolTip="Allows the cherry-pick operation to fast-forward the current branch if the cherry-picked commit is a descendant of the current HEAD. This can help avoid unnecessary merge commits when cherry-picking commits that are already in the current branch's history."
+          />
+        </StackPanel>
         <TextBox
+          AutomationProperties.HelpText="Mainline parent number (e.g. 1 for merge commits):"
           Style="{StaticResource MaterialFormInputStyle}"
           Text="{Binding MainlineParentNumber, UpdateSourceTrigger=PropertyChanged}"
+          ToolTip="Specifies the parent number to use when cherry-picking a merge commit. This is only applicable when cherry-picking merge commits, and it determines which parent of the merge commit will be considered the mainline for the cherry-pick operation."
         />
       </StackPanel>
       <StackPanel Grid.Row="1" Margin="8 0" Orientation="Horizontal" HorizontalAlignment="Right">

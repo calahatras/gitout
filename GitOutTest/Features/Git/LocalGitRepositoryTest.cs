@@ -59,8 +59,8 @@ public class LocalGitRepositoryTest
 
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
-        RelativeDirectoryPath source = RelativeDirectoryPath.Create("file1.txt");
-        RelativeDirectoryPath destination = RelativeDirectoryPath.Create("file2.txt");
+        var source = RelativeDirectoryPath.Create("file1.txt");
+        var destination = RelativeDirectoryPath.Create("file2.txt");
 
         await actor.DiffAsync(source, destination, DiffOptions.Builder().Build());
 
@@ -132,14 +132,13 @@ public class LocalGitRepositoryTest
 
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
-        var options = new GitCherryPickOptions
-        {
-            Edit = true,
-            NoCommit = true,
-            MainlineParentNumber = 1,
-            AppendCherryPickLine = true,
-            FastForward = true,
-        };
+        var options = new GitCherryPickOptions(
+            Edit: true,
+            NoCommit: true,
+            MainlineParentNumber: 1,
+            AppendCherryPickLine: true,
+            FastForward: true
+        );
 
         await actor.CherryPickAsync(["hash1"], options);
 

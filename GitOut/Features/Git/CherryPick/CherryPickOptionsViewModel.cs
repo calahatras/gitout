@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
-using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Git.CherryPick;
 
@@ -15,24 +14,22 @@ public sealed class CherryPickOptionsViewModel : INotifyPropertyChanged
     private bool appendCherryPickLine;
     private bool fastForward;
 
-    public CherryPickOptionsViewModel(
-        INavigationService navigation,
-        ITitleService title
-    )
+    public CherryPickOptionsViewModel(INavigationService navigation, ITitleService title)
     {
         title.Title = "Cherry pick options";
-        CherryPickPrepareOptions? prepared = navigation.GetOptions<CherryPickPrepareOptions>(typeof(CherryPickOptionsPage).FullName!);
+        CherryPickPrepareOptions? prepared = navigation.GetOptions<CherryPickPrepareOptions>(
+            typeof(CherryPickOptionsPage).FullName!
+        );
         CancelCommand = new CallbackCommand(navigation.Close);
         SetResultCommand = new CallbackCommand(() =>
             navigation.Close(
-                new GitCherryPickOptions
-                {
-                    Edit = edit,
-                    NoCommit = noCommit,
-                    MainlineParentNumber = mainlineParentNumber > 0 ? mainlineParentNumber : null,
-                    AppendCherryPickLine = appendCherryPickLine,
-                    FastForward = fastForward,
-                }
+                new GitCherryPickOptions(
+                    Edit: edit,
+                    NoCommit: noCommit,
+                    MainlineParentNumber: mainlineParentNumber > 0 ? mainlineParentNumber : null,
+                    AppendCherryPickLine: appendCherryPickLine,
+                    FastForward: fastForward
+                )
             )
         );
     }

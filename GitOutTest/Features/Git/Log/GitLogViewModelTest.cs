@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FakeItEasy;
-using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
-using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -44,7 +42,7 @@ public class GitLogViewModelTest
         titleService = A.Fake<ITitleService>();
 
         watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
-        var watcher = A.Fake<IRepositoryWatcher>();
+        IRepositoryWatcher watcher = A.Fake<IRepositoryWatcher>();
         A.CallTo(() =>
                 watchProvider.PrepareWatchRepositoryChanges(
                     repository,
@@ -70,7 +68,7 @@ public class GitLogViewModelTest
             updateStageOptions
         );
 
-        var commit = GitHistoryEvent
+        GitHistoryEvent commit = GitHistoryEvent
             .Builder()
             .ParseHash(new string('a', 40))
             .ParseDate(1613333029)
@@ -117,7 +115,7 @@ public class GitLogViewModelTest
             updateStageOptions
         );
 
-        var commit = GitHistoryEvent
+        GitHistoryEvent commit = GitHistoryEvent
             .Builder()
             .ParseHash(new string('a', 40))
             .ParseDate(1613333029)
