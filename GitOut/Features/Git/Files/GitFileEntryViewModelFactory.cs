@@ -101,15 +101,10 @@ public static class GitFileEntryViewModelFactory
             GitDiffFileEntry entry in repository.ListDiffChangesAsync(diff, root, builder.Build())
         )
         {
-            IGitFileEntryViewModel viewmodel = entry.FileType switch
+            if (entry.FileType == GitFileType.Blob)
             {
-                GitFileType.Blob => GitFileViewModel.RelativeDifference(repository, entry, options),
-                _ => throw new ArgumentOutOfRangeException(
-                    $"Cannot create viewmodel for invalid type {entry.FileType}",
-                    nameof(entry)
-                ),
-            };
-            yield return viewmodel;
+                yield return GitFileViewModel.RelativeDifference(repository, entry, options);
+            }
         }
     }
 }
