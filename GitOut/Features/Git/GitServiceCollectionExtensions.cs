@@ -1,4 +1,5 @@
 using GitOut.Features.Diagnostics;
+using GitOut.Features.Git.CherryPick;
 using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
@@ -24,5 +25,7 @@ public static class GitServiceCollectionExtensions
         services.AddTransient<GitStageViewModel>();
         services.AddTransient<RepositoryListPage>();
         services.AddTransient<RepositoryListViewModel>();
+        services.AddTransient<CherryPickOptionsPage>();
+        services.AddTransient<CherryPickOptionsViewModel>();
     }
 }
