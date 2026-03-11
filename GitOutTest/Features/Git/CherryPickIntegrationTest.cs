@@ -19,7 +19,7 @@ public class CherryPickIntegrationTest
     public async Task CherryPickFlow_ShouldExecuteSuccessfully()
     {
         // 1. Set up the repository mock
-        var repository = A.Fake<IGitRepository>();
+        IGitRepository repository = A.Fake<IGitRepository>();
         A.CallTo(() => repository.Name).Returns("integration-repo");
 
         // Use a TaskCompletionSource to allow awaiting the async operation
@@ -33,19 +33,21 @@ public class CherryPickIntegrationTest
             .Invokes(() => tcs.SetResult(true));
 
         // 2. Set up the environment mocks
-        var navigationService = A.Fake<INavigationService>();
+        INavigationService navigationService = A.Fake<INavigationService>();
         var options = new GitLogPageOptions(repository);
         A.CallTo(() =>
                 navigationService.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
             )
             .Returns(options);
 
-        var snackbarService = A.Fake<ISnackbarService>();
-        var updateStageOptions = A.Fake<IOptionsWriter<GitStageOptions>>();
-        var titleService = A.Fake<ITitleService>();
+        ISnackbarService snackbarService = A.Fake<ISnackbarService>();
+        IOptionsWriter<GitStageOptions> updateStageOptions = A.Fake<
+            IOptionsWriter<GitStageOptions>
+        >();
+        ITitleService titleService = A.Fake<ITitleService>();
 
-        var watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
-        var watcher = A.Fake<IRepositoryWatcher>();
+        IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+        IRepositoryWatcher watcher = A.Fake<IRepositoryWatcher>();
         A.CallTo(() =>
                 watchProvider.PrepareWatchRepositoryChanges(
                     repository,
@@ -54,7 +56,9 @@ public class CherryPickIntegrationTest
             )
             .Returns(watcher);
 
-        var stagingOptions = A.Fake<IOptionsMonitor<GitStageOptions>>();
+        IOptionsMonitor<GitStageOptions> stagingOptions = A.Fake<
+            IOptionsMonitor<GitStageOptions>
+        >();
         A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
 
         // 3. Initialize the ViewModel
@@ -68,7 +72,7 @@ public class CherryPickIntegrationTest
         );
 
         // 4. Set up the selected log entry
-        var commit = GitHistoryEvent
+        GitHistoryEvent commit = GitHistoryEvent
             .Builder()
             .ParseHash(new string('b', 40))
             .ParseDate(1613333029)

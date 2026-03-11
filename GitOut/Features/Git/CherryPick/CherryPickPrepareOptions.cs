@@ -3,4 +3,4 @@ using GitOut.Features.Git.Log;
 
 namespace GitOut.Features.Git.CherryPick;
 
-public record CherryPickPrepareOptions(IEnumerable<GitTreeEvent> Entries);
+public sealed record CherryPickPrepareOptions(IEnumerable<GitTreeEvent> Entries);

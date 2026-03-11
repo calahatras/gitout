@@ -132,14 +132,13 @@ public class LocalGitRepositoryTest
 
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
-        var options = new GitCherryPickOptions
-        {
-            Edit = true,
-            NoCommit = true,
-            MainlineParentNumber = 1,
-            AppendCherryPickLine = true,
-            FastForward = true,
-        };
+        var options = new GitCherryPickOptions(
+            Edit: true,
+            NoCommit: true,
+            MainlineParentNumber: 1,
+            AppendCherryPickLine: true,
+            FastForward: true
+        );
 
         await actor.CherryPickAsync(["hash1"], options);
 

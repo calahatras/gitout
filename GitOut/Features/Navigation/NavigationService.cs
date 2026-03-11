@@ -215,13 +215,16 @@ public class NavigationService : INavigationService
         if (overrideOptions?.IsTransparent == true)
         {
             window.Background = System.Windows.Media.Brushes.Transparent;
-            System.Windows.Shell.WindowChrome.SetWindowChrome(window, new System.Windows.Shell.WindowChrome
-            {
-                CaptionHeight = 0,
-                CornerRadius = new CornerRadius(8),
-                GlassFrameThickness = new Thickness(-1),
-                ResizeBorderThickness = new Thickness(0),
-            });
+            System.Windows.Shell.WindowChrome.SetWindowChrome(
+                window,
+                new System.Windows.Shell.WindowChrome
+                {
+                    CaptionHeight = 0,
+                    CornerRadius = new CornerRadius(8),
+                    GlassFrameThickness = new Thickness(-1),
+                    ResizeBorderThickness = new Thickness(0),
+                }
+            );
         }
         window.Activated += (sender, args) =>
         {
