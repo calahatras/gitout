@@ -385,7 +385,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 updateStageOptions.Update(snap => snap.IgnoreWhitespace = value);
                 if (SelectedContext is not null)
                 {
-                    SelectedContext = LogEntriesViewModel.CreateContext<GitHistoryEvent>(
+                    SelectedContext = LogEntriesViewModel.CreateContext(
                         selectedLogEntries.Count > 0
                             ? selectedLogEntries.Select(vm => vm.Event).ToList()
                             : selectedStashEntries.Select(vm => (GitHistoryEvent)vm.Event).ToList(),
