@@ -73,6 +73,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private bool isSearchDisplayed;
     private bool isCheckoutBranchVisible;
     private LogViewMode viewMode = LogViewMode.None;
+    private LogSelectionMode selectionMode = LogSelectionMode.None;
 
     private LogRevisionViewMode revisionViewMode;
     private int contextLines = 3;
@@ -157,6 +158,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
 
         selectedLogEntries.CollectionChanged += (sender, args) =>
         {
+            selectionMode = LogSelectionMode.Log;
             if (suppressSelectedLogEntriesCollectionChanged)
             {
                 return;
@@ -179,7 +181,11 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
 
             RefreshSelectedContext();
         };
-        selectedStashEntries.CollectionChanged += (sender, args) => RefreshSelectedContext();
+        selectedStashEntries.CollectionChanged += (sender, args) =>
+        {
+            selectionMode = LogSelectionMode.Stash;
+            RefreshSelectedContext();
+        };
 
         createStashBranchCommand = new NotNullCallbackCommand<GitStashEventViewModel>(model =>
         {
@@ -853,36 +859,42 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
 
         IGitFileEntryViewModel? previousSelection = SelectedContext?.SelectedItem;
 
-        if (selectedLogEntries.Count > 0)
+        switch (selectionMode)
         {
-            SelectedContext = LogEntriesViewModel.CreateContext(
-                selectedLogEntries.Select(vm => vm.Event).ToList(),
-                Repository,
-                monitor.CreateCallback(),
-                snack,
-                RevisionViewMode,
-                builder.Build(),
-                previousSelection
-            );
-            ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
-        }
-        else if (selectedStashEntries.Count > 0)
-        {
-            SelectedContext = LogEntriesViewModel.CreateContext(
-                selectedStashEntries.Select(vm => vm.Event).ToList(),
-                Repository,
-                monitor.CreateCallback(),
-                snack,
-                RevisionViewMode,
-                builder.Build(),
-                previousSelection
-            );
-            ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
-        }
-        else
-        {
-            SelectedContext = null;
-            ViewMode = LogViewMode.None;
+            case LogSelectionMode.Log:
+                {
+                    SelectedContext = LogEntriesViewModel.CreateContext(
+                        selectedLogEntries.Select(vm => vm.Event).ToList(),
+                        Repository,
+                        monitor.CreateCallback(),
+                        snack,
+                        RevisionViewMode,
+                        builder.Build(),
+                        previousSelection
+                    );
+                    ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
+                }
+                break;
+            case LogSelectionMode.Stash:
+                {
+                    SelectedContext = LogEntriesViewModel.CreateContext(
+                        selectedStashEntries.Select(vm => vm.Event).ToList(),
+                        Repository,
+                        monitor.CreateCallback(),
+                        snack,
+                        RevisionViewMode,
+                        builder.Build(),
+                        previousSelection
+                    );
+                    ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
+                }
+                break;
+            default:
+                {
+                    SelectedContext = null;
+                    ViewMode = LogViewMode.None;
+                }
+                break;
         }
     }
 
