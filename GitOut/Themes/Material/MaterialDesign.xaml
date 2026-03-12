@@ -249,6 +249,13 @@
     </Setter>
   </Style>
   <Style
+    x:Key="NarrowMaterialInputStyle"
+    TargetType="{x:Type TextBox}"
+    BasedOn="{StaticResource MaterialInputStyle}"
+  >
+    <Setter Property="MinWidth" Value="12" />
+  </Style>
+  <Style
     x:Key="MaterialFormInputStyle"
     TargetType="{x:Type TextBox}"
     BasedOn="{StaticResource MaterialInputStyle}"
@@ -1377,6 +1384,66 @@
         <Setter Property="Height" Value="32" />
       </Style>
     </Style.Resources>
+  </Style>
+  <Style x:Key="MaterialSliderThumbStyle" TargetType="{x:Type Thumb}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type Thumb}">
+          <Ellipse
+            Width="16"
+            Height="16"
+            Fill="{DynamicResource PrimaryHueMidBrush}"
+            Cursor="Hand"
+          />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="MaterialSliderStyle" TargetType="{x:Type Slider}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type Slider}">
+          <Grid VerticalAlignment="Center">
+            <Border
+              Height="3"
+              Background="{DynamicResource MaterialLightDividers}"
+              CornerRadius="1"
+              Margin="8,0"
+            />
+            <Track x:Name="PART_Track">
+              <Track.DecreaseRepeatButton>
+                <RepeatButton Command="Slider.DecreaseLarge">
+                  <RepeatButton.Template>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                      <Border
+                        Height="3"
+                        Background="{DynamicResource PrimaryHueMidBrush}"
+                        CornerRadius="1"
+                        Margin="8,0,0,0"
+                      />
+                    </ControlTemplate>
+                  </RepeatButton.Template>
+                </RepeatButton>
+              </Track.DecreaseRepeatButton>
+              <Track.IncreaseRepeatButton>
+                <RepeatButton Command="Slider.IncreaseLarge">
+                  <RepeatButton.Template>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                      <Border Height="3" Background="Transparent" />
+                    </ControlTemplate>
+                  </RepeatButton.Template>
+                </RepeatButton>
+              </Track.IncreaseRepeatButton>
+              <Track.Thumb>
+                <Thumb Style="{StaticResource MaterialSliderThumbStyle}" />
+              </Track.Thumb>
+            </Track>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style>
   <Style x:Key="MaterialCheckBoxStyle" TargetType="{x:Type CheckBox}">
     <Setter Property="Cursor" Value="Hand" />

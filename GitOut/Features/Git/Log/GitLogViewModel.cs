@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Collections;
+using GitOut.Features.Git.Files;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.IO;
@@ -57,6 +58,10 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private bool isSearchDisplayed;
     private bool isCheckoutBranchVisible;
     private LogViewMode viewMode = LogViewMode.None;
+    private LogSelectionMode selectionMode = LogSelectionMode.None;
+
+    private int contextLines = 3;
+    private bool showWholeFile;
 
     private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
     private LogEntriesViewModel? selectedContext;
@@ -117,36 +122,27 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
 
         selectedLogEntries.CollectionChanged += (sender, args) =>
         {
+            selectionMode = LogSelectionMode.Log;
             if (suppressSelectedLogEntriesCollectionChanged)
             {
                 return;
             }
 
-            SelectedContext = LogEntriesViewModel.CreateContext(
-                selectedLogEntries.Select(vm => vm.Event).ToList(),
-                Repository,
-                monitor.CreateCallback(),
-                snack,
-                RevisionViewMode,
-                ignoreWhitespace ? DiffOptions.Builder().IgnoreAllSpace().Build() : null
-            );
-            ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
             if (selectedLogEntries.Count >= 2)
             {
-                RevisionViewMode = LogRevisionViewMode.Diff;
+                revisionViewMode = LogRevisionViewMode.Diff;
+                PropertyChanged?.Invoke(
+                    this,
+                    new PropertyChangedEventArgs(nameof(RevisionViewMode))
+                );
             }
+
+            RefreshSelectedContext();
         };
         selectedStashEntries.CollectionChanged += (sender, args) =>
         {
-            SelectedContext = LogEntriesViewModel.CreateContext(
-                selectedStashEntries.Select(vm => vm.Event).ToList(),
-                Repository,
-                monitor.CreateCallback(),
-                snack,
-                RevisionViewMode,
-                ignoreWhitespace ? DiffOptions.Builder().IgnoreAllSpace().Build() : null
-            );
-            ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
+            selectionMode = LogSelectionMode.Stash;
+            RefreshSelectedContext();
         };
 
         createStashBranchCommand = new NotNullCallbackCommand<GitStashEventViewModel>(model =>
@@ -332,6 +328,13 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             gitTreeEvent.IsSelected = true;
         });
 
+        DecreaseContextLinesCommand = new CallbackCommand(() =>
+            ContextLines = Math.Max(0, ContextLines - 1)
+        );
+        IncreaseContextLinesCommand = new CallbackCommand(() =>
+            ContextLines = Math.Min(100, ContextLines + 1)
+        );
+
         AppendSelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
             entries.First(e => e.Event.Id == commit.Id).IsSelected = true
         );
@@ -385,16 +388,40 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 updateStageOptions.Update(snap => snap.IgnoreWhitespace = value);
                 if (SelectedContext is not null)
                 {
-                    SelectedContext = LogEntriesViewModel.CreateContext<GitHistoryEvent>(
-                        selectedLogEntries.Count > 0
-                            ? selectedLogEntries.Select(vm => vm.Event).ToList()
-                            : selectedStashEntries.Select(vm => (GitHistoryEvent)vm.Event).ToList(),
-                        Repository,
-                        monitor.CreateCallback(),
-                        snack,
-                        RevisionViewMode,
-                        value ? DiffOptions.Builder().IgnoreAllSpace().Build() : null
-                    );
+                    RefreshSelectedContext();
+                }
+            }
+        }
+    }
+
+    public int ContextLines
+    {
+        get => contextLines;
+        set
+        {
+            if (SetProperty(ref contextLines, value))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxContextLines)));
+                if (SelectedContext is not null)
+                {
+                    RefreshSelectedContext();
+                }
+            }
+        }
+    }
+
+    public int MaxContextLines => Math.Max(20, contextLines);
+
+    public bool ShowWholeFile
+    {
+        get => showWholeFile;
+        set
+        {
+            if (SetProperty(ref showWholeFile, value))
+            {
+                if (SelectedContext is not null)
+                {
+                    RefreshSelectedContext();
                 }
             }
         }
@@ -508,6 +535,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public ICommand ShowSearchFilesCommand { get; }
     public ICommand CloseDetailsCommand { get; }
     public ICommand SwapCommitsCommand { get; }
+    public ICommand DecreaseContextLinesCommand { get; }
+    public ICommand IncreaseContextLinesCommand { get; }
 
     public string FallbackPageName => typeof(RepositoryListPage).FullName!;
     public object? FallbackOptions => null;
@@ -685,6 +714,58 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             );
             await CheckRepositoryStatusAsync();
             IsWorking = false;
+        }
+    }
+
+    private void RefreshSelectedContext()
+    {
+        IDiffOptionsBuilder builder = DiffOptions
+            .Builder()
+            .ContextLines(showWholeFile ? 999999 : contextLines);
+
+        if (ignoreWhitespace)
+        {
+            builder.IgnoreAllSpace();
+        }
+
+        IGitFileEntryViewModel? previousSelection = SelectedContext?.SelectedItem;
+
+        switch (selectionMode)
+        {
+            case LogSelectionMode.Log:
+                {
+                    SelectedContext = LogEntriesViewModel.CreateContext(
+                        selectedLogEntries.Select(vm => vm.Event).ToList(),
+                        Repository,
+                        monitor.CreateCallback(),
+                        snack,
+                        RevisionViewMode,
+                        builder.Build(),
+                        previousSelection
+                    );
+                    ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
+                }
+                break;
+            case LogSelectionMode.Stash:
+                {
+                    SelectedContext = LogEntriesViewModel.CreateContext(
+                        selectedStashEntries.Select(vm => vm.Event).ToList(),
+                        Repository,
+                        monitor.CreateCallback(),
+                        snack,
+                        RevisionViewMode,
+                        builder.Build(),
+                        previousSelection
+                    );
+                    ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
+                }
+                break;
+            default:
+                {
+                    SelectedContext = null;
+                    ViewMode = LogViewMode.None;
+                }
+                break;
         }
     }
 

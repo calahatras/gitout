@@ -155,7 +155,6 @@
               Data="{StaticResource UndoVariant}"
             />
           </Button>
-          <Separator />
           <ToggleButton
             IsChecked="{Binding RefreshAutomatically}"
             ToolTip="Auto renew file changes"
@@ -165,13 +164,107 @@
               Data="{StaticResource AutoRenew}"
             />
           </ToggleButton>
+          <Separator Style="{StaticResource MaterialVerticalDivider}" />
+          <ToggleButton x:Name="ContextLinesOptions" Style="{StaticResource MaterialIconToggleButtonStyle}" ToolTip="Context lines">
+            <Path
+              Fill="{DynamicResource MaterialForegroundBase}"
+              Data="{StaticResource FormatLineSpacing}"
+            />
+          </ToggleButton>
+          <Popup
+            StaysOpen="False"
+            AllowsTransparency="True"
+            IsOpen="{Binding IsChecked, ElementName=ContextLinesOptions}"
+            PopupAnimation="Fade"
+            Placement="Bottom"
+          >
+            <Grid>
+              <Border
+                Style="{StaticResource CardPanelStyle}"
+                MinWidth="200"
+                Margin="16 8"
+                Padding="8"
+              >
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Button
+                    Style="{StaticResource MaterialIconButtonStyle}"
+                    Command="{Binding DecreaseContextLinesCommand}"
+                    ToolTip="Decrease context lines"
+                    VerticalAlignment="Center"
+                  >
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource Minus}"
+                    />
+                  </Button>
+                  <Slider
+                    Grid.Column="1"
+                    Style="{StaticResource MaterialSliderStyle}"
+                    Width="120"
+                    Margin="8 0"
+                    Minimum="0"
+                    Maximum="{Binding MaxContextLines}"
+                    Value="{Binding ContextLines, Delay=400}"
+                    TickFrequency="1"
+                    IsSnapToTickEnabled="True"
+                    VerticalAlignment="Center"
+                  />
+                  <TextBox
+                    Grid.Column="2"
+                    Style="{StaticResource NarrowMaterialInputStyle}"
+                    Margin="4 0 8 0"
+                    Width="24"
+                    TextAlignment="Center"
+                    Text="{Binding ContextLines, UpdateSourceTrigger=PropertyChanged, Delay=400}"
+                    VerticalAlignment="Center"
+                    ToolTip="Current context lines"
+                  />
+                  <Button
+                    Grid.Column="3"
+                    Style="{StaticResource MaterialIconButtonStyle}"
+                    Command="{Binding IncreaseContextLinesCommand}"
+                    ToolTip="Increase context lines"
+                    VerticalAlignment="Center"
+                  >
+                    <Path
+                      Fill="{DynamicResource MaterialForegroundBase}"
+                      Data="{StaticResource Plus}"
+                    />
+                  </Button>
+                </Grid>
+              </Border>
+            </Grid>
+          </Popup>
+          <ToggleButton IsChecked="{Binding ShowWholeFile}" ToolTip="Show entire file">
+            <Path Fill="{DynamicResource MaterialForegroundBase}">
+              <Path.Style>
+                <Style TargetType="{x:Type Path}">
+                  <Setter Property="Data" Value="{StaticResource ProjectorScreenVariantOff}" />
+                  <Style.Triggers>
+                    <DataTrigger
+                      Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+                      Value="True"
+                    >
+                      <Setter Property="Data" Value="{StaticResource ProjectorScreenVariant}" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Path.Style>
+            </Path>
+          </ToggleButton>
+          <Separator Style="{StaticResource MaterialVerticalDivider}" />
           <ToggleButton IsChecked="{Binding DiffWhitespace}" ToolTip="Toggle whitespace">
             <Path
               Fill="{DynamicResource MaterialForegroundBase}"
               Data="{StaticResource KeyboardSpace}"
             />
           </ToggleButton>
-          <Separator />
           <Button Command="{Binding RefreshStatusCommand}" ToolTip="Refresh">
             <Path
               Fill="{DynamicResource MaterialForegroundBase}"
