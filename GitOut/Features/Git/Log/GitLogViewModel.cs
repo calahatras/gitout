@@ -310,6 +310,10 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             {
                 entry.IsSelected = false;
             }
+            foreach (GitStashEventViewModel entry in activeStashes)
+            {
+                entry.IsSelected = false;
+            }
         });
         SwapCommitsCommand = new CallbackCommand(
             () =>
