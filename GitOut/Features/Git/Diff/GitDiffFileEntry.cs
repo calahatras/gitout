@@ -63,6 +63,7 @@ public class GitDiffFileEntry
         {
             "100" => GitFileType.Blob,
             "040" => GitFileType.Tree,
+            "160" => GitFileType.Commit,
             _ => GitFileType.None,
         };
 

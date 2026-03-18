@@ -5,4 +5,5 @@ public enum GitFileType
     None,
     Tree,
     Blob,
+    Commit,
 }
