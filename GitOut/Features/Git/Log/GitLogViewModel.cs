@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -76,6 +77,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private LogSelectionMode selectionMode = LogSelectionMode.None;
 
     private LogRevisionViewMode revisionViewMode;
+    private CancellationTokenSource? refreshContextCancellationTokenSource;
     private int contextLines = 3;
     private bool showWholeFile;
 
@@ -461,10 +463,22 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                     this,
                     new PropertyChangedEventArgs(nameof(MaxContextLines))
                 );
-                if (SelectedContext is not null)
-                {
-                    RefreshSelectedContext();
-                }
+
+                refreshContextCancellationTokenSource?.Cancel();
+                refreshContextCancellationTokenSource = new CancellationTokenSource();
+                CancellationToken token = refreshContextCancellationTokenSource.Token;
+
+                _ = Task.Delay(TimeSpan.FromMilliseconds(300), token)
+                    .ContinueWith(
+                        t =>
+                        {
+                            if (!t.IsCanceled && SelectedContext is not null)
+                            {
+                                Application.Current.Dispatcher.Invoke(RefreshSelectedContext);
+                            }
+                        },
+                        token
+                    );
             }
         }
     }

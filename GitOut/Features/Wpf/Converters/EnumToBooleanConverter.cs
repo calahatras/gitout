@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Data;
 
 namespace GitOut.Features.Wpf.Converters;
@@ -7,9 +8,13 @@ namespace GitOut.Features.Wpf.Converters;
 public sealed class EnumToBooleanConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture) =>
-        targetType != typeof(bool?)
-            ? throw new InvalidOperationException("The target type must be of type nullable bool")
-            : value?.ToString()?.Equals(parameter);
+        targetType != typeof(bool?) && targetType != typeof(bool)
+            ? throw new InvalidOperationException("The target type must be a boolean")
+        : value is not null && parameter is string enumValue
+            ? enumValue
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Any(item => Enum.Parse(value.GetType(), item).Equals(value))
+        : Enum.Parse(parameter.GetType(), parameter.ToString()!, false).Equals(value);
 
     public object ConvertBack(
         object value,
