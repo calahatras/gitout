@@ -6,33 +6,31 @@ public static class MonikerGenerator
 {
     private static readonly string[] Names = new[]
     {
-        "Andromeda",
-        "Orion",
-        "Pegasus",
-        "Lyra",
-        "Cygnus",
-        "Cassiopeia",
-        "Draco",
-        "Aquila",
-        "Centaurus",
-        "Vela",
-        "Carina",
-        "Puppis",
-        "Eridanus",
-        "Phoenix",
-        "Taurus",
-        "Gemini",
-        "Leo",
-        "Virgo",
-        "Scorpius",
-        "Sagittarius"
+        "andromeda",
+        "orion",
+        "pegasus",
+        "lyra",
+        "cygnus",
+        "cassiopeia",
+        "draco",
+        "aquila",
+        "centaurus",
+        "vela",
+        "carina",
+        "puppis",
+        "eridanus",
+        "phoenix",
+        "taurus",
+        "gemini",
+        "leo",
+        "virgo",
+        "scorpius",
+        "sagittarius",
     };
 
     public static string Generate()
     {
         var random = new Random();
-#pragma warning disable CA1308 // Normalize strings to uppercase
-        return Names[random.Next(Names.Length)].ToLowerInvariant();
-#pragma warning restore CA1308 // Normalize strings to uppercase
+        return Names[random.Next(Names.Length)];
     }
 }

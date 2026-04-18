@@ -145,7 +145,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                     )
         );
         defaultWorktreePrefixPath = worktreeOptions.CurrentValue.DefaultPrefixPath;
-        worktreeOptionsMonitorHandle = worktreeOptions.OnChange(options => 
+        worktreeOptionsMonitorHandle = worktreeOptions.OnChange(options =>
         {
             defaultWorktreePrefixPath = options.DefaultPrefixPath;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewWorktreePath)));
@@ -286,7 +286,10 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 {
                     // navigate to git log page with path set to worktree path
                     IGitRepository newRepo = repositoryFactory.Create(worktree.Path);
-                    navigation.Navigate(typeof(GitLogPage).FullName!, GitLogPageOptions.OpenRepository(newRepo));
+                    navigation.Navigate(
+                        typeof(GitLogPage).FullName!,
+                        GitLogPageOptions.OpenRepository(newRepo)
+                    );
                     snack.ShowSuccess($"Switched to worktree {worktree.Branch.Name}");
                 }
                 catch (InvalidOperationException e)
@@ -317,7 +320,9 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                     snack.ShowError("Could not create branch", e, TimeSpan.FromSeconds(10));
                 }
             },
-            (branchName) => branchName is not null || (checkoutBranchName is not null && GitBranchName.IsValid(checkoutBranchName))
+            (branchName) =>
+                branchName is not null
+                || (checkoutBranchName is not null && GitBranchName.IsValid(checkoutBranchName))
         );
 
         RemoveWorktreeCommand = new AsyncCallbackCommand<GitWorktreeViewModel>(
@@ -361,21 +366,28 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 try
                 {
                     string path = NewWorktreePath;
-                    var directory = DirectoryPath.Create(System.IO.Path.Combine(Repository.WorkingDirectory.Directory, path));
+                    var directory = DirectoryPath.Create(
+                        System.IO.Path.Combine(Repository.WorkingDirectory.Directory, path)
+                    );
                     var options = GitWorktreeAddOptions.Builder(directory);
                     var branchName = GitBranchName.CreateLocal(System.IO.Path.GetFileName(path));
 
-                    await Repository.WorktreeAddAsync(new GitWorktreeAddOptions(directory)
-                    {
-                        CreateBranch = true,
-                        Branch = branchName
-                    });
+                    await Repository.WorktreeAddAsync(
+                        new GitWorktreeAddOptions(directory)
+                        {
+                            CreateBranch = true,
+                            Branch = branchName,
+                        }
+                    );
 
                     snack.ShowSuccess($"Worktree {branchName.Name} created");
                     await RefreshWorktreesAsync();
 
                     IGitRepository newRepo = repositoryFactory.Create(DirectoryPath.Create(path));
-                    navigation.Navigate(typeof(GitLogPage).FullName!, GitLogPageOptions.OpenRepository(newRepo));
+                    navigation.Navigate(
+                        typeof(GitLogPage).FullName!,
+                        GitLogPageOptions.OpenRepository(newRepo)
+                    );
                 }
                 catch (ArgumentException e)
                 {
@@ -751,12 +763,16 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         {
             if (SetProperty(ref newWorktreeName, value))
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewWorktreePath)));
+                PropertyChanged?.Invoke(
+                    this,
+                    new PropertyChangedEventArgs(nameof(NewWorktreePath))
+                );
             }
         }
     }
 
-    public string NewWorktreePath => defaultWorktreePrefixPath.Replace("<name>", newWorktreeName, StringComparison.Ordinal);
+    public string NewWorktreePath =>
+        defaultWorktreePrefixPath.Replace("<name>", newWorktreeName, StringComparison.Ordinal);
 
     public ICommand NavigateToStageAreaCommand { get; }
     public ICommand RefreshStatusCommand { get; }

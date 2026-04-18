@@ -142,9 +142,12 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         });
         defaultWorktreePrefixPath = worktreeOptions.CurrentValue.DefaultPrefixPath;
         unsubscribeWorktreeOptions = worktreeOptions.OnChange(value =>
-        {
-            SetProperty(ref defaultWorktreePrefixPath, value.DefaultPrefixPath, nameof(DefaultWorktreePrefixPath));
-        });
+            SetProperty(
+                ref defaultWorktreePrefixPath,
+                value.DefaultPrefixPath,
+                nameof(DefaultWorktreePrefixPath)
+            )
+        );
     }
 
     public ICollectionView ValidRepositoryPaths { get; }
@@ -237,7 +240,8 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
                 }
                 else
                 {
-                    DefaultWorktreePrefixPathError = "Path must contain <name> which will be replaced by the worktree name";
+                    DefaultWorktreePrefixPathError =
+                        "Path must contain <name> which will be replaced by the worktree name";
                 }
             }
         }
