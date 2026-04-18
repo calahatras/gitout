@@ -9,7 +9,7 @@ public class GitBranchName
     private const string RemoteBranchType = "remotes";
 
     private static readonly Regex ValidBranchName = new(
-        "^[\\w\\d](?:[\\w\\d\\-+@&\\/\\{}.\\(\\)]+)(?<![\\/\\.])$"
+        "^([\\w\\d\\(])(?:[\\w\\d\\- +@&\\/\\{}.\\(\\)]+)(?<![\\/\\.])$"
     );
 
     private GitBranchName(string type, string name, GitBranchName? upstream = null)

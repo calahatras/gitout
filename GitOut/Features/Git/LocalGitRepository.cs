@@ -698,7 +698,7 @@ public sealed class LocalGitRepository : IGitRepository
             {
                 if (path is not null && hash is not null)
                 {
-                    yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.Create("HEAD"));
+                    yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.CreateLocal("HEAD"));
                 }
                 path = null;
                 hash = null;
@@ -718,11 +718,15 @@ public sealed class LocalGitRepository : IGitRepository
             {
                 branch = GitBranchName.Create(line[7..]);
             }
+            else if (line == "detached")
+            {
+                branch = GitBranchName.CreateLocal("(detached HEAD)");
+            }
         }
 
         if (path is not null && hash is not null)
         {
-            yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.Create("HEAD"));
+            yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.CreateLocal("HEAD"));
         }
     }
 
