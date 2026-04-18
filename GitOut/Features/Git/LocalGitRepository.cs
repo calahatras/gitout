@@ -247,9 +247,7 @@ public sealed class LocalGitRepository : IGitRepository
     public Stream GetUntrackedBlobStream(RelativeDirectoryPath path)
     {
         string filePath = Path.Combine(WorkingDirectory.Directory, path.ToString());
-        return File.Exists(filePath)
-            ? File.OpenRead(filePath)
-            : MemoryStream.Null;
+        return File.Exists(filePath) ? File.OpenRead(filePath) : MemoryStream.Null;
     }
 
     public Task<Stream> GetBlobStreamAsync(GitFileId file) =>
@@ -686,7 +684,9 @@ public sealed class LocalGitRepository : IGitRepository
 
     public async IAsyncEnumerable<GitWorktree> WorktreeListAsync()
     {
-        IGitProcess worktrees = CreateProcess(ProcessOptions.FromArguments("worktree list --porcelain"));
+        IGitProcess worktrees = CreateProcess(
+            ProcessOptions.FromArguments("worktree list --porcelain")
+        );
 
         string? path = null;
         GitObjectId? hash = null;
@@ -698,7 +698,11 @@ public sealed class LocalGitRepository : IGitRepository
             {
                 if (path is not null && hash is not null)
                 {
-                    yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.CreateLocal("HEAD"));
+                    yield return new GitWorktree(
+                        DirectoryPath.Create(path),
+                        hash,
+                        branch ?? GitBranchName.CreateLocal("HEAD")
+                    );
                 }
                 path = null;
                 hash = null;
@@ -726,7 +730,11 @@ public sealed class LocalGitRepository : IGitRepository
 
         if (path is not null && hash is not null)
         {
-            yield return new GitWorktree(DirectoryPath.Create(path), hash, branch ?? GitBranchName.CreateLocal("HEAD"));
+            yield return new GitWorktree(
+                DirectoryPath.Create(path),
+                hash,
+                branch ?? GitBranchName.CreateLocal("HEAD")
+            );
         }
     }
 
@@ -753,7 +761,13 @@ public sealed class LocalGitRepository : IGitRepository
         }
 
         ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
-        if (args.ErrorLines.Count > 0 && args.ErrorLines.Any(line => line.StartsWith("fatal:", StringComparison.OrdinalIgnoreCase) || line.StartsWith("error:", StringComparison.OrdinalIgnoreCase)))
+        if (
+            args.ErrorLines.Count > 0
+            && args.ErrorLines.Any(line =>
+                line.StartsWith("fatal:", StringComparison.OrdinalIgnoreCase)
+                || line.StartsWith("error:", StringComparison.OrdinalIgnoreCase)
+            )
+        )
         {
             throw new InvalidOperationException($"Could not add worktree: {args.Error}");
         }
