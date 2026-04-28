@@ -1,6 +1,6 @@
 namespace GitOut.Features.Settings;
 
-public class WorktreeOptions
+public sealed class WorktreeOptions
 {
     public const string SectionKey = "Worktrees";
 
