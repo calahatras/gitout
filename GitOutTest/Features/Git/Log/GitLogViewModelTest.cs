@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using FakeItEasy;
@@ -16,6 +17,8 @@ namespace GitOut.Features.Git.Log;
 
 public class GitLogViewModelTest
 {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    // Note: Fields are initialized in the Setup method, which is called before each test.
     private IGitRepository repository;
     private INavigationService navigationService;
     private ISnackbarService snackbarService;
@@ -23,8 +26,18 @@ public class GitLogViewModelTest
     private ITitleService titleService;
     private IGitRepositoryWatcherProvider watchProvider;
     private IOptionsMonitor<GitStageOptions> stagingOptions;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     [SetUp]
+    [MemberNotNull(
+        nameof(repository),
+        nameof(navigationService),
+        nameof(snackbarService),
+        nameof(updateStageOptions),
+        nameof(titleService),
+        nameof(watchProvider),
+        nameof(stagingOptions)
+    )]
     public void Setup()
     {
         repository = A.Fake<IGitRepository>();
