@@ -1098,7 +1098,7 @@
                               Margin="8 0"
                               Minimum="0"
                               Maximum="{Binding DataContext.MaxContextLines, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
-                              Value="{Binding DataContext.ContextLines, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}, Delay=400}"
+                              Value="{Binding DataContext.ContextLines, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
                               TickFrequency="1"
                               IsSnapToTickEnabled="True"
                               VerticalAlignment="Center"

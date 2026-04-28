@@ -62,6 +62,7 @@ public class GitStageViewModel
     private bool selectedFileHasChanges;
     private bool refreshAutomatically;
 
+    private CancellationTokenSource? refreshContextCancellationTokenSource;
     private int contextLines = 3;
     private bool showWholeFile;
 
@@ -207,7 +208,21 @@ public class GitStageViewModel
                     this,
                     new PropertyChangedEventArgs(nameof(MaxContextLines))
                 );
-                _ = ExecuteCurrentDiffAsync();
+                refreshContextCancellationTokenSource?.Cancel();
+                refreshContextCancellationTokenSource = new CancellationTokenSource();
+                CancellationToken token = refreshContextCancellationTokenSource.Token;
+
+                _ = Task.Delay(TimeSpan.FromMilliseconds(300), token)
+                    .ContinueWith(
+                        t =>
+                        {
+                            if (!t.IsCanceled)
+                            {
+                                Application.Current.Dispatcher.Invoke(ExecuteCurrentDiffAsync);
+                            }
+                        },
+                        token
+                    );
             }
         }
     }
@@ -475,6 +490,7 @@ public class GitStageViewModel
             cancelRefreshSnack?.Dispose();
             repositoryWatcher.Dispose();
             stagingOptionsHandle.Dispose();
+            refreshContextCancellationTokenSource?.Dispose();
         }
     }
 

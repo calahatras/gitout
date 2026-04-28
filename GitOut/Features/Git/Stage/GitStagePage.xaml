@@ -214,7 +214,7 @@
                     Margin="8 0"
                     Minimum="0"
                     Maximum="{Binding MaxContextLines}"
-                    Value="{Binding ContextLines, Delay=400}"
+                    Value="{Binding ContextLines}"
                     TickFrequency="1"
                     IsSnapToTickEnabled="True"
                     VerticalAlignment="Center"
@@ -225,7 +225,7 @@
                     Margin="4 0 8 0"
                     Width="24"
                     TextAlignment="Center"
-                    Text="{Binding ContextLines, UpdateSourceTrigger=PropertyChanged, Delay=400}"
+                    Text="{Binding ContextLines, UpdateSourceTrigger=PropertyChanged}"
                     VerticalAlignment="Center"
                     ToolTip="Current context lines"
                   />
