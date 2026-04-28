@@ -2,7 +2,7 @@ using GitOut.Features.IO;
 
 namespace GitOut.Features.Git.Worktree;
 
-public class GitWorktreeAddOptions
+public sealed class GitWorktreeAddOptions
 {
     public GitWorktreeAddOptions(DirectoryPath path) => Path = path;
 

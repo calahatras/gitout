@@ -2,7 +2,7 @@ using GitOut.Features.Git.Worktree;
 
 namespace GitOut.Features.Git.Log;
 
-public class GitWorktreeViewModel
+public sealed class GitWorktreeViewModel
 {
     public GitWorktreeViewModel(GitWorktree model, IGitRepository repository)
     {
