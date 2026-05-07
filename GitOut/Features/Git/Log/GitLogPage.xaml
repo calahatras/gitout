@@ -32,6 +32,7 @@
     <files:FileEntryQueryMatcher x:Key="FileNameQueryMatcher" />
     <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
     <lc:NodesToPathConverter x:Key="NodesToPathConverter" />
+    <converters:PathToFileNameConverter x:Key="FileNameConverter" />
     <Canvas x:Key="IconCanvas" x:Shared="False" Width="24" Height="24">
       <Canvas.LayoutTransform>
         <ScaleTransform ScaleX=".8" ScaleY=".8" />
@@ -93,6 +94,18 @@
           </Style>
         </MenuItem.ItemContainerStyle>
       </MenuItem>
+      <MenuItem
+        Header="Create worktree"
+        Command="{Binding CreateWorktreeFromCommitCommand}"
+        CommandParameter="{Binding SelectedContext.Root}"
+        IsEnabled="{Binding SelectedContext.IsSingleSelection}"
+      />
+      <MenuItem
+        Header="Create worktree (detached)"
+        Command="{Binding CreateWorktreeDetachedFromCommitCommand}"
+        CommandParameter="{Binding SelectedContext.Root}"
+        IsEnabled="{Binding SelectedContext.IsSingleSelection}"
+      />
       <Separator />
       <MenuItem Header="Cherry pick" IsEnabled="{Binding HasSelectedLogEntries}">
         <MenuItem Header="Cherry pick" Command="{Binding CherryPickCommand}" />
@@ -661,12 +674,24 @@
                                 HorizontalAlignment="Center"
                               />
                             </Canvas>
-                            <TextBlock
-                              Grid.Column="1"
-                              Text="{Binding Model.Branch.Name}"
-                              Style="{StaticResource NormalTextStyle}"
-                              VerticalAlignment="Center"
-                            />
+                            <Grid Grid.Column="1">
+                              <Grid.RowDefinitions>
+                                <RowDefinition Height="24" />
+                                <RowDefinition Height="12" />
+                              </Grid.RowDefinitions>
+                              <TextBlock
+                                Grid.Row="0"
+                                Text="{Binding Model.Branch.Name}"
+                                Style="{StaticResource NormalTextStyle}"
+                                VerticalAlignment="Center"
+                              />
+                              <TextBlock
+                                Grid.Row="1"
+                                Text="{Binding Model.Path, Converter={StaticResource FileNameConverter}}"
+                                Style="{StaticResource HintTextStyle}"
+                                VerticalAlignment="Center"
+                              />
+                            </Grid>
                             <Button
                               Grid.Column="2"
                               Style="{StaticResource MaterialIconButtonStyle}"
