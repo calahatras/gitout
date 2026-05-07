@@ -651,7 +651,11 @@ public sealed class LocalGitRepository : IGitRepository
         IProcessOptionsBuilder arguments = ProcessOptions.Builder();
         arguments.Append("worktree add");
 
-        if (options.CreateBranch)
+        if (options.Detach)
+        {
+            arguments.Append("--detach");
+        }
+        else if (options.CreateBranch)
         {
             arguments.Append("-b");
         }

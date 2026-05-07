@@ -442,6 +442,132 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             };
         });
 
+        CreateWorktreeFromCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
+        {
+            INavigationService child = navigation.NavigateNewWindow(
+                typeof(TextPromptPage).FullName!,
+                new TextPromptOptions(
+                    MonikerGenerator.Generate(),
+                    "Worktree name",
+                    name => !string.IsNullOrWhiteSpace(name),
+                    name => name,
+                    "Create worktree",
+                    "CREATE"
+                ),
+                new NavigationOverrideOptions(
+                    PromptSize,
+                    PromptOffset,
+                    IsModal: true,
+                    IsStatusBarVisible: false
+                )
+            );
+            child.Closed += async (sender, args) =>
+            {
+                string? worktreeName = child.GetDialogResult<string>();
+                if (!string.IsNullOrWhiteSpace(worktreeName))
+                {
+                    try
+                    {
+                        string path = defaultWorktreePrefixPath.Replace(
+                            "<name>",
+                            worktreeName,
+                            StringComparison.Ordinal
+                        );
+                        var directory = DirectoryPath.Create(
+                            System.IO.Path.Combine(Repository.WorkingDirectory.Directory, path)
+                        );
+                        var branchName = GitBranchName.CreateLocal(
+                            System.IO.Path.GetFileName(path)
+                        );
+
+                        await Repository.WorktreeAddAsync(
+                            new GitWorktreeAddOptions(directory)
+                            {
+                                CreateBranch = true,
+                                Branch = branchName,
+                                Commit = commit.Id,
+                            }
+                        );
+
+                        snack.ShowSuccess($"Worktree {branchName.Name} created");
+                        await RefreshWorktreesAsync();
+
+                        IGitRepository newRepo = repositoryFactory.Create(directory);
+                        navigation.Navigate(
+                            typeof(GitLogPage).FullName!,
+                            GitLogPageOptions.OpenRepository(newRepo)
+                        );
+                    }
+                    catch (Exception ioe)
+                    {
+                        snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
+                    }
+                }
+            };
+        });
+
+        CreateWorktreeDetachedFromCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(
+            commit =>
+            {
+                INavigationService child = navigation.NavigateNewWindow(
+                    typeof(TextPromptPage).FullName!,
+                    new TextPromptOptions(
+                        MonikerGenerator.Generate(),
+                        "Worktree name",
+                        name => !string.IsNullOrWhiteSpace(name),
+                        name => name,
+                        "Create worktree (detached)",
+                        "CREATE"
+                    ),
+                    new NavigationOverrideOptions(
+                        PromptSize,
+                        PromptOffset,
+                        IsModal: true,
+                        IsStatusBarVisible: false
+                    )
+                );
+                child.Closed += async (sender, args) =>
+                {
+                    string? worktreeName = child.GetDialogResult<string>();
+                    if (!string.IsNullOrWhiteSpace(worktreeName))
+                    {
+                        try
+                        {
+                            string path = defaultWorktreePrefixPath.Replace(
+                                "<name>",
+                                worktreeName,
+                                StringComparison.Ordinal
+                            );
+                            var directory = DirectoryPath.Create(
+                                System.IO.Path.Combine(Repository.WorkingDirectory.Directory, path)
+                            );
+
+                            await Repository.WorktreeAddAsync(
+                                new GitWorktreeAddOptions(directory)
+                                {
+                                    Detach = true,
+                                    Commit = commit.Id,
+                                }
+                            );
+
+                            snack.ShowSuccess($"Detached worktree {worktreeName} created");
+                            await RefreshWorktreesAsync();
+
+                            IGitRepository newRepo = repositoryFactory.Create(directory);
+                            navigation.Navigate(
+                                typeof(GitLogPage).FullName!,
+                                GitLogPageOptions.OpenRepository(newRepo)
+                            );
+                        }
+                        catch (Exception ioe)
+                        {
+                            snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
+                        }
+                    }
+                };
+            }
+        );
+
         RevealInExplorerCommand = new CallbackCommand(() =>
             Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose()
         );
@@ -784,6 +910,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public ICommand SwitchWorktreeCommand { get; }
     public ICommand RemoveWorktreeCommand { get; }
     public ICommand CreateWorktreeCommand { get; }
+    public ICommand CreateWorktreeFromCommitCommand { get; }
+    public ICommand CreateWorktreeDetachedFromCommitCommand { get; }
     public ICommand RevealInExplorerCommand { get; }
     public ICommand CopyContentCommand { get; }
     public ICommand CopyCommitHashCommand { get; }
