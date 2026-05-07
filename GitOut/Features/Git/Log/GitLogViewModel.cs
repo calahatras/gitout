@@ -56,6 +56,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private readonly IRepositoryWatcher repositoryWatcher;
     private readonly GitRepositoryMonitor monitor;
     private readonly IDisposable settingsMonitorHandle;
+    private readonly IDisposable logSettingsMonitorHandle;
 
     private readonly ICommand createStashBranchCommand;
 
@@ -72,7 +73,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private bool isCheckoutBranchVisible;
     private LogViewMode viewMode = LogViewMode.None;
 
-    private LogRevisionViewMode revisionViewMode = LogRevisionViewMode.CurrentRevision;
+    private LogRevisionViewMode revisionViewMode;
     private LogEntriesViewModel? selectedContext;
 
     private string? checkoutBranchName;
@@ -87,17 +88,38 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         IGitRepositoryWatcherProvider watchProvider,
         ISnackbarService snack,
         IOptionsMonitor<GitStageOptions> stagingOptions,
-        IOptionsWriter<GitStageOptions> updateStageOptions
+        IOptionsWriter<GitStageOptions> updateStageOptions,
+        IOptionsMonitor<GitLogOptions> logOptions
     )
     {
         this.snack = snack;
         this.updateStageOptions = updateStageOptions;
         showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
         ignoreWhitespace = stagingOptions.CurrentValue.IgnoreWhitespace;
+        revisionViewMode = logOptions.CurrentValue.DefaultSingleRevisionViewMode;
         settingsMonitorHandle = stagingOptions.OnChange(options =>
         {
             SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
             SetProperty(ref ignoreWhitespace, options.IgnoreWhitespace, nameof(IgnoreWhitespace));
+        });
+        logSettingsMonitorHandle = logOptions.OnChange(options =>
+        {
+            if (selectedLogEntries.Count < 2)
+            {
+                SetProperty(
+                    ref revisionViewMode,
+                    options.DefaultSingleRevisionViewMode,
+                    nameof(RevisionViewMode)
+                );
+            }
+            else
+            {
+                SetProperty(
+                    ref revisionViewMode,
+                    options.DefaultMultiRevisionViewMode,
+                    nameof(RevisionViewMode)
+                );
+            }
         });
         GitLogPageOptions options =
             navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
@@ -145,10 +167,10 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 ignoreWhitespace ? DiffOptions.Builder().IgnoreAllSpace().Build() : null
             );
             ViewMode = SelectedContext is null ? LogViewMode.None : LogViewMode.Files;
-            if (selectedLogEntries.Count >= 2)
-            {
-                RevisionViewMode = LogRevisionViewMode.Diff;
-            }
+            RevisionViewMode =
+                selectedLogEntries.Count < 2
+                    ? logOptions.CurrentValue.DefaultSingleRevisionViewMode
+                    : logOptions.CurrentValue.DefaultMultiRevisionViewMode;
             UpdateHighlights();
         };
         selectedStashEntries.CollectionChanged += (sender, args) =>
@@ -573,6 +595,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 repositoryWatcher.Dispose();
                 monitor.LogChanged -= OnLogChanged;
                 settingsMonitorHandle.Dispose();
+                logSettingsMonitorHandle.Dispose();
                 break;
             case NavigationType.Deactivated:
                 repositoryWatcher.EnableRaisingEvents = true;

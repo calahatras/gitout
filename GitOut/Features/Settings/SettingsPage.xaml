@@ -17,6 +17,7 @@
   x:Name="Root"
 >
   <UserControl.Resources>
+    <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     <Style
       x:Key="GridHeaderTextBoxStyle"
       TargetType="{x:Type TextBox}"
@@ -216,6 +217,105 @@
               <StackPanel>
                 <TextBlock Style="{StaticResource Header6TextStyle}" Text="Staging" />
                 <staging:StageSettings />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardPanelStyle}">
+              <StackPanel>
+                <TextBlock Style="{StaticResource Header6TextStyle}" Text="Log" />
+                <TextBlock
+                  Margin="0 8 0 4"
+                  Style="{StaticResource SecondaryTextStyle}"
+                  Text="Default single file view mode"
+                />
+                <ItemsControl Style="{StaticResource MaterialTextToggleButtonGroupStyle}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ToggleButton IsChecked="{Binding DefaultSingleRevisionViewMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=CurrentRevision}">
+                    <StackPanel Orientation="Horizontal">
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource FileTree}"
+                        Width="14"
+                        Height="14"
+                        Stretch="Uniform"
+                        Margin="0 0 4 0"
+                        VerticalAlignment="Center"
+                      />
+                      <TextBlock Text="FILE TREE" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </ToggleButton>
+                  <ToggleButton IsChecked="{Binding DefaultSingleRevisionViewMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Diff}">
+                    <StackPanel Orientation="Horizontal">
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource FileTree}"
+                        Width="14"
+                        Height="14"
+                        Stretch="Uniform"
+                        Margin="0 0 4 0"
+                        VerticalAlignment="Center"
+                      />
+                      <TextBlock Text="DIFF TREE" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </ToggleButton>
+                  <ToggleButton IsChecked="{Binding DefaultSingleRevisionViewMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DiffInline}">
+                    <StackPanel Orientation="Horizontal">
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource FormatListBullet}"
+                        Width="14"
+                        Height="14"
+                        Stretch="Uniform"
+                        Margin="0 0 4 0"
+                        VerticalAlignment="Center"
+                      />
+                      <TextBlock Text="DIFF LIST" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </ToggleButton>
+                </ItemsControl>
+                <TextBlock
+                  Margin="0 8 0 4"
+                  Style="{StaticResource SecondaryTextStyle}"
+                  Text="Default multi file view mode"
+                />
+                <ItemsControl Style="{StaticResource MaterialTextToggleButtonGroupStyle}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ToggleButton IsChecked="{Binding DefaultMultiRevisionViewMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Diff}">
+                    <StackPanel Orientation="Horizontal">
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource FileTree}"
+                        Width="14"
+                        Height="14"
+                        Stretch="Uniform"
+                        Margin="0 0 4 0"
+                        VerticalAlignment="Center"
+                      />
+                      <TextBlock Text="DIFF TREE" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </ToggleButton>
+                  <ToggleButton IsChecked="{Binding DefaultMultiRevisionViewMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DiffInline}">
+                    <StackPanel Orientation="Horizontal">
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource FormatListBullet}"
+                        Width="14"
+                        Height="14"
+                        Stretch="Uniform"
+                        Margin="0 0 4 0"
+                        VerticalAlignment="Center"
+                      />
+                      <TextBlock Text="DIFF LIST" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </ToggleButton>
+                </ItemsControl>
               </StackPanel>
             </Border>
             <Border Style="{StaticResource CardPanelStyle}">
