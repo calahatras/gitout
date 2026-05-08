@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using GitOut.Features.Git;
+using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
@@ -110,6 +111,9 @@ public partial class App : Application
         services
             .AddWritableOptions<GitStageOptions>()
             .Bind(context.Configuration, GitStageOptions.SectionKey);
+        services
+            .AddWritableOptions<GitLogOptions>()
+            .Bind(context.Configuration, GitLogOptions.SectionKey);
         services.AddLogging();
 
         services.AddHostedService<Bootstrap>();

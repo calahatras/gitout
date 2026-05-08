@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Data;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git;
+using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
@@ -34,6 +35,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
         IGitRepositoryFactory gitFactory,
         IOptionsMonitor<GitStageOptions> stageOptions,
         IOptionsWriter<GitStageOptions> storage,
+        IOptionsMonitor<GitLogOptions> logOptions,
+        IOptionsWriter<GitLogOptions> logStorage,
         IProcessTelemetryCollector telemetry
     )
     {
@@ -45,7 +48,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
             repositories,
             gitFactory,
             stageOptions,
-            storage
+            storage,
+            logOptions,
+            logStorage
         );
         content = general;
         MenuItem[] menuItems = new[]

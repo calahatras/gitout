@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using GitOut.Features.Git;
+using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
@@ -25,11 +26,15 @@ namespace GitOut.Features.Settings;
 public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly IOptionsWriter<GitStageOptions> storage;
+    private readonly IOptionsWriter<GitLogOptions> logStorage;
     private readonly IDisposable unsubscribeOptions;
+    private readonly IDisposable unsubscribeLogOptions;
     private bool useTransparentBackground = true;
     private bool trimLineEndings;
     private bool showSpacesAsDots;
     private string tabTransformText;
+    private LogRevisionViewMode defaultSingleRevisionViewMode;
+    private LogRevisionViewMode defaultMultiRevisionViewMode;
 
     public GeneralSettingsViewModel(
         ISnackbarService snacks,
@@ -37,10 +42,13 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         IGitRepositoryStorage repositories,
         IGitRepositoryFactory gitFactory,
         IOptionsMonitor<GitStageOptions> stageOptions,
-        IOptionsWriter<GitStageOptions> storage
+        IOptionsWriter<GitStageOptions> storage,
+        IOptionsMonitor<GitLogOptions> logOptions,
+        IOptionsWriter<GitLogOptions> logStorage
     )
     {
         this.storage = storage;
+        this.logStorage = logStorage;
         var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
         ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
@@ -108,6 +116,22 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
             SetProperty(ref tabTransformText, value.TabTransformText, nameof(TabTransformText));
             SetProperty(ref trimLineEndings, value.TrimLineEndings, nameof(TrimLineEndings));
         });
+
+        defaultSingleRevisionViewMode = logOptions.CurrentValue.DefaultSingleRevisionViewMode;
+        defaultMultiRevisionViewMode = logOptions.CurrentValue.DefaultMultiRevisionViewMode;
+        unsubscribeLogOptions = logOptions.OnChange(value =>
+        {
+            SetProperty(
+                ref defaultSingleRevisionViewMode,
+                value.DefaultSingleRevisionViewMode,
+                nameof(DefaultSingleRevisionViewMode)
+            );
+            SetProperty(
+                ref defaultMultiRevisionViewMode,
+                value.DefaultMultiRevisionViewMode,
+                nameof(DefaultMultiRevisionViewMode)
+            );
+        });
     }
 
     public ICollectionView ValidRepositoryPaths { get; }
@@ -162,6 +186,30 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         }
     }
 
+    public LogRevisionViewMode DefaultSingleRevisionViewMode
+    {
+        get => defaultSingleRevisionViewMode;
+        set
+        {
+            if (SetProperty(ref defaultSingleRevisionViewMode, value))
+            {
+                logStorage.Update(snapshot => snapshot.DefaultSingleRevisionViewMode = value);
+            }
+        }
+    }
+
+    public LogRevisionViewMode DefaultMultiRevisionViewMode
+    {
+        get => defaultMultiRevisionViewMode;
+        set
+        {
+            if (SetProperty(ref defaultMultiRevisionViewMode, value))
+            {
+                logStorage.Update(snapshot => snapshot.DefaultMultiRevisionViewMode = value);
+            }
+        }
+    }
+
     public ICommand OpenSettingsFolderCommand { get; }
     public ICommand SearchRootFolderCommand { get; }
     public ICommand AddRepositoryCommand { get; }
@@ -169,7 +217,11 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void Dispose() => unsubscribeOptions.Dispose();
+    public void Dispose()
+    {
+        unsubscribeOptions.Dispose();
+        unsubscribeLogOptions.Dispose();
+    }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
     {
