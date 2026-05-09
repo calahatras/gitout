@@ -13,8 +13,8 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using GitOut.Features.Collections;
-using GitOut.Features.Git.Files;
 using GitOut.Features.Git.CherryPick;
+using GitOut.Features.Git.Files;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.IO;
@@ -900,7 +900,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
             entry.HighlightBrush = brush;
         }
     }
-    
+
     private async Task ExecuteCherryPickAsync(GitCherryPickOptions? options)
     {
         IsWorking = true;
