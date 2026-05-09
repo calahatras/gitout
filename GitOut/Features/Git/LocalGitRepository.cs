@@ -741,27 +741,27 @@ public sealed class LocalGitRepository : IGitRepository
     public async Task WorktreeAddAsync(GitWorktreeAddOptions options)
     {
         IProcessOptionsBuilder arguments = ProcessOptions.Builder();
-        arguments.Append("worktree add");
+        _ = arguments.Append("worktree add");
 
         if (options.Detach)
         {
-            arguments.Append("--detach");
+            _ = arguments.Append("--detach");
         }
         else if (options.CreateBranch)
         {
-            arguments.Append("-b");
+            _ = arguments.Append("-b");
         }
 
         if (options.Branch is not null)
         {
-            arguments.Append(options.Branch.Name);
+            _ = arguments.Append(options.Branch.Name);
         }
 
-        arguments.Append(options.Path.Directory);
+        _ = arguments.Append(options.Path.Directory);
 
         if (options.Commit is not null)
         {
-            arguments.Append(options.Commit.Hash);
+            _ = arguments.Append(options.Commit.Hash);
         }
 
         ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
@@ -780,9 +780,9 @@ public sealed class LocalGitRepository : IGitRepository
     public async Task WorktreeRemoveAsync(DirectoryPath path)
     {
         IProcessOptionsBuilder arguments = ProcessOptions.Builder();
-        arguments.Append("worktree remove");
-        arguments.Append("--force");
-        arguments.Append(path.Directory);
+        _ = arguments.Append("worktree remove");
+        _ = arguments.Append("--force");
+        _ = arguments.Append(path.Directory);
 
         ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
         if (args.ErrorLines.Count > 0)
