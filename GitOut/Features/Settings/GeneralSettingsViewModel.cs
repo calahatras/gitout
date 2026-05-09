@@ -225,7 +225,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
             }
         }
     }
-    
+
     public string DefaultWorktreePrefixPath
     {
         get => defaultWorktreePrefixPath;
