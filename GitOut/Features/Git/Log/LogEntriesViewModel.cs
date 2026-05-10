@@ -150,7 +150,10 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                     LogRevisionViewMode.DiffInline => flattenedDiffFiles,
                     _ => throw new InvalidOperationException($"Invalid view mode: {value}"),
                 };
-                if (source is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy)
+                if (
+                    source
+                    is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy
+                )
                 {
                     SynchronizationContext? context = SynchronizationContext.Current;
                     ValueTask t = lazy.MaterializeAsync(RelativeDirectoryPath.Root);
@@ -185,7 +188,8 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         IGitRepositoryNotifier notifier,
         ISnackbarService snack,
         LogRevisionViewMode mode,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        IGitFileEntryViewModel? previousSelection = null
     )
         where T : GitHistoryEvent
     {
@@ -210,6 +214,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                 options
             );
         }
+        context.selectedItem = previousSelection;
         context.ViewMode = mode;
         return context;
     }

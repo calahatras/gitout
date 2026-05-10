@@ -4,16 +4,18 @@ namespace GitOut.Features.Git;
 
 public class DiffOptions
 {
-    private DiffOptions(bool cached, bool ignoreAllSpace, bool recursive)
+    private DiffOptions(bool cached, bool ignoreAllSpace, bool recursive, int? contextLines)
     {
         Cached = cached;
         IgnoreAllSpace = ignoreAllSpace;
         Recursive = recursive;
+        ContextLines = contextLines;
     }
 
     public bool Cached { get; }
     public bool IgnoreAllSpace { get; }
     public bool Recursive { get; }
+    public int? ContextLines { get; }
 
     public IEnumerable<string> GetArguments(bool includeCached = true)
     {
@@ -29,6 +31,10 @@ public class DiffOptions
         {
             yield return "-r";
         }
+        if (ContextLines.HasValue)
+        {
+            yield return $"--unified={ContextLines}";
+        }
     }
 
     public static IDiffOptionsBuilder Builder() => new DiffOptionsBuilder();
@@ -38,8 +44,9 @@ public class DiffOptions
         private bool cached;
         private bool ignoreAllSpace;
         private bool recursive;
+        private int? contextLines;
 
-        public DiffOptions Build() => new(cached, ignoreAllSpace, recursive);
+        public DiffOptions Build() => new(cached, ignoreAllSpace, recursive, contextLines);
 
         public IDiffOptionsBuilder Cached()
         {
@@ -56,6 +63,12 @@ public class DiffOptions
         public IDiffOptionsBuilder Recursive()
         {
             recursive = true;
+            return this;
+        }
+
+        public IDiffOptionsBuilder ContextLines(int lines)
+        {
+            contextLines = lines;
             return this;
         }
     }

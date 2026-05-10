@@ -6,4 +6,5 @@ public interface IDiffOptionsBuilder
     IDiffOptionsBuilder Cached();
     IDiffOptionsBuilder IgnoreAllSpace();
     IDiffOptionsBuilder Recursive();
+    IDiffOptionsBuilder ContextLines(int lines);
 }

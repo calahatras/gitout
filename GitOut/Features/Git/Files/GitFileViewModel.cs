@@ -14,7 +14,7 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
 
     private DiffContext? result;
 
-    private readonly DiffOptions options;
+    private DiffOptions options;
 
     private GitFileViewModel(
         IGitRepository repository,
@@ -81,6 +81,13 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
             }
             return result;
         }
+    }
+
+    public void UpdateOptions(DiffOptions newOptions)
+    {
+        options = newOptions;
+        result = null;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
