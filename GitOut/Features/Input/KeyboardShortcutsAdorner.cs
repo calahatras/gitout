@@ -68,7 +68,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
 
     protected override void OnRender(DrawingContext dc)
     {
-        var size = AdornedElement.RenderSize;
+        Size size = AdornedElement.RenderSize;
         double dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
 
         // Resolve all theme-aware colors once per render pass. Using TryFindResource walks
@@ -91,7 +91,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
         double rightColWidth = MeasureColumnWidth(rightGroups, theme, dpi);
         double colsWidth = leftColWidth + (rightGroups.Count > 0 ? ColumnGap + rightColWidth : 0);
 
-        var titleText = BuildText(
+        FormattedText titleText = BuildText(
             "Keyboard Shortcuts",
             TitleFontSize,
             FontWeights.SemiBold,
@@ -150,7 +150,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
         Brush badgeFill = ResolveBrush("MaterialGray700", Color.FromRgb(97, 97, 97));
 
         // MaterialGray500 (#9e9e9e) — subtle visible border on the badge
-        var badgeBorderBrush = ResolveBrush("MaterialGray500", Color.FromRgb(158, 158, 158));
+        Brush badgeBorderBrush = ResolveBrush("MaterialGray500", Color.FromRgb(158, 158, 158));
         var badgeBorder = new Pen(badgeBorderBrush, 1);
 
         // PrimaryHueLightBrush — accent colour from AppTheme.xaml, used for headings
@@ -195,10 +195,10 @@ public sealed class KeyboardShortcutsAdorner : Adorner
     )
     {
         double y = startY;
-        foreach (var group in groups)
+        foreach (IGrouping<string, KeyboardShortcutEntry> group in groups)
         {
             // Category heading in accent colour, uppercased for visual hierarchy.
-            var categoryText = BuildText(
+            FormattedText categoryText = BuildText(
                 group.Key.ToUpperInvariant(),
                 CategoryFontSize,
                 FontWeights.Bold,
@@ -208,7 +208,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
             dc.DrawText(categoryText, new Point(x, y));
             y += categoryText.Height + CategoryTitleGap;
 
-            foreach (var entry in group)
+            foreach (KeyboardShortcutEntry entry in group)
             {
                 double midY = y + RowHeight / 2;
 
@@ -216,7 +216,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
                 double badgesWidth = RenderBadges(dc, entry, x, midY, theme, dpi, render: true);
 
                 // ── Description ────────────────────────────────────────────
-                var descText = BuildText(
+                FormattedText descText = BuildText(
                     entry.Description,
                     DescriptionFontSize,
                     FontWeights.Normal,
@@ -255,13 +255,25 @@ public sealed class KeyboardShortcutsAdorner : Adorner
             // "+" separator drawn between consecutive badges
             if (offsetX > x)
             {
-                var plus = BuildText("+", KeyFontSize, FontWeights.Normal, theme.Text, dpi);
+                FormattedText plus = BuildText(
+                    "+",
+                    KeyFontSize,
+                    FontWeights.Normal,
+                    theme.Text,
+                    dpi
+                );
                 if (render)
                     dc.DrawText(plus, new Point(offsetX + 2, midY - plus.Height / 2));
                 offsetX += plus.Width + 4;
             }
 
-            var badgeText = BuildText(label, KeyFontSize, FontWeights.SemiBold, theme.Text, dpi);
+            FormattedText badgeText = BuildText(
+                label,
+                KeyFontSize,
+                FontWeights.SemiBold,
+                theme.Text,
+                dpi
+            );
             double bw = badgeText.Width + BadgePaddingH * 2;
             double bh = badgeText.Height + BadgePaddingV * 2;
 
@@ -339,7 +351,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
     )
     {
         double maxWidth = 0;
-        foreach (var group in groups)
+        foreach (IGrouping<string, KeyboardShortcutEntry> group in groups)
         {
             double catWidth = BuildText(
                 group.Key.ToUpperInvariant(),
@@ -350,11 +362,11 @@ public sealed class KeyboardShortcutsAdorner : Adorner
             ).Width;
             maxWidth = Math.Max(maxWidth, catWidth);
 
-            foreach (var entry in group)
+            foreach (KeyboardShortcutEntry entry in group)
             {
                 // Measure all badges without rendering, then add description width.
                 double badgesWidth = RenderBadges(null!, entry, 0, 0, theme, dpi, render: false);
-                var descText = BuildText(
+                FormattedText descText = BuildText(
                     entry.Description,
                     DescriptionFontSize,
                     FontWeights.Normal,
@@ -375,7 +387,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
     )
     {
         double height = 0;
-        foreach (var group in groups)
+        foreach (IGrouping<string, KeyboardShortcutEntry> group in groups)
         {
             height +=
                 BuildText(

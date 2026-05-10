@@ -1,7 +1,7 @@
 namespace GitOut.Features.Input;
 
 /// <summary>Persisted options for the keyboard-shortcuts overlay feature.</summary>
-public class KeyboardShortcutsOptions
+public sealed class KeyboardShortcutsOptions
 {
     public const string SectionKey = "shortcuts";
 

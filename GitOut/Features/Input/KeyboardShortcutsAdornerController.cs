@@ -113,7 +113,9 @@ internal sealed class KeyboardShortcutsAdornerController
         // For pages whose root element is a non-focusable container (e.g. a Grid), focus falls
         // through to the Window and the KeyBinding on the page is never reachable via routing.
         if (!owner.IsKeyboardFocusWithin)
+        {
             owner.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+        }
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
