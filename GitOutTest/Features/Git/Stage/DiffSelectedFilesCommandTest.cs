@@ -1,6 +1,7 @@
 using System.Linq;
 using FakeItEasy;
 using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Ignore;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -94,6 +95,7 @@ public class DiffSelectedFilesCommandTest
             .Returns(stageOptions);
 
         ITitleService title = A.Fake<ITitleService>();
+        IGitIgnoreService ignoreService = A.Fake<IGitIgnoreService>();
         IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
         _ = A.CallTo(() =>
                 watchProvider.PrepareWatchRepositoryChanges(
@@ -108,7 +110,7 @@ public class DiffSelectedFilesCommandTest
         _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
-        var vm = new GitStageViewModel(navigation, title, watchProvider, snack, options);
+        var vm = new GitStageViewModel(navigation, title, ignoreService, watchProvider, snack, options);
         vm.Navigated(NavigationType.Initial);
         return (vm, snack, repository);
     }
