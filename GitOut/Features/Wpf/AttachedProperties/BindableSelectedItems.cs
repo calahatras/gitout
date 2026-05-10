@@ -61,7 +61,7 @@ public class BindableSelectedItems : DependencyObject
                 continue;
             }
 
-            list.Add(item);
+            _ = list.Add(item);
         }
     }
 }

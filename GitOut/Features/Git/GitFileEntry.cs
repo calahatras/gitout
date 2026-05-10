@@ -42,7 +42,7 @@ public class GitFileEntry
         }
 
         string path = parts[1];
-        int lastPos = path.LastIndexOf(RelativeDirectoryPath.GitDirectorySeparatorChar);
+        _ = path.LastIndexOf(RelativeDirectoryPath.GitDirectorySeparatorChar);
 
         return new GitFileEntry(
             GitFileId.FromHash(metadata[2]),

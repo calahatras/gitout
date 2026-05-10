@@ -65,7 +65,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
                     return;
                 }
                 SynchronizationContext sync = SynchronizationContext.Current!;
-                Task.Run(() =>
+                _ = Task.Run(() =>
                 {
                     DirectoryInfo[] gitdirectories = info.GetDirectories(
                         ".git",
@@ -112,21 +112,21 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         showSpacesAsDots = stageOptions.CurrentValue.ShowSpacesAsDots;
         unsubscribeOptions = stageOptions.OnChange(value =>
         {
-            SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
-            SetProperty(ref tabTransformText, value.TabTransformText, nameof(TabTransformText));
-            SetProperty(ref trimLineEndings, value.TrimLineEndings, nameof(TrimLineEndings));
+            _ = SetProperty(ref showSpacesAsDots, value.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
+            _ = SetProperty(ref tabTransformText, value.TabTransformText, nameof(TabTransformText));
+            _ = SetProperty(ref trimLineEndings, value.TrimLineEndings, nameof(TrimLineEndings));
         });
 
         defaultSingleRevisionViewMode = logOptions.CurrentValue.DefaultSingleRevisionViewMode;
         defaultMultiRevisionViewMode = logOptions.CurrentValue.DefaultMultiRevisionViewMode;
         unsubscribeLogOptions = logOptions.OnChange(value =>
         {
-            SetProperty(
+            _ = SetProperty(
                 ref defaultSingleRevisionViewMode,
                 value.DefaultSingleRevisionViewMode,
                 nameof(DefaultSingleRevisionViewMode)
             );
-            SetProperty(
+            _ = SetProperty(
                 ref defaultMultiRevisionViewMode,
                 value.DefaultMultiRevisionViewMode,
                 nameof(DefaultMultiRevisionViewMode)

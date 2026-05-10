@@ -105,7 +105,7 @@ public class GitHistoryEvent
         {
             if (body.Length > 0)
             {
-                bodyBuilder.AppendLine(body);
+                _ = bodyBuilder.AppendLine(body);
             }
             return this;
         }

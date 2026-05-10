@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 
-namespace GitOut.Features.Generators;
+namespace GitProperties;
 
 [Generator]
 public class GitPropertiesGenerator : ISourceGenerator

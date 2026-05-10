@@ -106,28 +106,31 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         revisionViewMode = logOptions.CurrentValue.DefaultSingleRevisionViewMode;
         settingsMonitorHandle = stagingOptions.OnChange(options =>
         {
-            SetProperty(ref showSpacesAsDots, options.ShowSpacesAsDots, nameof(ShowSpacesAsDots));
-            SetProperty(ref ignoreWhitespace, options.IgnoreWhitespace, nameof(IgnoreWhitespace));
+            _ = SetProperty(
+                ref showSpacesAsDots,
+                options.ShowSpacesAsDots,
+                nameof(ShowSpacesAsDots)
+            );
+            _ = SetProperty(
+                ref ignoreWhitespace,
+                options.IgnoreWhitespace,
+                nameof(IgnoreWhitespace)
+            );
         });
         logSettingsMonitorHandle = logOptions.OnChange(options =>
-        {
-            if (selectedLogEntries.Count < 2)
-            {
-                SetProperty(
-                    ref revisionViewMode,
-                    options.DefaultSingleRevisionViewMode,
-                    nameof(RevisionViewMode)
-                );
-            }
-            else
-            {
-                SetProperty(
-                    ref revisionViewMode,
-                    options.DefaultMultiRevisionViewMode,
-                    nameof(RevisionViewMode)
-                );
-            }
-        });
+            _ =
+                selectedLogEntries.Count < 2
+                    ? SetProperty(
+                        ref revisionViewMode,
+                        options.DefaultSingleRevisionViewMode,
+                        nameof(RevisionViewMode)
+                    )
+                    : SetProperty(
+                        ref revisionViewMode,
+                        options.DefaultMultiRevisionViewMode,
+                        nameof(RevisionViewMode)
+                    )
+        );
         GitLogPageOptions options =
             navigation.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
             ?? throw new InvalidOperationException("Options may not be null");
@@ -807,7 +810,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         if (result?.Text == approveActionText)
         {
             IsWorking = true;
-            await Repository.DeleteBranchAsync(
+            _ = await Repository.DeleteBranchAsync(
                 branch,
                 new GitDeleteBranchOptions(ForceDelete: true)
             );
@@ -868,7 +871,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
 
         if (ignoreWhitespace)
         {
-            builder.IgnoreAllSpace();
+            _ = builder.IgnoreAllSpace();
         }
 
         IGitFileEntryViewModel? previousSelection = SelectedContext?.SelectedItem;

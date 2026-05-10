@@ -31,7 +31,7 @@ public class GitDiffResultTest
         IGitDiffBuilder builder = GitDiffResult.Builder();
         foreach (string line in diff)
         {
-            builder.Feed(line);
+            _ = builder.Feed(line);
         }
         GitDiffResult result = builder.Build();
         Assert.That(
@@ -56,7 +56,7 @@ public class GitDiffResultTest
         IGitDiffBuilder builder = GitDiffResult.Builder();
         foreach (string line in diff)
         {
-            builder.Feed(line);
+            _ = builder.Feed(line);
         }
         Assert.That(builder.IsBinaryFile, Is.True);
     }
@@ -74,7 +74,7 @@ public class GitDiffResultTest
         IGitDiffBuilder builder = GitDiffResult.Builder();
         foreach (string line in diff)
         {
-            builder.Feed(line);
+            _ = builder.Feed(line);
         }
         GitDiffResult result = builder.Build();
         Assert.That(result.Text!.Header, Is.EqualTo(string.Empty));

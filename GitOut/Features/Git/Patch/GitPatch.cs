@@ -37,9 +37,9 @@ public class GitPatch
     )
     {
         var builder = new GitPatchBuilder();
-        builder.SetMode(mode);
+        _ = builder.SetMode(mode);
 
-        builder.CreateHeader(path, type);
+        _ = builder.CreateHeader(path, type);
         var lines = new List<PatchLine>();
         HunkLine preline = visitor.FindPrepositionHunk();
         int fromRangeIndex = ProcessPreLine(mode, preline, lines);
@@ -65,7 +65,7 @@ public class GitPatch
             {
                 ProcessPostLine(mode, visitor, lines);
             }
-            builder.CreateHunk(fromRangeIndex, lines);
+            _ = builder.CreateHunk(fromRangeIndex, lines);
             lines.Clear();
             if (!visitor.IsDone)
             {
@@ -186,7 +186,7 @@ public class GitPatch
             }
             if (mode is PatchMode.AddIndex or PatchMode.AddWorkspace)
             {
-                patchBuilder.AppendLine(
+                _ = patchBuilder.AppendLine(
                     $"@@ -{fromFileRange},{uneditedLines + removedLines} +{fromFileRange + hunkOffset},{uneditedLines + addedLines} @@"
                 );
 
@@ -208,17 +208,17 @@ public class GitPatch
                             $"Invalid patch type for hunk {line.Type}"
                         ),
                     };
-                    patchBuilder.Append(editType);
-                    patchBuilder.Append(line.Line);
+                    _ = patchBuilder.Append(editType);
+                    _ = patchBuilder.Append(line.Line);
                     if (edits.Count <= i + 1 || edits[i + 1].Type != DiffLineType.Control)
                     {
-                        patchBuilder.Append('\n');
+                        _ = patchBuilder.Append('\n');
                     }
                 }
             }
             else
             {
-                patchBuilder.AppendLine(
+                _ = patchBuilder.AppendLine(
                     $"@@ -{fromFileRange},{uneditedLines + addedLines} +{fromFileRange + hunkOffset},{uneditedLines + removedLines} @@"
                 );
 
@@ -240,11 +240,11 @@ public class GitPatch
                             $"Invalid patch type for hunk {line.Type}"
                         ),
                     };
-                    patchBuilder.Append(editType);
-                    patchBuilder.Append(line.Line);
+                    _ = patchBuilder.Append(editType);
+                    _ = patchBuilder.Append(line.Line);
                     if (edits.Count <= i + 1 || edits[i + 1].Type != DiffLineType.Control)
                     {
-                        patchBuilder.Append('\n');
+                        _ = patchBuilder.Append('\n');
                     }
                 }
             }
@@ -253,15 +253,15 @@ public class GitPatch
 
         public GitPatchBuilder CreateHeader(RelativeDirectoryPath path, GitStatusChangeType type)
         {
-            patchBuilder.AppendLine($"diff --git a/{path} b/{path}");
+            _ = patchBuilder.AppendLine($"diff --git a/{path} b/{path}");
             switch (type)
             {
                 case GitStatusChangeType.Ordinary:
-                    patchBuilder.AppendLine($"--- a/{path}");
+                    _ = patchBuilder.AppendLine($"--- a/{path}");
                     break;
                 case GitStatusChangeType.Untracked:
-                    patchBuilder.AppendLine("new file mode 10644");
-                    patchBuilder.AppendLine("--- /dev/null");
+                    _ = patchBuilder.AppendLine("new file mode 10644");
+                    _ = patchBuilder.AppendLine("--- /dev/null");
                     break;
                 case GitStatusChangeType.RenamedOrCopied:
                 case GitStatusChangeType.Unmerged:
@@ -271,7 +271,7 @@ public class GitPatch
                         $"Cannot create diff for change type {type}"
                     );
             }
-            patchBuilder.AppendLine($"+++ b/{path}");
+            _ = patchBuilder.AppendLine($"+++ b/{path}");
             return this;
         }
 

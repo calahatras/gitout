@@ -82,15 +82,13 @@ public partial class Autocomplete : UserControl
 
     private readonly object localItemsLock = new();
     private readonly ObservableCollection<object?> localItems = new();
-    private readonly ICollectionView localView;
-
     private ILazyAsyncEnumerable<object, RelativeDirectoryPath>? deferredSource;
 
     public Autocomplete()
     {
         InitializeComponent();
         BindingOperations.EnableCollectionSynchronization(localItems, localItemsLock);
-        localView = CollectionViewSource.GetDefaultView(localItems);
+        Local = CollectionViewSource.GetDefaultView(localItems);
         OpenRecordCommand = new CallbackCommand<object?>(selection =>
         {
             if (ItemSelectedCommand is not null && ItemSelectedCommand.CanExecute(selection))
@@ -136,7 +134,7 @@ public partial class Autocomplete : UserControl
     public ICommand DecreaseSelectionIndexCommand { get; }
     public ICommand IncreaseSelectionIndexCommand { get; }
 
-    public ICollectionView Local => localView;
+    public ICollectionView Local { get; }
 
     public ICommand CancelCommand
     {
@@ -255,7 +253,7 @@ public partial class Autocomplete : UserControl
 
                         foreach (object? item in e.OldItems)
                         {
-                            localItems.Remove(item);
+                            _ = localItems.Remove(item);
                         }
                     }
                 }
@@ -280,7 +278,7 @@ public partial class Autocomplete : UserControl
     {
         if (d is Autocomplete control)
         {
-            control.localView.Filter = item =>
+            control.Local.Filter = item =>
                 e.NewValue is not IValueConverter converter
                 || control.SearchQuery is null
                 || (bool)
@@ -300,7 +298,7 @@ public partial class Autocomplete : UserControl
     {
         if (d is Autocomplete control)
         {
-            control.localView.Refresh();
+            control.Local.Refresh();
         }
     }
 

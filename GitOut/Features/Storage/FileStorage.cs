@@ -15,7 +15,7 @@ public class FileStorage : IWritableStorage
         {
             throw new InvalidOperationException($"Could not get parent path of {configFile}");
         }
-        Directory.CreateDirectory(existing.FullName);
+        _ = Directory.CreateDirectory(existing.FullName);
 
         IDictionary<string, object> sections;
         try

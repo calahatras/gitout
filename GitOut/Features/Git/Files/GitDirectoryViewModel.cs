@@ -101,10 +101,8 @@ public class GitDirectoryViewModel
                     && !lazy.IsMaterialized
                 )
                 {
-#pragma warning disable CA2012 // Use ValueTasks correctly
                     _ = lazy.MaterializeAsync(Path.Append(FileName.ToString())).AsTask();
-#pragma warning restore CA2012 // Use ValueTasks correctly
-                    entries.Remove(LoadingViewModel.Proxy);
+                    _ = entries.Remove(LoadingViewModel.Proxy);
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
                 }
             }

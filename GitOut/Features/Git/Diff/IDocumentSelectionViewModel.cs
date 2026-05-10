@@ -5,7 +5,7 @@ namespace GitOut.Features.Git.Diff;
 
 public interface IDocumentSelectionViewModel
 {
-    public IEnumerable<LineNumberViewModel> LineNumbers { get; }
-    public FlowDocument Document { get; }
+    IEnumerable<LineNumberViewModel> LineNumbers { get; }
+    FlowDocument Document { get; }
     TextRange? Selection { get; set; }
 }

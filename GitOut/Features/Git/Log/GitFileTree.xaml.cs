@@ -45,7 +45,7 @@ public partial class GitFileTree : UserControl
     {
         if (d is GitFileTree control)
         {
-            FocusChild(control.FileTree.ItemContainerGenerator, e.NewValue);
+            _ = FocusChild(control.FileTree.ItemContainerGenerator, e.NewValue);
         }
 
         bool FocusChild(ItemContainerGenerator generator, object child)
@@ -53,7 +53,7 @@ public partial class GitFileTree : UserControl
             DependencyObject container = generator.ContainerFromItem(child);
             if (container is TreeViewItem treeViewItem)
             {
-                treeViewItem.Focus();
+                _ = treeViewItem.Focus();
                 return true;
             }
 
@@ -89,7 +89,7 @@ public partial class GitFileTree : UserControl
                 && generator.Status == GeneratorStatus.ContainersGenerated
             )
             {
-                FocusChild(generator, e.NewValue);
+                _ = FocusChild(generator, e.NewValue);
                 generator.StatusChanged -= OnContainerStatusChanged;
             }
         }

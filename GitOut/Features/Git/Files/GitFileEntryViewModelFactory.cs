@@ -92,7 +92,7 @@ public static class GitFileEntryViewModelFactory
         IDiffOptionsBuilder builder = DiffOptions.Builder().Recursive();
         if (options?.Cached == true)
         {
-            builder.Cached();
+            _ = builder.Cached();
         }
 
         await foreach (

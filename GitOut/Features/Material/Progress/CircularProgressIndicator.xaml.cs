@@ -91,7 +91,7 @@ public partial class CircularProgressIndicator : UserControl
     protected override void OnInitialized(EventArgs e)
     {
         base.OnInitialized(e);
-        VisualStateManager.GoToElementState(this, "Normal", true);
+        _ = VisualStateManager.GoToElementState(this, "Normal", true);
     }
 
     public double Diameter

@@ -74,13 +74,13 @@ public class GitDiffResult
                         content.Add(line);
                     }
                 }
-                Feed(
+                _ = Feed(
                     $"{GitDiffHunk.HunkIdentifier} -1,{content.Count} +1,{content.Count} {GitDiffHunk.HunkIdentifier}"
                 );
                 char diffChar = type == GitStatusChangeType.Untracked ? '+' : ' ';
                 foreach (string line in content)
                 {
-                    Feed($"{diffChar}{line}");
+                    _ = Feed($"{diffChar}{line}");
                 }
             }
             return this;

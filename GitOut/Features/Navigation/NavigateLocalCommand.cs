@@ -37,7 +37,7 @@ public class NavigateLocalCommand<T> : ICommand
         bool newWindow = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
         if (newWindow)
         {
-            navigation.NavigateNewWindow(pagename, pageOptions);
+            _ = navigation.NavigateNewWindow(pagename, pageOptions);
         }
         else
         {

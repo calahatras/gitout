@@ -6,7 +6,7 @@ public static class SettingsServiceCollectionExtensions
 {
     public static void AddSettingsFeature(this IServiceCollection services)
     {
-        services.AddTransient<SettingsPage>();
-        services.AddTransient<SettingsViewModel>();
+        _ = services.AddTransient<SettingsPage>();
+        _ = services.AddTransient<SettingsViewModel>();
     }
 }

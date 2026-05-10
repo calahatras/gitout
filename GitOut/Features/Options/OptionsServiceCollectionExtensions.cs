@@ -20,8 +20,8 @@ public class WritableOptionsBuilder<T>
 
     public void Bind(IConfiguration config, string section)
     {
-        services.AddOptions<T>().Bind(config.GetSection(section));
-        services.AddScoped<IOptionsWriter<T>>(
+        _ = services.AddOptions<T>().Bind(config.GetSection(section));
+        _ = services.AddScoped<IOptionsWriter<T>>(
             (provider) =>
                 new OptionsWriter<T>(
                     provider.GetRequiredService<IOptions<T>>(),

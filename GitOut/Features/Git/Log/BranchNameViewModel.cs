@@ -51,11 +51,11 @@ public class BranchNameViewModel
                     .WithDuration(Timeout.InfiniteTimeSpan);
                 if (result.UndoCommand is not null)
                 {
-                    builder.AddAction(undoActionText);
+                    _ = builder.AddAction(undoActionText);
                 }
                 if (result.ForceDeleteCommand is not null)
                 {
-                    builder.AddAction(forceDeleteActionText);
+                    _ = builder.AddAction(forceDeleteActionText);
                 }
                 SnackAction? action = await snack.ShowAsync(builder);
                 if (action is not null)

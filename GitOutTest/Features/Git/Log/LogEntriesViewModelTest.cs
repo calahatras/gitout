@@ -40,7 +40,7 @@ public class LogEntriesViewModelTest
         IGitRepository repository = A.Fake<IGitRepository>();
         IGitRepositoryNotifier notifier = A.Fake<IGitRepositoryNotifier>();
         Captured<DiffOptions> capturedDiffOptions = A.Captured<DiffOptions>();
-        A.CallTo(() => repository.ListTreeAsync(root.Id, capturedDiffOptions._))
+        _ = A.CallTo(() => repository.ListTreeAsync(root.Id, capturedDiffOptions._))
             .Returns(entries.ToAsyncEnumerable());
         ISnackbarService snack = A.Fake<ISnackbarService>();
 
