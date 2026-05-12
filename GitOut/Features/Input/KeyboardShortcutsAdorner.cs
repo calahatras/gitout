@@ -52,6 +52,15 @@ public sealed class KeyboardShortcutsAdorner : Adorner
 
     private readonly IReadOnlyList<KeyboardShortcutEntry> shortcuts;
 
+    // Cached during OnRender so OnMouseDown can determine whether the click hit the scrim.
+    private Rect panelRect = Rect.Empty;
+
+    /// <summary>
+    /// Raised when the user clicks the scrim area outside the panel, requesting dismissal.
+    /// The controller subscribes to this event to remove the adorner from the layer.
+    /// </summary>
+    public event EventHandler? DismissRequested;
+
     /// <param name="adornedElement">The element this adorner is attached to.</param>
     /// <param name="shortcuts">The shortcut entries to display, grouped by <see cref="KeyboardShortcutEntry.Category"/>.</param>
     public KeyboardShortcutsAdorner(
@@ -62,8 +71,21 @@ public sealed class KeyboardShortcutsAdorner : Adorner
     {
         this.shortcuts = shortcuts;
 
-        // Allow mouse events to pass through to the adorned element underneath.
-        IsHitTestVisible = false;
+        // Capture mouse events so the scrim absorbs clicks instead of letting them fall through.
+        IsHitTestVisible = true;
+    }
+
+    protected override void OnMouseDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseDown(e);
+
+        // Only dismiss when clicking outside the panel (i.e. on the scrim background).
+        // A click on the panel itself does nothing — users may still be reading the shortcuts.
+        if (!panelRect.IsEmpty && !panelRect.Contains(e.GetPosition(this)))
+        {
+            e.Handled = true;
+            DismissRequested?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     protected override void OnRender(DrawingContext dc)
@@ -109,6 +131,10 @@ public sealed class KeyboardShortcutsAdorner : Adorner
         // ── Panel ─────────────────────────────────────────────────────────
         double panelX = (size.Width - panelWidth) / 2;
         double panelY = (size.Height - panelHeight) / 2;
+
+        // Cache so OnMouseDown can distinguish scrim clicks from panel clicks.
+        panelRect = new Rect(panelX, panelY, panelWidth, panelHeight);
+
         dc.DrawRoundedRectangle(
             theme.Panel,
             null,

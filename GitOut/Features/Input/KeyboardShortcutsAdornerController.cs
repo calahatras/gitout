@@ -47,6 +47,9 @@ internal sealed class KeyboardShortcutsAdornerController
     private KeyBinding? keyBinding;
     private IDisposable? subscription;
 
+    // Stored so the same delegate instance can be passed to both AddHandler and RemoveHandler.
+    private readonly KeyEventHandler onEscapePressed;
+
     /// <param name="owner">The page that will host the adorner.</param>
     /// <param name="options">Options monitor supplying the user-configured hotkey.</param>
     /// <param name="pageShortcuts">
@@ -69,6 +72,8 @@ internal sealed class KeyboardShortcutsAdornerController
                 : (IReadOnlyList<KeyboardShortcutEntry>)
                     pageShortcuts.Concat(KeyboardShortcutCommands.GlobalShortcuts).ToArray();
 
+        onEscapePressed = OnEscapePressed;
+
         // Registers the RoutedCommand so the NavigatorShell toolbar button routes to this page.
         owner.CommandBindings.Add(
             new CommandBinding(KeyboardShortcutCommands.ShowShortcuts, OnToggle)
@@ -82,19 +87,47 @@ internal sealed class KeyboardShortcutsAdornerController
 
     private void OnToggle(object sender, ExecutedRoutedEventArgs e)
     {
+        if (adorner is null)
+            ShowAdorner();
+        else
+            HideAdorner();
+    }
+
+    private void ShowAdorner()
+    {
         AdornerLayer? layer = AdornerLayer.GetAdornerLayer(owner);
         if (layer is null)
             return;
 
+        adorner = new KeyboardShortcutsAdorner(owner, shortcuts);
+        adorner.DismissRequested += OnDismissRequested;
+        layer.Add(adorner);
+
+        // Handle Escape as a dismiss gesture while the adorner is visible.
+        owner.AddHandler(UIElement.PreviewKeyDownEvent, onEscapePressed);
+    }
+
+    private void HideAdorner()
+    {
         if (adorner is null)
+            return;
+
+        AdornerLayer? layer = AdornerLayer.GetAdornerLayer(owner);
+        layer?.Remove(adorner);
+        adorner.DismissRequested -= OnDismissRequested;
+        adorner = null;
+
+        owner.RemoveHandler(UIElement.PreviewKeyDownEvent, onEscapePressed);
+    }
+
+    private void OnDismissRequested(object? sender, EventArgs e) => HideAdorner();
+
+    private void OnEscapePressed(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
         {
-            adorner = new KeyboardShortcutsAdorner(owner, shortcuts);
-            layer.Add(adorner);
-        }
-        else
-        {
-            layer.Remove(adorner);
-            adorner = null;
+            e.Handled = true;
+            HideAdorner();
         }
     }
 
@@ -120,6 +153,9 @@ internal sealed class KeyboardShortcutsAdornerController
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        // If the user navigates away while the overlay is open, dismiss it cleanly.
+        HideAdorner();
+
         // Dispose the live-update subscription; it will be renewed the next time Loaded fires.
         subscription?.Dispose();
         subscription = null;
