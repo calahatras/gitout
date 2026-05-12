@@ -25,17 +25,17 @@
     <Button
       x:Name="ChangeButton"
       Grid.Column="1"
+      VerticalAlignment="Center"
       Style="{StaticResource MaterialButtonStyle}"
       Content="CHANGE"
-      Margin="8 0 0 0"
       Click="OnChangeClick"
     />
     <Button
       x:Name="CancelButton"
       Grid.Column="2"
+      VerticalAlignment="Center"
       Style="{StaticResource MaterialButtonStyle}"
       Content="CANCEL"
-      Margin="8 0 0 0"
       Visibility="Collapsed"
       Click="OnCancelClick"
     />
