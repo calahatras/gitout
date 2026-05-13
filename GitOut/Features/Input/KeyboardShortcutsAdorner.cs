@@ -200,7 +200,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
     /// Takes the base color of a brush and returns a new semi-transparent brush suitable for the scrim.
     /// This makes the scrim match the theme's dark background rather than being a fixed dark color.
     /// </summary>
-    private static Brush BuildScrimBrush(Brush baseBrush)
+    private static SolidColorBrush BuildScrimBrush(Brush baseBrush)
     {
         Color baseColor = baseBrush is SolidColorBrush solid
             ? solid.Color
