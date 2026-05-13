@@ -105,6 +105,10 @@ internal sealed class KeyboardShortcutsAdornerController
 
         // Handle Escape as a dismiss gesture while the adorner is visible.
         owner.AddHandler(UIElement.PreviewKeyDownEvent, onEscapePressed);
+
+        // The toolbar button that invoked this command steals focus from the page.
+        // Restore it so the hotkey and Escape handler keep working.
+        FocusOwner();
     }
 
     private void HideAdorner()
@@ -118,6 +122,21 @@ internal sealed class KeyboardShortcutsAdornerController
         adorner = null;
 
         owner.RemoveHandler(UIElement.PreviewKeyDownEvent, onEscapePressed);
+
+        // Return focus to the page so the hotkey can be pressed again immediately.
+        FocusOwner();
+    }
+
+    /// <summary>
+    /// Ensures keyboard focus is within <see cref="owner"/> so that <see cref="InputBinding"/>s
+    /// and the Escape <c>PreviewKeyDown</c> handler fire correctly.
+    /// This is needed both on initial load (non-focusable root elements) and after a toolbar
+    /// button click moves focus out of the page's subtree.
+    /// </summary>
+    private void FocusOwner()
+    {
+        if (!owner.IsKeyboardFocusWithin)
+            owner.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
     }
 
     private void OnDismissRequested(object? sender, EventArgs e) => HideAdorner();
@@ -146,9 +165,7 @@ internal sealed class KeyboardShortcutsAdornerController
         // For pages whose root element is a non-focusable container (e.g. a Grid), focus falls
         // through to the Window and the KeyBinding on the page is never reachable via routing.
         if (!owner.IsKeyboardFocusWithin)
-        {
-            owner.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
-        }
+            FocusOwner();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
