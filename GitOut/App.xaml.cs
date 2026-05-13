@@ -30,6 +30,13 @@ public partial class App : Application
 {
     private readonly IHost host;
 
+    /// <summary>
+    /// The application's DI service provider, available after <see cref="OnStartup"/>.
+    /// Exposed for attached behaviors and other static helpers that cannot receive DI
+    /// services through constructor injection (e.g. <c>KeyboardShortcutsBehavior</c>).
+    /// </summary>
+    public static IServiceProvider Services { get; private set; } = null!;
+
     public App()
     {
         host = new HostBuilder()
@@ -80,6 +87,7 @@ public partial class App : Application
             );
         }
         base.OnStartup(e);
+        Services = host.Services;
         var token = new CancellationToken();
         _ = host.RunAsync(token);
     }
