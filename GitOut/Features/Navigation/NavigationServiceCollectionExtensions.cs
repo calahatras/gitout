@@ -12,10 +12,10 @@ public static class NavigationServiceCollectionExtensions
         IConfiguration configuration
     )
     {
-        services.AddScoped<INavigationService, NavigationService>();
-        services.AddScoped<NavigatorShellViewModel>();
+        _ = services.AddScoped<INavigationService, NavigationService>();
+        _ = services.AddScoped<NavigatorShellViewModel>();
 
-        services
+        _ = services
             .AddOptions<NavigationRegistrationOptions>()
             .Configure(options => options.StartupType = typeof(T).FullName!);
         services

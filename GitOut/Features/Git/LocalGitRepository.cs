@@ -71,36 +71,31 @@ public sealed class LocalGitRepository : IGitRepository
             switch (state)
             {
                 case 0:
-                    builder.ParseHash(line);
+                    _ = builder.ParseHash(line);
                     ++state;
                     break;
                 case 1:
-                    builder.ParseDate(long.Parse(line));
+                    _ = builder.ParseDate(long.Parse(line));
                     ++state;
                     break;
                 case 2:
-                    builder.ParseAuthorName(line);
+                    _ = builder.ParseAuthorName(line);
                     ++state;
                     break;
                 case 3:
-                    builder.ParseAuthorEmail(line);
+                    _ = builder.ParseAuthorEmail(line);
                     ++state;
                     break;
                 case 4:
-                    builder.ParseSubject(line);
+                    _ = builder.ParseSubject(line);
                     ++state;
                     break;
                 case 5:
-                    if (line.Contains('\0', StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException(
+                    _ = line.Contains('\0', StringComparison.OrdinalIgnoreCase)
+                        ? throw new InvalidOperationException(
                             "Multiple history events found but expected only 1"
-                        );
-                    }
-                    else
-                    {
-                        builder.BuildBody(line);
-                    }
+                        )
+                        : builder.BuildBody(line);
                     break;
             }
         }
@@ -140,7 +135,7 @@ public sealed class LocalGitRepository : IGitRepository
 
         if (options.IncludeRemotes)
         {
-            processOptionsBuilder.Append(" --remotes");
+            _ = processOptionsBuilder.Append(" --remotes");
         }
         IGitProcess log = CreateProcess(processOptionsBuilder.Build());
         await foreach (
@@ -238,7 +233,7 @@ public sealed class LocalGitRepository : IGitRepository
                 IGitStatusChangeBuilder builder = GitStatusChange.Parse(line[ranges[i]]);
                 if (builder.Type == GitStatusChangeType.RenamedOrCopied)
                 {
-                    builder.MergedFrom(line[ranges[++i]]);
+                    _ = builder.MergedFrom(line[ranges[++i]]);
                 }
                 builder.WorkingDirectory(WorkingDirectory);
                 statusChanges.Add(builder.Build());
@@ -266,18 +261,18 @@ public sealed class LocalGitRepository : IGitRepository
 
         if (options is not null)
         {
-            diffArguments.AppendRange(options.GetArguments());
+            _ = diffArguments.AppendRange(options.GetArguments());
         }
 
         bool shouldSkip = false;
         if (parent is null)
         {
-            diffArguments.AppendRange(change.ToString(), "--root");
+            _ = diffArguments.AppendRange(change.ToString(), "--root");
             shouldSkip = true;
         }
         else
         {
-            diffArguments.AppendRange(parent.Hash, change.ToString());
+            _ = diffArguments.AppendRange(parent.Hash, change.ToString());
         }
         IGitProcess diff = CreateProcess(diffArguments.Build());
 
@@ -339,11 +334,11 @@ public sealed class LocalGitRepository : IGitRepository
         IGitProcess diff = CreateProcess(args);
         await foreach (string line in diff.ReadLinesAsync())
         {
-            builder.Feed(line);
+            _ = builder.Feed(line);
         }
         if (builder.IsBinaryFile)
         {
-            builder.Feed(await GetBlobStreamAsync(target));
+            _ = builder.Feed(await GetBlobStreamAsync(target));
         }
         return builder.Build();
     }
@@ -358,11 +353,11 @@ public sealed class LocalGitRepository : IGitRepository
         IGitDiffBuilder builder = GitDiffResult.Builder();
         await foreach (string line in diff.ReadLinesAsync())
         {
-            builder.Feed(line);
+            _ = builder.Feed(line);
         }
         if (builder.IsBinaryFile)
         {
-            builder.Feed(GetUntrackedBlobStream(file));
+            _ = builder.Feed(GetUntrackedBlobStream(file));
         }
         return builder.Build();
     }
@@ -381,11 +376,11 @@ public sealed class LocalGitRepository : IGitRepository
         IGitDiffBuilder builder = GitDiffResult.Builder();
         await foreach (string line in diff.ReadLinesAsync())
         {
-            builder.Feed(line);
+            _ = builder.Feed(line);
         }
         if (builder.IsBinaryFile)
         {
-            builder.Feed(GetUntrackedBlobStream(destination));
+            _ = builder.Feed(GetUntrackedBlobStream(destination));
         }
         return builder.Build();
     }
@@ -395,9 +390,9 @@ public sealed class LocalGitRepository : IGitRepository
         IProcessOptionsBuilder builder = ProcessOptions.Builder().AppendRange("ls-tree", "-z");
         if (options is not null)
         {
-            builder.AppendRange(options.GetArguments());
+            _ = builder.AppendRange(options.GetArguments());
         }
-        builder.Append(id.Hash);
+        _ = builder.Append(id.Hash);
         IGitProcess process = CreateProcess(builder.Build());
         await foreach (string line in process.ReadLinesAsync())
         {
@@ -444,7 +439,7 @@ public sealed class LocalGitRepository : IGitRepository
             .Append(name.Name);
         if (options is not null)
         {
-            arguments.Append(options.From.ToString());
+            _ = arguments.Append(options.From.ToString());
         }
         ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
         if (args.ErrorLines.Count > 0)
@@ -507,12 +502,12 @@ public sealed class LocalGitRepository : IGitRepository
     )
     {
         IProcessOptionsBuilder arguments = ProcessOptions.Builder();
-        arguments.Append("checkout");
+        _ = arguments.Append("checkout");
         if (options is not null && options.CreateBranch)
         {
-            arguments.Append("-b");
+            _ = arguments.Append("-b");
         }
-        arguments.Append(name.Name);
+        _ = arguments.Append(name.Name);
         ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
         if (args.ErrorLines.Count > 0)
         {
@@ -562,9 +557,9 @@ public sealed class LocalGitRepository : IGitRepository
         var argumentsBuilder = new StringBuilder("commit");
         if (options.Amend)
         {
-            argumentsBuilder.Append(" --amend");
+            _ = argumentsBuilder.Append(" --amend");
         }
-        argumentsBuilder.Append(
+        _ = argumentsBuilder.Append(
             $" -m \"{options.Message.Replace("\"", "\\\"", StringComparison.OrdinalIgnoreCase)}\""
         );
         return CreateProcess(ProcessOptions.FromArguments(argumentsBuilder.ToString()))
@@ -581,7 +576,7 @@ public sealed class LocalGitRepository : IGitRepository
         {
             case PatchMode.AddIndex:
             case PatchMode.ResetIndex:
-                argumentsBuilder.Append(" --cached");
+                _ = argumentsBuilder.Append(" --cached");
                 break;
         }
 
@@ -612,23 +607,23 @@ public sealed class LocalGitRepository : IGitRepository
             switch (state)
             {
                 case 0:
-                    builder.ParseHash(line);
+                    _ = builder.ParseHash(line);
                     ++state;
                     break;
                 case 1:
-                    builder.ParseDate(long.Parse(line));
+                    _ = builder.ParseDate(long.Parse(line));
                     ++state;
                     break;
                 case 2:
-                    builder.ParseAuthorName(line);
+                    _ = builder.ParseAuthorName(line);
                     ++state;
                     break;
                 case 3:
-                    builder.ParseAuthorEmail(line);
+                    _ = builder.ParseAuthorEmail(line);
                     ++state;
                     break;
                 case 4:
-                    builder.ParseSubject(line);
+                    _ = builder.ParseSubject(line);
                     ++state;
                     break;
                 case 5:
@@ -636,7 +631,7 @@ public sealed class LocalGitRepository : IGitRepository
                     if (zeroSeparator != -1)
                     {
                         string body = line[0..zeroSeparator];
-                        builder.BuildBody(body);
+                        _ = builder.BuildBody(body);
                         string hashes = line[(zeroSeparator + 1)..];
                         if (hashes.Length == 0)
                         {
@@ -645,12 +640,12 @@ public sealed class LocalGitRepository : IGitRepository
                         T item = builder.Build();
                         yield return item;
                         builder = factory();
-                        builder.ParseHash(hashes);
+                        _ = builder.ParseHash(hashes);
                         state = 1;
                     }
                     else
                     {
-                        builder.BuildBody(line);
+                        _ = builder.BuildBody(line);
                     }
                     break;
             }

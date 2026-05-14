@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Windows.Input;
 using GitOut.Features.Collections;
 using GitOut.Features.Git.Log;
@@ -14,6 +13,7 @@ using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
+using Microsoft.Win32;
 using DataObject = System.Windows.DataObject;
 
 namespace GitOut.Features.Git.RepositoryList;
@@ -49,10 +49,10 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
 
         AddRepositoryCommand = new AsyncCallbackCommand(async () =>
         {
-            var dialog = new FolderBrowserDialog();
-            if (dialog.ShowDialog() == DialogResult.OK)
+            var dialog = new OpenFolderDialog();
+            if (dialog.ShowDialog() == true)
             {
-                IGitRepository? repository = await CreateRepositoryAsync(dialog.SelectedPath);
+                IGitRepository? repository = await CreateRepositoryAsync(dialog.FolderName);
                 if (repository is not null)
                 {
                     storage.Add(repository);
@@ -94,7 +94,7 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
                     .ToList()
             )
             {
-                repositories.Remove(repo);
+                _ = repositories.Remove(repo);
             }
         });
 

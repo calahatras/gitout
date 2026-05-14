@@ -39,7 +39,7 @@ public class NavigationService : INavigationService
         titleService = title;
         this.theme = theme;
         this.logger = logger;
-        life.ApplicationStopping.Register(() =>
+        _ = life.ApplicationStopping.Register(() =>
         {
             foreach (Window window in Application.Current.Windows)
             {

@@ -21,13 +21,15 @@ public class StatusChangeViewModel : INotifyPropertyChanged
         else
         {
             GitModifiedStatusType? status =
-                location == StatusChangeLocation.Workspace
-                    ? model.WorkspaceStatus
-                    : model.IndexStatus;
-            if (status == null)
-            {
-                throw new ArgumentNullException(nameof(model), "Got null status for tracked file");
-            }
+                (
+                    location == StatusChangeLocation.Workspace
+                        ? model.WorkspaceStatus
+                        : model.IndexStatus
+                )
+                ?? throw new ArgumentNullException(
+                    nameof(model),
+                    "Got null status for tracked file"
+                );
             Status = status.Value;
             IconResourceKey = status switch
             {

@@ -17,10 +17,10 @@ public class SnackbarService : ISnackbarService
     public void ShowError(string message, Exception error, TimeSpan? duration = null)
     {
         ISnackBuilder? builder = Snack.Builder();
-        builder.WithMessage(message).WithError(error);
+        _ = builder.WithMessage(message).WithError(error);
         if (duration.HasValue)
         {
-            builder.WithDuration(duration.Value);
+            _ = builder.WithDuration(duration.Value);
         }
         SendSnack(builder.Build());
     }

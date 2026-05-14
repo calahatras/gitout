@@ -99,15 +99,13 @@ public class GitStatusChange
                 // u <xy> <sub> <m1> <m2> <m3> <mW> <h1> <h2> <h3> <path>
                 stagedStatus = GetModifiedStatusType(change[2]);
                 unstagedStatus = GetModifiedStatusType(change[3]);
-
-                PosixFileModes[]? first = GetFileModes(change[10..16].ToString());
-                PosixFileModes[]? second = GetFileModes(change[17..23].ToString());
-                PosixFileModes[]? third = GetFileModes(change[24..30].ToString());
+                _ = GetFileModes(change[10..16].ToString());
+                _ = GetFileModes(change[17..23].ToString());
+                _ = GetFileModes(change[24..30].ToString());
                 worktreeFileModes = GetFileModes(change[31..37].ToString());
-
-                var firstObjectId = GitFileId.FromHash(change[38..78]);
-                var secondObjectId = GitFileId.FromHash(change[79..119]);
-                var thirdObjectId = GitFileId.FromHash(change[120..160]);
+                _ = GitFileId.FromHash(change[38..78]);
+                _ = GitFileId.FromHash(change[79..119]);
+                _ = GitFileId.FromHash(change[120..160]);
 
                 path = RelativeDirectoryPath.Create(change[161..].ToString());
             }

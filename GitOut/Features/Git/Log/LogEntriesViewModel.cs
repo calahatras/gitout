@@ -27,7 +27,6 @@ public class LogEntriesViewModel : INotifyPropertyChanged
     private readonly CollectionViewSource currentSource;
 
     private IEnumerable<IGitFileEntryViewModel> logFiles;
-    private readonly ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> allFiles;
     private readonly IEnumerable<IGitFileEntryViewModel> diffFiles;
     private readonly IEnumerable<IGitFileEntryViewModel> flattenedDiffFiles;
 
@@ -50,7 +49,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         this.notifier = notifier;
         this.snack = snack;
         this.options = options;
-        allFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
+        AllFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
             _ => ListAllFilesAsync(),
             IGitDirectoryEntryViewModel.CompareItems
         );
@@ -115,7 +114,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
 
     public string Subject => Root.Subject;
 
-    public ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> AllFiles => allFiles;
+    public ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> AllFiles { get; }
 
     public ICollectionView RootFiles
     {
@@ -157,7 +156,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                 {
                     SynchronizationContext? context = SynchronizationContext.Current;
                     ValueTask t = lazy.MaterializeAsync(RelativeDirectoryPath.Root);
-                    t.AsTask()
+                    _ = t.AsTask()
                         .ContinueWith(task =>
                             context!.Post(
                                 d =>
@@ -305,17 +304,11 @@ public class LogEntriesViewModel : INotifyPropertyChanged
             {
                 child.IsExpanded = true;
                 current = child.OfType<IGitDirectoryEntryViewModel>();
-                if (selectedItem is null)
-                {
-                    selectedItem = child.FirstOrDefault(f => f.FullPath == entry.FullPath);
-                }
+                selectedItem ??= child.FirstOrDefault(f => f.FullPath == entry.FullPath);
             }
         }
-        if (selectedItem is null)
-        {
-            selectedItem = items.FirstOrDefault(f => f.FullPath == entry.FullPath);
-        }
-        Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => SelectedItem = selectedItem));
+        selectedItem ??= items.FirstOrDefault(f => f.FullPath == entry.FullPath);
+        _ = Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => SelectedItem = selectedItem));
     }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)

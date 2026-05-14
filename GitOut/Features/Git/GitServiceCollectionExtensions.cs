@@ -13,16 +13,19 @@ public static class GitServiceCollectionExtensions
 {
     public static void AddGitFeature(this IServiceCollection services)
     {
-        services.AddScoped<IGitRepositoryStorage, GitRepositoryStorage>();
-        services.AddSingleton<IProcessTelemetryCollector, ProcessTelemetryCollector>();
-        services.AddScoped<IProcessFactory<IGitProcess>, GitProcessFactory>();
-        services.AddScoped<IGitRepositoryFactory, GitRepositoryFactory>();
-        services.AddScoped<IGitRepositoryWatcherProvider, GitRepositoryFileSystemWatcherProvider>();
-        services.AddTransient<GitLogPage>();
-        services.AddTransient<GitLogViewModel>();
-        services.AddTransient<GitStagePage>();
-        services.AddTransient<GitStageViewModel>();
-        services.AddTransient<RepositoryListPage>();
-        services.AddTransient<RepositoryListViewModel>();
+        _ = services.AddScoped<IGitRepositoryStorage, GitRepositoryStorage>();
+        _ = services.AddSingleton<IProcessTelemetryCollector, ProcessTelemetryCollector>();
+        _ = services.AddScoped<IProcessFactory<IGitProcess>, GitProcessFactory>();
+        _ = services.AddScoped<IGitRepositoryFactory, GitRepositoryFactory>();
+        _ = services.AddScoped<
+            IGitRepositoryWatcherProvider,
+            GitRepositoryFileSystemWatcherProvider
+        >();
+        _ = services.AddTransient<GitLogPage>();
+        _ = services.AddTransient<GitLogViewModel>();
+        _ = services.AddTransient<GitStagePage>();
+        _ = services.AddTransient<GitStageViewModel>();
+        _ = services.AddTransient<RepositoryListPage>();
+        _ = services.AddTransient<RepositoryListViewModel>();
     }
 }

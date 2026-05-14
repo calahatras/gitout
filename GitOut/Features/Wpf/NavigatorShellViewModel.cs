@@ -116,7 +116,7 @@ public sealed class NavigatorShellViewModel : INotifyPropertyChanged, IDisposabl
     private static void ShowSnack(Snack snack, ObservableCollection<Snack> snackStack)
     {
         Application.Current.Dispatcher.Invoke(() => snackStack.Add(snack));
-        snack.Canceled.Register(() =>
+        _ = snack.Canceled.Register(() =>
             Application.Current.Dispatcher.Invoke(() => snackStack.Remove(snack))
         );
     }

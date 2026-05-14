@@ -218,7 +218,7 @@ public class GitStageViewModel
                         {
                             if (!t.IsCanceled)
                             {
-                                Application.Current.Dispatcher.Invoke(ExecuteCurrentDiffAsync);
+                                _ = Application.Current.Dispatcher.Invoke(ExecuteCurrentDiffAsync);
                             }
                         },
                         token
@@ -246,7 +246,7 @@ public class GitStageViewModel
         get => amendLastCommit;
         set
         {
-            SetProperty(ref amendLastCommit, value);
+            _ = SetProperty(ref amendLastCommit, value);
             if (value)
             {
                 cachedCommitMessage = CommitMessage;
@@ -541,7 +541,7 @@ public class GitStageViewModel
             .ContextLines(showWholeFile ? 999999 : contextLines);
         if (diffWhitespace)
         {
-            optionsBuilder.IgnoreAllSpace();
+            _ = optionsBuilder.IgnoreAllSpace();
         }
         DiffOptions options = optionsBuilder.Build();
 
@@ -591,7 +591,7 @@ public class GitStageViewModel
                 .ContextLines(showWholeFile ? 999999 : contextLines);
             if (diffWhitespace)
             {
-                optionsBuilder.IgnoreAllSpace();
+                _ = optionsBuilder.IgnoreAllSpace();
             }
             viewmodel.UpdateOptions(optionsBuilder.Build());
             SelectedDiffResult = viewmodel.DiffResult;
@@ -626,13 +626,13 @@ public class GitStageViewModel
         IDiffOptionsBuilder optionsBuilder = DiffOptions.Builder();
         if (diffWhitespace)
         {
-            optionsBuilder.IgnoreAllSpace();
+            _ = optionsBuilder.IgnoreAllSpace();
         }
         if (location == StatusChangeLocation.Index)
         {
-            optionsBuilder.Cached();
+            _ = optionsBuilder.Cached();
         }
-        optionsBuilder.ContextLines(showWholeFile ? 999999 : contextLines);
+        _ = optionsBuilder.ContextLines(showWholeFile ? 999999 : contextLines);
         SelectedDiffResult = await DiffContext.DiffAsync(
             Repository,
             change,
@@ -907,11 +907,11 @@ public class GitStageViewModel
         IPatchLineTransformBuilder transformBuilder = PatchLineTransform.Builder();
         if (stagingOptions.CurrentValue.TrimLineEndings)
         {
-            transformBuilder.TrimLines();
+            _ = transformBuilder.TrimLines();
         }
         if (stagingOptions.CurrentValue.TabTransformText.Length > 0)
         {
-            transformBuilder.ConvertTabsToSpaces(stagingOptions.CurrentValue.TabTransformText);
+            _ = transformBuilder.ConvertTabsToSpaces(stagingOptions.CurrentValue.TabTransformText);
         }
         ITextTransform transform = transformBuilder.Build();
 
@@ -1217,7 +1217,7 @@ public class GitStageViewModel
             .ContextLines(showWholeFile ? 999999 : contextLines);
         if (diffWhitespace)
         {
-            optionsBuilder.IgnoreAllSpace();
+            _ = optionsBuilder.IgnoreAllSpace();
         }
 
         SelectedDiffResult = await DiffContext.DiffFilesAsync(
@@ -1244,13 +1244,13 @@ public class GitStageViewModel
         cancelRefreshSnack?.Cancel();
         cancelRefreshSnack = new CancellationTokenSource();
         ISnackBuilder? builder = Snack.Builder();
-        builder.AddAction("DELETE");
-        builder.AddAction("RECYCLE");
-        builder.WithMessage(
+        _ = builder.AddAction("DELETE");
+        _ = builder.AddAction("RECYCLE");
+        _ = builder.WithMessage(
             $"{Path.GetFileName(path)} is untracked. " + $"Do you want to delete the file?"
         );
-        builder.WithDuration(Timeout.InfiniteTimeSpan);
-        builder.WithCancellation(cancelRefreshSnack.Token);
+        _ = builder.WithDuration(Timeout.InfiniteTimeSpan);
+        _ = builder.WithCancellation(cancelRefreshSnack.Token);
         SnackAction? action = await snack.ShowAsync(builder);
 
         if (action?.Text == "DELETE")

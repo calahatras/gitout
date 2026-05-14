@@ -23,8 +23,8 @@ public class DiffSelectedFilesCommandTest
     [Test]
     public void DiffSelectedFilesCommandShouldBeDisabledIfOneFileSelected()
     {
-        (GitStageViewModel actor, ISnackbarService _, IGitRepository _) = CreateViewModel();
-        actor.WorkspaceFiles.MoveCurrentToFirst();
+        (GitStageViewModel actor, _, _) = CreateViewModel();
+        _ = actor.WorkspaceFiles.MoveCurrentToFirst();
         ((StatusChangeViewModel)actor.WorkspaceFiles.CurrentItem!).IsSelected = true;
 
         Assert.That(actor.DiffSelectedFilesCommand.CanExecute(null), Is.False);
@@ -44,15 +44,14 @@ public class DiffSelectedFilesCommandTest
     [Test]
     public void DiffSelectedFilesShouldCallRepositoryDiffWithNoIndex()
     {
-        (GitStageViewModel actor, ISnackbarService _, IGitRepository repository) =
-            CreateViewModel();
+        (GitStageViewModel actor, _, IGitRepository repository) = CreateViewModel();
         var files = actor.WorkspaceFiles.Cast<StatusChangeViewModel>().ToList();
         files[0].IsSelected = true;
         files[1].IsSelected = true;
 
         IGitDiffBuilder builder = GitDiffResult.Builder();
-        builder.Feed("diff --git a/file1 b/file2");
-        A.CallTo(() =>
+        _ = builder.Feed("diff --git a/file1 b/file2");
+        _ = A.CallTo(() =>
                 repository.DiffAsync(
                     A<RelativeDirectoryPath>._,
                     A<RelativeDirectoryPath>._,
@@ -64,7 +63,7 @@ public class DiffSelectedFilesCommandTest
 
         actor.DiffSelectedFilesCommand.Execute(null);
 
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 repository.DiffAsync(
                     A<RelativeDirectoryPath>.That.Matches(p => p.ToString() == "file1.txt"),
                     A<RelativeDirectoryPath>.That.Matches(p => p.ToString() == "file2.txt"),
@@ -83,17 +82,20 @@ public class DiffSelectedFilesCommandTest
             GitStatusChange.Parse("? file2.txt").Build(),
             GitStatusChange.Parse("? file3.txt").Build(),
         ];
-        A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(changes));
-        A.CallTo(() => repository.WorkingDirectory).Returns(DirectoryPath.Create("C:\\Wrapper"));
+        _ = A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult(changes));
+        _ = A.CallTo(() => repository.WorkingDirectory)
+            .Returns(DirectoryPath.Create("C:\\Wrapper"));
 
         var stageOptions = new GitStagePageOptions(repository);
         INavigationService navigation = A.Fake<INavigationService>();
-        A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!))
+        _ = A.CallTo(() =>
+                navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)
+            )
             .Returns(stageOptions);
 
         ITitleService title = A.Fake<ITitleService>();
         IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 watchProvider.PrepareWatchRepositoryChanges(
                     repository,
                     A<RepositoryWatcherOptions>.Ignored
@@ -103,7 +105,7 @@ public class DiffSelectedFilesCommandTest
 
         ISnackbarService snack = A.Fake<ISnackbarService>();
         IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
-        A.CallTo(() => options.CurrentValue)
+        _ = A.CallTo(() => options.CurrentValue)
             .Returns(new GitStageOptions { ShowSpacesAsDots = false });
 
         var vm = new GitStageViewModel(navigation, title, watchProvider, snack, options);

@@ -53,7 +53,7 @@ public class GitProcess : IGitProcess
                 WorkingDirectory = workingDirectory.Directory,
             },
         };
-        exec.Start();
+        _ = exec.Start();
 
         var source = new TaskCompletionSource<bool>();
         var output = new List<string>();
@@ -67,7 +67,7 @@ public class GitProcess : IGitProcess
 
         if (cancellationToken != CancellationToken.None)
         {
-            cancellationToken.Register(source.SetCanceled);
+            _ = cancellationToken.Register(source.SetCanceled);
         }
         Trace.WriteLine("Writing to stream:");
         Trace.WriteLine(writer.ToString());
@@ -135,7 +135,7 @@ public class GitProcess : IGitProcess
                 WorkingDirectory = workingDirectory.Directory,
             },
         };
-        exec.Start();
+        _ = exec.Start();
 
         var stream = new MemoryStream();
         await exec.StandardOutput.BaseStream.CopyToAsync(stream, cancellationToken);
@@ -186,7 +186,7 @@ public class GitProcess : IGitProcess
         exec.OutputDataReceived += OnHandleOutputData;
         exec.ErrorDataReceived += OnHandleErrorData;
         exec.Exited += (sender, e) => dataCounter.Signal();
-        exec.Start();
+        _ = exec.Start();
 
         exec.BeginErrorReadLine();
         exec.BeginOutputReadLine();
@@ -225,12 +225,12 @@ public class GitProcess : IGitProcess
             string? data = e.Data;
             if (data is null)
             {
-                dataCounter.Signal();
+                _ = dataCounter.Signal();
             }
             else
             {
                 output.AddRange(data.Split('\0'));
-                queue.Post(data);
+                _ = queue.Post(data);
             }
             dataReceivedEvent.Set();
         }
@@ -239,7 +239,7 @@ public class GitProcess : IGitProcess
             string? data = e.Data;
             if (data is null)
             {
-                dataCounter.Signal();
+                _ = dataCounter.Signal();
             }
             else
             {

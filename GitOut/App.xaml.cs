@@ -44,7 +44,7 @@ public partial class App : Application
                         ".gitout",
                         "error.log"
                     );
-                    builder.AddProvider(new FileLoggerProvider(logFile));
+                    _ = builder.AddProvider(new FileLoggerProvider(logFile));
                 }
             )
             .UseConsoleLifetime()
@@ -56,15 +56,15 @@ public partial class App : Application
 
         IHostApplicationLifetime life =
             host.Services.GetRequiredService<IHostApplicationLifetime>();
-        life.ApplicationStarted.Register(LogLifetimeEvent(logger, "Host started"));
-        life.ApplicationStopping.Register(LogLifetimeEvent(logger, "Application stopping"));
+        _ = life.ApplicationStarted.Register(LogLifetimeEvent(logger, "Host started"));
+        _ = life.ApplicationStopping.Register(LogLifetimeEvent(logger, "Application stopping"));
     }
 
     protected override void OnStartup(StartupEventArgs e)
     {
         PresentationTraceSources.Refresh();
-        PresentationTraceSources.DataBindingSource.Listeners.Add(new ConsoleTraceListener());
-        PresentationTraceSources.DataBindingSource.Listeners.Add(new DebugTraceListener());
+        _ = PresentationTraceSources.DataBindingSource.Listeners.Add(new ConsoleTraceListener());
+        _ = PresentationTraceSources.DataBindingSource.Listeners.Add(new DebugTraceListener());
         PresentationTraceSources.DataBindingSource.Switch.Level =
             SourceLevels.Warning | SourceLevels.Error;
 
@@ -77,7 +77,7 @@ public partial class App : Application
         );
         base.OnStartup(e);
         var token = new CancellationToken();
-        host.RunAsync(token);
+        _ = host.RunAsync(token);
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -91,21 +91,21 @@ public partial class App : Application
 
     private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
     {
-        services.AddScoped<ISnackbarService, SnackbarService>();
+        _ = services.AddScoped<ISnackbarService, SnackbarService>();
         services.AddNavigationServiceWithStartPage<RepositoryListPage>(context.Configuration);
 
-        services.AddScoped<ITitleService, TitleService>();
-        services.AddSingleton<IWritableStorage, FileStorage>();
-        services.AddScoped<Features.Wpf.Commands.Application>();
+        _ = services.AddScoped<ITitleService, TitleService>();
+        _ = services.AddSingleton<IWritableStorage, FileStorage>();
+        _ = services.AddScoped<Features.Wpf.Commands.Application>();
 
         services.AddSettingsFeature();
         services.AddGitFeature();
-        services.AddTextPromptFeature();
+        _ = services.AddTextPromptFeature();
         services.AddThemeFeature();
 
-        services.AddOptions();
+        _ = services.AddOptions();
 
-        services
+        _ = services
             .AddOptions<GitStoreOptions>()
             .Bind(context.Configuration.GetSection(GitStoreOptions.SectionKey));
         services
@@ -114,9 +114,9 @@ public partial class App : Application
         services
             .AddWritableOptions<GitLogOptions>()
             .Bind(context.Configuration, GitLogOptions.SectionKey);
-        services.AddLogging();
+        _ = services.AddLogging();
 
-        services.AddHostedService<Bootstrap>();
+        _ = services.AddHostedService<Bootstrap>();
     }
 
     private void RegisterExceptionHandlers(ILogger<App> logger)

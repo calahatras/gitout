@@ -30,7 +30,7 @@ public class FileLogger : ILogger
             content += $"{exception}\r\n";
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+        _ = Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
         File.AppendAllText(filePath, content);
     }
 }

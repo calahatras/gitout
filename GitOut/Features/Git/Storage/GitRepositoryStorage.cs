@@ -28,7 +28,7 @@ public class GitRepositoryStorage : IGitRepositoryStorage
             Convert(options.CurrentValue.Repositories ?? Array.Empty<string>())
         );
         Repositories = repositories;
-        options.OnChange(update =>
+        _ = options.OnChange(update =>
             repositories.OnNext(Convert(update.Repositories ?? Array.Empty<string>()))
         );
     }
