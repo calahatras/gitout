@@ -33,5 +33,8 @@ public static class KeyboardShortcutCommands
             new(Key.P, "Open Settings", "Global", ModifierKeys.Control),
             new(Key.Left, "Navigate Back", "Global", ModifierKeys.Alt),
             new(Key.F11, "Toggle Full Screen", "Global"),
+            new(Key.OemPlus, "Zoom in", "Zoom", ModifierKeys.Control),
+            new(Key.OemMinus, "Zoom out", "Zoom", ModifierKeys.Control),
+            new(Key.D0, "Reset zoom", "Zoom", ModifierKeys.Control),
         };
 }
