@@ -1,3 +1,4 @@
+#pragma warning disable RS1035 // Do not do file IO in analyzers
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,30 +11,34 @@ using Microsoft.CodeAnalysis;
 namespace GitProperties;
 
 [Generator]
-public class GitPropertiesGenerator : ISourceGenerator
+public class GitPropertiesGenerator : IIncrementalGenerator
 {
-    public void Execute(GeneratorExecutionContext context)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        const string ProjectDirOptionsKey = "build_property.projectdir";
-        if (
-            !context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(
-                ProjectDirOptionsKey,
-                out string folder
-            )
-        )
+        var projectDirProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.projectdir", out string folder);
+                return folder;
+            });
+
+        context.RegisterSourceOutput(projectDirProvider, (spc, folder) =>
         {
-            return;
-        }
-        try
-        {
-            Properties props = ReadGitProperties(folder, context.CancellationToken);
-            if (context.CancellationToken.IsCancellationRequested)
+            if (folder is null)
             {
                 return;
             }
 
-            string source =
-                $@"// Auto generated code
+            try
+            {
+                Properties props = ReadGitProperties(folder, spc.CancellationToken);
+                if (spc.CancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                string source =
+                    $@"// Auto generated code
 namespace GitOut.Features.Git.Properties
 {{
     public static class GitProperties
@@ -44,15 +49,14 @@ namespace GitOut.Features.Git.Properties
 }}
 ";
 
-            context.AddSource($"GitProperties.g.cs", source);
-        }
-        catch (Exception e)
-        {
-            Trace.WriteLine(e.ToString());
-        }
+                spc.AddSource("GitProperties.g.cs", source);
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.ToString());
+            }
+        });
     }
-
-    public void Initialize(GeneratorInitializationContext context) { }
 
     private Properties ReadGitProperties(string folder, CancellationToken token)
     {
