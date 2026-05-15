@@ -58,8 +58,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private readonly IOptionsWriter<GitStageOptions> updateStageOptions;
     private readonly IRepositoryWatcher repositoryWatcher;
     private readonly GitRepositoryMonitor monitor;
-    private readonly IDisposable settingsMonitorHandle;
-    private readonly IDisposable logSettingsMonitorHandle;
+    private readonly IDisposable? settingsMonitorHandle;
+    private readonly IDisposable? logSettingsMonitorHandle;
 
     private readonly ICommand createStashBranchCommand;
 
@@ -696,8 +696,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 repositoryWatcher.Events -= OnFileSystemChanges;
                 repositoryWatcher.Dispose();
                 monitor.LogChanged -= OnLogChanged;
-                settingsMonitorHandle.Dispose();
-                logSettingsMonitorHandle.Dispose();
+                settingsMonitorHandle?.Dispose();
+                logSettingsMonitorHandle?.Dispose();
                 break;
             case NavigationType.Deactivated:
                 repositoryWatcher.EnableRaisingEvents = true;

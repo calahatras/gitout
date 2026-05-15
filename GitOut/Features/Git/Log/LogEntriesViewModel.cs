@@ -149,31 +149,29 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                     LogRevisionViewMode.DiffInline => flattenedDiffFiles,
                     _ => throw new InvalidOperationException($"Invalid view mode: {value}"),
                 };
+                Action updateAction = () =>
+                {
+                    currentSource.Source = source;
+                    RootFiles = currentSource.View;
+                    SelectItem(previousSelection);
+                };
+
                 if (
                     source
                     is ILazyAsyncEnumerable<IGitFileEntryViewModel, RelativeDirectoryPath> lazy
                 )
                 {
-                    SynchronizationContext? context = SynchronizationContext.Current;
                     ValueTask t = lazy.MaterializeAsync(RelativeDirectoryPath.Root);
                     _ = t.AsTask()
-                        .ContinueWith(task =>
-                            context!.Post(
-                                d =>
-                                {
-                                    currentSource.Source = source;
-                                    RootFiles = currentSource.View;
-                                    SelectItem(previousSelection);
-                                },
-                                null
-                            )
-                        );
+                        .ContinueWith(task => currentSource.Dispatcher.BeginInvoke(updateAction));
+                }
+                else if (currentSource.Dispatcher.CheckAccess())
+                {
+                    updateAction();
                 }
                 else
                 {
-                    currentSource.Source = source;
-                    RootFiles = currentSource.View;
-                    SelectItem(previousSelection);
+                    currentSource.Dispatcher.BeginInvoke(updateAction);
                 }
             }
         }

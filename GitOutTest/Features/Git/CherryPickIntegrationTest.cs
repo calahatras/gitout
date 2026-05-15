@@ -61,6 +61,8 @@ public class CherryPickIntegrationTest
         >();
         A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
 
+        IOptionsMonitor<GitLogOptions> logOptions = A.Fake<IOptionsMonitor<GitLogOptions>>();
+
         // 3. Initialize the ViewModel
         var viewModel = new GitLogViewModel(
             navigationService,
@@ -68,7 +70,8 @@ public class CherryPickIntegrationTest
             watchProvider,
             snackbarService,
             stagingOptions,
-            updateStageOptions
+            updateStageOptions,
+            logOptions
         );
 
         // 4. Set up the selected log entry

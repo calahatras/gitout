@@ -36,7 +36,7 @@ public class GitStageViewModel
     private readonly ISnackbarService snack;
     private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
     private readonly IRepositoryWatcher repositoryWatcher;
-    private readonly IDisposable stagingOptionsHandle;
+    private readonly IDisposable? stagingOptionsHandle;
 
     private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
     private readonly object workspaceFilesLock = new();
@@ -489,7 +489,7 @@ public class GitStageViewModel
         {
             cancelRefreshSnack?.Dispose();
             repositoryWatcher.Dispose();
-            stagingOptionsHandle.Dispose();
+            stagingOptionsHandle?.Dispose();
             refreshContextCancellationTokenSource?.Dispose();
         }
     }

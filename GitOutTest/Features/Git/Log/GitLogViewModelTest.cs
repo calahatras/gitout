@@ -71,6 +71,8 @@ public class GitLogViewModelTest
     [Test]
     public async Task CherryPickCommand_ShouldCallRepository_AndShowSuccessSnackbar()
     {
+        IOptionsMonitor<GitLogOptions> logOptions = A.Fake<IOptionsMonitor<GitLogOptions>>();
+
         // Arrange
         var viewModel = new GitLogViewModel(
             navigationService,
@@ -78,7 +80,8 @@ public class GitLogViewModelTest
             watchProvider,
             snackbarService,
             stagingOptions,
-            updateStageOptions
+            updateStageOptions,
+            logOptions
         );
 
         GitHistoryEvent commit = GitHistoryEvent
@@ -118,6 +121,7 @@ public class GitLogViewModelTest
     [Test]
     public async Task CherryPickCommand_ShouldHandleConflict_AndShowActionSnackbar()
     {
+        IOptionsMonitor<GitLogOptions> logOptions = A.Fake<IOptionsMonitor<GitLogOptions>>();
         // Arrange
         var viewModel = new GitLogViewModel(
             navigationService,
@@ -125,7 +129,8 @@ public class GitLogViewModelTest
             watchProvider,
             snackbarService,
             stagingOptions,
-            updateStageOptions
+            updateStageOptions,
+            logOptions
         );
 
         GitHistoryEvent commit = GitHistoryEvent
