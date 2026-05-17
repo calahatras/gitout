@@ -39,6 +39,7 @@ public class RelativeDirectoryPath
 
     public FileName Name { get; }
     public string Directory { get; }
+    public bool IsDirectory => Directory.EndsWith(GitDirectorySeparatorChar);
     public IReadOnlyCollection<string> Segments { get; }
     public RelativeDirectoryPath Parent => parent.Value;
 
