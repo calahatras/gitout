@@ -16,8 +16,8 @@ public sealed class KeyboardShortcutsSettingsViewModel : INotifyPropertyChanged,
 {
     private readonly IOptionsWriter<KeyboardShortcutsOptions> writer;
     private readonly IDisposable? subscription;
-    private Key hotKey;
-    private ModifierKeys modifiers;
+    private Key hotKey = Key.OemQuestion;
+    private ModifierKeys modifiers = ModifierKeys.None;
 
     public KeyboardShortcutsSettingsViewModel(
         IOptionsMonitor<KeyboardShortcutsOptions> options,
@@ -30,8 +30,8 @@ public sealed class KeyboardShortcutsSettingsViewModel : INotifyPropertyChanged,
         // Keep in sync when another process or the settings UI writes a change.
         subscription = options.OnChange(o =>
         {
-            SetProperty(ref hotKey, ParseKey(o.HotKey), nameof(HotKey));
-            SetProperty(ref modifiers, ParseModifiers(o.Modifiers), nameof(Modifiers));
+            _ = SetProperty(ref hotKey, ParseKey(o.HotKey), nameof(HotKey));
+            _ = SetProperty(ref modifiers, ParseModifiers(o.Modifiers), nameof(Modifiers));
         });
     }
 

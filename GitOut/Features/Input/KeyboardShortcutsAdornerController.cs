@@ -75,7 +75,7 @@ internal sealed class KeyboardShortcutsAdornerController
         onEscapePressed = OnEscapePressed;
 
         // Registers the RoutedCommand so the NavigatorShell toolbar button routes to this page.
-        owner.CommandBindings.Add(
+        _ = owner.CommandBindings.Add(
             new CommandBinding(KeyboardShortcutCommands.ShowShortcuts, OnToggle)
         );
         owner.Loaded += OnLoaded;
@@ -95,7 +95,7 @@ internal sealed class KeyboardShortcutsAdornerController
 
     private void ShowAdorner()
     {
-        AdornerLayer? layer = AdornerLayer.GetAdornerLayer(owner);
+        var layer = AdornerLayer.GetAdornerLayer(owner);
         if (layer is null)
             return;
 
@@ -116,7 +116,7 @@ internal sealed class KeyboardShortcutsAdornerController
         if (adorner is null)
             return;
 
-        AdornerLayer? layer = AdornerLayer.GetAdornerLayer(owner);
+        var layer = AdornerLayer.GetAdornerLayer(owner);
         layer?.Remove(adorner);
         adorner.DismissRequested -= OnDismissRequested;
         adorner = null;
@@ -136,7 +136,7 @@ internal sealed class KeyboardShortcutsAdornerController
     private void FocusOwner()
     {
         if (!owner.IsKeyboardFocusWithin)
-            owner.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+            _ = owner.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
     }
 
     private void OnDismissRequested(object? sender, EventArgs e) => HideAdorner();
@@ -188,6 +188,6 @@ internal sealed class KeyboardShortcutsAdornerController
             KeyboardShortcutsSettingsViewModel.ParseKey(options.CurrentValue.HotKey),
             KeyboardShortcutsSettingsViewModel.ParseModifiers(options.CurrentValue.Modifiers)
         );
-        owner.InputBindings.Add(keyBinding);
+        _ = owner.InputBindings.Add(keyBinding);
     }
 }
