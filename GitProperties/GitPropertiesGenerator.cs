@@ -15,30 +15,33 @@ public class GitPropertiesGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var projectDirProvider = context.AnalyzerConfigOptionsProvider
-            .Select((options, _) =>
+        var projectDirProvider = context.AnalyzerConfigOptionsProvider.Select(
+            (options, ct) =>
             {
                 options.GlobalOptions.TryGetValue("build_property.projectdir", out string folder);
                 return folder;
-            });
-
-        context.RegisterSourceOutput(projectDirProvider, (spc, folder) =>
-        {
-            if (folder is null)
-            {
-                return;
             }
+        );
 
-            try
+        context.RegisterSourceOutput(
+            projectDirProvider,
+            (spc, folder) =>
             {
-                Properties props = ReadGitProperties(folder, spc.CancellationToken);
-                if (spc.CancellationToken.IsCancellationRequested)
+                if (folder is null)
                 {
                     return;
                 }
 
-                string source =
-                    $@"// Auto generated code
+                try
+                {
+                    Properties props = ReadGitProperties(folder, spc.CancellationToken);
+                    if (spc.CancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    string source =
+                        $@"// Auto generated code
 namespace GitOut.Features.Git.Properties
 {{
     public static class GitProperties
@@ -49,13 +52,14 @@ namespace GitOut.Features.Git.Properties
 }}
 ";
 
-                spc.AddSource("GitProperties.g.cs", source);
+                    spc.AddSource("GitProperties.g.cs", source);
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e.ToString());
+                }
             }
-            catch (Exception e)
-            {
-                Trace.WriteLine(e.ToString());
-            }
-        });
+        );
     }
 
     private Properties ReadGitProperties(string folder, CancellationToken token)
