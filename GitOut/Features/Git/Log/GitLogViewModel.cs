@@ -603,7 +603,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         );
 
         RevealInExplorerCommand = new CallbackCommand(() =>
-            Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose()
+            Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory.Normalize()}").Dispose()
         );
         CopyContentCommand = new CopyTextToClipBoardCommand<object>(
             d => Repository.WorkingDirectory.Directory,
