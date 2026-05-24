@@ -9,6 +9,7 @@ using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.Llm;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -100,6 +101,7 @@ public partial class App : Application
 
         services.AddSettingsFeature();
         services.AddGitFeature();
+        services.AddLlmFeature();
         _ = services.AddTextPromptFeature();
         services.AddThemeFeature();
 
@@ -111,6 +113,9 @@ public partial class App : Application
         services
             .AddWritableOptions<GitStageOptions>()
             .Bind(context.Configuration, GitStageOptions.SectionKey);
+        services
+            .AddWritableOptions<LlmOptions>()
+            .Bind(context.Configuration, LlmOptions.SectionKey);
         services
             .AddWritableOptions<GitLogOptions>()
             .Bind(context.Configuration, GitLogOptions.SectionKey);

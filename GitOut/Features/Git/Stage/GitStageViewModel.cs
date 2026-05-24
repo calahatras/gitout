@@ -18,6 +18,7 @@ using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
+using GitOut.Features.Llm;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Native.Shell32;
 using GitOut.Features.Navigation;
@@ -37,6 +38,9 @@ public class GitStageViewModel
     private readonly IOptionsMonitor<GitStageOptions> stagingOptions;
     private readonly IRepositoryWatcher repositoryWatcher;
     private readonly IDisposable stagingOptionsHandle;
+    private readonly LlmCommitMessageGenerator commitMessageGenerator;
+    private readonly IOptionsMonitor<LlmOptions> llmOptions;
+    private bool isGeneratingCommitMessage;
 
     private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
     private readonly object workspaceFilesLock = new();
@@ -78,6 +82,24 @@ public class GitStageViewModel
         IGitRepositoryWatcherProvider watchProvider,
         ISnackbarService snack,
         IOptionsMonitor<GitStageOptions> stagingOptions
+    ) : this(
+        navigation,
+        title,
+        watchProvider,
+        snack,
+        stagingOptions,
+        new LlmCommitMessageGenerator(new NullLlmService(), new DummyOptionsMonitor<LlmOptions>(new LlmOptions())),
+        new DummyOptionsMonitor<LlmOptions>(new LlmOptions())
+    ) {}
+
+    public GitStageViewModel(
+        INavigationService navigation,
+        ITitleService title,
+        IGitRepositoryWatcherProvider watchProvider,
+        ISnackbarService snack,
+        IOptionsMonitor<GitStageOptions> stagingOptions,
+        LlmCommitMessageGenerator commitMessageGenerator,
+        IOptionsMonitor<LlmOptions> llmOptions
     )
     {
         GitStagePageOptions options =
@@ -85,6 +107,8 @@ public class GitStageViewModel
             ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
         this.snack = snack;
         this.stagingOptions = stagingOptions;
+        this.commitMessageGenerator = commitMessageGenerator;
+        this.llmOptions = llmOptions;
         Repository = options.Repository;
         title.Title = $"{Repository.Name} (Stage)";
         showSpacesAsDots = stagingOptions.CurrentValue.ShowSpacesAsDots;
@@ -121,6 +145,10 @@ public class GitStageViewModel
                 !string.IsNullOrEmpty(CommitMessage)
                 && (indexFiles.Count > 0 || amendLastCommit)
                 && (!checkoutBranchBeforeCommit || GitBranchName.IsValid(newBranchName))
+        );
+        GenerateCommitMessageCommand = new AsyncCallbackCommand(
+            GenerateCommitMessageAsync,
+            () => !isGeneratingCommitMessage && (indexFiles.Count > 0 || amendLastCommit)
         );
         StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
         StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
@@ -377,6 +405,13 @@ public class GitStageViewModel
     public ICommand ResetHeadCommand { get; }
     public ICommand StashIndexCommand { get; }
     public ICommand CommitCommand { get; }
+    public ICommand GenerateCommitMessageCommand { get; }
+
+    public bool IsGeneratingCommitMessage
+    {
+        get => isGeneratingCommitMessage;
+        private set => SetProperty(ref isGeneratingCommitMessage, value);
+    }
     public ICommand CancelEditTextCommand { get; }
     public ICommand PatchEditTextCommand { get; }
     public ICommand DiffSelectedFilesCommand { get; }
@@ -1059,6 +1094,56 @@ public class GitStageViewModel
         SelectedChange = null;
     }
 
+    private async Task GenerateCommitMessageAsync()
+    {
+        IsGeneratingCommitMessage = true;
+        CommandManager.InvalidateRequerySuggested();
+        try
+        {
+            snack.Show("Fetching staged changes...");
+            string diffText = await Repository.GetStagedDiffAsync();
+            if (string.IsNullOrWhiteSpace(diffText))
+            {
+                snack.Show("No staged changes found to generate a message from.");
+                return;
+            }
+
+            var historyMessages = new List<string>();
+            LlmOptions options = llmOptions.CurrentValue;
+            if (options.UseHistory)
+            {
+                try
+                {
+                    var logOptions = new LogOptions { IncludeRemotes = false, IncludeStashes = false };
+                    IEnumerable<GitHistoryEvent> history = await Repository.LogAsync(logOptions);
+                    historyMessages.AddRange(
+                        history.Take(options.HistoryCount)
+                               .Select(h => string.IsNullOrEmpty(h.Body) ? h.Subject : $"{h.Subject}\n\n{h.Body}")
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // History fetch might fail in brand new repositories; ignore and continue without history context
+                    System.Diagnostics.Debug.WriteLine($"Failed to retrieve history for LLM: {ex.Message}");
+                }
+            }
+
+            snack.Show("Generating commit message using local LLM...");
+            string generatedMsg = await commitMessageGenerator.GenerateCommitMessageAsync(diffText, historyMessages);
+            CommitMessage = generatedMsg;
+            snack.ShowSuccess("Commit message generated successfully.");
+        }
+        catch (Exception ex)
+        {
+            snack.ShowError("Failed to generate commit message: llama-server might be offline.", ex);
+        }
+        finally
+        {
+            IsGeneratingCommitMessage = false;
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
     private void ParseStatus(GitStatusResult result)
     {
         foreach (GitStatusChange change in result.Changes)
@@ -1296,5 +1381,23 @@ public class GitStageViewModel
                 middle = (int)Math.Floor(Math.FusedMultiplyAdd(end - start, .5, start));
             }
         } while (true);
+    }
+
+    private class DummyOptionsMonitor<T> : IOptionsMonitor<T> where T : class, new()
+    {
+        public DummyOptionsMonitor(T value) => CurrentValue = value;
+        public T CurrentValue { get; }
+        public T Get(string? name) => CurrentValue;
+        public IDisposable OnChange(Action<T, string?> listener) => new DummyDisposable();
+        private class DummyDisposable : IDisposable
+        {
+            public void Dispose() {}
+        }
+    }
+
+    private class NullLlmService : ILlmService
+    {
+        public Task<string> GenerateCompletionAsync(LlmCompletionRequest request, CancellationToken cancellationToken = default)
+            => Task.FromResult(string.Empty);
     }
 }

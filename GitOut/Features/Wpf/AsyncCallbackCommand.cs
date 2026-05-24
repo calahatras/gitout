@@ -11,6 +11,8 @@ public class AsyncCallbackCommand : AsyncCallbackCommand<object>
 
     public AsyncCallbackCommand(Func<Task> execute, Func<bool> canExecute)
         : base(_ => execute(), _ => canExecute()) { }
+
+    public Task ExecuteAsync() => ExecuteAsync(null);
 }
 
 public class AsyncCallbackCommand<TArg> : ICommand
@@ -35,11 +37,16 @@ public class AsyncCallbackCommand<TArg> : ICommand
 
     public bool CanExecute(object? parameter) => canExecute((TArg?)parameter);
 
-    public async void Execute(object? parameter)
+    public async Task ExecuteAsync(TArg? parameter)
     {
         if (CanExecute(parameter))
         {
-            await execute((TArg?)parameter);
+            await execute(parameter);
         }
+    }
+
+    public async void Execute(object? parameter)
+    {
+        await ExecuteAsync((TArg?)parameter);
     }
 }

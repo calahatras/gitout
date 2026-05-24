@@ -6,6 +6,7 @@ using FakeItEasy;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
+using GitOut.Features.Llm;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Wpf;
@@ -1846,5 +1847,54 @@ public class GitStageViewModelTest
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)
             )
         );
+    }
+
+    [Test]
+    public async Task GenerateCommitMessageCommandShouldGenerateMessageFromStagedDiffAndHistory()
+    {
+        IGitRepository repository = A.Fake<IGitRepository>();
+        _ = A.CallTo(() => repository.GetStagedDiffAsync(A<System.Threading.CancellationToken>._)).Returns("diff-text");
+
+        GitHistoryEvent commit = GitHistoryEvent.Builder()
+            .ParseHash("0000000000000000000000000000000000000000")
+            .ParseAuthorName("Author")
+            .ParseAuthorEmail("email@example.com")
+            .ParseDate(12345678)
+            .ParseSubject("Subject")
+            .Build();
+        _ = A.CallTo(() => repository.LogAsync(A<LogOptions>._)).Returns(new[] { commit });
+
+        GitStatusChange change = GitStatusChange.Parse("1 M. N... 100644 100644 100644 9e7e798e2b5cf7e72dba4554a144dcc85bf7f4d6 2952ce2c99004f4f66aae34bff1b0d6252cbe36e filename.txt").Build();
+        _ = A.CallTo(() => repository.StatusAsync()).Returns(new GitStatusResult([change]));
+
+        INavigationService navigation = A.Fake<INavigationService>();
+        var stageOptions = new GitStagePageOptions(repository);
+        _ = A.CallTo(() => navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)).Returns(stageOptions);
+
+        ITitleService title = A.Fake<ITitleService>();
+        IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+        IRepositoryWatcher watch = A.Fake<IRepositoryWatcher>();
+        _ = A.CallTo(() => watchProvider.PrepareWatchRepositoryChanges(repository, RepositoryWatcherOptions.All)).Returns(watch);
+        ISnackbarService snack = A.Fake<ISnackbarService>();
+
+        IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+        _ = A.CallTo(() => options.CurrentValue).Returns(new GitStageOptions { ShowSpacesAsDots = false });
+
+        IOptionsMonitor<LlmOptions> llmOptions = A.Fake<IOptionsMonitor<LlmOptions>>();
+        _ = A.CallTo(() => llmOptions.CurrentValue).Returns(new LlmOptions { UseHistory = true, HistoryCount = 1 });
+
+        ILlmService llmService = A.Fake<ILlmService>();
+        _ = A.CallTo(() => llmService.GenerateCompletionAsync(A<LlmCompletionRequest>._, A<System.Threading.CancellationToken>._)).Returns("AI generated message");
+
+        var generator = new LlmCommitMessageGenerator(llmService, llmOptions);
+
+        var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options, generator, llmOptions);
+
+        actor.Navigated(NavigationType.Initial);
+
+        await ((AsyncCallbackCommand)actor.GenerateCommitMessageCommand).ExecuteAsync();
+
+        Assert.That(actor.CommitMessage, Is.EqualTo("AI generated message"));
+        A.CallTo(() => snack.ShowSuccess(A<string>._)).MustHaveHappenedOnceExactly();
     }
 }

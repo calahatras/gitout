@@ -55,19 +55,36 @@ public class GitProcess : IGitProcess
         };
         _ = exec.Start();
 
+        int eventCount = 3;
         var source = new TaskCompletionSource<bool>();
         var output = new List<string>();
         var error = new List<string>();
+
+        void Signal()
+        {
+            if (Interlocked.Decrement(ref eventCount) == 0)
+            {
+                try
+                {
+                    source.TrySetResult(exec.ExitCode == 0);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    source.TrySetException(ex);
+                }
+            }
+        }
+
         exec.OutputDataReceived += OnHandleOutputData;
         exec.ErrorDataReceived += OnHandleErrorData;
-        exec.Exited += (sender, e) => source.SetResult(string.IsNullOrEmpty(error.ToString()));
+        exec.Exited += (sender, e) => Signal();
 
         exec.BeginErrorReadLine();
         exec.BeginOutputReadLine();
 
         if (cancellationToken != CancellationToken.None)
         {
-            _ = cancellationToken.Register(source.SetCanceled);
+            _ = cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
         }
         Trace.WriteLine("Writing to stream:");
         Trace.WriteLine(writer.ToString());
@@ -103,7 +120,11 @@ public class GitProcess : IGitProcess
         void OnHandleOutputData(object sender, DataReceivedEventArgs e)
         {
             string? data = e.Data;
-            if (data is not null)
+            if (data is null)
+            {
+                Signal();
+            }
+            else
             {
                 output.AddRange(data.Split('\0'));
                 Trace.WriteLine($"{data}");
@@ -112,7 +133,11 @@ public class GitProcess : IGitProcess
         void OnHandleErrorData(object sender, DataReceivedEventArgs e)
         {
             string? data = e.Data;
-            if (data is not null)
+            if (data is null)
+            {
+                Signal();
+            }
+            else
             {
                 error.Add(data);
                 Trace.WriteLine($"{data}");

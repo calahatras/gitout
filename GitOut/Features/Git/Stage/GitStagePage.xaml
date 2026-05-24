@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
   x:Class="GitOut.Features.Git.Stage.GitStagePage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,6 +8,7 @@
   xmlns:local="clr-namespace:GitOut.Features.Git.Stage"
   xmlns:files="clr-namespace:GitOut.Features.Git.Files"
   xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
+  xmlns:progress="clr-namespace:GitOut.Features.Material.Progress"
   xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
   xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
   Focusable="True"
@@ -20,7 +21,7 @@
     <local:StatusToBrushConverter x:Key="StatusToBrushConverter" />
     <diff:DiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter" />
     <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
-    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <Style
       x:Key="GitChangeListStyle"
       BasedOn="{StaticResource MaterialListStyle}"
@@ -881,6 +882,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
               <StackPanel Orientation="Horizontal">
                 <CheckBox
@@ -894,8 +896,30 @@
                   IsChecked="{Binding CheckoutBranchBeforeCommit}"
                 />
               </StackPanel>
+              <Grid Grid.Column="2" VerticalAlignment="Center">
+                <Button
+                  Style="{StaticResource StageIconButtonStyle}"
+                  Command="{Binding GenerateCommitMessageCommand}"
+                  ToolTip="Generate commit message using AI"
+                  Visibility="{Binding IsGeneratingCommitMessage, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=true}"
+                >
+                  <Path
+                    Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                    Data="{StaticResource Creation}"
+                  />
+                </Button>
+                <progress:CircularProgressIndicator
+                  ShowProgress="{Binding IsGeneratingCommitMessage}"
+                  StrokeThickness="2"
+                  Diameter="20"
+                  Stroke="{DynamicResource MaterialForegroundBase}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Margin="6 0"
+                />
+              </Grid>
               <Button
-                Grid.Column="2"
+                Grid.Column="3"
                 Style="{StaticResource StageIconButtonStyle}"
                 Command="{Binding StashIndexCommand}"
                 ToolTip="Stash index"
@@ -906,7 +930,7 @@
                 />
               </Button>
               <Button
-                Grid.Column="3"
+                Grid.Column="4"
                 Style="{StaticResource StageIconButtonStyle}"
                 Command="{Binding CommitCommand}"
                 ToolTip="Commit"

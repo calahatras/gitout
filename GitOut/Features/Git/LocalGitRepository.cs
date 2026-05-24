@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.Diagnostics;
@@ -568,6 +569,17 @@ public sealed class LocalGitRepository : IGitRepository
         );
         return CreateProcess(ProcessOptions.FromArguments(argumentsBuilder.ToString()))
             .ExecuteAsync();
+    }
+
+    public async Task<string> GetStagedDiffAsync(CancellationToken cancellationToken = default)
+    {
+        IGitProcess proc = CreateProcess(ProcessOptions.FromArguments("--no-optional-locks diff --cached --no-color"));
+        ProcessEventArgs result = await proc.ExecuteAsync(cancellationToken);
+        if (result.ErrorLines.Count > 0)
+        {
+            throw new InvalidOperationException($"git diff failed: {result.Error}");
+        }
+        return result.Output;
     }
 
     public Task RestoreWorkspaceAsync(GitStatusChange change) =>

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
@@ -58,6 +59,7 @@ public interface IGitRepository
     Task ApplyAsync(GitPatch patch);
     Task StashIndexAsync();
     Task CommitAsync(GitCommitOptions options);
+    Task<string> GetStagedDiffAsync(CancellationToken cancellationToken = default);
     Task RestoreWorkspaceAsync(GitStatusChange change);
 
     IAsyncEnumerable<GitWorktree> WorktreeListAsync();
