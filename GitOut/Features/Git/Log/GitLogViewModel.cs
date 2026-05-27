@@ -29,7 +29,11 @@ using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Git.Log;
 
-public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INavigationFallback
+public class GitLogViewModel
+    : INotifyPropertyChanged,
+        INavigationListener,
+        INavigationFallback,
+        IDisposable
 {
     private static readonly Size PromptSize = new(400, 150);
     private static readonly Point PromptOffset = new(80, 60);
@@ -66,7 +70,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private readonly IGitRepositoryFactory repositoryFactory;
     private readonly IDisposable? settingsMonitorHandle;
     private readonly IDisposable? logSettingsMonitorHandle;
-    private readonly IDisposable worktreeOptionsMonitorHandle;
+    private readonly IDisposable? worktreeOptionsMonitorHandle;
 
     private readonly ICommand createStashBranchCommand;
 
@@ -532,7 +536,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                             GitLogPageOptions.OpenRepository(newRepo)
                         );
                     }
-                    catch (Exception ioe)
+                    catch (InvalidOperationException ioe)
                     {
                         snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
                     }
@@ -593,7 +597,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                                 GitLogPageOptions.OpenRepository(newRepo)
                             );
                         }
-                        catch (Exception ioe)
+                        catch (InvalidOperationException ioe)
                         {
                             snack.ShowError(ioe.Message, ioe, TimeSpan.FromSeconds(4));
                         }
@@ -986,7 +990,7 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 monitor.LogChanged -= OnLogChanged;
                 settingsMonitorHandle?.Dispose();
                 logSettingsMonitorHandle?.Dispose();
-                worktreeOptionsMonitorHandle.Dispose();
+                worktreeOptionsMonitorHandle?.Dispose();
                 break;
             case NavigationType.Deactivated:
                 repositoryWatcher.EnableRaisingEvents = true;
@@ -1003,6 +1007,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 break;
         }
     }
+
+    public void Dispose() => refreshContextCancellationTokenSource?.Dispose();
 
     private void OnLogChanged(object? sender, EventArgs args) => _ = CheckRepositoryStatusAsync();
 

@@ -80,9 +80,11 @@ public class GitStageViewModel
         IOptionsMonitor<GitStageOptions> stagingOptions
     )
     {
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
         GitStagePageOptions options =
             navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)
             ?? throw new ArgumentNullException(nameof(options), "Options may not be null");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
         this.snack = snack;
         this.stagingOptions = stagingOptions;
         Repository = options.Repository;
@@ -815,7 +817,9 @@ public class GitStageViewModel
 
         if (selectedChange is null)
         {
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
             throw new ArgumentNullException(nameof(selectedChange), "No change is selected");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
         }
         if (selectedChange.Location == StatusChangeLocation.Workspace)
         {
@@ -892,7 +896,9 @@ public class GitStageViewModel
 
         if (selectedChange is null)
         {
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
             throw new ArgumentNullException(nameof(selectedChange), "No change is selected");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
         }
         if (selectedChange.Location != StatusChangeLocation.Workspace)
         {
@@ -1263,7 +1269,7 @@ public class GitStageViewModel
         }
     }
 
-    private static int FindSortedIndex<T>(IList<T> items, Func<T, int> compare)
+    private static int FindSortedIndex<T>(ObservableCollection<T> items, Func<T, int> compare)
     {
         int start = 0;
         int middle = items.Count / 2;

@@ -29,7 +29,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
     private readonly IOptionsWriter<GitLogOptions> logStorage;
     private readonly IDisposable? unsubscribeOptions;
     private readonly IDisposable? unsubscribeLogOptions;
-    private readonly IDisposable unsubscribeWorktreeOptions;
+    private readonly IDisposable? unsubscribeWorktreeOptions;
     private readonly IOptionsWriter<WorktreeOptions> worktreeStorage;
     private bool useTransparentBackground = true;
     private bool trimLineEndings;
@@ -264,7 +264,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
     {
         unsubscribeOptions?.Dispose();
         unsubscribeLogOptions?.Dispose();
-        unsubscribeWorktreeOptions.Dispose();
+        unsubscribeWorktreeOptions?.Dispose();
     }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
