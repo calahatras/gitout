@@ -114,8 +114,9 @@ internal sealed class KeyboardShortcutsAdornerController
     private void HideAdorner()
     {
         if (adorner is null)
+        {
             return;
-
+        }
         var layer = AdornerLayer.GetAdornerLayer(owner);
         layer?.Remove(adorner);
         adorner.DismissRequested -= OnDismissRequested;
@@ -136,7 +137,9 @@ internal sealed class KeyboardShortcutsAdornerController
     private void FocusOwner()
     {
         if (!owner.IsKeyboardFocusWithin)
+        {
             _ = owner.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+        }
     }
 
     private void OnDismissRequested(object? sender, EventArgs e) => HideAdorner();
@@ -165,7 +168,9 @@ internal sealed class KeyboardShortcutsAdornerController
         // For pages whose root element is a non-focusable container (e.g. a Grid), focus falls
         // through to the Window and the KeyBinding on the page is never reachable via routing.
         if (!owner.IsKeyboardFocusWithin)
+        {
             FocusOwner();
+        }
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
@@ -181,8 +186,9 @@ internal sealed class KeyboardShortcutsAdornerController
     private void ApplyCurrentHotkey()
     {
         if (keyBinding is not null)
+        {
             owner.InputBindings.Remove(keyBinding);
-
+        }
         keyBinding = new KeyBinding(
             KeyboardShortcutCommands.ShowShortcuts,
             KeyboardShortcutsSettingsViewModel.ParseKey(options.CurrentValue.HotKey),

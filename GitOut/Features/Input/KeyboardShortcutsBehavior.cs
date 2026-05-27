@@ -108,10 +108,14 @@ public static class KeyboardShortcutsBehavior
     private static void OnRegisterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not UserControl page)
+        {
             return;
+        }
 
         if ((bool)e.NewValue)
+        {
             page.Loaded += OnPageFirstLoaded;
+        }
     }
 
     /// <summary>
@@ -122,7 +126,9 @@ public static class KeyboardShortcutsBehavior
     private static void OnPageFirstLoaded(object sender, RoutedEventArgs e)
     {
         if (sender is not UserControl page)
+        {
             return;
+        }
 
         // Only wire up once — the controller manages its own Loaded/Unloaded from here on.
         page.Loaded -= OnPageFirstLoaded;
@@ -177,7 +183,9 @@ public static class KeyboardShortcutsBehavior
         foreach (object child in LogicalTreeHelper.GetChildren(element))
         {
             if (child is DependencyObject childDo)
+            {
                 CollectFromElement(childDo, entries);
+            }
         }
     }
 }

@@ -155,7 +155,9 @@ public sealed class KeyboardShortcutsAdorner : Adorner
 
         RenderColumn(dc, leftGroups, leftX, contentY, theme, dpi);
         if (rightGroups.Count > 0)
+        {
             RenderColumn(dc, rightGroups, leftX + leftColWidth + ColumnGap, contentY, theme, dpi);
+        }
     }
 
     // ── Theme resolution ──────────────────────────────────────────────────
@@ -289,7 +291,9 @@ public sealed class KeyboardShortcutsAdorner : Adorner
                     dpi
                 );
                 if (render)
+                {
                     dc.DrawText(plus, new Point(offsetX + 2, midY - plus.Height / 2));
+                }
                 offsetX += plus.Width + 4;
             }
 
@@ -328,11 +332,17 @@ public sealed class KeyboardShortcutsAdorner : Adorner
     private static IEnumerable<string> BadgeLabels(KeyboardShortcutEntry entry)
     {
         if (entry.Modifiers.HasFlag(ModifierKeys.Control))
+        {
             yield return "Ctrl";
+        }
         if (entry.Modifiers.HasFlag(ModifierKeys.Alt))
+        {
             yield return "Alt";
+        }
         if (entry.Modifiers.HasFlag(ModifierKeys.Shift))
+        {
             yield return "Shift";
+        }
         yield return KeyLabel(entry.Key);
     }
 
@@ -343,17 +353,27 @@ public sealed class KeyboardShortcutsAdorner : Adorner
     internal static string ModifiersLabel(ModifierKeys modifiers)
     {
         if (modifiers == ModifierKeys.None)
+        {
             return string.Empty;
+        }
 
         var parts = new List<string>(4);
         if ((modifiers & ModifierKeys.Control) != 0)
+        {
             parts.Add("Ctrl");
+        }
         if ((modifiers & ModifierKeys.Alt) != 0)
+        {
             parts.Add("Alt");
+        }
         if ((modifiers & ModifierKeys.Shift) != 0)
+        {
             parts.Add("Shift");
+        }
         if ((modifiers & ModifierKeys.Windows) != 0)
+        {
             parts.Add("Win");
+        }
         return string.Join("+", parts);
     }
 
