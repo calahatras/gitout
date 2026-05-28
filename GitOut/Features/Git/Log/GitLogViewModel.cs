@@ -391,7 +391,7 @@ public class GitLogViewModel
                     snack.ShowSuccess($"Worktree {branchName.Name} created");
                     await RefreshWorktreesAsync();
 
-                    IGitRepository newRepo = repositoryFactory.Create(DirectoryPath.Create(path));
+                    IGitRepository newRepo = repositoryFactory.Create(directory);
                     navigation.Navigate(
                         typeof(GitLogPage).FullName!,
                         GitLogPageOptions.OpenRepository(newRepo)
