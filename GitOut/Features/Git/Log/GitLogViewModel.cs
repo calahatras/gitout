@@ -1008,7 +1008,15 @@ public class GitLogViewModel
         }
     }
 
-    public void Dispose() => refreshContextCancellationTokenSource?.Dispose();
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        refreshContextCancellationTokenSource?.Dispose();
+        worktreeOptionsMonitorHandle?.Dispose();
+        repositoryWatcher?.Dispose();
+        settingsMonitorHandle?.Dispose();
+        logSettingsMonitorHandle?.Dispose();
+    }
 
     private void OnLogChanged(object? sender, EventArgs args) => _ = CheckRepositoryStatusAsync();
 
