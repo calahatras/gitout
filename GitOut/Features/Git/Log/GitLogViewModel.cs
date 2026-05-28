@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using GitOut.Features.Collections;
+using GitOut.Features.Git.CherryPick;
 using GitOut.Features.Git.Files;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
@@ -57,8 +58,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     private readonly IOptionsWriter<GitStageOptions> updateStageOptions;
     private readonly IRepositoryWatcher repositoryWatcher;
     private readonly GitRepositoryMonitor monitor;
-    private readonly IDisposable settingsMonitorHandle;
-    private readonly IDisposable logSettingsMonitorHandle;
+    private readonly IDisposable? settingsMonitorHandle;
+    private readonly IDisposable? logSettingsMonitorHandle;
 
     private readonly ICommand createStashBranchCommand;
 
@@ -182,9 +183,12 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 selectedLogEntries.Count < 2
                     ? logOptions.CurrentValue.DefaultSingleRevisionViewMode
                     : logOptions.CurrentValue.DefaultMultiRevisionViewMode;
-            UpdateHighlights();
-
             RefreshSelectedContext();
+            UpdateHighlights();
+            PropertyChanged?.Invoke(
+                this,
+                new PropertyChangedEventArgs(nameof(HasSelectedLogEntries))
+            );
         };
         selectedStashEntries.CollectionChanged += (sender, args) =>
         {
@@ -316,6 +320,36 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 }
             };
         });
+        CherryPickCommand = new AsyncCallbackCommand(
+            () => ExecuteCherryPickAsync(null),
+            () => selectedLogEntries.Count > 0
+        );
+
+        CherryPickAdvancedCommand = new CallbackCommand(
+            () =>
+            {
+                INavigationService child = navigation.NavigateNewWindow(
+                    typeof(CherryPickOptionsPage).FullName!,
+                    new CherryPickPrepareOptions(selectedLogEntries),
+                    new NavigationOverrideOptions(
+                        new Size(400, 290),
+                        PromptOffset,
+                        IsModal: true,
+                        IsStatusBarVisible: false,
+                        IsTransparent: true
+                    )
+                );
+                child.Closed += async (sender, args) =>
+                {
+                    GitCherryPickOptions? options = child.GetDialogResult<GitCherryPickOptions>();
+                    if (options is not null)
+                    {
+                        await ExecuteCherryPickAsync(options);
+                    }
+                };
+            },
+            () => selectedLogEntries.Count > 0
+        );
 
         RevealInExplorerCommand = new CallbackCommand(() =>
             Process.Start("explorer.exe", $"/s,{Repository.WorkingDirectory}").Dispose()
@@ -551,6 +585,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
         private set => SetProperty(ref changesCount, value);
     }
 
+    public bool HasSelectedLogEntries => selectedLogEntries.Count > 0;
+
     public ICollectionView ActiveStashes { get; }
     public ICollectionView Entries { get; }
     public ICollectionView Remotes { get; }
@@ -622,6 +658,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
     public ICommand FetchRemotesCommand { get; }
     public ICommand PruneRemotesCommand { get; }
     public ICommand CreateBranchFromCommitCommand { get; }
+    public ICommand CherryPickCommand { get; }
+    public ICommand CherryPickAdvancedCommand { get; }
     public ICommand CheckoutCommitCommand { get; }
     public ICommand CheckoutBranchCommand { get; }
     public ICommand RevealInExplorerCommand { get; }
@@ -658,8 +696,8 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 repositoryWatcher.Events -= OnFileSystemChanges;
                 repositoryWatcher.Dispose();
                 monitor.LogChanged -= OnLogChanged;
-                settingsMonitorHandle.Dispose();
-                logSettingsMonitorHandle.Dispose();
+                settingsMonitorHandle?.Dispose();
+                logSettingsMonitorHandle?.Dispose();
                 break;
             case NavigationType.Deactivated:
                 repositoryWatcher.EnableRaisingEvents = true;
@@ -860,6 +898,79 @@ public class GitLogViewModel : INotifyPropertyChanged, INavigationListener, INav
                 brush = UpstreamHighlightBrush;
             }
             entry.HighlightBrush = brush;
+        }
+    }
+
+    private async Task ExecuteCherryPickAsync(GitCherryPickOptions? options)
+    {
+        IsWorking = true;
+        try
+        {
+            IEnumerable<string> references = selectedLogEntries.Select(e => e.Event.Id.Hash);
+            await Repository.CherryPickAsync(references, options);
+            snack.ShowSuccess("Cherry-pick completed successfully");
+        }
+        catch (InvalidOperationException ex)
+        {
+            await HandleCherryPickErrorAsync(ex.Message);
+        }
+        finally
+        {
+            await CheckRepositoryStatusAsync();
+            IsWorking = false;
+        }
+    }
+
+    private async Task HandleCherryPickErrorAsync(string errorMessage)
+    {
+        const string continueAction = "CONTINUE";
+        const string skipAction = "SKIP";
+        const string abortAction = "ABORT";
+
+        SnackAction? action = await snack.ShowAsync(
+            Snack
+                .Builder()
+                .WithMessage(
+                    $"Cherry-pick conflict: {errorMessage}. Please resolve conflicts and choose an action."
+                )
+                .WithDuration(TimeSpan.FromMinutes(10))
+                .AddAction(continueAction)
+                .AddAction(skipAction)
+                .AddAction(abortAction)
+        );
+
+        if (action is null)
+        {
+            return;
+        }
+
+        IsWorking = true;
+        try
+        {
+            if (action.Text == continueAction)
+            {
+                await Repository.CherryPickContinueAsync();
+                snack.ShowSuccess("Cherry-pick continued");
+            }
+            else if (action.Text == skipAction)
+            {
+                await Repository.CherryPickSkipAsync();
+                snack.ShowSuccess("Cherry-pick skipped");
+            }
+            else if (action.Text == abortAction)
+            {
+                await Repository.CherryPickAbortAsync();
+                snack.ShowSuccess("Cherry-pick aborted");
+            }
+        }
+        catch (InvalidOperationException e)
+        {
+            snack.ShowError(e.Message, e, TimeSpan.FromSeconds(10));
+        }
+        finally
+        {
+            await CheckRepositoryStatusAsync();
+            IsWorking = false;
         }
     }
 

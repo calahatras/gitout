@@ -69,12 +69,15 @@ public partial class App : Application
             SourceLevels.Warning | SourceLevels.Error;
 
         ILogger<App> logger = host.Services.GetRequiredService<ILogger<App>>();
-        logger.LogInformation(LogEventId.Application, "Application started");
-        logger.LogInformation(
-            LogEventId.Application,
-            "Commit ID: {CommitId}",
-            Features.Git.Properties.GitProperties.CommitId
-        );
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(LogEventId.Application, "Application started");
+            logger.LogInformation(
+                LogEventId.Application,
+                "Commit ID: {CommitId}",
+                Features.Git.Properties.GitProperties.CommitId
+            );
+        }
         base.OnStartup(e);
         var token = new CancellationToken();
         _ = host.RunAsync(token);

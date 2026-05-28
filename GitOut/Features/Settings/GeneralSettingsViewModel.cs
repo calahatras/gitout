@@ -27,8 +27,8 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 {
     private readonly IOptionsWriter<GitStageOptions> storage;
     private readonly IOptionsWriter<GitLogOptions> logStorage;
-    private readonly IDisposable unsubscribeOptions;
-    private readonly IDisposable unsubscribeLogOptions;
+    private readonly IDisposable? unsubscribeOptions;
+    private readonly IDisposable? unsubscribeLogOptions;
     private bool useTransparentBackground = true;
     private bool trimLineEndings;
     private bool showSpacesAsDots;
@@ -219,8 +219,8 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 
     public void Dispose()
     {
-        unsubscribeOptions.Dispose();
-        unsubscribeLogOptions.Dispose();
+        unsubscribeOptions?.Dispose();
+        unsubscribeLogOptions?.Dispose();
     }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
