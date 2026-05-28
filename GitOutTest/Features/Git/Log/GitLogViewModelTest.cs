@@ -9,6 +9,7 @@ using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Options;
+using GitOut.Features.Settings;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 using NUnit.Framework;
@@ -25,7 +26,9 @@ public class GitLogViewModelTest
     private IOptionsWriter<GitStageOptions> updateStageOptions;
     private ITitleService titleService;
     private IGitRepositoryWatcherProvider watchProvider;
+    private IGitRepositoryFactory repositoryFactory;
     private IOptionsMonitor<GitStageOptions> stagingOptions;
+    private IOptionsMonitor<WorktreeOptions> worktreeOptions;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     [SetUp]
@@ -64,8 +67,10 @@ public class GitLogViewModelTest
             )
             .Returns(watcher);
 
+        repositoryFactory = A.Fake<IGitRepositoryFactory>();
         stagingOptions = A.Fake<IOptionsMonitor<GitStageOptions>>();
         A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
+        worktreeOptions = A.Fake<IOptionsMonitor<WorktreeOptions>>();
     }
 
     [Test]
@@ -78,10 +83,12 @@ public class GitLogViewModelTest
             navigationService,
             titleService,
             watchProvider,
+            repositoryFactory,
             snackbarService,
             stagingOptions,
             updateStageOptions,
-            logOptions
+            logOptions,
+            worktreeOptions
         );
 
         GitHistoryEvent commit = GitHistoryEvent
@@ -127,10 +134,12 @@ public class GitLogViewModelTest
             navigationService,
             titleService,
             watchProvider,
+            repositoryFactory,
             snackbarService,
             stagingOptions,
             updateStageOptions,
-            logOptions
+            logOptions,
+            worktreeOptions
         );
 
         GitHistoryEvent commit = GitHistoryEvent
