@@ -611,6 +611,10 @@ public class GitStageViewModel
         }
 
         GitStatusChange change = selectedChange.Model;
+        if (change.Path.IsDirectory)
+        {
+            return;
+        }
         StatusChangeLocation location = selectedChange.Location;
         if (
             location == StatusChangeLocation.Index
