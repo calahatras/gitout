@@ -15,13 +15,17 @@ public class GitPropertiesGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var projectDirProvider = context.AnalyzerConfigOptionsProvider.Select(
-            (options, ct) =>
-            {
-                options.GlobalOptions.TryGetValue("build_property.projectdir", out string folder);
-                return folder;
-            }
-        );
+        IncrementalValueProvider<string> projectDirProvider =
+            context.AnalyzerConfigOptionsProvider.Select(
+                (options, ct) =>
+                {
+                    _ = options.GlobalOptions.TryGetValue(
+                        "build_property.projectdir",
+                        out string folder
+                    );
+                    return folder;
+                }
+            );
 
         context.RegisterSourceOutput(
             projectDirProvider,

@@ -32,6 +32,7 @@
     <files:FileEntryQueryMatcher x:Key="FileNameQueryMatcher" />
     <lc:TreeToMarginConverter x:Key="TreeToMarginConverter" />
     <lc:NodesToPathConverter x:Key="NodesToPathConverter" />
+    <converters:PathToFileNameConverter x:Key="FileNameConverter" />
     <Canvas x:Key="IconCanvas" x:Shared="False" Width="24" Height="24">
       <Canvas.LayoutTransform>
         <ScaleTransform ScaleX=".8" ScaleY=".8" />
@@ -93,6 +94,18 @@
           </Style>
         </MenuItem.ItemContainerStyle>
       </MenuItem>
+      <MenuItem
+        Header="Create worktree"
+        Command="{Binding CreateWorktreeFromCommitCommand}"
+        CommandParameter="{Binding SelectedContext.Root}"
+        IsEnabled="{Binding SelectedContext.IsSingleSelection}"
+      />
+      <MenuItem
+        Header="Create worktree (detached)"
+        Command="{Binding CreateWorktreeDetachedFromCommitCommand}"
+        CommandParameter="{Binding SelectedContext.Root}"
+        IsEnabled="{Binding SelectedContext.IsSingleSelection}"
+      />
       <Separator />
       <MenuItem Header="Cherry pick" IsEnabled="{Binding HasSelectedLogEntries}">
         <MenuItem Header="Cherry pick" Command="{Binding CherryPickCommand}" />
@@ -568,6 +581,139 @@
                     Style="{StaticResource HintTextStyle}"
                     Text="Branch will be created from HEAD"
                   />
+                </Grid>
+              </Border>
+            </Grid>
+          </Popup>
+          <ToggleButton
+            x:Name="Worktrees"
+            ToolBar.OverflowMode="Never"
+            ToolTip="Worktrees"
+            IsChecked="{Binding IsWorktreesVisible}"
+          >
+            <Path Fill="{DynamicResource MaterialForegroundBase}" Data="{StaticResource Forest}" />
+          </ToggleButton>
+          <Popup
+            ToolBar.OverflowMode="Never"
+            StaysOpen="False"
+            AllowsTransparency="True"
+            IsOpen="{Binding IsChecked, ElementName=Worktrees}"
+            PopupAnimation="Fade"
+            Placement="Bottom"
+          >
+            <Grid>
+              <Border
+                Style="{StaticResource CardPanelStyle}"
+                MinWidth="200"
+                Margin="16 8"
+                Padding="0"
+              >
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                  </Grid.RowDefinitions>
+                  <Grid Grid.Row="0" Margin="16 16 16 16">
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                      <TextBox
+                        Style="{StaticResource MaterialInputStyle}"
+                        AutomationProperties.HelpText="Name"
+                        Text="{Binding DataContext.NewWorktreeName, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                      />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom">
+                      <Button
+                        Style="{StaticResource MaterialButtonStyle}"
+                        Content="CREATE"
+                        Command="{Binding DataContext.CreateWorktreeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      />
+                    </StackPanel>
+                    <TextBlock
+                      Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Text="{Binding DataContext.NewWorktreePath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      Style="{StaticResource HintTextStyle}"
+                    />
+                  </Grid>
+                  <Border Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}" />
+                  <ListView
+                    Grid.Row="2"
+                    Style="{StaticResource MaterialListStyle}"
+                    ItemsSource="{Binding ActiveWorktrees}"
+                  >
+                    <ListView.ItemTemplate>
+                      <DataTemplate DataType="{x:Type local:GitWorktreeViewModel}">
+                        <Button
+                          Style="{StaticResource MaterialListItemButtonStyle}"
+                          Command="{Binding DataContext.SwitchWorktreeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding Model}"
+                        >
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="32" />
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Canvas Width="24" Height="24">
+                              <Canvas.LayoutTransform>
+                                <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                              </Canvas.LayoutTransform>
+                              <Path
+                                Fill="{DynamicResource MaterialForegroundBase}"
+                                Data="{StaticResource Forest}"
+                                HorizontalAlignment="Center"
+                              />
+                            </Canvas>
+                            <Grid Grid.Column="1">
+                              <Grid.RowDefinitions>
+                                <RowDefinition Height="24" />
+                                <RowDefinition Height="12" />
+                              </Grid.RowDefinitions>
+                              <TextBlock
+                                Grid.Row="0"
+                                Text="{Binding Model.Branch.Name}"
+                                Style="{StaticResource NormalTextStyle}"
+                                VerticalAlignment="Center"
+                              />
+                              <TextBlock
+                                Grid.Row="1"
+                                Text="{Binding Model.Path, Converter={StaticResource FileNameConverter}}"
+                                Style="{StaticResource HintTextStyle}"
+                                VerticalAlignment="Center"
+                              />
+                            </Grid>
+                            <Button
+                              Grid.Column="2"
+                              Style="{StaticResource MaterialIconButtonStyle}"
+                              Command="{Binding DataContext.RemoveWorktreeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                              CommandParameter="{Binding}"
+                              ToolTip="Remove worktree"
+                            >
+                              <Canvas Width="24" Height="24">
+                                <Canvas.LayoutTransform>
+                                  <ScaleTransform ScaleX=".75" ScaleY=".75" />
+                                </Canvas.LayoutTransform>
+                                <Path
+                                  Fill="{DynamicResource MaterialForegroundBase}"
+                                  Data="{StaticResource Close}"
+                                />
+                              </Canvas>
+                            </Button>
+                          </Grid>
+                        </Button>
+                      </DataTemplate>
+                    </ListView.ItemTemplate>
+                  </ListView>
                 </Grid>
               </Border>
             </Grid>

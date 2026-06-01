@@ -7,6 +7,7 @@ using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Options;
+using GitOut.Features.Settings;
 using GitOut.Features.Wpf;
 using Microsoft.Extensions.Options;
 using NUnit.Framework;
@@ -55,6 +56,7 @@ public class CherryPickIntegrationTest
                 )
             )
             .Returns(watcher);
+        IGitRepositoryFactory repositoryFactory = A.Fake<IGitRepositoryFactory>();
 
         IOptionsMonitor<GitStageOptions> stagingOptions = A.Fake<
             IOptionsMonitor<GitStageOptions>
@@ -62,16 +64,19 @@ public class CherryPickIntegrationTest
         A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
 
         IOptionsMonitor<GitLogOptions> logOptions = A.Fake<IOptionsMonitor<GitLogOptions>>();
+        IOptionsMonitor<WorktreeOptions> worktreeOptions = A.Fake<IOptionsMonitor<WorktreeOptions>>();
 
         // 3. Initialize the ViewModel
         var viewModel = new GitLogViewModel(
             navigationService,
             titleService,
             watchProvider,
+            repositoryFactory,
             snackbarService,
             stagingOptions,
             updateStageOptions,
-            logOptions
+            logOptions,
+            worktreeOptions
         );
 
         // 4. Set up the selected log entry

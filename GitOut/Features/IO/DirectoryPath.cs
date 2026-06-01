@@ -25,5 +25,7 @@ public class DirectoryPath
 
     public override string ToString() => Directory;
 
+    public string Normalize() => Directory.Replace('/', Path.DirectorySeparatorChar);
+
     public static DirectoryPath Create(string path) => new(path);
 }
