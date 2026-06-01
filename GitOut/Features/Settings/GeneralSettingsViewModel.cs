@@ -13,6 +13,7 @@ using GitOut.Features.Git;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.Input;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -47,6 +48,8 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         IOptionsWriter<GitStageOptions> storage,
         IOptionsMonitor<GitLogOptions> logOptions,
         IOptionsWriter<GitLogOptions> logStorage,
+        IOptionsMonitor<KeyboardShortcutsOptions> shortcutsOptions,
+        IOptionsWriter<KeyboardShortcutsOptions> shortcutsWriter,
         IOptionsMonitor<WorktreeOptions> worktreeOptions,
         IOptionsWriter<WorktreeOptions> worktreeStorage
     )
@@ -55,6 +58,11 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         this.logStorage = logStorage;
         this.storage = storage;
         this.worktreeStorage = worktreeStorage;
+
+        ShortcutsSettings = new KeyboardShortcutsSettingsViewModel(
+            shortcutsOptions,
+            shortcutsWriter
+        );
         var validPaths = new ObservableCollection<ValidGitRepositoryPathViewModel>();
         ValidRepositoryPaths = CollectionViewSource.GetDefaultView(validPaths);
 
@@ -149,6 +157,9 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
     }
 
     public ICollectionView ValidRepositoryPaths { get; }
+
+    /// <summary>Exposes the keyboard-shortcuts hotkey setting for display in the settings UI.</summary>
+    public KeyboardShortcutsSettingsViewModel ShortcutsSettings { get; }
 
     public bool UseTransparentBackground
     {
@@ -263,6 +274,7 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
         unsubscribeOptions?.Dispose();
         unsubscribeLogOptions?.Dispose();
         unsubscribeWorktreeOptions?.Dispose();
+        ShortcutsSettings.Dispose();
     }
 
     private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)

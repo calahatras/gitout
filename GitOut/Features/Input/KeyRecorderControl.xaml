@@ -1,0 +1,43 @@
+<UserControl
+  x:Class="GitOut.Features.Input.KeyRecorderControl"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  mc:Ignorable="d"
+  d:DesignHeight="36"
+  d:DesignWidth="300"
+>
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="Auto" />
+    </Grid.ColumnDefinitions>
+    <!-- Read-only TextBox showing the current key label or recording prompt. -->
+    <TextBox
+      x:Name="KeyDisplay"
+      Style="{StaticResource MaterialInputStyle}"
+      IsReadOnly="True"
+      FontFamily="Roboto"
+      FontSize="12"
+    />
+    <Button
+      x:Name="ChangeButton"
+      Grid.Column="1"
+      Style="{StaticResource MaterialButtonStyle}"
+      Content="CHANGE"
+      Margin="8 0 0 0"
+      Click="OnChangeClick"
+    />
+    <Button
+      x:Name="CancelButton"
+      Grid.Column="2"
+      Style="{StaticResource MaterialButtonStyle}"
+      Content="CANCEL"
+      Margin="8 0 0 0"
+      Visibility="Collapsed"
+      Click="OnCancelClick"
+    />
+  </Grid>
+</UserControl>

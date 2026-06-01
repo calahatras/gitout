@@ -8,6 +8,7 @@ using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.Input;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
 using GitOut.Features.Options;
@@ -37,6 +38,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
         IOptionsWriter<GitStageOptions> storage,
         IOptionsMonitor<GitLogOptions> logOptions,
         IOptionsWriter<GitLogOptions> logStorage,
+        IOptionsMonitor<KeyboardShortcutsOptions> shortcutsOptions,
+        IOptionsWriter<KeyboardShortcutsOptions> shortcutsWriter,
         IOptionsMonitor<WorktreeOptions> worktreeOptions,
         IOptionsWriter<WorktreeOptions> worktreeStorage,
         IProcessTelemetryCollector telemetry
@@ -53,6 +56,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, INavigationFallb
             storage,
             logOptions,
             logStorage,
+            shortcutsOptions,
+            shortcutsWriter,
             worktreeOptions,
             worktreeStorage
         );

@@ -480,16 +480,14 @@
                         Command="{Binding FetchRemotesCommand}"
                       >
                         FETCH
-                      </Button
-                      >
+                      </Button>
                       <Button
                         Style="{StaticResource MaterialButtonStyle}"
                         Command="{Binding PruneRemotesCommand}"
                         ToolTip="Prune selected remotes"
                       >
                         PRUNE
-                      </Button
-                      >
+                      </Button>
                     </StackPanel>
                   </Grid>
                   <Border Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}" />

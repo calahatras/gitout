@@ -9,6 +9,7 @@ using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.Input;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -117,6 +118,10 @@ public partial class App : Application
         services
             .AddWritableOptions<GitLogOptions>()
             .Bind(context.Configuration, GitLogOptions.SectionKey);
+        services
+            .AddWritableOptions<KeyboardShortcutsOptions>()
+            .Bind(context.Configuration, KeyboardShortcutsOptions.SectionKey);
+
         services
             .AddWritableOptions<WorktreeOptions>()
             .Bind(context.Configuration, WorktreeOptions.SectionKey);

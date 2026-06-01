@@ -807,15 +807,13 @@
                   Command="{Binding PatchEditTextCommand}"
                 >
                                     OK
-                                </Button
-                >
+                                </Button>
                 <Button
                   Style="{StaticResource MaterialButtonStyle}"
                   Command="{Binding CancelEditTextCommand}"
                 >
                                     CANCEL
-                                </Button
-                >
+                                </Button>
               </StackPanel>
             </Grid>
           </Border>
