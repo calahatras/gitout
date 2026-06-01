@@ -64,7 +64,9 @@ public class CherryPickIntegrationTest
         A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
 
         IOptionsMonitor<GitLogOptions> logOptions = A.Fake<IOptionsMonitor<GitLogOptions>>();
-        IOptionsMonitor<WorktreeOptions> worktreeOptions = A.Fake<IOptionsMonitor<WorktreeOptions>>();
+        IOptionsMonitor<WorktreeOptions> worktreeOptions = A.Fake<
+            IOptionsMonitor<WorktreeOptions>
+        >();
 
         // 3. Initialize the ViewModel
         var viewModel = new GitLogViewModel(

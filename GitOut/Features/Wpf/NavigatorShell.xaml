@@ -13,7 +13,7 @@
   Title="{Binding Title, TargetNullValue='git out'}"
   Width="1280"
   Height="800"
-  MinHeight="150"
+  MinHeight="100"
   MinWidth="320"
   WindowStyle="SingleBorderWindow"
   WindowStartupLocation="Manual"

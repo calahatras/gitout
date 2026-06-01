@@ -35,7 +35,7 @@ public class GitLogViewModel
         INavigationFallback,
         IDisposable
 {
-    private static readonly Size PromptSize = new(400, 150);
+    private static readonly Size PromptSize = new(400, 130);
     private static readonly Point PromptOffset = new(80, 60);
 
     private static readonly Brush AuthorHighlightBrush;
@@ -237,7 +237,8 @@ public class GitLogViewModel
                     PromptSize,
                     PromptOffset,
                     IsModal: true,
-                    IsStatusBarVisible: false
+                    IsStatusBarVisible: false,
+                    IsTransparent: true
                 )
             );
             child.Closed += async (sender, args) =>
@@ -425,7 +426,8 @@ public class GitLogViewModel
                     PromptSize,
                     PromptOffset,
                     IsModal: true,
-                    IsStatusBarVisible: false
+                    IsStatusBarVisible: false,
+                    IsTransparent: true
                 )
             );
             child.Closed += async (sender, args) =>
@@ -496,7 +498,8 @@ public class GitLogViewModel
                     PromptSize,
                     PromptOffset,
                     IsModal: true,
-                    IsStatusBarVisible: false
+                    IsStatusBarVisible: false,
+                    IsTransparent: true
                 )
             );
             child.Closed += async (sender, args) =>
@@ -561,7 +564,8 @@ public class GitLogViewModel
                         PromptSize,
                         PromptOffset,
                         IsModal: true,
-                        IsStatusBarVisible: false
+                        IsStatusBarVisible: false,
+                        IsTransparent: true
                     )
                 );
                 child.Closed += async (sender, args) =>

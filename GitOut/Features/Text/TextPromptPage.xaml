@@ -10,27 +10,31 @@
   d:DesignWidth="500"
   d:DataContext="{d:DesignInstance Type={x:Type local:TextPromptViewModel}}"
 >
-  <Grid Style="{StaticResource LayoutRootGridStyle}">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
-    <TextBox
-      x:Name="FileNameInput"
-      Style="{StaticResource MaterialFormInputStyle}"
-      AutomationProperties.HelpText="{Binding Prompt, Mode=OneTime}"
-      Text="{Binding StartValue, Mode=OneTime}"
-    />
-    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-      <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelCommand}"
-        >CANCEL</Button
-      >
-      <Button
-        Style="{StaticResource MaterialButtonStyle}"
-        Content="{Binding ConfirmButtonText}"
-        Command="{Binding SetResultCommand}"
-        CommandParameter="{Binding Text, ElementName=FileNameInput}"
-      />
-    </StackPanel>
-  </Grid>
+  <Border CornerRadius="8" Background="{DynamicResource MaterialBackgroundBackground}">
+    <Grid Style="{StaticResource LayoutRootGridStyle}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <StackPanel Margin="8 16 8 0">
+        <TextBox
+          x:Name="FileNameInput"
+          Style="{StaticResource MaterialFormInputStyle}"
+          AutomationProperties.HelpText="{Binding Prompt, Mode=OneTime}"
+          Text="{Binding StartValue, Mode=OneTime}"
+        />
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelCommand}"
+            >CANCEL</Button
+          >
+          <Button
+            Style="{StaticResource MaterialButtonStyle}"
+            Content="{Binding ConfirmButtonText}"
+            Command="{Binding SetResultCommand}"
+            CommandParameter="{Binding Text, ElementName=FileNameInput}"
+          />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </Border>
 </UserControl>
