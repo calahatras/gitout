@@ -50,19 +50,19 @@ public class GitLogViewModel
     }
 
     private readonly object activeStashesLock = new();
-    private readonly ObservableCollection<GitStashEventViewModel> activeStashes = new();
+    private readonly ObservableCollection<GitStashEventViewModel> activeStashes = [];
 
     private readonly object activeWorktreesLock = new();
-    private readonly ObservableCollection<GitWorktreeViewModel> activeWorktrees = new();
+    private readonly ObservableCollection<GitWorktreeViewModel> activeWorktrees = [];
 
     private readonly object entriesLock = new();
-    private readonly RangeObservableCollection<GitTreeEvent> entries = new();
+    private readonly RangeObservableCollection<GitTreeEvent> entries = [];
 
     private readonly object remotesLock = new();
-    private readonly ObservableCollection<GitRemoteViewModel> remotes = new();
+    private readonly ObservableCollection<GitRemoteViewModel> remotes = [];
 
-    private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = new();
-    private readonly ObservableCollection<GitStashEventViewModel> selectedStashEntries = new();
+    private readonly ObservableCollection<GitTreeEvent> selectedLogEntries = [];
+    private readonly ObservableCollection<GitStashEventViewModel> selectedStashEntries = [];
     private readonly ISnackbarService snack;
     private readonly IOptionsWriter<GitStageOptions> updateStageOptions;
     private readonly IRepositoryWatcher repositoryWatcher;
@@ -73,36 +73,16 @@ public class GitLogViewModel
     private readonly IDisposable? worktreeOptionsMonitorHandle;
 
     private readonly ICommand createStashBranchCommand;
-
-    private int changesCount;
-    private bool includeStashes = true;
-    private bool includeRemotes = true;
     private bool suppressSelectedLogEntriesCollectionChanged;
     private bool showSpacesAsDots;
     private bool ignoreWhitespace;
-    private bool highlightAuthor;
-    private bool highlightUpstreamBranch;
-    private bool isStashesVisible;
-    private bool isWorktreesVisible;
-    private bool isSearchDisplayed;
-    private bool isCheckoutBranchVisible;
-    private LogViewMode viewMode = LogViewMode.None;
     private LogSelectionMode selectionMode = LogSelectionMode.None;
 
     private LogRevisionViewMode revisionViewMode;
     private CancellationTokenSource? refreshContextCancellationTokenSource;
-    private int contextLines = 3;
-    private bool showWholeFile;
-
-    private LogEntriesViewModel? selectedContext;
-
     private string? checkoutBranchName;
-    private string newWorktreeName = string.Empty;
     private string defaultWorktreePrefixPath = string.Empty;
-    private GitTreeEvent? entryInView;
     private bool hasChanges;
-
-    private bool isWorking;
 
     public GitLogViewModel(
         INavigationService navigation,
@@ -406,7 +386,7 @@ public class GitLogViewModel
                     snack.ShowError("Could not create worktree", e, TimeSpan.FromSeconds(10));
                 }
             },
-            () => !string.IsNullOrEmpty(newWorktreeName)
+            () => !string.IsNullOrEmpty(NewWorktreeName)
         );
 
         CreateBranchFromCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
@@ -633,7 +613,7 @@ public class GitLogViewModel
 
         SquashCommitsCommand = new AsyncCallbackCommand<LogEntriesViewModel?>(
             SquashCommitAsync,
-            gte => gte is not null && changesCount == 0
+            gte => gte is not null && ChangesCount == 0
         );
 
         CloseDetailsCommand = new CallbackCommand(() =>
@@ -651,7 +631,7 @@ public class GitLogViewModel
             () =>
             {
                 suppressSelectedLogEntriesCollectionChanged = true;
-                SelectedContext = selectedContext!.SwapEntries();
+                SelectedContext = SelectedContext!.SwapEntries();
                 suppressSelectedLogEntriesCollectionChanged = false;
             },
             () => selectedLogEntries.Count == 2
@@ -684,27 +664,27 @@ public class GitLogViewModel
 
     public bool IncludeStashes
     {
-        get => includeStashes;
+        get;
         set
         {
-            if (SetProperty(ref includeStashes, value))
+            if (SetProperty(ref field, value))
             {
                 _ = CheckRepositoryStatusAsync();
             }
         }
-    }
+    } = true;
 
     public bool IncludeRemotes
     {
-        get => includeRemotes;
+        get;
         set
         {
-            if (SetProperty(ref includeRemotes, value))
+            if (SetProperty(ref field, value))
             {
                 _ = CheckRepositoryStatusAsync();
             }
         }
-    }
+    } = true;
 
     public bool ShowSpacesAsDots
     {
@@ -746,10 +726,10 @@ public class GitLogViewModel
 
     public int ContextLines
     {
-        get => contextLines;
+        get;
         set
         {
-            if (SetProperty(ref contextLines, value))
+            if (SetProperty(ref field, value))
             {
                 PropertyChanged?.Invoke(
                     this,
@@ -773,16 +753,16 @@ public class GitLogViewModel
                     );
             }
         }
-    }
+    } = 3;
 
-    public int MaxContextLines => Math.Max(20, contextLines);
+    public int MaxContextLines => Math.Max(20, ContextLines);
 
     public bool ShowWholeFile
     {
-        get => showWholeFile;
+        get;
         set
         {
-            if (SetProperty(ref showWholeFile, value))
+            if (SetProperty(ref field, value))
             {
                 if (SelectedContext is not null)
                 {
@@ -794,10 +774,10 @@ public class GitLogViewModel
 
     public bool HighlightAuthor
     {
-        get => highlightAuthor;
+        get;
         set
         {
-            if (SetProperty(ref highlightAuthor, value))
+            if (SetProperty(ref field, value))
             {
                 UpdateHighlights();
             }
@@ -806,10 +786,10 @@ public class GitLogViewModel
 
     public bool HighlightUpstreamBranch
     {
-        get => highlightUpstreamBranch;
+        get;
         set
         {
-            if (SetProperty(ref highlightUpstreamBranch, value))
+            if (SetProperty(ref field, value))
             {
                 UpdateHighlights();
             }
@@ -818,26 +798,26 @@ public class GitLogViewModel
 
     public bool IsSearchDisplayed
     {
-        get => isSearchDisplayed;
-        set => SetProperty(ref isSearchDisplayed, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool IsCheckoutBranchVisible
     {
-        get => isCheckoutBranchVisible;
-        set => SetProperty(ref isCheckoutBranchVisible, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool IsWorking
     {
-        get => isWorking;
-        set => SetProperty(ref isWorking, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public int ChangesCount
     {
-        get => changesCount;
-        private set => SetProperty(ref changesCount, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public bool HasSelectedLogEntries => selectedLogEntries.Count > 0;
@@ -854,22 +834,22 @@ public class GitLogViewModel
 
     public GitTreeEvent? EntryInView
     {
-        get => entryInView;
-        private set => SetProperty(ref entryInView, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public LogEntriesViewModel? SelectedContext
     {
-        get => selectedContext;
-        set => SetProperty(ref selectedContext, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public LogViewMode ViewMode
     {
-        get => viewMode;
+        get;
         set
         {
-            if (SetProperty(ref viewMode, value))
+            if (SetProperty(ref field, value))
             {
                 PropertyChanged?.Invoke(
                     this,
@@ -877,14 +857,14 @@ public class GitLogViewModel
                 );
             }
         }
-    }
+    } = LogViewMode.None;
     public bool FileViewVisible => (ViewMode & LogViewMode.Files) == LogViewMode.Files;
     public bool IsStashesVisible
     {
-        get => isStashesVisible;
+        get;
         set
         {
-            if (SetProperty(ref isStashesVisible, value) && value)
+            if (SetProperty(ref field, value) && value)
             {
                 _ = RefreshStashListAsync();
             }
@@ -893,10 +873,10 @@ public class GitLogViewModel
 
     public bool IsWorktreesVisible
     {
-        get => isWorktreesVisible;
+        get;
         set
         {
-            if (SetProperty(ref isWorktreesVisible, value) && value)
+            if (SetProperty(ref field, value) && value)
             {
                 NewWorktreeName = MonikerGenerator.Generate();
                 _ = RefreshWorktreesAsync();
@@ -909,9 +889,9 @@ public class GitLogViewModel
         get => revisionViewMode;
         set
         {
-            if (SetProperty(ref revisionViewMode, value) && selectedContext is not null)
+            if (SetProperty(ref revisionViewMode, value) && SelectedContext is not null)
             {
-                selectedContext.ViewMode = revisionViewMode;
+                SelectedContext.ViewMode = revisionViewMode;
             }
         }
     }
@@ -924,10 +904,10 @@ public class GitLogViewModel
 
     public string NewWorktreeName
     {
-        get => newWorktreeName;
+        get;
         set
         {
-            if (SetProperty(ref newWorktreeName, value))
+            if (SetProperty(ref field, value))
             {
                 PropertyChanged?.Invoke(
                     this,
@@ -935,10 +915,10 @@ public class GitLogViewModel
                 );
             }
         }
-    }
+    } = string.Empty;
 
     public string NewWorktreePath =>
-        defaultWorktreePrefixPath.Replace("<name>", newWorktreeName, StringComparison.Ordinal);
+        defaultWorktreePrefixPath.Replace("<name>", NewWorktreeName, StringComparison.Ordinal);
 
     public ICommand NavigateToStageAreaCommand { get; }
     public ICommand RefreshStatusCommand { get; }
@@ -1075,8 +1055,8 @@ public class GitLogViewModel
                     .LogAsync(
                         new LogOptions
                         {
-                            IncludeRemotes = includeRemotes,
-                            IncludeStashes = includeStashes,
+                            IncludeRemotes = IncludeRemotes,
+                            IncludeStashes = IncludeStashes,
                         }
                     )
                     .ConfigureAwait(false);
@@ -1182,10 +1162,10 @@ public class GitLogViewModel
             selectedLogEntries.Count > 0 ? selectedLogEntries[0].Event : null;
 
         string? highlightEmail =
-            highlightAuthor && selected is not null ? selected.Author.Email : null;
+            HighlightAuthor && selected is not null ? selected.Author.Email : null;
 
         GitCommitId? highlightUpstreamId = null;
-        if (highlightUpstreamBranch && selected is not null)
+        if (HighlightUpstreamBranch && selected is not null)
         {
             foreach (GitBranchName branch in selected.Branches)
             {
@@ -1297,7 +1277,7 @@ public class GitLogViewModel
     {
         IDiffOptionsBuilder builder = DiffOptions
             .Builder()
-            .ContextLines(showWholeFile ? 999999 : contextLines);
+            .ContextLines(ShowWholeFile ? 999999 : ContextLines);
 
         if (ignoreWhitespace)
         {

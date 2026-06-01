@@ -18,11 +18,6 @@ public sealed class NavigatorShellViewModel : INotifyPropertyChanged, IDisposabl
 {
     private readonly IDisposable processStreamSubscription;
 
-    private string? title;
-    private bool isStatusBarVisible = true;
-    private string? statusBarText;
-    private ContentControl? content;
-
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
     public NavigatorShellViewModel() { }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -76,26 +71,26 @@ public sealed class NavigatorShellViewModel : INotifyPropertyChanged, IDisposabl
 
     public string? Title
     {
-        get => title;
-        private set => SetProperty(ref title, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public bool IsStatusBarVisible
     {
-        get => isStatusBarVisible;
-        set => SetProperty(ref isStatusBarVisible, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     public string? StatusBarText
     {
-        get => statusBarText;
-        private set => SetProperty(ref statusBarText, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public ContentControl? Content
     {
-        get => content;
-        private set => SetProperty(ref content, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public ICollectionView Snacks { get; }

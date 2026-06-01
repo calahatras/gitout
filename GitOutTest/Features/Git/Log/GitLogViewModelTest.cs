@@ -44,11 +44,11 @@ public class GitLogViewModelTest
     public void Setup()
     {
         repository = A.Fake<IGitRepository>();
-        A.CallTo(() => repository.Name).Returns("fake-repo");
+        _ = A.CallTo(() => repository.Name).Returns("fake-repo");
 
         navigationService = A.Fake<INavigationService>();
         var options = new GitLogPageOptions(repository);
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 navigationService.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
             )
             .Returns(options);
@@ -59,7 +59,7 @@ public class GitLogViewModelTest
 
         watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
         IRepositoryWatcher watcher = A.Fake<IRepositoryWatcher>();
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 watchProvider.PrepareWatchRepositoryChanges(
                     repository,
                     A<RepositoryWatcherOptions>._
@@ -69,7 +69,7 @@ public class GitLogViewModelTest
 
         repositoryFactory = A.Fake<IGitRepositoryFactory>();
         stagingOptions = A.Fake<IOptionsMonitor<GitStageOptions>>();
-        A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
+        _ = A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
         worktreeOptions = A.Fake<IOptionsMonitor<WorktreeOptions>>();
     }
 
@@ -104,16 +104,16 @@ public class GitLogViewModelTest
         viewModel.SelectedLogEntries.Add(treeEvent);
 
         var tcs = new TaskCompletionSource<bool>();
-        A.CallTo(() => repository.CherryPickAsync(A<IEnumerable<string>>._, null))
+        _ = A.CallTo(() => repository.CherryPickAsync(A<IEnumerable<string>>._, null))
             .Invokes(() => tcs.SetResult(true));
 
         // Act
         viewModel.CherryPickCommand.Execute(null);
 
-        await tcs.Task;
+        _ = await tcs.Task;
 
         // Assert
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 repository.CherryPickAsync(
                     A<IEnumerable<string>>.That.Matches(e => e.First() == commit.Id.Hash),
                     null
@@ -121,7 +121,7 @@ public class GitLogViewModelTest
             )
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => snackbarService.ShowSuccess("Cherry-pick completed successfully"))
+        _ = A.CallTo(() => snackbarService.ShowSuccess("Cherry-pick completed successfully"))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -155,20 +155,20 @@ public class GitLogViewModelTest
         viewModel.SelectedLogEntries.Add(treeEvent);
 
         var tcs = new TaskCompletionSource<SnackAction?>();
-        A.CallTo(() => repository.CherryPickAsync(A<IEnumerable<string>>._, null))
+        _ = A.CallTo(() => repository.CherryPickAsync(A<IEnumerable<string>>._, null))
             .Throws(new InvalidOperationException("Merge conflict in file.txt"));
 
-        A.CallTo(() => snackbarService.ShowAsync(A<ISnackBuilder>._))
+        _ = A.CallTo(() => snackbarService.ShowAsync(A<ISnackBuilder>._))
             .Invokes(() => tcs.SetResult(null!))
             .Returns(tcs.Task);
 
         // Act
         viewModel.CherryPickCommand.Execute(null);
 
-        await tcs.Task;
+        _ = await tcs.Task;
 
         // Assert
-        A.CallTo(() => snackbarService.ShowAsync(A<ISnackBuilder>._))
+        _ = A.CallTo(() => snackbarService.ShowAsync(A<ISnackBuilder>._))
             .MustHaveHappenedOnceExactly();
     }
 }

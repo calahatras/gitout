@@ -22,7 +22,7 @@ public class NavigationService : INavigationService
     private readonly ILogger<NavigationService> logger;
 
     private readonly Stack<(ContentControl, string?)> pageStack = new();
-    private readonly Dictionary<string, object> pageOptions = new();
+    private readonly Dictionary<string, object> pageOptions = [];
 
     private NavigatorShell? shell;
     private object? dialogResult;

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -32,8 +31,6 @@ public class LogEntriesViewModel : INotifyPropertyChanged
 
     private ICollectionView rootView;
     private IGitFileEntryViewModel? selectedItem;
-    private LogRevisionViewMode viewMode = LogRevisionViewMode.CurrentRevision;
-
     private readonly DiffOptions? options;
 
     private LogEntriesViewModel(
@@ -136,10 +133,10 @@ public class LogEntriesViewModel : INotifyPropertyChanged
 
     public LogRevisionViewMode ViewMode
     {
-        get => viewMode;
+        get;
         set
         {
-            if (SetProperty(ref viewMode, value))
+            if (SetProperty(ref field, value))
             {
                 IGitFileEntryViewModel? previousSelection = selectedItem;
                 IEnumerable<IGitFileEntryViewModel> source = value switch
@@ -171,11 +168,11 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                 }
                 else
                 {
-                    currentSource.Dispatcher.BeginInvoke(updateAction);
+                    _ = currentSource.Dispatcher.BeginInvoke(updateAction);
                 }
             }
         }
-    }
+    } = LogRevisionViewMode.CurrentRevision;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -322,8 +319,7 @@ public class LogEntriesViewModel : INotifyPropertyChanged
 
     private class DirectoryScaffold : IGitDirectoryEntryViewModel
     {
-        private readonly ICollection<IGitFileEntryViewModel> entries =
-            new List<IGitFileEntryViewModel>();
+        private readonly ICollection<IGitFileEntryViewModel> entries = [];
 
         public DirectoryScaffold(RelativeDirectoryPath directory)
         {

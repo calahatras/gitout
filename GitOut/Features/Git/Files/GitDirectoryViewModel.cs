@@ -17,7 +17,6 @@ public class GitDirectoryViewModel
 {
     private readonly IGitRepository repository;
     private readonly ICollection<IGitFileEntryViewModel> entries;
-    private bool isExpanded;
 
     private GitDirectoryViewModel(
         IGitRepository repository,
@@ -85,10 +84,10 @@ public class GitDirectoryViewModel
     public string IconResourceKey => IsExpanded ? "FolderOpen" : "Folder";
     public bool IsExpanded
     {
-        get => isExpanded;
+        get;
         set
         {
-            if (SetProperty(ref isExpanded, value))
+            if (SetProperty(ref field, value))
             {
                 PropertyChanged?.Invoke(
                     this,

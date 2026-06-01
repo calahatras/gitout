@@ -79,7 +79,7 @@ public class LocalGitRepositoryTest
 
         IProcessFactory<IGitProcess> processFactory = A.Fake<IProcessFactory<IGitProcess>>();
         IGitProcess process = A.Fake<IGitProcess>();
-        A.CallTo(() => process.ExecuteAsync(default))
+        _ = A.CallTo(() => process.ExecuteAsync(default))
             .Returns(
                 new ProcessEventArgs(
                     "git",
@@ -93,7 +93,7 @@ public class LocalGitRepositoryTest
                 )
             );
         Captured<ProcessOptions> capturedProcessOptions = A.Captured<ProcessOptions>();
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
 
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
@@ -103,7 +103,7 @@ public class LocalGitRepositoryTest
             capturedProcessOptions.Values[0].Arguments,
             Is.EqualTo("cherry-pick hash1 hash2")
         );
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._))
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -114,7 +114,7 @@ public class LocalGitRepositoryTest
 
         IProcessFactory<IGitProcess> processFactory = A.Fake<IProcessFactory<IGitProcess>>();
         IGitProcess process = A.Fake<IGitProcess>();
-        A.CallTo(() => process.ExecuteAsync(default))
+        _ = A.CallTo(() => process.ExecuteAsync(default))
             .Returns(
                 new ProcessEventArgs(
                     "git",
@@ -128,7 +128,7 @@ public class LocalGitRepositoryTest
                 )
             );
         Captured<ProcessOptions> capturedProcessOptions = A.Captured<ProcessOptions>();
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
 
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
@@ -146,7 +146,7 @@ public class LocalGitRepositoryTest
             capturedProcessOptions.Values[0].Arguments,
             Is.EqualTo("cherry-pick --edit --no-commit -m 1 -x --ff hash1")
         );
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._))
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -156,7 +156,7 @@ public class LocalGitRepositoryTest
         var path = DirectoryPath.Create("c:\\path\\to\\repo");
         IProcessFactory<IGitProcess> processFactory = A.Fake<IProcessFactory<IGitProcess>>();
         IGitProcess process = A.Fake<IGitProcess>();
-        A.CallTo(() => process.ExecuteAsync(default))
+        _ = A.CallTo(() => process.ExecuteAsync(default))
             .Returns(
                 new ProcessEventArgs(
                     "git",
@@ -170,7 +170,7 @@ public class LocalGitRepositoryTest
                 )
             );
         Captured<ProcessOptions> capturedProcessOptions = A.Captured<ProcessOptions>();
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
         await actor.CherryPickContinueAsync();
@@ -187,7 +187,7 @@ public class LocalGitRepositoryTest
         var path = DirectoryPath.Create("c:\\path\\to\\repo");
         IProcessFactory<IGitProcess> processFactory = A.Fake<IProcessFactory<IGitProcess>>();
         IGitProcess process = A.Fake<IGitProcess>();
-        A.CallTo(() => process.ExecuteAsync(default))
+        _ = A.CallTo(() => process.ExecuteAsync(default))
             .Returns(
                 new ProcessEventArgs(
                     "git",
@@ -201,7 +201,7 @@ public class LocalGitRepositoryTest
                 )
             );
         Captured<ProcessOptions> capturedProcessOptions = A.Captured<ProcessOptions>();
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
         await actor.CherryPickSkipAsync();
@@ -215,7 +215,7 @@ public class LocalGitRepositoryTest
         var path = DirectoryPath.Create("c:\\path\\to\\repo");
         IProcessFactory<IGitProcess> processFactory = A.Fake<IProcessFactory<IGitProcess>>();
         IGitProcess process = A.Fake<IGitProcess>();
-        A.CallTo(() => process.ExecuteAsync(default))
+        _ = A.CallTo(() => process.ExecuteAsync(default))
             .Returns(
                 new ProcessEventArgs(
                     "git",
@@ -229,7 +229,7 @@ public class LocalGitRepositoryTest
                 )
             );
         Captured<ProcessOptions> capturedProcessOptions = A.Captured<ProcessOptions>();
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
         await actor.CherryPickAbortAsync();
@@ -243,7 +243,7 @@ public class LocalGitRepositoryTest
         var path = DirectoryPath.Create("c:\\path\\to\\repo");
         IProcessFactory<IGitProcess> processFactory = A.Fake<IProcessFactory<IGitProcess>>();
         IGitProcess process = A.Fake<IGitProcess>();
-        A.CallTo(() => process.ExecuteAsync(default))
+        _ = A.CallTo(() => process.ExecuteAsync(default))
             .Returns(
                 new ProcessEventArgs(
                     "git",
@@ -257,7 +257,7 @@ public class LocalGitRepositoryTest
                 )
             );
         Captured<ProcessOptions> capturedProcessOptions = A.Captured<ProcessOptions>();
-        A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
+        _ = A.CallTo(() => processFactory.Create(path, capturedProcessOptions._)).Returns(process);
         var actor = LocalGitRepository.InitializeFromPath(path, processFactory);
 
         await actor.CherryPickQuitAsync();

@@ -17,8 +17,8 @@ public class GitDiffResult
 
     private class GitDiffBuilder : IGitDiffBuilder
     {
-        private readonly ICollection<GitDiffHunk> hunks = new List<GitDiffHunk>();
-        private readonly ICollection<string> parts = new List<string>();
+        private readonly ICollection<GitDiffHunk> hunks = [];
+        private readonly ICollection<string> parts = [];
         private string? header;
 
         private Stream? stream;
@@ -65,7 +65,7 @@ public class GitDiffResult
             }
             else
             {
-                List<string> content = new();
+                List<string> content = [];
                 using (var reader = new StreamReader(stream))
                 {
                     string? line;

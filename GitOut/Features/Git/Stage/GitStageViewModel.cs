@@ -1,6 +1,5 @@
 #pragma warning disable CA1506
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -38,38 +37,18 @@ public class GitStageViewModel
     private readonly IRepositoryWatcher repositoryWatcher;
     private readonly IDisposable? stagingOptionsHandle;
 
-    private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = new();
+    private readonly ObservableCollection<StatusChangeViewModel> workspaceFiles = [];
     private readonly object workspaceFilesLock = new();
-    private readonly ObservableCollection<StatusChangeViewModel> indexFiles = new();
+    private readonly ObservableCollection<StatusChangeViewModel> indexFiles = [];
     private readonly object indexFilesLock = new();
 
     private StatusChangeViewModel? selectedChange;
-    private DiffContext? selectedDiffResult;
-
-    private ICollectionView? amendFilesView;
-    private IGitFileEntryViewModel? selectedAmendChange;
-
-    private int selectedWorkspaceIndex;
-    private int selectedIndexIndex;
-
     private bool showSpacesAsDots;
-    private bool diffWhitespace;
-    private bool amendLastCommit;
-    private bool checkoutBranchBeforeCommit;
-
     private CancellationTokenSource? cancelRefreshSnack;
     private bool hasChanges;
     private bool selectedFileHasChanges;
-    private bool refreshAutomatically;
-
     private CancellationTokenSource? refreshContextCancellationTokenSource;
-    private int contextLines = 3;
-    private bool showWholeFile;
-
-    private string commitMessage = string.Empty;
-    private string newBranchName = string.Empty;
     private string cachedCommitMessage = string.Empty;
-    private EditPatchViewModel? editHunk;
     private GitPatch? undoPatch;
 
     public GitStageViewModel(
@@ -114,15 +93,15 @@ public class GitStageViewModel
 
         StashIndexCommand = new AsyncCallbackCommand(
             StashIndexAsync,
-            () => !amendLastCommit && indexFiles.Count > 0 && !checkoutBranchBeforeCommit
+            () => !AmendLastCommit && indexFiles.Count > 0 && !CheckoutBranchBeforeCommit
         );
 
         CommitCommand = new AsyncCallbackCommand(
             CommitChangesAsync,
             () =>
                 !string.IsNullOrEmpty(CommitMessage)
-                && (indexFiles.Count > 0 || amendLastCommit)
-                && (!checkoutBranchBeforeCommit || GitBranchName.IsValid(newBranchName))
+                && (indexFiles.Count > 0 || AmendLastCommit)
+                && (!CheckoutBranchBeforeCommit || GitBranchName.IsValid(NewBranchName))
         );
         StageFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(StageFileAsync);
         StageWorkspaceFilesCommand = new AsyncCallbackCommand(StageWorkspaceFilesAsync);
@@ -161,7 +140,7 @@ public class GitStageViewModel
         CancelEditTextCommand = new CallbackCommand(() => EditHunk = null);
         PatchEditTextCommand = new AsyncCallbackCommand(
             PatchEditSelectionAsync,
-            () => editHunk is not null
+            () => EditHunk is not null
         );
         DiffSelectedFilesCommand = new AsyncCallbackCommand(
             DiffSelectedFilesAsync,
@@ -183,16 +162,16 @@ public class GitStageViewModel
 
     public bool RefreshAutomatically
     {
-        get => refreshAutomatically;
-        set => SetProperty(ref refreshAutomatically, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool DiffWhitespace
     {
-        get => diffWhitespace;
+        get;
         set
         {
-            if (SetProperty(ref diffWhitespace, value))
+            if (SetProperty(ref field, value))
             {
                 _ = ExecuteCurrentDiffAsync();
             }
@@ -201,10 +180,10 @@ public class GitStageViewModel
 
     public int ContextLines
     {
-        get => contextLines;
+        get;
         set
         {
-            if (SetProperty(ref contextLines, value))
+            if (SetProperty(ref field, value))
             {
                 PropertyChanged?.Invoke(
                     this,
@@ -227,16 +206,16 @@ public class GitStageViewModel
                     );
             }
         }
-    }
+    } = 3;
 
-    public int MaxContextLines => Math.Max(20, contextLines);
+    public int MaxContextLines => Math.Max(20, ContextLines);
 
     public bool ShowWholeFile
     {
-        get => showWholeFile;
+        get;
         set
         {
-            if (SetProperty(ref showWholeFile, value))
+            if (SetProperty(ref field, value))
             {
                 _ = ExecuteCurrentDiffAsync();
             }
@@ -245,10 +224,10 @@ public class GitStageViewModel
 
     public bool AmendLastCommit
     {
-        get => amendLastCommit;
+        get;
         set
         {
-            _ = SetProperty(ref amendLastCommit, value);
+            _ = SetProperty(ref field, value);
             if (value)
             {
                 cachedCommitMessage = CommitMessage;
@@ -264,32 +243,32 @@ public class GitStageViewModel
 
     public bool CheckoutBranchBeforeCommit
     {
-        get => checkoutBranchBeforeCommit;
-        set => SetProperty(ref checkoutBranchBeforeCommit, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public string CommitMessage
     {
-        get => commitMessage;
-        set => SetProperty(ref commitMessage, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     public string NewBranchName
     {
-        get => newBranchName;
-        set => SetProperty(ref newBranchName, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     public int SelectedWorkspaceIndex
     {
-        get => selectedWorkspaceIndex;
-        set => SetProperty(ref selectedWorkspaceIndex, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public int SelectedIndexIndex
     {
-        get => selectedIndexIndex;
-        set => SetProperty(ref selectedIndexIndex, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public StatusChangeViewModel? SelectedChange
@@ -312,21 +291,21 @@ public class GitStageViewModel
 
     public IGitFileEntryViewModel? SelectedAmendChange
     {
-        get => selectedAmendChange;
+        get;
         set
         {
-            if (selectedAmendChange is INotifyPropertyChanged unsubscribe)
+            if (field is INotifyPropertyChanged unsubscribe)
             {
                 unsubscribe.PropertyChanged -= NotifyDiffResultPropertyChanged;
             }
-            if (SetProperty(ref selectedAmendChange, value))
+            if (SetProperty(ref field, value))
             {
                 SelectedDiffResult = null;
-                if (selectedAmendChange is INotifyPropertyChanged subscribe)
+                if (field is INotifyPropertyChanged subscribe)
                 {
                     subscribe.PropertyChanged += NotifyDiffResultPropertyChanged;
                 }
-                if (selectedAmendChange is not null)
+                if (field is not null)
                 {
                     SelectedChange = null;
                     ExecuteAmendDiff();
@@ -340,22 +319,22 @@ public class GitStageViewModel
 
     public EditPatchViewModel? EditHunk
     {
-        get => editHunk;
-        set => SetProperty(ref editHunk, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public DiffContext? SelectedDiffResult
     {
-        get => selectedDiffResult;
-        set => SetProperty(ref selectedDiffResult, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public ICollectionView IndexFiles { get; }
     public ICollectionView WorkspaceFiles { get; }
     public ICollectionView? AmendFiles
     {
-        get => amendFilesView;
-        set => SetProperty(ref amendFilesView, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public ICommand RefreshStatusCommand { get; }
@@ -407,7 +386,7 @@ public class GitStageViewModel
             case NavigationType.Activated:
                 {
                     repositoryWatcher.EnableRaisingEvents = false;
-                    if (hasChanges && !(selectedFileHasChanges && !refreshAutomatically))
+                    if (hasChanges && !(selectedFileHasChanges && !RefreshAutomatically))
                     {
                         const string RefreshedMessage =
                             "git out detected file changes and refreshed automatically";
@@ -425,10 +404,10 @@ public class GitStageViewModel
 
                     if (
                         selectedFileHasChanges
-                        && (selectedChange is not null || selectedAmendChange is not null)
+                        && (selectedChange is not null || SelectedAmendChange is not null)
                     )
                     {
-                        if (refreshAutomatically)
+                        if (RefreshAutomatically)
                         {
                             if (
                                 selectedChange is null
@@ -540,8 +519,8 @@ public class GitStageViewModel
     {
         IDiffOptionsBuilder optionsBuilder = DiffOptions
             .Builder()
-            .ContextLines(showWholeFile ? 999999 : contextLines);
-        if (diffWhitespace)
+            .ContextLines(ShowWholeFile ? 999999 : ContextLines);
+        if (DiffWhitespace)
         {
             _ = optionsBuilder.IgnoreAllSpace();
         }
@@ -578,7 +557,7 @@ public class GitStageViewModel
         {
             await ExecuteDiffAsync();
         }
-        else if (selectedAmendChange is not null)
+        else if (SelectedAmendChange is not null)
         {
             ExecuteAmendDiff();
         }
@@ -586,12 +565,12 @@ public class GitStageViewModel
 
     private void ExecuteAmendDiff()
     {
-        if (selectedAmendChange is GitFileViewModel viewmodel)
+        if (SelectedAmendChange is GitFileViewModel viewmodel)
         {
             IDiffOptionsBuilder optionsBuilder = DiffOptions
                 .Builder()
-                .ContextLines(showWholeFile ? 999999 : contextLines);
-            if (diffWhitespace)
+                .ContextLines(ShowWholeFile ? 999999 : ContextLines);
+            if (DiffWhitespace)
             {
                 _ = optionsBuilder.IgnoreAllSpace();
             }
@@ -630,7 +609,7 @@ public class GitStageViewModel
             return;
         }
         IDiffOptionsBuilder optionsBuilder = DiffOptions.Builder();
-        if (diffWhitespace)
+        if (DiffWhitespace)
         {
             _ = optionsBuilder.IgnoreAllSpace();
         }
@@ -638,7 +617,7 @@ public class GitStageViewModel
         {
             _ = optionsBuilder.Cached();
         }
-        _ = optionsBuilder.ContextLines(showWholeFile ? 999999 : contextLines);
+        _ = optionsBuilder.ContextLines(ShowWholeFile ? 999999 : ContextLines);
         SelectedDiffResult = await DiffContext.DiffAsync(
             Repository,
             change,
@@ -936,7 +915,7 @@ public class GitStageViewModel
                 hunks,
                 transform
             );
-            int previousIndex = selectedWorkspaceIndex;
+            int previousIndex = SelectedWorkspaceIndex;
             await Repository.ApplyAsync(patch);
             await GetRepositoryStatusAsync();
             if (selectedChange is null)
@@ -1007,7 +986,7 @@ public class GitStageViewModel
 
     private async Task PatchEditSelectionAsync()
     {
-        if (selectedChange is null || editHunk is null)
+        if (selectedChange is null || EditHunk is null)
         {
             return;
         }
@@ -1015,7 +994,7 @@ public class GitStageViewModel
             PatchMode.AddIndex,
             selectedChange.Model.Path,
             GitStatusChangeType.Ordinary,
-            editHunk.GetHunkVisitor(PatchMode.AddIndex)
+            EditHunk.GetHunkVisitor(PatchMode.AddIndex)
         );
 
         await Repository.ApplyAsync(patch);
@@ -1051,13 +1030,13 @@ public class GitStageViewModel
             }
         }
 
-        GitCommitOptions options = amendLastCommit
-            ? GitCommitOptions.AmendLatest(commitMessage)
-            : GitCommitOptions.CreateCommit(commitMessage);
+        GitCommitOptions options = AmendLastCommit
+            ? GitCommitOptions.AmendLatest(CommitMessage)
+            : GitCommitOptions.CreateCommit(CommitMessage);
         await Repository.CommitAsync(options);
         snack.ShowSuccess("Commited changes successfully");
         await GetRepositoryStatusAsync();
-        if (amendLastCommit)
+        if (AmendLastCommit)
         {
             GitHistoryEvent head = await Repository.GetHeadAsync();
             RefreshAmendList(head);
@@ -1224,8 +1203,8 @@ public class GitStageViewModel
 
         IDiffOptionsBuilder optionsBuilder = DiffOptions
             .Builder()
-            .ContextLines(showWholeFile ? 999999 : contextLines);
-        if (diffWhitespace)
+            .ContextLines(ShowWholeFile ? 999999 : ContextLines);
+        if (DiffWhitespace)
         {
             _ = optionsBuilder.IgnoreAllSpace();
         }

@@ -31,14 +31,12 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
     private readonly IDisposable? unsubscribeLogOptions;
     private readonly IDisposable? unsubscribeWorktreeOptions;
     private readonly IOptionsWriter<WorktreeOptions> worktreeStorage;
-    private bool useTransparentBackground = true;
     private bool trimLineEndings;
     private bool showSpacesAsDots;
     private string tabTransformText;
     private LogRevisionViewMode defaultSingleRevisionViewMode;
     private LogRevisionViewMode defaultMultiRevisionViewMode;
     private string defaultWorktreePrefixPath;
-    private string defaultWorktreePrefixPathError = string.Empty;
 
     public GeneralSettingsViewModel(
         ISnackbarService snacks,
@@ -154,17 +152,17 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 
     public bool UseTransparentBackground
     {
-        get => useTransparentBackground;
+        get;
         set
         {
-            if (SetProperty(ref useTransparentBackground, value))
+            if (SetProperty(ref field, value))
             {
                 Application.Current.Resources["MaterialBackgroundBackground"] = value
                     ? new SolidColorBrush(Color.FromArgb(98, 48, 48, 48))
                     : new SolidColorBrush(Color.FromArgb(255, 48, 48, 48));
             }
         }
-    }
+    } = true;
 
     public bool ShowSpacesAsDots
     {
@@ -249,9 +247,9 @@ public sealed class GeneralSettingsViewModel : INotifyPropertyChanged, IDisposab
 
     public string DefaultWorktreePrefixPathError
     {
-        get => defaultWorktreePrefixPathError;
-        set => SetProperty(ref defaultWorktreePrefixPathError, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     public ICommand OpenSettingsFolderCommand { get; }
     public ICommand SearchRootFolderCommand { get; }

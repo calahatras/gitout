@@ -81,7 +81,7 @@ public partial class Autocomplete : UserControl
     );
 
     private readonly object localItemsLock = new();
-    private readonly ObservableCollection<object?> localItems = new();
+    private readonly ObservableCollection<object?> localItems = [];
     private ILazyAsyncEnumerable<object, RelativeDirectoryPath>? deferredSource;
 
     public Autocomplete()

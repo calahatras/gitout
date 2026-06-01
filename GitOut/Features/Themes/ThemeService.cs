@@ -7,7 +7,7 @@ namespace GitOut.Features.Themes;
 
 public class ThemeService : IThemeService
 {
-    private readonly IList<ResourceDictionary> resourceProviders = new List<ResourceDictionary>();
+    private readonly IList<ResourceDictionary> resourceProviders = [];
     private ThemePaletteViewModel currentTheme;
 
     public ThemeService()

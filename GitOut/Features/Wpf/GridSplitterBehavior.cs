@@ -78,14 +78,8 @@ public static class GridSplitterBehavior
         {
             if (!resizing)
             {
-                if (frozenColumn is not null)
-                {
-                    frozenColumn.Width = new GridLength(frozenColumn.ActualWidth);
-                }
-                if (frozenRow is not null)
-                {
-                    frozenRow.Height = new GridLength(frozenRow.ActualHeight);
-                }
+                _ = frozenColumn?.Width = new GridLength(frozenColumn.ActualWidth);
+                _ = frozenRow?.Height = new GridLength(frozenRow.ActualHeight);
             }
             resizing = true;
         }

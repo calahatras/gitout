@@ -8,12 +8,6 @@ namespace GitOut.Features.Git.CherryPick;
 
 public sealed class CherryPickOptionsViewModel : INotifyPropertyChanged
 {
-    private bool edit;
-    private bool noCommit;
-    private int mainlineParentNumber;
-    private bool appendCherryPickLine;
-    private bool fastForward;
-
     public CherryPickOptionsViewModel(INavigationService navigation, ITitleService title)
     {
         title.Title = "Cherry pick options";
@@ -24,11 +18,11 @@ public sealed class CherryPickOptionsViewModel : INotifyPropertyChanged
         SetResultCommand = new CallbackCommand(() =>
             navigation.Close(
                 new GitCherryPickOptions(
-                    Edit: edit,
-                    NoCommit: noCommit,
-                    MainlineParentNumber: mainlineParentNumber > 0 ? mainlineParentNumber : null,
-                    AppendCherryPickLine: appendCherryPickLine,
-                    FastForward: fastForward
+                    Edit: Edit,
+                    NoCommit: NoCommit,
+                    MainlineParentNumber: MainlineParentNumber > 0 ? MainlineParentNumber : null,
+                    AppendCherryPickLine: AppendCherryPickLine,
+                    FastForward: FastForward
                 )
             )
         );
@@ -36,32 +30,32 @@ public sealed class CherryPickOptionsViewModel : INotifyPropertyChanged
 
     public bool Edit
     {
-        get => edit;
-        set => SetProperty(ref edit, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool NoCommit
     {
-        get => noCommit;
-        set => SetProperty(ref noCommit, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public int MainlineParentNumber
     {
-        get => mainlineParentNumber;
-        set => SetProperty(ref mainlineParentNumber, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool AppendCherryPickLine
     {
-        get => appendCherryPickLine;
-        set => SetProperty(ref appendCherryPickLine, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool FastForward
     {
-        get => fastForward;
-        set => SetProperty(ref fastForward, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public ICommand CancelCommand { get; }

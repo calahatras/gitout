@@ -13,7 +13,7 @@ public class SortedObservableCollection<T>
         INotifyPropertyChanged
 {
     private readonly Func<T, T, int> comparer;
-    private readonly IList<T> backingCollection = new List<T>();
+    private readonly IList<T> backingCollection = [];
 
     public SortedObservableCollection(Func<T, T, int> comparer) => this.comparer = comparer;
 
