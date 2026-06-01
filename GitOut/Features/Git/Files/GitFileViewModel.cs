@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.IO;
+using GitOut.Features.Text;
 
 namespace GitOut.Features.Git.Files;
 
@@ -11,7 +12,11 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
     private readonly IGitRepository repository;
     private readonly GitFileId sourceId;
     private readonly GitFileId? destinationId;
+    private readonly GitCommitId? commitId;
     private DiffOptions options;
+    private FileViewMode viewMode = FileViewMode.Diff;
+    private GitBlameViewModel? blameResult;
+    private bool showHistory;
 
     private GitFileViewModel(
         IGitRepository repository,
@@ -21,9 +26,11 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
         GitFileId sourceId,
         GitFileId? destinationId = null,
         GitDiffType diffType = GitDiffType.None,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        GitCommitId? commitId = null
     )
     {
+        this.commitId = commitId;
         this.repository = repository;
         this.options = options ?? DiffOptions.Builder().Build();
         Path = path;
@@ -68,6 +75,53 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
     // note: this viewmodel is used in tree view and as such requires IsExpanded property
     public bool IsExpanded { get; set; }
 
+    public FileViewMode ViewMode
+    {
+        get => viewMode;
+        set
+        {
+            if (viewMode != value)
+            {
+                viewMode = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewMode)));
+                if (viewMode == FileViewMode.Blame && blameResult == null)
+                {
+                    _ = RefreshBlameAsync();
+                }
+            }
+        }
+    }
+
+    public bool ShowHistory
+    {
+        get => showHistory;
+        set
+        {
+            if (showHistory != value)
+            {
+                showHistory = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowHistory)));
+            }
+        }
+    }
+
+    public GitBlameViewModel? BlameResult
+    {
+        get
+        {
+            if (blameResult == null && viewMode == FileViewMode.Blame)
+            {
+                _ = RefreshBlameAsync();
+            }
+            return blameResult;
+        }
+        private set
+        {
+            blameResult = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BlameResult)));
+        }
+    }
+
     public DiffContext? DiffResult
     {
         get
@@ -94,7 +148,8 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
         IGitRepository repository,
         GitFileEntry file,
         RelativeDirectoryPath relativePath,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        GitCommitId? commitId = null
     ) =>
         file.Type != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
@@ -106,14 +161,16 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
                 file.Id,
                 null,
                 GitDiffType.None,
-                options
+                options,
+                commitId
             );
 
     public static GitFileViewModel Difference(
         IGitRepository repository,
         GitDiffFileEntry file,
         RelativeDirectoryPath relativePath,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        GitCommitId? commitId = null
     ) =>
         file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
@@ -125,13 +182,15 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
                 file.Source.Id,
                 file.Destination.Id,
                 file.Type,
-                options
+                options,
+                commitId
             );
 
     public static GitFileViewModel RelativeDifference(
         IGitRepository repository,
         GitDiffFileEntry file,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        GitCommitId? commitId = null
     ) =>
         file.FileType != GitFileType.Blob
             ? throw new ArgumentException($"Invalid file type for blob {file.Type}", nameof(file))
@@ -148,7 +207,8 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
                 file.Source.Id,
                 file.Destination.Id,
                 file.Type,
-                options
+                options,
+                commitId
             );
 
     private async Task RefreshDiffAsync()
@@ -164,5 +224,14 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
                 options
             );
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
+    }
+
+    private async Task RefreshBlameAsync()
+    {
+        GitBlameResult result = await repository.BlameAsync(Path, FileName, commitId);
+        ISyntaxHighlighter highlighter = SyntaxHighlighterProvider.GetHighlighter(
+            FileName.ToString()
+        );
+        BlameResult = GitBlameViewModel.ParseBlame(result, highlighter);
     }
 }

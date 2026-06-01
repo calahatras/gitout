@@ -10,7 +10,8 @@ public static class GitFileEntryViewModelFactory
     public static async IAsyncEnumerable<IGitFileEntryViewModel> ListIdAsync(
         GitObjectId id,
         IGitRepository repository,
-        RelativeDirectoryPath currentPath
+        RelativeDirectoryPath currentPath,
+        GitCommitId? commitId = null
     )
     {
         await foreach (GitFileEntry file in repository.ListTreeAsync(id))
@@ -21,9 +22,15 @@ public static class GitFileEntryViewModelFactory
                     repository,
                     file,
                     currentPath,
-                    (treeId, relativePath) => ListIdAsync(treeId, repository, relativePath)
+                    (treeId, relativePath) =>
+                        ListIdAsync(treeId, repository, relativePath, commitId)
                 ),
-                GitFileType.Blob => GitFileViewModel.Snapshot(repository, file, currentPath),
+                GitFileType.Blob => GitFileViewModel.Snapshot(
+                    repository,
+                    file,
+                    currentPath,
+                    commitId: commitId
+                ),
                 _ => throw new ArgumentOutOfRangeException(
                     $"Cannot create viewmodel for invalid type {file.Type}",
                     nameof(file)
@@ -38,7 +45,8 @@ public static class GitFileEntryViewModelFactory
         GitObjectId diff,
         IGitRepository repository,
         RelativeDirectoryPath currentPath,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        GitCommitId? commitId = null
     )
     {
         await foreach (GitDiffFileEntry entry in repository.ListDiffChangesAsync(diff, root))
@@ -55,15 +63,22 @@ public static class GitFileEntryViewModelFactory
                             GitDiffType.Create => ListIdAsync(
                                 destinationId,
                                 repository,
-                                relativePath
+                                relativePath,
+                                commitId
                             ),
-                            GitDiffType.Delete => ListIdAsync(treeId, repository, relativePath),
+                            GitDiffType.Delete => ListIdAsync(
+                                treeId,
+                                repository,
+                                relativePath,
+                                commitId
+                            ),
                             _ => DiffIdAsync(
                                 treeId,
                                 destinationId,
                                 repository,
                                 relativePath,
-                                options
+                                options,
+                                commitId
                             ),
                         }
                 ),
@@ -71,7 +86,8 @@ public static class GitFileEntryViewModelFactory
                     repository,
                     entry,
                     currentPath,
-                    options
+                    options,
+                    commitId
                 ),
                 _ => throw new ArgumentOutOfRangeException(
                     $"Cannot create viewmodel for invalid type {entry.FileType}",
@@ -86,7 +102,8 @@ public static class GitFileEntryViewModelFactory
         GitCommitId? root,
         GitCommitId diff,
         IGitRepository repository,
-        DiffOptions? options = null
+        DiffOptions? options = null,
+        GitCommitId? commitId = null
     )
     {
         IDiffOptionsBuilder builder = DiffOptions.Builder().Recursive();
@@ -101,7 +118,12 @@ public static class GitFileEntryViewModelFactory
         {
             if (entry.FileType == GitFileType.Blob)
             {
-                yield return GitFileViewModel.RelativeDifference(repository, entry, options);
+                yield return GitFileViewModel.RelativeDifference(
+                    repository,
+                    entry,
+                    options,
+                    commitId
+                );
             }
         }
     }

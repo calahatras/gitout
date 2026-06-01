@@ -32,10 +32,11 @@ public class GitDiffViewModel : IDocumentSelectionViewModel
 
     public static GitDiffViewModel ParseDiff(
         IEnumerable<GitDiffHunk> result,
-        DiffDisplayOptions display
+        DiffDisplayOptions display,
+        string fileName
     )
     {
-        ISyntaxHighlighter highlighter = new CSharpSyntaxHighlighter();
+        ISyntaxHighlighter highlighter = SyntaxHighlighterProvider.GetHighlighter(fileName);
 
         var document = new FlowDocument
         {

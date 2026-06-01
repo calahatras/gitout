@@ -52,7 +52,12 @@ public class LogEntriesViewModel : INotifyPropertyChanged
         );
         var logFiles = new SortedLazyAsyncCollection<IGitFileEntryViewModel, RelativeDirectoryPath>(
             relativePath =>
-                GitFileEntryViewModelFactory.ListIdAsync(root.Id, repository, relativePath),
+                GitFileEntryViewModelFactory.ListIdAsync(
+                    root.Id,
+                    repository,
+                    relativePath,
+                    root.Id
+                ),
             IGitDirectoryEntryViewModel.CompareItems
         );
 
@@ -66,7 +71,8 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                     root.Id,
                     repository,
                     RelativeDirectoryPath.Root,
-                    options
+                    options,
+                    root.Id
                 ),
             IGitDirectoryEntryViewModel.CompareItems
         );
@@ -80,7 +86,8 @@ public class LogEntriesViewModel : INotifyPropertyChanged
                     diff?.Id ?? root.ParentId,
                     root.Id,
                     repository,
-                    options
+                    options,
+                    root.Id
                 ),
             IGitDirectoryEntryViewModel.CompareItems
         );
@@ -234,7 +241,12 @@ public class LogEntriesViewModel : INotifyPropertyChanged
             )
         )
         {
-            var viewModel = GitFileViewModel.Snapshot(repository, item, RelativeDirectoryPath.Root);
+            var viewModel = GitFileViewModel.Snapshot(
+                repository,
+                item,
+                RelativeDirectoryPath.Root,
+                commitId: Root.Id
+            );
             if (!tree.TryGetValue(item.Directory.Directory, out DirectoryScaffold? directory))
             {
                 directory = new DirectoryScaffold(item.Directory);

@@ -15,4 +15,6 @@ public class GitCommitId : GitObjectId, IEquatable<GitCommitId>
     public override bool Equals(object? obj) => obj is GitCommitId other && Equals(other);
 
     public static GitCommitId FromHash(ReadOnlySpan<char> hash) => new(hash.ToString());
+
+    public static GitCommitId Empty { get; } = new(new string('0', 40));
 }

@@ -23,6 +23,11 @@ public interface IGitRepository
     Task FetchAsync(GitRemote remote);
     Task PruneRemoteAsync(GitRemote remote);
     Task<IEnumerable<GitHistoryEvent>> LogAsync(LogOptions options);
+    Task<GitBlameResult> BlameAsync(
+        RelativeDirectoryPath path,
+        GitOut.Features.IO.FileName fileName,
+        GitCommitId? fromCommit = null
+    );
     IAsyncEnumerable<GitStash> StashListAsync();
     Task StashAsync();
     Task ApplyStashAsync(GitStash stash);

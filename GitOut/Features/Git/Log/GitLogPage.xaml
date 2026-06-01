@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
   x:Class="GitOut.Features.Git.Log.GitLogPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -1412,6 +1412,40 @@
                         </Path.Style>
                       </Path>
                     </ToggleButton>
+                    <ToggleButton
+                      Style="{StaticResource MaterialIconToggleButtonStyle}"
+                      IsChecked="{Binding DataContext.ShowHistory, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                      ToolTip="Show history"
+                    >
+                      <Path
+                        Fill="{DynamicResource MaterialForegroundBase}"
+                        Data="{StaticResource FileUndo}"
+                      />
+                    </ToggleButton>
+                    <Separator Style="{StaticResource MaterialVerticalDivider}" />
+                    <ItemsControl
+                      Style="{StaticResource MaterialToggleButtonGroupStyle}"
+                      Margin="4,0"
+                    >
+                      <ToggleButton
+                        IsChecked="{Binding ViewMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Diff}"
+                        ToolTip="Diff"
+                      >
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource File}"
+                        />
+                      </ToggleButton>
+                      <ToggleButton
+                        IsChecked="{Binding ViewMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Blame}"
+                        ToolTip="Blame"
+                      >
+                        <Path
+                          Fill="{DynamicResource MaterialForegroundBase}"
+                          Data="{StaticResource FileEdit}"
+                        />
+                      </ToggleButton>
+                    </ItemsControl>
                     <Separator Style="{StaticResource MaterialVerticalDivider}" />
                     <Canvas Width="24" Height="24" ToolTip="{Binding Status}">
                       <Canvas.LayoutTransform>
@@ -1424,12 +1458,36 @@
                     </Canvas>
                   </StackPanel>
                 </Grid>
-                <diff:GitDiffControl
-                  Grid.Row="1"
-                  Diff="{Binding DiffResult}"
-                  ShowSpacesAsDots="{Binding DataContext.ShowSpacesAsDots, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
-                  HorizontalAlignment="Stretch"
-                />
+                <ContentControl Grid.Row="1" HorizontalAlignment="Stretch" Content="{Binding}">
+                  <ContentControl.Style>
+                    <Style TargetType="{x:Type ContentControl}">
+                      <Style.Triggers>
+                        <DataTrigger
+                          Binding="{Binding ViewMode}"
+                          Value="{x:Static files:FileViewMode.Blame}"
+                        >
+                          <Setter Property="ContentTemplate">
+                            <Setter.Value>
+                              <DataTemplate DataType="{x:Type files:GitFileViewModel}">
+                                <files:GitBlameControl />
+                              </DataTemplate>
+                            </Setter.Value>
+                          </Setter>
+                        </DataTrigger>
+                      </Style.Triggers>
+                      <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                          <DataTemplate DataType="{x:Type files:GitFileViewModel}">
+                            <diff:GitDiffControl
+                              Diff="{Binding DiffResult}"
+                              ShowSpacesAsDots="{Binding DataContext.ShowSpacesAsDots, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:GitLogPage}}}"
+                            />
+                          </DataTemplate>
+                        </Setter.Value>
+                      </Setter>
+                    </Style>
+                  </ContentControl.Style>
+                </ContentControl>
               </Grid>
             </DataTemplate>
             <DataTemplate DataType="{x:Type files:GitDirectoryViewModel}">

@@ -679,16 +679,25 @@ public class GitLogViewModel
             },
             () => selectedLogEntries.Count == 2
         );
-        SelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
+        SelectCommitCommand = new NotNullCallbackCommand<object>(payload =>
         {
+            GitCommitId id = payload switch
+            {
+                GitHistoryEvent evt => evt.Id,
+                GitCommitId commitId => commitId,
+                _ => throw new ArgumentException($"Invalid payload type: {payload.GetType()}"),
+            };
             EntryInView = null;
             foreach (GitTreeEvent entry in entries)
             {
                 entry.IsSelected = false;
             }
-            GitTreeEvent gitTreeEvent = entries.First(e => e.Event.Id == commit.Id);
-            EntryInView = gitTreeEvent;
-            gitTreeEvent.IsSelected = true;
+            GitTreeEvent? gitTreeEvent = entries.FirstOrDefault(e => e.Event.Id == id);
+            if (gitTreeEvent != null)
+            {
+                EntryInView = gitTreeEvent;
+                gitTreeEvent.IsSelected = true;
+            }
         });
 
         DecreaseContextLinesCommand = new CallbackCommand(() =>
@@ -698,9 +707,20 @@ public class GitLogViewModel
             ContextLines = Math.Min(100, ContextLines + 1)
         );
 
-        AppendSelectCommitCommand = new NotNullCallbackCommand<GitHistoryEvent>(commit =>
-            entries.First(e => e.Event.Id == commit.Id).IsSelected = true
-        );
+        AppendSelectCommitCommand = new NotNullCallbackCommand<object>(payload =>
+        {
+            GitCommitId id = payload switch
+            {
+                GitHistoryEvent evt => evt.Id,
+                GitCommitId commitId => commitId,
+                _ => throw new ArgumentException($"Invalid payload type: {payload.GetType()}"),
+            };
+            GitTreeEvent? gitTreeEvent = entries.FirstOrDefault(e => e.Event.Id == id);
+            if (gitTreeEvent != null)
+            {
+                gitTreeEvent.IsSelected = true;
+            }
+        });
         CloseAutocompleteCommand = new CallbackCommand(() => IsSearchDisplayed = false);
         ShowSearchFilesCommand = new CallbackCommand(() => IsSearchDisplayed = true);
     }
@@ -883,8 +903,66 @@ public class GitLogViewModel
 
     public LogEntriesViewModel? SelectedContext
     {
-        get;
-        set => SetProperty(ref field, value);
+        get => field;
+        set
+        {
+            if (field is not null)
+            {
+                field.PropertyChanged -= OnSelectedContextPropertyChanged;
+            }
+            if (SetProperty(ref field, value))
+            {
+                if (field is not null)
+                {
+                    field.PropertyChanged += OnSelectedContextPropertyChanged;
+                }
+            }
+        }
+    }
+
+    private bool showHistory;
+    private GitOut.Features.IO.RelativeDirectoryPath? filteredPath;
+    private GitOut.Features.IO.FileName? filteredFileName;
+    private GitOut.Features.Git.Files.IGitFileEntryViewModel? cachedSelectedFile;
+
+    public bool ShowHistory
+    {
+        get => showHistory;
+        set
+        {
+            if (SetProperty(ref showHistory, value))
+            {
+                if (value && SelectedContext?.SelectedItem != null)
+                {
+                    filteredPath = SelectedContext.SelectedItem.Path;
+                    filteredFileName = SelectedContext.SelectedItem.FileName;
+                }
+                else
+                {
+                    filteredPath = null;
+                    filteredFileName = null;
+                }
+                cachedSelectedFile = SelectedContext?.SelectedItem;
+                _ = CheckRepositoryStatusAsync();
+            }
+        }
+    }
+
+    private void OnSelectedContextPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(LogEntriesViewModel.SelectedItem))
+        {
+            if (showHistory && SelectedContext?.SelectedItem != null)
+            {
+                if (
+                    filteredPath != SelectedContext.SelectedItem.Path
+                    || filteredFileName != SelectedContext.SelectedItem.FileName
+                )
+                {
+                    ShowHistory = false;
+                }
+            }
+        }
     }
 
     public LogViewMode ViewMode
@@ -1105,6 +1183,8 @@ public class GitLogViewModel
                         {
                             IncludeRemotes = IncludeRemotes,
                             IncludeStashes = IncludeStashes,
+                            Path = filteredPath,
+                            FileName = filteredFileName,
                         }
                     )
                     .ConfigureAwait(false);
@@ -1340,7 +1420,17 @@ public class GitLogViewModel
             _ = builder.IgnoreAllSpace();
         }
 
-        IGitFileEntryViewModel? previousSelection = SelectedContext?.SelectedItem;
+        IGitFileEntryViewModel? previousSelection =
+            SelectedContext?.SelectedItem ?? cachedSelectedFile;
+
+        if (selectedLogEntries.Count == 0)
+        {
+            cachedSelectedFile = previousSelection;
+        }
+        else
+        {
+            cachedSelectedFile = null;
+        }
 
         switch (selectionMode)
         {

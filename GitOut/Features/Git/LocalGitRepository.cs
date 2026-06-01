@@ -138,6 +138,13 @@ public sealed class LocalGitRepository : IGitRepository
         {
             _ = processOptionsBuilder.Append(" --remotes");
         }
+        if (options.Path is not null && options.FileName is not null)
+        {
+            string fullPath = string.IsNullOrEmpty(options.Path.ToString())
+                ? options.FileName.ToString()
+                : $"{options.Path}/{options.FileName}";
+            _ = processOptionsBuilder.AppendRange("--follow", "--", fullPath);
+        }
         IGitProcess log = CreateProcess(processOptionsBuilder.Build());
         await foreach (
             GitHistoryEvent item in ParseHistoryLines(log.ReadLinesAsync(), GitHistoryEvent.Builder)
@@ -203,6 +210,140 @@ public sealed class LocalGitRepository : IGitRepository
         }
 
         return history;
+    }
+
+    public async Task<GitBlameResult> BlameAsync(
+        RelativeDirectoryPath path,
+        GitOut.Features.IO.FileName fileName,
+        GitCommitId? fromCommit = null
+    )
+    {
+        string fullPath = string.IsNullOrEmpty(path.ToString())
+            ? fileName.ToString()
+            : $"{path}/{fileName}";
+        IProcessOptionsBuilder arguments = ProcessOptions
+            .Builder()
+            .AppendRange("blame", "--porcelain");
+        if (fromCommit is not null)
+        {
+            _ = arguments.Append(fromCommit.Hash);
+        }
+        _ = arguments.AppendRange("--", fullPath);
+
+        IGitProcess blame = CreateProcess(arguments.Build());
+        var hunks = new List<GitBlameHunk>();
+        GitBlameHunk? currentHunk = null;
+        var currentLines = new List<GitBlameLine>();
+
+        var commitCache =
+            new Dictionary<
+                string,
+                (string author, string email, DateTimeOffset date, string summary)
+            >();
+
+        string currentHash = string.Empty;
+        int currentLineNum = 0;
+
+        await foreach (string line in blame.ReadLinesAsync())
+        {
+            if (line.StartsWith('\t'))
+            {
+                if (currentHunk is null || currentHunk.CommitId.Hash != currentHash)
+                {
+                    if (currentHunk is not null)
+                    {
+                        currentHunk = new GitBlameHunk
+                        {
+                            CommitId = currentHunk.CommitId,
+                            Author = currentHunk.Author,
+                            AuthorEmail = currentHunk.AuthorEmail,
+                            AuthorDate = currentHunk.AuthorDate,
+                            Summary = currentHunk.Summary,
+                            Lines = currentLines,
+                        };
+                        hunks.Add(currentHunk);
+                    }
+
+                    var cached = commitCache[currentHash];
+                    currentLines = new List<GitBlameLine>();
+                    currentHunk = new GitBlameHunk
+                    {
+                        CommitId = GitCommitId.FromHash(currentHash),
+                        Author = cached.author,
+                        AuthorEmail = cached.email,
+                        AuthorDate = cached.date,
+                        Summary = cached.summary,
+                        Lines = currentLines,
+                    };
+                }
+
+                currentLines.Add(
+                    new GitBlameLine { FinalLineNumber = currentLineNum, Content = line[1..] }
+                );
+            }
+            else
+            {
+                int firstSpace = line.IndexOf(' ', StringComparison.Ordinal);
+                if (firstSpace == 40)
+                {
+                    currentHash = line[..40];
+                    string[] parts = line.Split(' ');
+                    currentLineNum = int.Parse(parts[2]);
+
+                    if (!commitCache.ContainsKey(currentHash))
+                    {
+                        commitCache[currentHash] = (
+                            string.Empty,
+                            string.Empty,
+                            DateTimeOffset.MinValue,
+                            string.Empty
+                        );
+                    }
+                }
+                else if (firstSpace > 0)
+                {
+                    string key = line[..firstSpace];
+                    string value = line[(firstSpace + 1)..];
+                    if (commitCache.TryGetValue(currentHash, out var cache))
+                    {
+                        switch (key)
+                        {
+                            case "author":
+                                commitCache[currentHash] = cache with { author = value };
+                                break;
+                            case "author-mail":
+                                commitCache[currentHash] = cache with { email = value };
+                                break;
+                            case "author-time":
+                                commitCache[currentHash] = cache with
+                                {
+                                    date = DateTimeOffset.FromUnixTimeSeconds(long.Parse(value)),
+                                };
+                                break;
+                            case "summary":
+                                commitCache[currentHash] = cache with { summary = value };
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (currentHunk is not null)
+        {
+            currentHunk = new GitBlameHunk
+            {
+                CommitId = currentHunk.CommitId,
+                Author = currentHunk.Author,
+                AuthorEmail = currentHunk.AuthorEmail,
+                AuthorDate = currentHunk.AuthorDate,
+                Summary = currentHunk.Summary,
+                Lines = currentLines,
+            };
+            hunks.Add(currentHunk);
+        }
+
+        return new GitBlameResult(hunks);
     }
 
     public async IAsyncEnumerable<GitStash> StashListAsync()

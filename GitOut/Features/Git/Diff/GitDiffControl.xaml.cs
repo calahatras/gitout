@@ -111,7 +111,7 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
         return null;
     }
 
-    private void ParseCurrentContent(IEnumerable<GitDiffHunk> hunks)
+    private void ParseCurrentContent(IEnumerable<GitDiffHunk> hunks, string fileName)
     {
         double pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         DiffDisplayOptions display = ShowSpacesAsDots
@@ -126,7 +126,7 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
                 (Brush)Application.Current.Resources["MaterialLightDividers"],
                 (Brush)Application.Current.Resources["MaterialGray400"]
             );
-        var vm = GitDiffViewModel.ParseDiff(hunks, display);
+        var vm = GitDiffViewModel.ParseDiff(hunks, display, fileName);
         CurrentContent = vm;
     }
 
@@ -170,7 +170,7 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
                 }
                 else if (context.Text is not null)
                 {
-                    control.ParseCurrentContent(context.Text.Hunks);
+                    control.ParseCurrentContent(context.Text.Hunks, extension);
                 }
             }
         }
@@ -189,7 +189,7 @@ public partial class GitDiffControl : UserControl, INotifyPropertyChanged, IHunk
             && context.Text is not null
         )
         {
-            control.ParseCurrentContent(context.Text.Hunks);
+            control.ParseCurrentContent(context.Text.Hunks, context.FileExtension);
         }
     }
 }
