@@ -27,7 +27,6 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
     private readonly IGitRepositoryStorage storage;
     private readonly IGitRepositoryFactory repositoryFactory;
     private readonly ISnackbarService snack;
-    private string searchQuery = string.Empty;
 
     public RepositoryListViewModel(
         INavigationService navigation,
@@ -61,9 +60,7 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
             }
         });
 
-        RemoveRepositoryCommand = new NotNullCallbackCommand<IGitRepository>(repository =>
-            storage.Remove(repository)
-        );
+        RemoveRepositoryCommand = new NotNullCallbackCommand<IGitRepository>(storage.Remove);
 
         subscription = storage.Repositories.Subscribe(finalList =>
         {
@@ -132,7 +129,7 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
             return;
         }
 
-        List<IGitRepository> repositories = new();
+        List<IGitRepository> repositories = [];
         foreach (string? path in dataObject.GetFileDropList())
         {
             if (path is null)
@@ -171,9 +168,9 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
 
     public string SearchQuery
     {
-        get => searchQuery;
-        set => SetProperty(ref searchQuery, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     public void Navigated(NavigationType type)
     {

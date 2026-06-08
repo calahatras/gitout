@@ -8,8 +8,8 @@ namespace GitOut.Features.Wpf;
 
 public class CompositeCommand : ICommand
 {
-    private readonly List<(Action action, Func<bool> canAction)> actions = new();
-    private readonly List<(Func<Task> asyncAction, Func<bool> canAction)> tasks = new();
+    private readonly List<(Action action, Func<bool> canAction)> actions = [];
+    private readonly List<(Func<Task> asyncAction, Func<bool> canAction)> tasks = [];
 
     public CompositeCommand() { }
 
@@ -63,8 +63,8 @@ public class CompositeCommand : ICommand
 public class CompositeCommand<T> : ICommand
     where T : class
 {
-    private readonly List<(Action<T> action, Func<T, bool> canAction)> actions = new();
-    private readonly List<(Func<T, Task> actionAsync, Func<T, bool> canAction)> tasks = new();
+    private readonly List<(Action<T> action, Func<T, bool> canAction)> actions = [];
+    private readonly List<(Func<T, Task> actionAsync, Func<T, bool> canAction)> tasks = [];
 
     public CompositeCommand() { }
 

@@ -1,28 +1,36 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
+using GitOut.Features.IO;
 using GitOut.Features.Wpf;
 
 namespace GitOut.Features.Git;
 
-public class GitDeleteResult
+public partial class GitDeleteResult
 {
+    [GeneratedRegex("^error: [Cc]annot delete branch")]
+    private static partial Regex CanForceBranchRemoval();
+
     private GitDeleteResult(
         string message,
         ICommand? undo = null,
-        ICommand? forceDelete = null,
+        ICommand? additional = null,
+        string? additionalLabel = null,
         bool isBranchDeleted = false
     )
     {
         Message = message;
         UndoCommand = undo;
-        ForceDeleteCommand = forceDelete;
+        AdditionalCommand = additional;
+        AdditionalCommandLabel = additionalLabel;
         IsBranchDeleted = isBranchDeleted;
     }
 
     public string Message { get; }
     public ICommand? UndoCommand { get; }
-    public ICommand? ForceDeleteCommand { get; }
+    public ICommand? AdditionalCommand { get; }
+    public string? AdditionalCommandLabel { get; }
 
     public bool IsBranchDeleted { get; }
 
@@ -60,16 +68,39 @@ public class GitDeleteResult
             {
                 return new GitDeleteResult(
                     $"The branch is not fully merged to remote, are you sure you want to delete {name.Name}",
-                    forceDelete: new AsyncCallbackCommand(() =>
+                    additional: new AsyncCallbackCommand(() =>
                         repository.DeleteBranchAsync(name, new GitDeleteBranchOptions(true))
                     )
                 );
             }
-            else if (first.StartsWith("error: Cannot delete branch '"))
+            else if (CanForceBranchRemoval().IsMatch(first))
             {
-                return new GitDeleteResult(
-                    $"Cannot delete branch '{name.Name}' because it is checked out!"
-                );
+                if (
+                    first.Contains(
+                        " used by worktree at ",
+                        System.StringComparison.InvariantCulture
+                    )
+                )
+                {
+                    string worktreePath = first.Split('\'')[3];
+                    return new GitDeleteResult(
+                        $"Cannot delete branch '{name.Name}' because it is used by a worktree!",
+                        additional: new AsyncCallbackCommand(async () =>
+                        {
+                            await repository.WorktreeRemoveAsync(
+                                DirectoryPath.Create(worktreePath)
+                            );
+                            _ = await repository.DeleteBranchAsync(name);
+                        }),
+                        additionalLabel: "REMOVE WORKTREE"
+                    );
+                }
+                else
+                {
+                    return new GitDeleteResult(
+                        $"Cannot delete branch '{name.Name}' because it is checked out!"
+                    );
+                }
             }
         }
         return new GitDeleteResult("Unknown issue");

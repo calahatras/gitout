@@ -11,9 +11,6 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
     private readonly IGitRepository repository;
     private readonly GitFileId sourceId;
     private readonly GitFileId? destinationId;
-
-    private DiffContext? result;
-
     private DiffOptions options;
 
     private GitFileViewModel(
@@ -75,18 +72,19 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
     {
         get
         {
-            if (result is null)
+            if (field is null)
             {
                 _ = RefreshDiffAsync();
             }
-            return result;
+            return field;
         }
+        private set;
     }
 
     public void UpdateOptions(DiffOptions newOptions)
     {
         options = newOptions;
-        result = null;
+        DiffResult = null;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiffResult)));
     }
 
@@ -155,7 +153,7 @@ public class GitFileViewModel : IGitFileEntryViewModel, INotifyPropertyChanged
 
     private async Task RefreshDiffAsync()
     {
-        result = destinationId is null
+        DiffResult = destinationId is null
             ? await DiffContext.SnapshotFileAsync(repository, Path, FileName, sourceId)
             : await DiffContext.DiffFileAsync(
                 repository,

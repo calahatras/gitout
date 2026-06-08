@@ -25,7 +25,7 @@ public class NodesToPathConverter : IMultiValueConverter
             return DependencyProperty.UnsetValue;
         }
 
-        List<Path> paths = new();
+        List<Path> paths = [];
         foreach (GitTreeNode? node in nodes)
         {
             if (!node.IsCommit)
@@ -86,7 +86,7 @@ public class NodesToPathConverter : IMultiValueConverter
             StrokeThickness = 2,
             SnapsToDevicePixels = true,
             Data = geometry,
-            StrokeDashArray = useDashedLine ? new DoubleCollection(new[] { 3d, 1 }) : null,
+            StrokeDashArray = useDashedLine ? [.. new[] { 3d, 1 }] : null,
         };
 
     private static Path? AddCommitGeometry(GitTreeNode node, double height)

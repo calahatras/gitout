@@ -21,11 +21,11 @@ public class CherryPickIntegrationTest
     {
         // 1. Set up the repository mock
         IGitRepository repository = A.Fake<IGitRepository>();
-        A.CallTo(() => repository.Name).Returns("integration-repo");
+        _ = A.CallTo(() => repository.Name).Returns("integration-repo");
 
         // Use a TaskCompletionSource to allow awaiting the async operation
         var tcs = new TaskCompletionSource<bool>();
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 repository.CherryPickAsync(
                     A<System.Collections.Generic.IEnumerable<string>>._,
                     null
@@ -36,7 +36,7 @@ public class CherryPickIntegrationTest
         // 2. Set up the environment mocks
         INavigationService navigationService = A.Fake<INavigationService>();
         var options = new GitLogPageOptions(repository);
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 navigationService.GetOptions<GitLogPageOptions>(typeof(GitLogPage).FullName!)
             )
             .Returns(options);
@@ -49,7 +49,7 @@ public class CherryPickIntegrationTest
 
         IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
         IRepositoryWatcher watcher = A.Fake<IRepositoryWatcher>();
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 watchProvider.PrepareWatchRepositoryChanges(
                     repository,
                     A<RepositoryWatcherOptions>._
@@ -61,7 +61,7 @@ public class CherryPickIntegrationTest
         IOptionsMonitor<GitStageOptions> stagingOptions = A.Fake<
             IOptionsMonitor<GitStageOptions>
         >();
-        A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
+        _ = A.CallTo(() => stagingOptions.CurrentValue).Returns(new GitStageOptions());
 
         IOptionsMonitor<GitLogOptions> logOptions = A.Fake<IOptionsMonitor<GitLogOptions>>();
         IOptionsMonitor<WorktreeOptions> worktreeOptions = A.Fake<
@@ -98,10 +98,10 @@ public class CherryPickIntegrationTest
         viewModel.CherryPickCommand.Execute(null);
 
         // Wait for the async execution to finish simulated by the TaskCompletionSource
-        await tcs.Task;
+        _ = await tcs.Task;
 
         // 6. Verify full flow
-        A.CallTo(() =>
+        _ = A.CallTo(() =>
                 repository.CherryPickAsync(
                     A<System.Collections.Generic.IEnumerable<string>>.That.Matches(e =>
                         e.First() == commit.Id.Hash
@@ -111,7 +111,7 @@ public class CherryPickIntegrationTest
             )
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => snackbarService.ShowSuccess("Cherry-pick completed successfully"))
+        _ = A.CallTo(() => snackbarService.ShowSuccess("Cherry-pick completed successfully"))
             .MustHaveHappenedOnceExactly();
     }
 }

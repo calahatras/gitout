@@ -43,7 +43,7 @@ public class Snack
 
     private class SnackBuilder : ISnackBuilder
     {
-        private readonly IList<string> actions = new List<string>();
+        private readonly IList<string> actions = [];
         private TimeSpan? duration;
         private string? message;
         private Exception? error;

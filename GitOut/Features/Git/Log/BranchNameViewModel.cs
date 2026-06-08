@@ -44,7 +44,7 @@ public class BranchNameViewModel
                     notifier.NotifyLogChanged();
                 }
                 const string undoActionText = "UNDO";
-                const string forceDeleteActionText = "FORCE";
+                string additionalActionLabel = result.AdditionalCommandLabel ?? "FORCE";
                 ISnackBuilder? builder = Snack
                     .Builder()
                     .WithMessage(result.Message)
@@ -53,21 +53,20 @@ public class BranchNameViewModel
                 {
                     _ = builder.AddAction(undoActionText);
                 }
-                if (result.ForceDeleteCommand is not null)
+                if (result.AdditionalCommand is not null)
                 {
-                    _ = builder.AddAction(forceDeleteActionText);
+                    _ = builder.AddAction(additionalActionLabel);
                 }
                 SnackAction? action = await snack.ShowAsync(builder);
                 if (action is not null)
                 {
-                    switch (action.Text)
+                    if (action.Text == undoActionText)
                     {
-                        case undoActionText:
-                            result.UndoCommand!.Execute(null);
-                            break;
-                        case forceDeleteActionText:
-                            result.ForceDeleteCommand!.Execute(null);
-                            break;
+                        result.UndoCommand!.Execute(null);
+                    }
+                    else if (action.Text == additionalActionLabel)
+                    {
+                        result.AdditionalCommand!.Execute(null);
                     }
                     notifier.NotifyLogChanged();
                 }

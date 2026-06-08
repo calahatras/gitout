@@ -10,7 +10,7 @@ public class SnackbarService : ISnackbarService
     public Task<SnackAction?> ShowAsync(ISnackBuilder snack)
     {
         var source = new TaskCompletionSource<SnackAction?>();
-        SendSnack(snack.Build(action => source.SetResult(action)));
+        SendSnack(snack.Build(source.SetResult));
         return source.Task;
     }
 

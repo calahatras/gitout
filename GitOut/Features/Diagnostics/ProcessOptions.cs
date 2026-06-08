@@ -14,7 +14,7 @@ public class ProcessOptions
 
     private class ProcessOptionsBuilder : IProcessOptionsBuilder
     {
-        private readonly List<string> arguments = new();
+        private readonly List<string> arguments = [];
 
         public IProcessOptionsBuilder Append(string argument)
         {

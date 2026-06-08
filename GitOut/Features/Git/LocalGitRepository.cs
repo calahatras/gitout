@@ -32,7 +32,7 @@ public sealed class LocalGitRepository : IGitRepository
 
     public GitStatusResult? CachedStatus { get; private set; }
 
-    private static readonly char[] GitLineSeparator = new char[] { '\0' };
+    private static readonly char[] GitLineSeparator = ['\0'];
 
     public async Task<bool> IsInsideWorkTree()
     {
@@ -581,31 +581,31 @@ public sealed class LocalGitRepository : IGitRepository
         {
             if (options.Edit)
             {
-                arguments.Append("--edit");
+                _ = arguments.Append("--edit");
             }
 
             if (options.NoCommit)
             {
-                arguments.Append("--no-commit");
+                _ = arguments.Append("--no-commit");
             }
 
             if (options.MainlineParentNumber.HasValue)
             {
-                arguments.AppendRange("-m", options.MainlineParentNumber.Value.ToString());
+                _ = arguments.AppendRange("-m", options.MainlineParentNumber.Value.ToString());
             }
 
             if (options.AppendCherryPickLine)
             {
-                arguments.Append("-x");
+                _ = arguments.Append("-x");
             }
 
             if (options.FastForward)
             {
-                arguments.Append("--ff");
+                _ = arguments.Append("--ff");
             }
         }
 
-        arguments.AppendRange(references);
+        _ = arguments.AppendRange(references);
 
         ProcessEventArgs args = await CreateProcess(arguments.Build()).ExecuteAsync();
         if (args.ErrorLines.Count > 0)

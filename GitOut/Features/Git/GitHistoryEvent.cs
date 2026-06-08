@@ -39,8 +39,8 @@ public class GitHistoryEvent
     public GitHistoryEvent? Parent { get; private set; }
     public GitHistoryEvent? MergedParent { get; private set; }
 
-    public IList<GitBranchName> Branches { get; } = new List<GitBranchName>();
-    public IList<GitHistoryEvent> Children { get; } = new List<GitHistoryEvent>();
+    public IList<GitBranchName> Branches { get; } = [];
+    public IList<GitHistoryEvent> Children { get; } = [];
 
     public static IGitHistoryEventBuilder<GitHistoryEvent> Builder() =>
         new GitHistoryEventBuilder();

@@ -6,8 +6,6 @@ namespace GitOut.Features.Git.Stage;
 
 public class StatusChangeViewModel : INotifyPropertyChanged
 {
-    private bool isSelected;
-
     private StatusChangeViewModel(GitStatusChange model, StatusChangeLocation location)
     {
         Model = model;
@@ -55,8 +53,8 @@ public class StatusChangeViewModel : INotifyPropertyChanged
 
     public bool IsSelected
     {
-        get => isSelected;
-        set => SetProperty(ref isSelected, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

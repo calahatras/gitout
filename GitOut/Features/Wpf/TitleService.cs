@@ -4,11 +4,10 @@ namespace GitOut.Features.Wpf;
 
 public class TitleService : ITitleService
 {
-    private string? title;
     public string? Title
     {
-        get => title;
-        set => SetProperty(ref title, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public event EventHandler<TitleChangedEventArgs>? TitleChanged;

@@ -9,8 +9,8 @@ namespace GitOut.Features.Git.Log;
 
 public class GitTreeEvent : INotifyPropertyChanged
 {
-    private static readonly List<AvailableColor> colors = new()
-    {
+    private static readonly List<AvailableColor> colors =
+    [
         new AvailableColor(Color.FromRgb(255, 255, 0)),
         new AvailableColor(Color.FromRgb(255, 200, 100)),
         new AvailableColor(Color.FromRgb(0, 255, 255)),
@@ -19,13 +19,11 @@ public class GitTreeEvent : INotifyPropertyChanged
         new AvailableColor(Color.FromRgb(200, 200, 200)),
         new AvailableColor(Color.FromRgb(100, 100, 100)),
         new AvailableColor(Color.FromRgb(50, 50, 50)),
-    };
+    ];
 
-    private readonly List<GitTreeNode> nodes = new();
+    private readonly List<GitTreeNode> nodes = [];
     private int commitIndex = -1;
     private int colorIndex;
-    private bool isSelected;
-    private Brush? highlightBrush;
 
     public GitTreeEvent(GitHistoryEvent historyEvent) => Event = historyEvent;
 
@@ -46,14 +44,14 @@ public class GitTreeEvent : INotifyPropertyChanged
 
     public bool IsSelected
     {
-        get => isSelected;
-        set => SetProperty(ref isSelected, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public Brush? HighlightBrush
     {
-        get => highlightBrush;
-        set => SetProperty(ref highlightBrush, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public int StashIndex => Event is GitStash stash ? stash.StashIndex : -1;
@@ -223,10 +221,7 @@ public class GitTreeEvent : INotifyPropertyChanged
     private static void SetColorAvailable(Color color)
     {
         AvailableColor? availableColor = colors.FirstOrDefault(ac => ac.Color == color);
-        if (availableColor is not null)
-        {
-            availableColor.Available = true;
-        }
+        _ = availableColor?.Available = true;
     }
 
     private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
