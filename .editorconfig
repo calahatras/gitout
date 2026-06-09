@@ -213,6 +213,8 @@ dotnet_style_prefer_conditional_expression_over_return=true:warning
 
 dotnet_code_quality_unused_parameters=all:warning
 
+dotnet_diagnostic.IDE0011.severity = error
+
 dotnet_diagnostic.CA1000.severity=warning
 dotnet_diagnostic.CA1001.severity=suggestion
 dotnet_diagnostic.CA1002.severity=warning

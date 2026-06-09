@@ -24,6 +24,7 @@ public class GitBranchNameTest
     [TestCase("some-&-thing")]
     [TestCase("some@name")]
     [TestCase("wip(test)")]
+    [TestCase("fix/issue#1")]
     public void CreateLocalShouldAllowValidNames(string input)
     {
         bool isValid = GitBranchName.IsValid(input);
