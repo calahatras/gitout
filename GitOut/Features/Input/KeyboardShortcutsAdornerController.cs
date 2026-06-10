@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using GitOut.Features.Options;
 using Microsoft.Extensions.Options;
 
 namespace GitOut.Features.Input;
@@ -39,6 +40,7 @@ internal sealed class KeyboardShortcutsAdornerController
 {
     private readonly UserControl owner;
     private readonly IOptionsMonitor<KeyboardShortcutsOptions> options;
+    private readonly IOptionsWriter<KeyboardShortcutsOptions> optionsWriter;
 
     // Page-specific + global shortcuts merged once at construction time.
     private readonly IReadOnlyList<KeyboardShortcutEntry> shortcuts;
@@ -52,6 +54,7 @@ internal sealed class KeyboardShortcutsAdornerController
 
     /// <param name="owner">The page that will host the adorner.</param>
     /// <param name="options">Options monitor supplying the user-configured hotkey.</param>
+    /// <param name="optionsWriter">Writer used to persist a corrected hotkey when an invalid gesture is detected.</param>
     /// <param name="pageShortcuts">
     /// Page-specific shortcuts to show above the global ones.
     /// Pass an empty array for pages that have no page-specific shortcuts.
@@ -59,11 +62,13 @@ internal sealed class KeyboardShortcutsAdornerController
     public KeyboardShortcutsAdornerController(
         UserControl owner,
         IOptionsMonitor<KeyboardShortcutsOptions> options,
+        IOptionsWriter<KeyboardShortcutsOptions> optionsWriter,
         IReadOnlyList<KeyboardShortcutEntry> pageShortcuts
     )
     {
         this.owner = owner;
         this.options = options;
+        this.optionsWriter = optionsWriter;
 
         // Merge: page shortcuts first, global shortcuts last.
         shortcuts =
@@ -194,11 +199,37 @@ internal sealed class KeyboardShortcutsAdornerController
         {
             owner.InputBindings.Remove(keyBinding);
         }
-        keyBinding = new KeyBinding(
-            KeyboardShortcutCommands.ShowShortcuts,
-            KeyboardShortcutsSettingsViewModel.ParseKey(options.CurrentValue.HotKey),
-            KeyboardShortcutsSettingsViewModel.ParseModifiers(options.CurrentValue.Modifiers)
+
+        Key key = KeyboardShortcutsSettingsViewModel.ParseKey(options.CurrentValue.HotKey);
+        ModifierKeys modifiers = KeyboardShortcutsSettingsViewModel.ParseModifiers(
+            options.CurrentValue.Modifiers
         );
+
+        if (!IsValidKeyGesture(key, modifiers))
+        {
+            key = Key.OemQuestion;
+            modifiers = ModifierKeys.None;
+            optionsWriter.Update(o =>
+            {
+                o.HotKey = key.ToString();
+                o.Modifiers = modifiers.ToString();
+            });
+        }
+
+        keyBinding = new KeyBinding(KeyboardShortcutCommands.ShowShortcuts, key, modifiers);
         _ = owner.InputBindings.Add(keyBinding);
+    }
+
+    private static bool IsValidKeyGesture(Key key, ModifierKeys modifiers)
+    {
+        try
+        {
+            _ = new KeyGesture(key, modifiers);
+            return true;
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
     }
 }

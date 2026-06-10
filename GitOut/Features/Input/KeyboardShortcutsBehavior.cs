@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using GitOut.Features.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -139,8 +140,12 @@ public static class KeyboardShortcutsBehavior
             IOptionsMonitor<KeyboardShortcutsOptions>
         >();
 
+        IOptionsWriter<KeyboardShortcutsOptions> optionsWriter = App.Services.GetRequiredService<
+            IOptionsWriter<KeyboardShortcutsOptions>
+        >();
+
         // The controller self-registers on Loaded/Unloaded; no reference needs to be stored.
-        _ = new KeyboardShortcutsAdornerController(page, options, entries);
+        _ = new KeyboardShortcutsAdornerController(page, options, optionsWriter, entries);
     }
 
     /// <summary>
