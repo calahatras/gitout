@@ -120,7 +120,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
             theme.Accent,
             dpi
         );
-        double panelWidth = Math.Max(colsWidth, titleText.Width) + PanelPadding * 2;
+        double panelWidth = Math.Max(colsWidth, titleText.Width) + (PanelPadding * 2);
 
         double leftColHeight = MeasureColumnHeight(leftGroups, theme, dpi);
         double rightColHeight = MeasureColumnHeight(rightGroups, theme, dpi);
@@ -146,7 +146,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
         // ── Title ─────────────────────────────────────────────────────────
         dc.DrawText(
             titleText,
-            new Point(panelX + (panelWidth - titleText.Width) / 2, panelY + PanelPadding)
+            new Point(panelX + ((panelWidth - titleText.Width) / 2), panelY + PanelPadding)
         );
 
         // ── Columns ───────────────────────────────────────────────────────
@@ -238,7 +238,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
 
             foreach (KeyboardShortcutEntry entry in group)
             {
-                double midY = y + RowHeight / 2;
+                double midY = y + (RowHeight / 2);
 
                 // ── Key badges (modifier badges + key badge) ───────────────
                 double badgesWidth = RenderBadges(dc, entry, x, midY, theme, dpi, render: true);
@@ -253,7 +253,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
                 );
                 dc.DrawText(
                     descText,
-                    new Point(x + badgesWidth + BadgeDescriptionGap, midY - descText.Height / 2)
+                    new Point(x + badgesWidth + BadgeDescriptionGap, midY - (descText.Height / 2))
                 );
 
                 y += RowHeight;
@@ -292,7 +292,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
                 );
                 if (render)
                 {
-                    dc.DrawText(plus, new Point(offsetX + 2, midY - plus.Height / 2));
+                    dc.DrawText(plus, new Point(offsetX + 2, midY - (plus.Height / 2)));
                 }
                 offsetX += plus.Width + 4;
             }
@@ -304,12 +304,12 @@ public sealed class KeyboardShortcutsAdorner : Adorner
                 theme.Text,
                 dpi
             );
-            double bw = badgeText.Width + BadgePaddingH * 2;
-            double bh = badgeText.Height + BadgePaddingV * 2;
+            double bw = badgeText.Width + (BadgePaddingH * 2);
+            double bh = badgeText.Height + (BadgePaddingV * 2);
 
             if (render)
             {
-                var rect = new Rect(offsetX, midY - bh / 2, bw, bh);
+                var rect = new Rect(offsetX, midY - (bh / 2), bw, bh);
                 dc.DrawRoundedRectangle(
                     theme.BadgeFill,
                     theme.BadgeBorder,
@@ -319,7 +319,7 @@ public sealed class KeyboardShortcutsAdorner : Adorner
                 );
                 dc.DrawText(
                     badgeText,
-                    new Point(offsetX + BadgePaddingH, midY - badgeText.Height / 2)
+                    new Point(offsetX + BadgePaddingH, midY - (badgeText.Height / 2))
                 );
             }
 

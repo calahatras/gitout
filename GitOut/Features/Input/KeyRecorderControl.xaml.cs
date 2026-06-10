@@ -65,7 +65,9 @@ public partial class KeyRecorderControl : System.Windows.Controls.UserControl
         CancelButton.Visibility = Visibility.Visible;
 
         if (Window.GetWindow(this) is Window window)
+        {
             window.PreviewKeyDown += OnWindowPreviewKeyDown;
+        }
     }
 
     private void StopRecording(Window? window)
@@ -76,7 +78,9 @@ public partial class KeyRecorderControl : System.Windows.Controls.UserControl
 
         Window? w = window ?? Window.GetWindow(this);
         if (w is not null)
+        {
             w.PreviewKeyDown -= OnWindowPreviewKeyDown;
+        }
     }
 
     private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)

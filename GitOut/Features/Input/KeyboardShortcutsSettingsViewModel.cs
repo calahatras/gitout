@@ -42,7 +42,9 @@ public sealed class KeyboardShortcutsSettingsViewModel : INotifyPropertyChanged,
         set
         {
             if (SetProperty(ref hotKey, value))
+            {
                 writer.Update(s => s.HotKey = value.ToString());
+            }
         }
     }
 
@@ -53,7 +55,9 @@ public sealed class KeyboardShortcutsSettingsViewModel : INotifyPropertyChanged,
         set
         {
             if (SetProperty(ref modifiers, value))
+            {
                 writer.Update(s => s.Modifiers = value.ToString());
+            }
         }
     }
 
@@ -82,7 +86,10 @@ public sealed class KeyboardShortcutsSettingsViewModel : INotifyPropertyChanged,
     )
     {
         if (EqualityComparer<T>.Default.Equals(field, value))
+        {
             return false;
+        }
+
         field = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         return true;

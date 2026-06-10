@@ -69,8 +69,7 @@ internal sealed class KeyboardShortcutsAdornerController
         shortcuts =
             pageShortcuts.Count == 0
                 ? KeyboardShortcutCommands.GlobalShortcuts
-                : (IReadOnlyList<KeyboardShortcutEntry>)
-                    pageShortcuts.Concat(KeyboardShortcutCommands.GlobalShortcuts).ToArray();
+                : pageShortcuts.Concat(KeyboardShortcutCommands.GlobalShortcuts).ToArray();
 
         onEscapePressed = OnEscapePressed;
 
@@ -88,16 +87,22 @@ internal sealed class KeyboardShortcutsAdornerController
     private void OnToggle(object sender, ExecutedRoutedEventArgs e)
     {
         if (adorner is null)
+        {
             ShowAdorner();
+        }
         else
+        {
             HideAdorner();
+        }
     }
 
     private void ShowAdorner()
     {
         var layer = AdornerLayer.GetAdornerLayer(owner);
         if (layer is null)
+        {
             return;
+        }
 
         adorner = new KeyboardShortcutsAdorner(owner, shortcuts);
         adorner.DismissRequested += OnDismissRequested;
