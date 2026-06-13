@@ -158,6 +158,17 @@
         Command="{Binding CreateBranchCommand}"
         CommandParameter="{Binding}"
       />
+      <Separator />
+      <MenuItem
+        Header="Copy stash name"
+        Command="{Binding CopyStashNameCommand}"
+        CommandParameter="{Binding}"
+      />
+      <MenuItem
+        Header="Copy stash ID"
+        Command="{Binding CopyStashIdCommand}"
+        CommandParameter="{Binding}"
+      />
     </ContextMenu>
     <Style x:Key="BranchStyle" TargetType="{x:Type Border}">
       <Setter Property="Background" Value="Transparent" />
@@ -918,7 +929,28 @@
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid Style="{StaticResource MaterialToolbarStyle}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
           <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="Stashes" />
+          <Button
+            Grid.Column="1"
+            Style="{StaticResource MaterialIconButtonStyle}"
+            Command="{Binding RefreshStashesCommand}"
+            ToolTip="Refresh stashes"
+            HorizontalAlignment="Right"
+          >
+            <Canvas Width="24" Height="24">
+              <Canvas.LayoutTransform>
+                <ScaleTransform ScaleX=".75" ScaleY=".75" />
+              </Canvas.LayoutTransform>
+              <Path
+                Fill="{DynamicResource MaterialForegroundBase}"
+                Data="{StaticResource Refresh}"
+              />
+            </Canvas>
+          </Button>
         </Grid>
         <ListView
           Grid.Row="1"

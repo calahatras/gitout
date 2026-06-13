@@ -166,6 +166,7 @@ public class GitLogViewModel
             typeof(GitStagePage).FullName!,
             e => GitStagePageOptions.Stage(Repository)
         );
+        RefreshStashesCommand = new AsyncCallbackCommand(RefreshStashListAsync);
         RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
 
         selectedLogEntries.CollectionChanged += (sender, args) =>
@@ -925,6 +926,7 @@ public class GitLogViewModel
         defaultWorktreePrefixPath.Replace("<name>", NewWorktreeName, StringComparison.Ordinal);
 
     public ICommand NavigateToStageAreaCommand { get; }
+    public ICommand RefreshStashesCommand { get; }
     public ICommand RefreshStatusCommand { get; }
     public ICommand FetchRemotesCommand { get; }
     public ICommand PruneRemotesCommand { get; }
