@@ -509,6 +509,22 @@
             </Button>
             <Button
               Style="{StaticResource MaterialIconButtonStyle}"
+              Command="{Binding StageUpdatedCommand}"
+              ToolTip="Stage files already in index"
+            >
+              <Canvas Width="24" Height="24">
+                <Canvas.LayoutTransform>
+                  <ScaleTransform ScaleX=".75" ScaleY=".75" />
+                </Canvas.LayoutTransform>
+                <Path
+                  Fill="{DynamicResource MaterialForegroundBase}"
+                  Data="{StaticResource ArchivePlus}"
+                />
+              </Canvas>
+            </Button>
+            <Separator Style="{StaticResource MaterialVerticalDivider}" />
+            <Button
+              Style="{StaticResource MaterialIconButtonStyle}"
               Command="{Binding ResetHeadCommand}"
               ToolTip="Reset to workspace"
             >

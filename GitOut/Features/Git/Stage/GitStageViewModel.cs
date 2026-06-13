@@ -130,6 +130,10 @@ public class GitStageViewModel
             StageAllFilesAsync,
             () => workspaceFiles.Count > 0
         );
+        StageUpdatedCommand = new AsyncCallbackCommand(
+            StageUpdatedFilesAsync,
+            () => workspaceFiles.Count > 0 && indexFiles.Count > 0
+        );
         IntentToAddFileCommand = new AsyncCallbackCommand<StatusChangeViewModel>(
             IntentToAddFileAsync,
             CanIntentToAddFile
@@ -343,6 +347,7 @@ public class GitStageViewModel
     public ICommand MoveNextCommand { get; }
 
     public ICommand AddAllCommand { get; }
+    public ICommand StageUpdatedCommand { get; }
     public ICommand IntentToAddFileCommand { get; }
     public ICommand IntentToAddCommand { get; }
     public ICommand StageFileCommand { get; }
@@ -629,6 +634,22 @@ public class GitStageViewModel
     {
         await Repository.AddAllAsync();
         await GetRepositoryStatusAsync();
+    }
+
+    private async Task StageUpdatedFilesAsync()
+    {
+        undoPatch = null;
+        int previousIndex = SelectedWorkspaceIndex;
+        foreach (StatusChangeViewModel item in workspaceFiles)
+        {
+            if (indexFiles.Any(indexItem => indexItem.Path == item.Path))
+            {
+                await Repository.AddAsync(item.Model, AddOptions.None);
+            }
+        }
+        await GetRepositoryStatusAsync();
+        SelectedWorkspaceIndex =
+            previousIndex >= workspaceFiles.Count ? workspaceFiles.Count - 1 : previousIndex;
     }
 
     private async Task IntentToAddFileAsync(StatusChangeViewModel? model)
