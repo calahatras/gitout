@@ -24,6 +24,10 @@ public interface IGitRepository
     Task PruneRemoteAsync(GitRemote remote);
     Task<IEnumerable<GitHistoryEvent>> LogAsync(LogOptions options);
     IAsyncEnumerable<GitStash> StashListAsync();
+    Task StashAsync();
+    Task ApplyStashAsync(GitStash stash);
+    Task PopStashAsync(GitStash stash);
+    Task DropStashAsync(GitStash stash);
     Task<GitStatusResult> StatusAsync();
     IAsyncEnumerable<GitDiffFileEntry> ListDiffChangesAsync(
         GitObjectId change,

@@ -1,5 +1,6 @@
 #pragma warning disable CA1506
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -548,10 +549,10 @@ public class GitStageViewModel
 
     private async Task ExecuteCurrentDiffAsync()
     {
-        var selectedLocal = workspaceFiles.Where(x => x.IsSelected).ToList();
+        List<StatusChangeViewModel> selectedLocal = [.. workspaceFiles.Where(x => x.IsSelected)];
         if (selectedLocal.Count != 2)
         {
-            selectedLocal = indexFiles.Where(x => x.IsSelected).ToList();
+            selectedLocal = [.. indexFiles.Where(x => x.IsSelected)];
         }
 
         if (selectedLocal.Count == 2)
@@ -1216,10 +1217,10 @@ public class GitStageViewModel
 
     private async Task DiffSelectedFilesAsync()
     {
-        var selected = workspaceFiles.Where(x => x.IsSelected).ToList();
+        List<StatusChangeViewModel> selected = [.. workspaceFiles.Where(x => x.IsSelected)];
         if (selected.Count != 2)
         {
-            selected = indexFiles.Where(x => x.IsSelected).ToList();
+            selected = [.. indexFiles.Where(x => x.IsSelected)];
         }
 
         IDiffOptionsBuilder optionsBuilder = DiffOptions

@@ -166,8 +166,46 @@ public class GitLogViewModel
             typeof(GitStagePage).FullName!,
             e => GitStagePageOptions.Stage(Repository)
         );
+        CreateStashCommand = new AsyncCallbackCommand(async () =>
+        {
+            await Repository.StashAsync();
+            await CheckRepositoryStatusAsync();
+            await RefreshStashListAsync();
+        });
         RefreshStashesCommand = new AsyncCallbackCommand(RefreshStashListAsync);
         RefreshStatusCommand = new AsyncCallbackCommand(CheckRepositoryStatusAsync);
+
+        ApplyStashCommand = new AsyncCallbackCommand<GitStashEventViewModel?>(async vm =>
+        {
+            if (vm is null)
+            {
+                return;
+            }
+
+            await Repository.ApplyStashAsync(vm.Event);
+            await CheckRepositoryStatusAsync();
+        });
+        PopStashCommand = new AsyncCallbackCommand<GitStashEventViewModel?>(async vm =>
+        {
+            if (vm is null)
+            {
+                return;
+            }
+
+            await Repository.PopStashAsync(vm.Event);
+            await CheckRepositoryStatusAsync();
+            await RefreshStashListAsync();
+        });
+        DropStashCommand = new AsyncCallbackCommand<GitStashEventViewModel?>(async vm =>
+        {
+            if (vm is null)
+            {
+                return;
+            }
+
+            await Repository.DropStashAsync(vm.Event);
+            await RefreshStashListAsync();
+        });
 
         selectedLogEntries.CollectionChanged += (sender, args) =>
         {
@@ -926,8 +964,12 @@ public class GitLogViewModel
         defaultWorktreePrefixPath.Replace("<name>", NewWorktreeName, StringComparison.Ordinal);
 
     public ICommand NavigateToStageAreaCommand { get; }
+    public ICommand CreateStashCommand { get; }
     public ICommand RefreshStashesCommand { get; }
     public ICommand RefreshStatusCommand { get; }
+    public ICommand ApplyStashCommand { get; }
+    public ICommand PopStashCommand { get; }
+    public ICommand DropStashCommand { get; }
     public ICommand FetchRemotesCommand { get; }
     public ICommand PruneRemotesCommand { get; }
     public ICommand CreateBranchFromCommitCommand { get; }
@@ -1102,7 +1144,15 @@ public class GitLogViewModel
         {
             lock (activeStashesLock)
             {
-                activeStashes.Add(new GitStashEventViewModel(stashEntry, createStashBranchCommand));
+                activeStashes.Add(
+                    new GitStashEventViewModel(
+                        stashEntry,
+                        createStashBranchCommand,
+                        ApplyStashCommand,
+                        PopStashCommand,
+                        DropStashCommand
+                    )
+                );
             }
         }
     }

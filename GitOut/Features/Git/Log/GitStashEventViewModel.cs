@@ -7,10 +7,19 @@ namespace GitOut.Features.Git.Log;
 
 public sealed class GitStashEventViewModel : INotifyPropertyChanged
 {
-    public GitStashEventViewModel(GitStash stashEvent, ICommand createBranchCommand)
+    public GitStashEventViewModel(
+        GitStash stashEvent,
+        ICommand createBranchCommand,
+        ICommand applyStashCommand,
+        ICommand popStashCommand,
+        ICommand dropStashCommand
+    )
     {
         Event = stashEvent;
         CreateBranchCommand = createBranchCommand;
+        ApplyStashCommand = applyStashCommand;
+        PopStashCommand = popStashCommand;
+        DropStashCommand = dropStashCommand;
         CopyStashNameCommand = new CopyTextToClipBoardCommand<GitStashEventViewModel>(vm =>
             $"stash@{{{vm?.StashIndex ?? 0}}}"
         );
@@ -31,6 +40,9 @@ public sealed class GitStashEventViewModel : INotifyPropertyChanged
     }
 
     public ICommand CreateBranchCommand { get; }
+    public ICommand ApplyStashCommand { get; }
+    public ICommand PopStashCommand { get; }
+    public ICommand DropStashCommand { get; }
     public ICommand CopyStashNameCommand { get; }
     public ICommand CopyStashIdCommand { get; }
 

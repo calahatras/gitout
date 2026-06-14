@@ -108,11 +108,11 @@ public class GitProcess : IGitProcess
             {
                 try
                 {
-                    source.TrySetResult(exec.ExitCode == 0);
+                    _ = source.TrySetResult(exec.ExitCode == 0);
                 }
                 catch (InvalidOperationException ex)
                 {
-                    source.TrySetException(ex);
+                    _ = source.TrySetException(ex);
                 }
             }
         }
