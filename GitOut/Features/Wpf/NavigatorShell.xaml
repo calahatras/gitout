@@ -8,6 +8,7 @@
   xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
   xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
   xmlns:zoom="clr-namespace:GitOut.Features.Wpf.Zoom"
+  xmlns:input="clr-namespace:GitOut.Features.Input"
   mc:Ignorable="d"
   x:Name="window"
   Title="{Binding Title, TargetNullValue='git out'}"
@@ -130,6 +131,24 @@
             Command="{Binding OpenSettingsCommand}"
             ToolTip="Settings"
           />
+          <Button
+            Style="{StaticResource StatusBarMenuButtonStyle}"
+            Command="{x:Static input:KeyboardShortcutCommands.ShowShortcuts}"
+            CommandTarget="{Binding Content}"
+            ToolTip="Keyboard shortcuts (?)"
+          >
+            <Button.Content>
+              <Canvas Width="24" Height="24">
+                <Canvas.LayoutTransform>
+                  <ScaleTransform ScaleX=".7" ScaleY=".7" />
+                </Canvas.LayoutTransform>
+                <Path
+                  Fill="{DynamicResource PrimaryHueMidForegroundBrush}"
+                  Data="{StaticResource HelpCircleOutline}"
+                />
+              </Canvas>
+            </Button.Content>
+          </Button>
           <TextBlock
             Style="{StaticResource StatusBarTextStyle}"
             Text="{Binding StatusBarText}"

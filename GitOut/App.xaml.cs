@@ -9,6 +9,7 @@ using GitOut.Features.Git.Log;
 using GitOut.Features.Git.RepositoryList;
 using GitOut.Features.Git.Stage;
 using GitOut.Features.Git.Storage;
+using GitOut.Features.Input;
 using GitOut.Features.Logging;
 using GitOut.Features.Material.Snackbar;
 using GitOut.Features.Navigation;
@@ -28,6 +29,13 @@ namespace GitOut;
 public partial class App : Application
 {
     private readonly IHost host;
+
+    /// <summary>
+    /// The application's DI service provider, available after <see cref="OnStartup"/>.
+    /// Exposed for attached behaviors and other static helpers that cannot receive DI
+    /// services through constructor injection (e.g. <c>KeyboardShortcutsBehavior</c>).
+    /// </summary>
+    public static IServiceProvider Services { get; private set; } = null!;
 
     public App()
     {
@@ -79,6 +87,7 @@ public partial class App : Application
             );
         }
         base.OnStartup(e);
+        Services = host.Services;
         var token = new CancellationToken();
         _ = host.RunAsync(token);
     }
@@ -117,6 +126,10 @@ public partial class App : Application
         services
             .AddWritableOptions<GitLogOptions>()
             .Bind(context.Configuration, GitLogOptions.SectionKey);
+        services
+            .AddWritableOptions<KeyboardShortcutsOptions>()
+            .Bind(context.Configuration, KeyboardShortcutsOptions.SectionKey);
+
         services
             .AddWritableOptions<WorktreeOptions>()
             .Bind(context.Configuration, WorktreeOptions.SectionKey);

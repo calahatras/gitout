@@ -10,6 +10,7 @@
   xmlns:local="clr-namespace:GitOut.Features.Settings"
   xmlns:themes="clr-namespace:GitOut.Features.Themes"
   xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
+  xmlns:input="clr-namespace:GitOut.Features.Input"
   mc:Ignorable="d"
   d:DataContext="{d:DesignInstance Type=local:SettingsViewModel}"
   d:DesignHeight="450"
@@ -322,6 +323,20 @@
               <StackPanel>
                 <TextBlock Text="Theme" Style="{StaticResource Header6TextStyle}" />
                 <themes:ThemeSettingsPicker SelectThemeCommand="{Binding ChangeThemeCommand}" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardPanelStyle}">
+              <StackPanel>
+                <TextBlock Text="Keyboard Shortcuts" Style="{StaticResource Header6TextStyle}" />
+                <TextBlock
+                  Margin="0 8 0 4"
+                  Style="{StaticResource SecondaryTextStyle}"
+                  Text="Overlay hotkey"
+                />
+                <input:KeyRecorderControl
+                  HotKey="{Binding ShortcutsSettings.HotKey, Mode=TwoWay}"
+                  HotModifiers="{Binding ShortcutsSettings.Modifiers, Mode=TwoWay}"
+                />
               </StackPanel>
             </Border>
             <Border Style="{StaticResource CardPanelStyle}">

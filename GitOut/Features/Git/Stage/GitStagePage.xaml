@@ -10,7 +10,9 @@
   xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
   xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
   xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
+  xmlns:input="clr-namespace:GitOut.Features.Input"
   Focusable="True"
+  input:KeyboardShortcutsBehavior.Register="True"
   mc:Ignorable="d"
   d:DesignHeight="450"
   d:DesignWidth="800"
@@ -89,30 +91,40 @@
       Modifiers="Control"
       Command="{Binding MovePreviousCommand}"
       CommandParameter="{Binding ElementName=WorkspaceFiles}"
+      input:KeyboardShortcutsBehavior.Description="Previous workspace file"
+      input:KeyboardShortcutsBehavior.Category="Navigation"
     />
     <KeyBinding
       Key="Period"
       Modifiers="Control"
       Command="{Binding MoveNextCommand}"
       CommandParameter="{Binding ElementName=WorkspaceFiles}"
+      input:KeyboardShortcutsBehavior.Description="Next workspace file"
+      input:KeyboardShortcutsBehavior.Category="Navigation"
     />
     <KeyBinding
       Key="OemComma"
       Modifiers="Control+Shift"
       Command="{Binding MovePreviousCommand}"
       CommandParameter="{Binding ElementName=IndexFiles}"
+      input:KeyboardShortcutsBehavior.Description="Previous index file"
+      input:KeyboardShortcutsBehavior.Category="Navigation"
     />
     <KeyBinding
       Key="Period"
       Modifiers="Control+Shift"
       Command="{Binding MoveNextCommand}"
       CommandParameter="{Binding ElementName=IndexFiles}"
+      input:KeyboardShortcutsBehavior.Description="Next index file"
+      input:KeyboardShortcutsBehavior.Category="Navigation"
     />
     <KeyBinding
       Key="C"
       Modifiers="Control+Shift"
       Command="{Binding SetFocusCommand}"
       CommandParameter="{Binding ElementName=CommitMessage}"
+      input:KeyboardShortcutsBehavior.Description="Focus commit message"
+      input:KeyboardShortcutsBehavior.Category="Navigation"
     />
   </UserControl.InputBindings>
   <Grid>
@@ -330,11 +342,26 @@
           Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
         >
           <ListView.InputBindings>
-            <KeyBinding Key="S" Command="{Binding StageWorkspaceFilesCommand}" />
+            <KeyBinding
+              Key="S"
+              Command="{Binding StageWorkspaceFilesCommand}"
+              input:KeyboardShortcutsBehavior.Description="Stage file"
+              input:KeyboardShortcutsBehavior.Category="Workspace"
+            />
             <KeyBinding Key="Enter" Command="{Binding StageWorkspaceFilesCommand}" />
-            <KeyBinding Key="R" Command="{Binding ResetWorkspaceFilesCommand}" />
+            <KeyBinding
+              Key="R"
+              Command="{Binding ResetWorkspaceFilesCommand}"
+              input:KeyboardShortcutsBehavior.Description="Discard changes"
+              input:KeyboardShortcutsBehavior.Category="Workspace"
+            />
             <KeyBinding Key="Delete" Command="{Binding ResetWorkspaceFilesCommand}" />
-            <KeyBinding Key="I" Command="{Binding IntentToAddCommand}" />
+            <KeyBinding
+              Key="I"
+              Command="{Binding IntentToAddCommand}"
+              input:KeyboardShortcutsBehavior.Description="Mark as intent-to-add"
+              input:KeyboardShortcutsBehavior.Category="Workspace"
+            />
           </ListView.InputBindings>
           <ListView.ItemContainerStyle>
             <Style TargetType="{x:Type ListViewItem}">
@@ -534,7 +561,12 @@
           Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:GitStagePage}}}"
         >
           <ListView.InputBindings>
-            <KeyBinding Key="R" Command="{Binding ResetIndexFilesCommand}" />
+            <KeyBinding
+              Key="R"
+              Command="{Binding ResetIndexFilesCommand}"
+              input:KeyboardShortcutsBehavior.Description="Unstage file"
+              input:KeyboardShortcutsBehavior.Category="Index"
+            />
             <KeyBinding Key="Delete" Command="{Binding ResetIndexFilesCommand}" />
           </ListView.InputBindings>
           <ListView.ItemContainerStyle>
@@ -739,16 +771,22 @@
               Key="R"
               Command="{Binding ResetSelectedTextCommand}"
               CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+              input:KeyboardShortcutsBehavior.Description="Reset selection"
+              input:KeyboardShortcutsBehavior.Category="Diff"
             />
             <KeyBinding
               Key="S"
               Command="{Binding StageSelectedTextCommand}"
               CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+              input:KeyboardShortcutsBehavior.Description="Stage selection"
+              input:KeyboardShortcutsBehavior.Category="Diff"
             />
             <KeyBinding
               Key="E"
               Command="{Binding EditSelectedTextCommand}"
               CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type diff:GitDiffControl}}}"
+              input:KeyboardShortcutsBehavior.Description="Edit hunk"
+              input:KeyboardShortcutsBehavior.Category="Diff"
             />
             <KeyBinding
               Key="OemComma"
@@ -807,15 +845,13 @@
                   Command="{Binding PatchEditTextCommand}"
                 >
                                     OK
-                                </Button
-                >
+                                </Button>
                 <Button
                   Style="{StaticResource MaterialButtonStyle}"
                   Command="{Binding CancelEditTextCommand}"
                 >
                                     CANCEL
-                                </Button
-                >
+                                </Button>
               </StackPanel>
             </Grid>
           </Border>
@@ -848,7 +884,13 @@
               AutomationProperties.HelpText="Commit message"
             >
               <TextBox.InputBindings>
-                <KeyBinding Key="Return" Modifiers="Shift" Command="{Binding CommitCommand}" />
+                <KeyBinding
+                  Key="Return"
+                  Modifiers="Shift"
+                  Command="{Binding CommitCommand}"
+                  input:KeyboardShortcutsBehavior.Description="Commit"
+                  input:KeyboardShortcutsBehavior.Category="Commit"
+                />
                 <KeyBinding
                   Key="OemComma"
                   Modifiers="Control"

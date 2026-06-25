@@ -17,10 +17,12 @@
   xmlns:scroll="clr-namespace:GitOut.Features.Wpf.Scrolling"
   xmlns:wpf="clr-namespace:GitOut.Features.Wpf"
   xmlns:wpfcommands="clr-namespace:GitOut.Features.Wpf.Commands"
+  xmlns:input="clr-namespace:GitOut.Features.Input"
   mc:Ignorable="d"
   d:DataContext="{d:DesignInstance Type={x:Type local:GitLogViewModel}}"
   d:DesignHeight="450"
   d:DesignWidth="800"
+  input:KeyboardShortcutsBehavior.Register="True"
 >
   <UserControl.Resources>
     <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -480,16 +482,14 @@
                         Command="{Binding FetchRemotesCommand}"
                       >
                         FETCH
-                      </Button
-                      >
+                      </Button>
                       <Button
                         Style="{StaticResource MaterialButtonStyle}"
                         Command="{Binding PruneRemotesCommand}"
                         ToolTip="Prune selected remotes"
                       >
                         PRUNE
-                      </Button
-                      >
+                      </Button>
                     </StackPanel>
                   </Grid>
                   <Border Grid.Row="1" Style="{StaticResource MaterialHorizontalDivider}" />
