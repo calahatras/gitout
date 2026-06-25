@@ -12,7 +12,12 @@ public class GitBranchName
         "^([\\w\\d\\(])(?:[\\w\\d\\- +@&\\/\\{}.\\(\\)]+)(?<![\\/\\.])$"
     );
 
-    private GitBranchName(string type, string name, GitBranchName? upstream = null)
+    private GitBranchName(
+        string type,
+        string name,
+        GitBranchName? upstream = null,
+        bool hasWorktree = false
+    )
     {
         if (name.Length <= 1)
         {
@@ -25,6 +30,7 @@ public class GitBranchName
         Type = type;
         Name = name;
         Upstream = upstream;
+        HasWorktree = hasWorktree;
         IconResource = type switch
         {
             LocalBranchType => "SourceCommitLocal",
@@ -37,6 +43,8 @@ public class GitBranchName
     public string Name { get; }
     public GitBranchName? Upstream { get; }
 
+    public bool HasWorktree { get; }
+
     public string IconResource { get; }
 
     public bool IsLocalBranchType => Type == LocalBranchType;
@@ -46,7 +54,11 @@ public class GitBranchName
     public static bool IsValid(string? name) =>
         name is not null && name.Length > 1 && ValidBranchName.IsMatch(name);
 
-    public static GitBranchName Create(string name, GitBranchName? upstream = null)
+    public static GitBranchName Create(
+        string name,
+        GitBranchName? upstream = null,
+        bool hasWorktree = false
+    )
     {
         if (!name.StartsWith("refs"))
         {
@@ -54,8 +66,8 @@ public class GitBranchName
         }
         string[] parts = name.Split('/', 3);
         return parts.Length > 2
-            ? new GitBranchName(parts[1], parts[2], upstream)
-            : new GitBranchName(parts[1], parts[1], upstream);
+            ? new GitBranchName(parts[1], parts[2], upstream, hasWorktree)
+            : new GitBranchName(parts[1], parts[1], upstream, hasWorktree);
     }
 
     public static GitBranchName CreateLocal(string name) => new(LocalBranchType, name);

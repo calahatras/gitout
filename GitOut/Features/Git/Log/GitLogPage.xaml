@@ -1062,6 +1062,20 @@
                               />
                             </Canvas>
                             <TextBlock Text="{Binding Name}" />
+                            <Canvas
+                              Width="24"
+                              Height="24"
+                              Margin="4 0 0 0"
+                              Visibility="{Binding HasWorktree, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            >
+                              <Canvas.LayoutTransform>
+                                <ScaleTransform ScaleX=".5" ScaleY=".5" />
+                              </Canvas.LayoutTransform>
+                              <Path
+                                Fill="{DynamicResource MaterialForegroundBase}"
+                                Data="{StaticResource Forest}"
+                              />
+                            </Canvas>
                           </StackPanel>
                         </Border>
                       </DataTemplate>

@@ -171,12 +171,12 @@ public sealed class LocalGitRepository : IGitRepository
 
         IGitProcess branches = CreateProcess(
             ProcessOptions.FromArguments(
-                "for-each-ref --sort=-committerdate refs --format=\"%(objectname) %(refname) %(upstream)\""
+                "for-each-ref --sort=-committerdate refs --format=\"%(objectname)|%(refname)|%(upstream)|%(worktreepath)\""
             )
         );
         await foreach (string line in branches.ReadLinesAsync())
         {
-            string[] parts = line.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = line.Split('|', 4);
             if (parts.Length < 2)
             {
                 continue;
@@ -184,8 +184,12 @@ public sealed class LocalGitRepository : IGitRepository
             var id = GitCommitId.FromHash(parts[0]);
             if (historyByCommitId.TryGetValue(id, out GitHistoryEvent? logitem))
             {
-                GitBranchName? upstream = parts.Length == 3 ? GitBranchName.Create(parts[2]) : null;
-                var branch = GitBranchName.Create(parts[1], upstream);
+                GitBranchName? upstream =
+                    parts.Length >= 3 && parts[2].Length > 0
+                        ? GitBranchName.Create(parts[2])
+                        : null;
+                bool hasWorktree = parts.Length >= 4 && parts[3].Length > 0;
+                var branch = GitBranchName.Create(parts[1], upstream, hasWorktree);
                 logitem.Branches.Add(branch);
             }
         }
