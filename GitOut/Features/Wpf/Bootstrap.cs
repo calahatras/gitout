@@ -1,6 +1,10 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using GitOut.Features.Git;
+using GitOut.Features.Git.Log;
+using GitOut.Features.IO;
 using GitOut.Features.Navigation;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -27,6 +31,24 @@ public class Bootstrap : IHostedService
         if (provider.GetService(typeof(INavigationService)) is INavigationService navigation)
         {
             navigation.Navigate(options.StartupType, null);
+
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1)
+            {
+                string path = Path.GetFullPath(args[1]);
+                if (
+                    Directory.Exists(path)
+                    && provider.GetService(typeof(IGitRepositoryFactory))
+                        is IGitRepositoryFactory factory
+                )
+                {
+                    IGitRepository repo = factory.Create(DirectoryPath.Create(path));
+                    navigation.Navigate(
+                        typeof(GitLogPage).FullName!,
+                        GitLogPageOptions.OpenRepository(repo)
+                    );
+                }
+            }
         }
         return Task.CompletedTask;
     }
