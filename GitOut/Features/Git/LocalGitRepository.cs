@@ -222,6 +222,20 @@ public sealed class LocalGitRepository : IGitRepository
         }
     }
 
+    public Task StashAsync() => CreateProcess(ProcessOptions.FromArguments("stash")).ExecuteAsync();
+
+    public Task ApplyStashAsync(GitStash stash) =>
+        CreateProcess(ProcessOptions.FromArguments($"stash apply stash@{{{stash.StashIndex}}}"))
+            .ExecuteAsync();
+
+    public Task PopStashAsync(GitStash stash) =>
+        CreateProcess(ProcessOptions.FromArguments($"stash pop stash@{{{stash.StashIndex}}}"))
+            .ExecuteAsync();
+
+    public Task DropStashAsync(GitStash stash) =>
+        CreateProcess(ProcessOptions.FromArguments($"stash drop stash@{{{stash.StashIndex}}}"))
+            .ExecuteAsync();
+
     public async Task<GitStatusResult> StatusAsync()
     {
         var statusChanges = new List<GitStatusChange>();

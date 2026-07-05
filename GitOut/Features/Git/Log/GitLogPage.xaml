@@ -153,9 +153,60 @@
       </MenuItem>
     </ContextMenu>
     <ContextMenu x:Key="StashMenu">
+      <MenuItem Header="Apply" Command="{Binding ApplyStashCommand}" CommandParameter="{Binding}">
+        <MenuItem.Icon>
+          <Canvas Width="24" Height="24">
+            <Canvas.LayoutTransform>
+              <ScaleTransform ScaleX=".75" ScaleY=".75" />
+            </Canvas.LayoutTransform>
+            <Path
+              Fill="{DynamicResource MaterialForegroundIcon}"
+              Data="{StaticResource ArchiveCheck}"
+            />
+          </Canvas>
+        </MenuItem.Icon>
+      </MenuItem>
+      <MenuItem Header="Pop" Command="{Binding PopStashCommand}" CommandParameter="{Binding}">
+        <MenuItem.Icon>
+          <Canvas Width="24" Height="24">
+            <Canvas.LayoutTransform>
+              <ScaleTransform ScaleX=".75" ScaleY=".75" />
+            </Canvas.LayoutTransform>
+            <Path
+              Fill="{DynamicResource MaterialForegroundIcon}"
+              Data="{StaticResource ArchiveArrowUp}"
+            />
+          </Canvas>
+        </MenuItem.Icon>
+      </MenuItem>
+      <MenuItem Header="Drop" Command="{Binding DropStashCommand}" CommandParameter="{Binding}">
+        <MenuItem.Icon>
+          <Canvas Width="24" Height="24">
+            <Canvas.LayoutTransform>
+              <ScaleTransform ScaleX=".75" ScaleY=".75" />
+            </Canvas.LayoutTransform>
+            <Path
+              Fill="{DynamicResource MaterialForegroundIcon}"
+              Data="{StaticResource ArchiveRemove}"
+            />
+          </Canvas>
+        </MenuItem.Icon>
+      </MenuItem>
+      <Separator />
       <MenuItem
         Header="Create branch"
         Command="{Binding CreateBranchCommand}"
+        CommandParameter="{Binding}"
+      />
+      <Separator />
+      <MenuItem
+        Header="Copy stash name"
+        Command="{Binding CopyStashNameCommand}"
+        CommandParameter="{Binding}"
+      />
+      <MenuItem
+        Header="Copy stash ID"
+        Command="{Binding CopyStashIdCommand}"
         CommandParameter="{Binding}"
       />
     </ContextMenu>
@@ -918,7 +969,46 @@
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid Style="{StaticResource MaterialToolbarStyle}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
           <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="Stashes" />
+          <Button
+            Grid.Column="1"
+            Style="{StaticResource MaterialIconButtonStyle}"
+            Command="{Binding CreateStashCommand}"
+            ToolTip="Create stash"
+            HorizontalAlignment="Right"
+          >
+            <Canvas Width="24" Height="24">
+              <Canvas.LayoutTransform>
+                <ScaleTransform ScaleX=".75" ScaleY=".75" />
+              </Canvas.LayoutTransform>
+              <Path
+                Fill="{DynamicResource MaterialForegroundBase}"
+                Data="{StaticResource Archive}"
+              />
+            </Canvas>
+          </Button>
+          <Button
+            Grid.Column="2"
+            Style="{StaticResource MaterialIconButtonStyle}"
+            Command="{Binding RefreshStashesCommand}"
+            ToolTip="Refresh stashes"
+            HorizontalAlignment="Right"
+          >
+            <Canvas Width="24" Height="24">
+              <Canvas.LayoutTransform>
+                <ScaleTransform ScaleX=".75" ScaleY=".75" />
+              </Canvas.LayoutTransform>
+              <Path
+                Fill="{DynamicResource MaterialForegroundBase}"
+                Data="{StaticResource Refresh}"
+              />
+            </Canvas>
+          </Button>
         </Grid>
         <ListView
           Grid.Row="1"
