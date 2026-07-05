@@ -860,14 +860,14 @@
                   Style="{StaticResource MaterialButtonStyle}"
                   Command="{Binding PatchEditTextCommand}"
                 >
-                                    OK
-                                </Button>
+                  OK
+                </Button>
                 <Button
                   Style="{StaticResource MaterialButtonStyle}"
                   Command="{Binding CancelEditTextCommand}"
                 >
-                                    CANCEL
-                                </Button>
+                  CANCEL
+                </Button>
               </StackPanel>
             </Grid>
           </Border>

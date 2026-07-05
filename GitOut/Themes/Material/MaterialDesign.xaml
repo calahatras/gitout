@@ -1,4 +1,4 @@
-﻿<ResourceDictionary
+<ResourceDictionary
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:snack="clr-namespace:GitOut.Features.Material.Snackbar"
@@ -254,6 +254,138 @@
     BasedOn="{StaticResource MaterialInputStyle}"
   >
     <Setter Property="MinWidth" Value="12" />
+  </Style>
+  <Style x:Key="MaterialSearchInputStyle" TargetType="{x:Type TextBox}">
+    <Setter Property="SnapsToDevicePixels" Value="True" />
+    <Setter Property="OverridesDefaultStyle" Value="True" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="None" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="MinWidth" Value="120" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="AllowDrop" Value="true" />
+    <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type TextBox}">
+          <Grid>
+            <Grid Name="Inactive">
+              <Border
+                Name="InactiveBorder"
+                CornerRadius="0"
+                BorderThickness="0 0 0 1"
+                BorderBrush="{DynamicResource MaterialLightDividers}"
+              />
+              <TextBlock
+                x:Name="InactivePlaceholder"
+                Text="{TemplateBinding AutomationProperties.HelpText}"
+                Foreground="{DynamicResource MaterialForegroundBase}"
+                FontSize="12"
+                VerticalAlignment="Center"
+                Margin="0 0 0 2"
+                Visibility="Hidden"
+              />
+            </Grid>
+            <Grid Name="Active">
+              <Border
+                Name="ActiveBorder"
+                CornerRadius="0"
+                BorderThickness="0 0 0 1"
+                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+              />
+              <TextBlock
+                x:Name="ActivePlaceholder"
+                Text="{TemplateBinding AutomationProperties.HelpText}"
+                Foreground="{DynamicResource PrimaryHueMidBrush}"
+                FontSize="12"
+                VerticalAlignment="Center"
+                Margin="0 0 0 2"
+                Visibility="Hidden"
+              />
+            </Grid>
+            <ScrollViewer Margin="0 0 0 0" x:Name="PART_ContentHost" VerticalAlignment="Center" />
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="Disabled">
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames
+                      Storyboard.TargetName="InactiveBorder"
+                      Storyboard.TargetProperty="(Border.BorderBrush)"
+                    >
+                      <ObjectAnimationUsingKeyFrames.KeyFrames>
+                        <DiscreteObjectKeyFrame
+                          KeyTime="0:0:0"
+                          Value="{StaticResource MaterialLightDisabledText}"
+                        />
+                      </ObjectAnimationUsingKeyFrames.KeyFrames>
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+                <VisualState x:Name="ReadOnly">
+                  <Storyboard>
+                    <ColorAnimation
+                      Storyboard.TargetName="InactiveBorder"
+                      Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                      To="Transparent"
+                    >
+                      <ColorAnimation.EasingFunction>
+                        <CubicEase EasingMode="EaseOut" />
+                      </ColorAnimation.EasingFunction>
+                    </ColorAnimation>
+                  </Storyboard>
+                </VisualState>
+                <VisualState x:Name="MouseOver" />
+              </VisualStateGroup>
+              <VisualStateGroup Name="FocusStates">
+                <VisualState Name="Unfocused">
+                  <Storyboard>
+                    <DoubleAnimation
+                      Storyboard.TargetName="Inactive"
+                      Storyboard.TargetProperty="Opacity"
+                      To="1"
+                      Duration="0:0:0.3"
+                    />
+                    <DoubleAnimation
+                      Storyboard.TargetName="Active"
+                      Storyboard.TargetProperty="Opacity"
+                      To="0"
+                      Duration="0:0:0.3"
+                    />
+                  </Storyboard>
+                </VisualState>
+                <VisualState Name="Focused">
+                  <Storyboard>
+                    <DoubleAnimation
+                      Storyboard.TargetName="Inactive"
+                      Storyboard.TargetProperty="Opacity"
+                      To="0"
+                      Duration="0:0:0.1"
+                    />
+                    <DoubleAnimation
+                      Storyboard.TargetName="Active"
+                      Storyboard.TargetProperty="Opacity"
+                      To="1"
+                      Duration="0:0:0.1"
+                    />
+                  </Storyboard>
+                </VisualState>
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Text" Value="">
+              <Setter TargetName="InactivePlaceholder" Property="Visibility" Value="Visible" />
+              <Setter TargetName="ActivePlaceholder" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="Text" Value="{x:Null}">
+              <Setter TargetName="InactivePlaceholder" Property="Visibility" Value="Visible" />
+              <Setter TargetName="ActivePlaceholder" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style>
   <Style
     x:Key="MaterialFormInputStyle"

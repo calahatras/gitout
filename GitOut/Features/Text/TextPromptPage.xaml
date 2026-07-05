@@ -24,9 +24,9 @@
           Text="{Binding StartValue, Mode=OneTime}"
         />
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-          <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelCommand}"
-            >CANCEL</Button
-          >
+          <Button Style="{StaticResource MaterialButtonStyle}" Command="{Binding CancelCommand}">
+            CANCEL
+          </Button>
           <Button
             Style="{StaticResource MaterialButtonStyle}"
             Content="{Binding ConfirmButtonText}"
