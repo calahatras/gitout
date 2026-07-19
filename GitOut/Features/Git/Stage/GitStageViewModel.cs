@@ -87,14 +87,14 @@ public class GitStageViewModel
                 bool isIncluded =
                     string.IsNullOrEmpty(IncludeFilterText)
                     || IncludeFilterText
-                        .Split(';')
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
                         .Any(filter =>
                             model.Path.Contains(filter, StringComparison.InvariantCultureIgnoreCase)
                         );
                 bool isExcluded =
                     !string.IsNullOrEmpty(ExcludeFilterText)
                     && ExcludeFilterText
-                        .Split(';')
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
                         .Any(filter =>
                             model.Path.Contains(filter, StringComparison.InvariantCultureIgnoreCase)
                         );
