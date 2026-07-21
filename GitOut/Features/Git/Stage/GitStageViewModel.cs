@@ -49,6 +49,7 @@ public class GitStageViewModel
     private bool hasChanges;
     private bool selectedFileHasChanges;
     private CancellationTokenSource? refreshContextCancellationTokenSource;
+
     private string cachedCommitMessage = string.Empty;
     private GitPatch? undoPatch;
 
@@ -79,6 +80,28 @@ public class GitStageViewModel
 
         BindingOperations.EnableCollectionSynchronization(workspaceFiles, workspaceFilesLock);
         WorkspaceFiles = CollectionViewSource.GetDefaultView(workspaceFiles);
+        WorkspaceFiles.Filter = (item) =>
+        {
+            if (item is StatusChangeViewModel model)
+            {
+                bool isIncluded =
+                    string.IsNullOrEmpty(IncludeFilterText)
+                    || IncludeFilterText
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Any(filter =>
+                            model.Path.Contains(filter, StringComparison.InvariantCultureIgnoreCase)
+                        );
+                bool isExcluded =
+                    !string.IsNullOrEmpty(ExcludeFilterText)
+                    && ExcludeFilterText
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Any(filter =>
+                            model.Path.Contains(filter, StringComparison.InvariantCultureIgnoreCase)
+                        );
+                return isIncluded && !isExcluded;
+            }
+            return false;
+        };
         BindingOperations.EnableCollectionSynchronization(indexFiles, indexFilesLock);
         IndexFiles = CollectionViewSource.GetDefaultView(indexFiles);
 
@@ -262,6 +285,30 @@ public class GitStageViewModel
     {
         get;
         set => SetProperty(ref field, value);
+    } = string.Empty;
+
+    public string IncludeFilterText
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                WorkspaceFiles.Refresh();
+            }
+        }
+    } = string.Empty;
+
+    public string ExcludeFilterText
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                WorkspaceFiles.Refresh();
+            }
+        }
     } = string.Empty;
 
     public int SelectedWorkspaceIndex
