@@ -23,6 +23,8 @@ public class DirectoryPath
 
     public string Directory { get; }
 
+    public DirectoryPath Parent => Create(System.IO.Directory.GetParent(Directory)!.FullName);
+
     public override string ToString() => Directory;
 
     public string Normalize() => Directory.Replace('/', Path.DirectorySeparatorChar);

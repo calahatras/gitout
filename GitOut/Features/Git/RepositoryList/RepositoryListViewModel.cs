@@ -100,6 +100,11 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
         DropCommand = new AsyncCallbackCommand<DataObject>(OnDropAsync);
     }
 
+    public RepositoryGroupMode GroupByMode
+    {
+        get; set => SetProperty(ref field, value);
+    } = RepositoryGroupMode.ParentFolder;
+
     private async Task<IGitRepository?> CreateRepositoryAsync(string path)
     {
         IGitRepository repository = repositoryFactory.Create(DirectoryPath.Create(path));
@@ -188,4 +193,11 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+}
+
+public enum RepositoryGroupMode
+{
+    None,
+    Single,
+    ParentFolder,
 }

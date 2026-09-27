@@ -752,9 +752,11 @@ public class GitLogViewModel
                 if (SelectedContext is not null)
                 {
                     SelectedContext = LogEntriesViewModel.CreateContext(
-                        selectedLogEntries.Count > 0
-                            ? selectedLogEntries.Select(vm => vm.Event).ToList()
-                            : selectedStashEntries.Select(vm => (GitHistoryEvent)vm.Event).ToList(),
+                        [
+                            .. selectedLogEntries.Count > 0
+                                ? selectedLogEntries.Select(vm => vm.Event)
+                                : selectedStashEntries.Select(vm => (GitHistoryEvent)vm.Event),
+                        ],
                         Repository,
                         monitor.CreateCallback(),
                         snack,
@@ -1385,7 +1387,7 @@ public class GitLogViewModel
     {
         var stopwatch = Stopwatch.StartNew();
         var events = new List<GitTreeEvent>();
-        IEnumerable<TreeBuildingLeaf> leafs = Enumerable.Empty<TreeBuildingLeaf>();
+        IEnumerable<TreeBuildingLeaf> leafs = [];
         GitTreeEvent.ResetColors();
         foreach (GitHistoryEvent item in log)
         {

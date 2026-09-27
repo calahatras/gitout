@@ -6,16 +6,13 @@ using System.ComponentModel;
 
 namespace GitOut.Features.Collections;
 
-public class SortedObservableCollection<T>
+public class SortedObservableCollection<T>(Func<T, T, int> comparer)
     : ICollection<T>,
         IReadOnlyCollection<T>,
         INotifyCollectionChanged,
         INotifyPropertyChanged
 {
-    private readonly Func<T, T, int> comparer;
     private readonly IList<T> backingCollection = [];
-
-    public SortedObservableCollection(Func<T, T, int> comparer) => this.comparer = comparer;
 
     public SortedObservableCollection(IEnumerable<T> initialItems, Func<T, T, int> comparer)
         : this(comparer)
