@@ -1,9 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -66,7 +69,7 @@ public partial class Autocomplete : UserControl
         nameof(QueryMatcher),
         typeof(IValueConverter),
         typeof(Autocomplete),
-        new PropertyMetadata(null, OnQueryMatcherChanged)
+        new PropertyMetadata(null)
     );
 
     public static readonly DependencyProperty SearchQueryProperty = DependencyProperty.Register(
@@ -80,15 +83,78 @@ public partial class Autocomplete : UserControl
         )
     );
 
-    private readonly object localItemsLock = new();
-    private readonly ObservableCollection<object?> localItems = [];
+    public static readonly DependencyProperty GroupByPathProperty = DependencyProperty.Register(
+        nameof(GroupByPath),
+        typeof(string),
+        typeof(Autocomplete),
+        new PropertyMetadata(null, OnGroupingChanged)
+    );
+
+    public string GroupByPath
+    {
+        get => (string)GetValue(GroupByPathProperty);
+        set => SetValue(GroupByPathProperty, value);
+    }
+
+    public static readonly DependencyProperty GroupHeaderTemplateProperty =
+        DependencyProperty.Register(
+            nameof(GroupHeaderTemplate),
+            typeof(DataTemplate),
+            typeof(Autocomplete),
+            new PropertyMetadata(null)
+        );
+
+    public DataTemplate GroupHeaderTemplate
+    {
+        get => (DataTemplate)GetValue(GroupHeaderTemplateProperty);
+        set => SetValue(GroupHeaderTemplateProperty, value);
+    }
+
+    public static readonly DependencyProperty GroupHeaderTemplateSelectorProperty =
+        DependencyProperty.Register(
+            nameof(GroupHeaderTemplateSelector),
+            typeof(DataTemplateSelector),
+            typeof(Autocomplete),
+            new PropertyMetadata(null)
+        );
+
+    public DataTemplateSelector GroupHeaderTemplateSelector
+    {
+        get => (DataTemplateSelector)GetValue(GroupHeaderTemplateSelectorProperty);
+        set => SetValue(GroupHeaderTemplateSelectorProperty, value);
+    }
+    public static readonly DependencyProperty ViewProperty = DependencyProperty.Register(
+        nameof(View),
+        typeof(ICollectionView),
+        typeof(Autocomplete),
+        new PropertyMetadata(null)
+    );
+
+    public ICollectionView? View
+    {
+        get => (ICollectionView?)GetValue(ViewProperty);
+        set => SetValue(ViewProperty, value);
+    }
+
+    public static readonly DependencyProperty IsGroupedProperty = DependencyProperty.Register(
+        nameof(IsGrouped),
+        typeof(bool),
+        typeof(Autocomplete),
+        new PropertyMetadata(false, OnGroupingChanged)
+    );
+
+    public bool IsGrouped
+    {
+        get => (bool)GetValue(IsGroupedProperty);
+        set => SetValue(IsGroupedProperty, value);
+    }
+
+    private readonly CollectionViewSource viewSource = new();
     private ILazyAsyncEnumerable<object, RelativeDirectoryPath>? deferredSource;
 
     public Autocomplete()
     {
         InitializeComponent();
-        BindingOperations.EnableCollectionSynchronization(localItems, localItemsLock);
-        Local = CollectionViewSource.GetDefaultView(localItems);
         OpenRecordCommand = new CallbackCommand<object?>(selection =>
         {
             if (ItemSelectedCommand is not null && ItemSelectedCommand.CanExecute(selection))
@@ -120,21 +186,47 @@ public partial class Autocomplete : UserControl
                 return;
             }
 
-            if (SelectedIndex < localItems.Count - 1)
+            Type type = viewSource.Source.GetType();
+            Type? iReadOnlyCollection = type.GetInterfaces()
+                .FirstOrDefault(i =>
+                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>)
+                );
+
+            int count = 0;
+            if (iReadOnlyCollection != null)
+            {
+                PropertyInfo? countProp = iReadOnlyCollection.GetProperty("Count");
+                if (countProp?.GetValue(viewSource.Source) is int roCount)
+                {
+                    count = roCount;
+                }
+            }
+            if (SelectedIndex < count - 1)
             {
                 ++SelectedIndex;
             }
             view.ScrollIntoView(view.SelectedItem);
         });
+        viewSource.Filter += OnFilterItem;
         IsVisibleChanged += OnVisibleChanged;
     }
+
+    private void OnFilterItem(object sender, FilterEventArgs e) =>
+        e.Accepted = QueryMatcher is null
+            ? (e.Item.ToString() is string vl)
+                && vl.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+            : (bool)
+                QueryMatcher.Convert(
+                    e.Item,
+                    typeof(bool),
+                    SearchQuery,
+                    CultureInfo.InvariantCulture
+                );
 
     public ICommand OpenRecordCommand { get; }
 
     public ICommand DecreaseSelectionIndexCommand { get; }
     public ICommand IncreaseSelectionIndexCommand { get; }
-
-    public ICollectionView Local { get; }
 
     public ICommand CancelCommand
     {
@@ -204,101 +296,30 @@ public partial class Autocomplete : UserControl
 
     private void UpdateLocalView(IEnumerable<object> items)
     {
+        viewSource.Source = items;
         if (items is ILazyAsyncEnumerable<object, RelativeDirectoryPath> lazy)
         {
             deferredSource = lazy;
         }
-        lock (localItemsLock)
+        viewSource.GroupDescriptions.Clear();
+        if (IsGrouped && !string.IsNullOrWhiteSpace(GroupByPath))
         {
-            localItems.Clear();
-            foreach (object? item in items)
-            {
-                localItems.Add(item);
-            }
+            viewSource.GroupDescriptions.Add(new PropertyGroupDescription(GroupByPath));
         }
+        View = viewSource.View;
     }
 
-    private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        switch (e.Action)
-        {
-            case NotifyCollectionChangedAction.Add:
-                {
-                    lock (localItemsLock)
-                    {
-                        if (e.NewItems is null)
-                        {
-                            return;
-                        }
-
-                        for (
-                            int index = e.NewStartingIndex, i = 0;
-                            i < e.NewItems.Count;
-                            ++i, ++index
-                        )
-                        {
-                            localItems.Insert(index, e.NewItems[i]);
-                        }
-                    }
-                }
-                break;
-            case NotifyCollectionChangedAction.Remove:
-                {
-                    lock (localItemsLock)
-                    {
-                        if (e.OldItems is null)
-                        {
-                            return;
-                        }
-
-                        foreach (object? item in e.OldItems)
-                        {
-                            _ = localItems.Remove(item);
-                        }
-                    }
-                }
-                break;
-            case NotifyCollectionChangedAction.Reset:
-                {
-                    lock (localItemsLock)
-                    {
-                        localItems.Clear();
-                    }
-                }
-                break;
-            default:
-                throw new ArgumentException($"Invalid collection action {e.Action}", nameof(e));
-        }
-    }
-
-    private static void OnQueryMatcherChanged(
-        DependencyObject d,
-        DependencyPropertyChangedEventArgs e
-    )
-    {
-        if (d is Autocomplete control)
-        {
-            control.Local.Filter = item =>
-                e.NewValue is not IValueConverter converter
-                || control.SearchQuery is null
-                || (bool)
-                    converter.Convert(
-                        item,
-                        typeof(bool),
-                        control.SearchQuery.ToUpperInvariant(),
-                        CultureInfo.CurrentCulture
-                    );
-        }
-    }
+    private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        viewSource.View.Refresh();
 
     private static void OnSearchQueryChanged(
         DependencyObject d,
         DependencyPropertyChangedEventArgs e
     )
     {
-        if (d is Autocomplete control)
+        if (d is Autocomplete control && control.View is not null)
         {
-            control.Local.Refresh();
+            control.View.Refresh();
         }
     }
 
@@ -322,5 +343,11 @@ public partial class Autocomplete : UserControl
                 next.CollectionChanged += control.OnSourceCollectionChanged;
             }
         }
+    }
+
+    private static void OnGroupingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (Autocomplete)d;
+        control.UpdateLocalView(control.ItemsSource);
     }
 }

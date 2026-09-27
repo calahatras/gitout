@@ -7,6 +7,7 @@
   xmlns:git="clr-namespace:GitOut.Features.Git"
   xmlns:text="clr-namespace:GitOut.Features.Text"
   xmlns:local="clr-namespace:GitOut.Features.Git.RepositoryList"
+  xmlns:converters="clr-namespace:GitOut.Features.Wpf.Converters"
   xmlns:input="clr-namespace:GitOut.Features.Input"
   mc:Ignorable="d"
   d:DataContext="{d:DesignInstance Type={x:Type local:RepositoryListViewModel}}"
@@ -15,6 +16,10 @@
   x:Name="Root"
   input:KeyboardShortcutsBehavior.Register="True"
 >
+  <UserControl.Resources>
+    <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+    <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
+  </UserControl.Resources>
   <Grid Style="{StaticResource LayoutRootGridStyle}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -28,6 +33,26 @@
       <TextBlock Style="{StaticResource MaterialToolbarHeaderStyle}" Text="Repositories" />
       <ToolBarTray Style="{StaticResource MaterialToolbarTrayStyle}" IsLocked="True">
         <ToolBar>
+          <ItemsControl Style="{StaticResource MaterialToggleButtonGroupStyle}">
+            <ToggleButton
+              IsChecked="{Binding GroupByMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Single}"
+              ToolTip="Plain list"
+            >
+              <Path
+                Fill="{DynamicResource MaterialForegroundBase}"
+                Data="{StaticResource FormatListBullet}"
+              />
+            </ToggleButton>
+            <ToggleButton
+              IsChecked="{Binding GroupByMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=ParentFolder}"
+              ToolTip="Group by parent folder"
+            >
+              <Path
+                Fill="{DynamicResource MaterialForegroundBase}"
+                Data="{StaticResource FileTree}"
+              />
+            </ToggleButton>
+          </ItemsControl>
           <Button
             Style="{StaticResource MaterialIconButtonStyle}"
             Command="{Binding AddRepositoryCommand}"
@@ -67,6 +92,8 @@
         CancelCommand="{Binding ClearCommand}"
         ItemSelectedCommand="{Binding DataContext.NavigateToLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
         DropCommand="{Binding DropCommand}"
+        IsGrouped="{Binding DataContext.GroupByMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=ParentFolder}"
+        GroupByPath="WorkingDirectory.Parent.Directory"
       >
         <text:Autocomplete.Style>
           <Style TargetType="{x:Type text:Autocomplete}">
@@ -99,10 +126,47 @@
                 Grid.Row="1"
                 Text="{Binding WorkingDirectory.Directory}"
                 Style="{StaticResource SecondaryTextStyle}"
+                Visibility="{Binding DataContext.GroupByMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Single}"
               />
             </Grid>
           </DataTemplate>
         </text:Autocomplete.ItemTemplate>
+        <text:Autocomplete.GroupHeaderTemplate>
+          <DataTemplate>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <TextBlock
+                Text="{Binding Name}"
+                Style="{StaticResource SecondaryTextStyle}"
+                FontWeight="SemiBold"
+                VerticalAlignment="Center"
+              />
+
+              <Border Grid.Column="1" Style="{StaticResource BadgeStyle}" Margin="-6 0 0 0">
+                <TextBlock
+                  Text="{Binding ItemCount}"
+                  Style="{StaticResource HintTextStyle}"
+                  VerticalAlignment="Bottom"
+                  HorizontalAlignment="Center"
+                />
+              </Border>
+              <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button
+                  Content="Clone"
+                  Style="{StaticResource MaterialButtonStyle}"
+                  Command="{Binding DataContext.EditGroupCommand, RelativeSource={RelativeSource AncestorType=text:Autocomplete}}"
+                  CommandParameter="{Binding}"
+                />
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </text:Autocomplete.GroupHeaderTemplate>
       </text:Autocomplete>
     </Grid>
   </Grid>

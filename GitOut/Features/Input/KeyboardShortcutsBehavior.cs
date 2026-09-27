@@ -136,6 +136,10 @@ public static class KeyboardShortcutsBehavior
 
         List<KeyboardShortcutEntry> entries = CollectEntries(page);
 
+        if (App.Services is null)
+        {
+            return;
+        }
         IOptionsMonitor<KeyboardShortcutsOptions> options = App.Services.GetRequiredService<
             IOptionsMonitor<KeyboardShortcutsOptions>
         >();
