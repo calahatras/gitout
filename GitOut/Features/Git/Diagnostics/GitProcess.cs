@@ -74,10 +74,9 @@ public class GitProcess : IGitProcess
         Trace.WriteLine("Writing to stream:");
         Trace.WriteLine(writer.ToString());
         Trace.WriteLine("======");
-        using (StreamWriter processInput = exec.StandardInput)
-        {
-            await processInput.WriteAsync(writer, cancellationToken);
-        }
+        byte[] buffer = Encoding.UTF8.GetBytes(writer.ToString());
+        await exec.StandardInput.BaseStream.WriteAsync(buffer, cancellationToken);
+        exec.StandardInput.Dispose();
         bool isSuccessful = await source.Task;
 
         TimeSpan duration = exec.ExitTime - exec.StartTime;
