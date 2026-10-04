@@ -4,9 +4,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using GitOut.Features.Collections;
+using GitOut.Features.Diagnostics;
+using GitOut.Features.Git.Diagnostics;
 using GitOut.Features.Git.Log;
 using GitOut.Features.Git.Storage;
 using GitOut.Features.IO;
@@ -27,17 +31,113 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
     private readonly IGitRepositoryStorage storage;
     private readonly IGitRepositoryFactory repositoryFactory;
     private readonly ISnackbarService snack;
+    private readonly IProcessFactory<IGitProcess>? processFactory;
 
     public RepositoryListViewModel(
         INavigationService navigation,
         IGitRepositoryStorage storage,
         IGitRepositoryFactory repositoryFactory,
-        ISnackbarService snack
+        ISnackbarService snack,
+        IProcessFactory<IGitProcess>? processFactory = null
     )
     {
         this.storage = storage;
         this.repositoryFactory = repositoryFactory;
         this.snack = snack;
+        this.processFactory = processFactory;
+
+        CloneCommand = new CallbackCommand<object?>(parameter =>
+        {
+            string? path = parameter switch
+            {
+                CollectionViewGroup group => group.Name?.ToString(),
+                string s => s,
+                _ => parameter?.ToString()
+            };
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            if (string.Equals(ActiveCloneDirectory, path, StringComparison.Ordinal))
+            {
+                ActiveCloneDirectory = null;
+            }
+            else
+            {
+                ActiveCloneDirectory = path;
+                CloneUrl = string.Empty;
+                CloneBranch = string.Empty;
+            }
+        });
+
+        CancelCloneCommand = new CallbackCommand(() => ActiveCloneDirectory = null);
+
+        ExecuteCloneCommand = new AsyncCallbackCommand(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(ActiveCloneDirectory) || string.IsNullOrWhiteSpace(CloneUrl))
+            {
+                return;
+            }
+
+            string cloneDirectory = ActiveCloneDirectory;
+            string url = CloneUrl.Trim();
+            string branch = CloneBranch.Trim();
+            string? repoName = GetRepositoryNameFromUrl(url);
+
+            if (repoName is not null)
+            {
+                string expectedPath = Path.Combine(cloneDirectory, repoName);
+                if (Directory.Exists(expectedPath))
+                {
+                    snack.ShowError("Could not clone repository", new InvalidOperationException($"Target directory '{expectedPath}' already exists"));
+                    return;
+                }
+            }
+
+            ActiveCloneDirectory = null;
+
+            if (processFactory is null)
+            {
+                snack.ShowSuccess($"Cloning repository {url}...");
+                return;
+            }
+
+            try
+            {
+                var arguments = new StringBuilder("clone ");
+                if (!string.IsNullOrEmpty(branch))
+                {
+                    arguments.Append($"--branch \"{branch}\" ");
+                }
+                arguments.Append($"\"{url}\"");
+
+                IGitProcess process = processFactory.Create(
+                    DirectoryPath.Create(cloneDirectory),
+                    ProcessOptions.FromArguments(arguments.ToString())
+                );
+                _ = await process.ExecuteAsync();
+
+                string? targetPath = repoName is not null ? Path.Combine(cloneDirectory, repoName) : null;
+                if (targetPath is not null && Directory.Exists(targetPath))
+                {
+                    IGitRepository? repository = await CreateRepositoryAsync(targetPath);
+                    if (repository is not null)
+                    {
+                        storage.Add(repository);
+                        snack.ShowSuccess($"Cloned {repository.Name}");
+                    }
+                }
+                else
+                {
+                    snack.ShowSuccess("Cloned repository");
+                }
+            }
+            catch (Exception e) when (e is InvalidOperationException or ArgumentException or IOException)
+            {
+                snack.ShowError("Could not clone repository", e, TimeSpan.FromSeconds(10));
+            }
+        }, () => !string.IsNullOrWhiteSpace(CloneUrl) && !string.IsNullOrWhiteSpace(ActiveCloneDirectory));
 
         NavigateToLogCommand = new NavigateLocalCommand<IGitRepository>(
             navigation,
@@ -168,6 +268,72 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
     public ICommand RemoveRepositoryCommand { get; }
     public ICommand ClearCommand { get; }
     public ICommand DropCommand { get; }
+    public ICommand CloneCommand { get; }
+    public ICommand EditGroupCommand => CloneCommand;
+    public ICommand CancelCloneCommand { get; }
+    public ICommand ExecuteCloneCommand { get; }
+
+    public string? ActiveCloneDirectory
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CloneDestinationHint)));
+            }
+        }
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "Git repository URLs can be SSH URLs, paths, or arbitrary string remotes.")]
+    public string CloneUrl
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CloneDestinationHint)));
+            }
+        }
+    } = string.Empty;
+
+    public string CloneBranch
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
+
+    public string CloneDestinationHint
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(ActiveCloneDirectory))
+            {
+                return string.Empty;
+            }
+            string? name = GetRepositoryNameFromUrl(CloneUrl);
+            return string.IsNullOrEmpty(name)
+                ? $"Clone to {ActiveCloneDirectory}"
+                : $"Clone to {Path.Combine(ActiveCloneDirectory, name)}";
+        }
+    }
+
+    private static string? GetRepositoryNameFromUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return null;
+        }
+        string trimmed = url.TrimEnd('/', '\\');
+        int slashIndex = Math.Max(trimmed.LastIndexOf('/'), trimmed.LastIndexOf('\\'));
+        string name = slashIndex >= 0 ? trimmed[(slashIndex + 1)..] : trimmed;
+        if (name.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
+        {
+            name = name[..^4];
+        }
+        return string.IsNullOrWhiteSpace(name) ? null : name;
+    }
 
     public IEnumerable<IGitRepository> Repositories => repositories;
 
@@ -185,13 +351,15 @@ public class RepositoryListViewModel : INavigationListener, INotifyPropertyChang
         }
     }
 
-    private void SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetProperty<T>(ref T prop, T value, [CallerMemberName] string? propertyName = null)
     {
         if (!ReferenceEquals(prop, value))
         {
             prop = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
         }
+        return false;
     }
 }
 

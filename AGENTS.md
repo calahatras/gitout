@@ -3,7 +3,7 @@
 Gitout is a graphical tool to use git which is a version control system.
 It features various views from which a user can run git commands from the UI
 
-- Workspaces - a list of git folders.
+- Workspaces - a list of git folders with cloning support into grouped directories.
 - Log - a version tree with a list of git commits each displaying a subject line, date, and author. A user can select commits and compare them, showing file versions and changes.
 - Stage - show a list of changed files in the current workspace or index.
 - Settings - Configuration for the application
