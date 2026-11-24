@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using GitOut.Features.Diagnostics;
 using GitOut.Features.Git.Diagnostics;
@@ -268,8 +269,12 @@ public sealed class LocalGitRepository : IGitRepository
         return File.Exists(filePath) ? File.OpenRead(filePath) : MemoryStream.Null;
     }
 
-    public Task<Stream> GetBlobStreamAsync(GitFileId file) =>
-        CreateProcess(ProcessOptions.FromArguments($"cat-file blob \"{file}\"")).ReadStreamAsync();
+    public Task<Stream> GetBlobStreamAsync(
+        GitFileId file,
+        CancellationToken cancellationToken = default
+    ) =>
+        CreateProcess(ProcessOptions.FromArguments($"cat-file blob \"{file}\""))
+            .ReadStreamAsync(cancellationToken);
 
     public async IAsyncEnumerable<GitDiffFileEntry> ListDiffChangesAsync(
         GitObjectId change,
@@ -327,20 +332,27 @@ public sealed class LocalGitRepository : IGitRepository
         }
     }
 
-    public async Task<GitDiffResult> DiffAsync(
+    public Task<GitDiffResult> DiffAsync(
         GitFileId source,
         GitFileId target,
         DiffOptions options
+    ) => DiffAsync(source, target, options, CancellationToken.None);
+
+    public async Task<GitDiffResult> DiffAsync(
+        GitFileId source,
+        GitFileId target,
+        DiffOptions options,
+        CancellationToken cancellationToken
     )
     {
         IGitDiffBuilder builder = GitDiffResult.Builder();
         if (source.IsEmpty)
         {
-            return builder.Feed(await GetBlobStreamAsync(target)).Build();
+            return builder.Feed(await GetBlobStreamAsync(target, cancellationToken)).Build();
         }
         if (target.IsEmpty)
         {
-            return builder.Feed(await GetBlobStreamAsync(source)).Build();
+            return builder.Feed(await GetBlobStreamAsync(source, cancellationToken)).Build();
         }
         if (target.Equals(source))
         {
@@ -354,18 +366,25 @@ public sealed class LocalGitRepository : IGitRepository
         var args = ProcessOptions.FromArguments(argumentBuilder.ToString());
 
         IGitProcess diff = CreateProcess(args);
-        await foreach (string line in diff.ReadLinesAsync())
+        await foreach (string line in diff.ReadLinesAsync(cancellationToken))
         {
             _ = builder.Feed(line);
         }
         if (builder.IsBinaryFile)
         {
-            _ = builder.Feed(await GetBlobStreamAsync(target));
+            _ = builder.Feed(await GetBlobStreamAsync(target, cancellationToken));
         }
         return builder.Build();
     }
 
-    public async Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options)
+    public Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options) =>
+        DiffAsync(file, options, CancellationToken.None);
+
+    public async Task<GitDiffResult> DiffAsync(
+        RelativeDirectoryPath file,
+        DiffOptions options,
+        CancellationToken cancellationToken
+    )
     {
         string argumentBuilder =
             $"--no-optional-locks diff --no-color {string.Join(" ", options.GetArguments())} -- {file}";
@@ -373,7 +392,7 @@ public sealed class LocalGitRepository : IGitRepository
 
         IGitProcess diff = CreateProcess(args);
         IGitDiffBuilder builder = GitDiffResult.Builder();
-        await foreach (string line in diff.ReadLinesAsync())
+        await foreach (string line in diff.ReadLinesAsync(cancellationToken))
         {
             _ = builder.Feed(line);
         }

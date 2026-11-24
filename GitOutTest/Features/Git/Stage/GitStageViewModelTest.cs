@@ -1,9 +1,13 @@
 #pragma warning disable CA1506
 using System;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FakeItEasy;
 using GitOut.Features.Git.Diff;
+using GitOut.Features.Git.Files;
 using GitOut.Features.Git.Patch;
 using GitOut.Features.IO;
 using GitOut.Features.Material.Snackbar;
@@ -1846,5 +1850,138 @@ public class GitStageViewModelTest
 ".Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)
             )
         );
+    }
+
+    [Test]
+    public async Task SlowFileLoadShouldShowCancelPopupAndCancelCommandShouldCancelLoad()
+    {
+        IGitRepository repository = A.Fake<IGitRepository>();
+        _ = A.CallTo(() => repository.WorkingDirectory)
+            .Returns(DirectoryPath.Create("C:/repo"));
+        CancellationToken capturedToken = CancellationToken.None;
+        _ = A.CallTo(() => repository.GetBlobStreamAsync(A<GitFileId>._, A<CancellationToken>._))
+            .ReturnsLazily(async call =>
+            {
+                capturedToken = call.GetArgument<CancellationToken>(1);
+                await Task.Delay(TimeSpan.FromSeconds(10), capturedToken);
+                return new MemoryStream();
+            });
+
+        var stageOptions = new GitStagePageOptions(repository);
+        INavigationService navigation = A.Fake<INavigationService>();
+        _ = A.CallTo(() =>
+                navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)
+            )
+            .Returns(stageOptions);
+        ITitleService title = A.Fake<ITitleService>();
+        IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+        _ = A.CallTo(() =>
+                watchProvider.PrepareWatchRepositoryChanges(
+                    repository,
+                    RepositoryWatcherOptions.All
+                )
+            )
+            .Returns(A.Fake<IRepositoryWatcher>());
+        ISnackbarService snack = A.Fake<ISnackbarService>();
+        IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+        _ = A.CallTo(() => options.CurrentValue)
+            .Returns(new GitStageOptions { ShowSpacesAsDots = false });
+
+        using var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options)
+        {
+            LoadPopupDelay = TimeSpan.FromMilliseconds(50),
+        };
+
+        var fileEntry = new GitFileEntry(
+            GitFileId.FromHash("abcb7caf7a6b8368b4ac4da17863bedbce945dab"),
+            GitFileType.Blob,
+            [],
+            RelativeDirectoryPath.Create("large.bin")
+        );
+        GitFileViewModel fileViewModel = GitFileViewModel.Snapshot(
+            repository,
+            fileEntry,
+            RelativeDirectoryPath.Root,
+            loadTimeout: TimeSpan.FromSeconds(30)
+        );
+
+        actor.SelectedAmendChange = fileViewModel;
+
+        Assert.That(actor.IsLoadingSlow, Is.False);
+
+        DateTime deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
+        while (!actor.IsLoadingSlow && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(10);
+        }
+
+        Assert.That(actor.IsLoadingSlow, Is.True);
+
+        actor.CancelLoadCommand.Execute(null);
+
+        deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
+        while (fileViewModel.IsLoading && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(10);
+        }
+
+        Assert.That(actor.IsLoadingSlow, Is.False);
+        Assert.That(fileViewModel.IsLoading, Is.False);
+        Assert.That(capturedToken.IsCancellationRequested, Is.True);
+    }
+
+    [Test]
+    public async Task FastFileLoadShouldNotShowCancelPopup()
+    {
+        IGitRepository repository = A.Fake<IGitRepository>();
+        _ = A.CallTo(() => repository.WorkingDirectory)
+            .Returns(DirectoryPath.Create("C:/repo"));
+        _ = A.CallTo(() => repository.GetBlobStreamAsync(A<GitFileId>._, A<CancellationToken>._))
+            .Returns(
+                Task.FromResult<Stream>(new MemoryStream(Encoding.UTF8.GetBytes("fast content")))
+            );
+
+        var stageOptions = new GitStagePageOptions(repository);
+        INavigationService navigation = A.Fake<INavigationService>();
+        _ = A.CallTo(() =>
+                navigation.GetOptions<GitStagePageOptions>(typeof(GitStagePage).FullName!)
+            )
+            .Returns(stageOptions);
+        ITitleService title = A.Fake<ITitleService>();
+        IGitRepositoryWatcherProvider watchProvider = A.Fake<IGitRepositoryWatcherProvider>();
+        _ = A.CallTo(() =>
+                watchProvider.PrepareWatchRepositoryChanges(
+                    repository,
+                    RepositoryWatcherOptions.All
+                )
+            )
+            .Returns(A.Fake<IRepositoryWatcher>());
+        ISnackbarService snack = A.Fake<ISnackbarService>();
+        IOptionsMonitor<GitStageOptions> options = A.Fake<IOptionsMonitor<GitStageOptions>>();
+        _ = A.CallTo(() => options.CurrentValue)
+            .Returns(new GitStageOptions { ShowSpacesAsDots = false });
+
+        using var actor = new GitStageViewModel(navigation, title, watchProvider, snack, options)
+        {
+            LoadPopupDelay = TimeSpan.FromMilliseconds(80),
+        };
+
+        var fileEntry = new GitFileEntry(
+            GitFileId.FromHash("abcb7caf7a6b8368b4ac4da17863bedbce945dab"),
+            GitFileType.Blob,
+            [],
+            RelativeDirectoryPath.Create("small.txt")
+        );
+        GitFileViewModel fileViewModel = GitFileViewModel.Snapshot(
+            repository,
+            fileEntry,
+            RelativeDirectoryPath.Root
+        );
+
+        actor.SelectedAmendChange = fileViewModel;
+        await Task.Delay(120);
+
+        Assert.That(actor.IsLoadingSlow, Is.False);
+        Assert.That(actor.SelectedDiffResult, Is.Not.Null);
     }
 }

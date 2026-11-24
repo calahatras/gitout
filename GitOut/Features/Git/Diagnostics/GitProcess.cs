@@ -162,8 +162,20 @@ public class GitProcess : IGitProcess
         _ = exec.Start();
 
         var stream = new MemoryStream();
-        await exec.StandardOutput.BaseStream.CopyToAsync(stream, cancellationToken);
-        exec.WaitForExit();
+        try
+        {
+            await exec.StandardOutput.BaseStream.CopyToAsync(stream, cancellationToken);
+            exec.WaitForExit();
+        }
+        catch (OperationCanceledException)
+        {
+            if (!exec.HasExited)
+            {
+                exec.Kill();
+            }
+            stream.Dispose();
+            throw;
+        }
         Trace.WriteLine(
             $"Running command {arguments.Arguments}: {(exec.ExitTime - exec.StartTime).TotalMilliseconds}ms"
         );

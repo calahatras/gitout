@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using GitOut.Features.Git.Diff;
 using GitOut.Features.Git.Patch;
@@ -35,7 +36,18 @@ public interface IGitRepository
         DiffOptions? options = default
     );
     Task<GitDiffResult> DiffAsync(GitFileId source, GitFileId target, DiffOptions options);
+    Task<GitDiffResult> DiffAsync(
+        GitFileId source,
+        GitFileId target,
+        DiffOptions options,
+        CancellationToken cancellationToken
+    );
     Task<GitDiffResult> DiffAsync(RelativeDirectoryPath file, DiffOptions options);
+    Task<GitDiffResult> DiffAsync(
+        RelativeDirectoryPath file,
+        DiffOptions options,
+        CancellationToken cancellationToken
+    );
     Task<GitDiffResult> DiffAsync(
         RelativeDirectoryPath source,
         RelativeDirectoryPath destination,
@@ -43,7 +55,7 @@ public interface IGitRepository
     );
     IAsyncEnumerable<GitFileEntry> ListTreeAsync(GitObjectId id, DiffOptions? options = default);
     Stream GetUntrackedBlobStream(RelativeDirectoryPath path);
-    Task<Stream> GetBlobStreamAsync(GitFileId file);
+    Task<Stream> GetBlobStreamAsync(GitFileId file, CancellationToken cancellationToken = default);
 
     Task AddAllAsync();
     Task ResetAllAsync();

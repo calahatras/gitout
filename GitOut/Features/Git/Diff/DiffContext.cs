@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using GitOut.Features.IO;
 
@@ -40,7 +41,8 @@ public class DiffContext
     public static async Task<DiffContext> DiffAsync(
         IGitRepository repository,
         GitStatusChange change,
-        DiffOptions options
+        DiffOptions options,
+        CancellationToken cancellationToken = default
     ) =>
         CreateFromResult(
             repository,
@@ -55,8 +57,13 @@ public class DiffContext
                         .Build()
                 : change.Type == GitStatusChangeType.RenamedOrCopied
                 && change.SourceId! != change.DestinationId!
-                    ? await repository.DiffAsync(change.SourceId!, change.DestinationId!, options)
-                : await repository.DiffAsync(change.Path, options),
+                    ? await repository.DiffAsync(
+                        change.SourceId!,
+                        change.DestinationId!,
+                        options,
+                        cancellationToken
+                    )
+                : await repository.DiffAsync(change.Path, options, cancellationToken),
             change.SourceId,
             change.DestinationId
         );
@@ -65,7 +72,8 @@ public class DiffContext
         IGitRepository repository,
         RelativeDirectoryPath directory,
         FileName file,
-        GitFileId sourceId
+        GitFileId sourceId,
+        CancellationToken cancellationToken = default
     ) =>
         CreateFromResult(
             repository,
@@ -76,7 +84,10 @@ public class DiffContext
                     file.ToString()
                 )
             ),
-            GitDiffResult.Builder().Feed(await repository.GetBlobStreamAsync(sourceId)).Build(),
+            GitDiffResult
+                .Builder()
+                .Feed(await repository.GetBlobStreamAsync(sourceId, cancellationToken))
+                .Build(),
             sourceId,
             null
         );
@@ -87,7 +98,8 @@ public class DiffContext
         FileName file,
         GitFileId sourceId,
         GitFileId destinationId,
-        DiffOptions options
+        DiffOptions options,
+        CancellationToken cancellationToken = default
     ) =>
         CreateFromResult(
             repository,
@@ -98,7 +110,7 @@ public class DiffContext
                     file.ToString()
                 )
             ),
-            await repository.DiffAsync(sourceId, destinationId, options),
+            await repository.DiffAsync(sourceId, destinationId, options, cancellationToken),
             sourceId,
             destinationId
         );

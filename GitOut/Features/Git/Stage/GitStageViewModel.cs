@@ -49,6 +49,8 @@ public class GitStageViewModel
     private bool hasChanges;
     private bool selectedFileHasChanges;
     private CancellationTokenSource? refreshContextCancellationTokenSource;
+    private CancellationTokenSource? loadDiffCancellationTokenSource;
+    private CancellationTokenSource? loadingTimerCancellationTokenSource;
 
     private string cachedCommitMessage = string.Empty;
     private GitPatch? undoPatch;
@@ -182,7 +184,10 @@ public class GitStageViewModel
         IncreaseContextLinesCommand = new CallbackCommand(() =>
             ContextLines = Math.Min(100, ContextLines + 1)
         );
+        CancelLoadCommand = new CallbackCommand(CancelLoading);
     }
+
+    internal TimeSpan LoadPopupDelay { get; set; } = TimeSpan.FromSeconds(5);
 
     public IGitRepository Repository { get; }
 
@@ -330,6 +335,8 @@ public class GitStageViewModel
         {
             if (SetProperty(ref selectedChange, value))
             {
+                loadDiffCancellationTokenSource?.Cancel();
+                StopLoadingIndicator();
                 SelectedDiffResult = null;
                 cancelRefreshSnack?.Cancel();
                 if (selectedChange is not null)
@@ -350,6 +357,11 @@ public class GitStageViewModel
             {
                 unsubscribe.PropertyChanged -= NotifyDiffResultPropertyChanged;
             }
+            if (field is GitFileViewModel previousFile)
+            {
+                previousFile.CancelLoad();
+                StopLoadingIndicator();
+            }
             if (SetProperty(ref field, value))
             {
                 SelectedDiffResult = null;
@@ -364,9 +376,28 @@ public class GitStageViewModel
                 }
             }
 
-            void NotifyDiffResultPropertyChanged(object? sender, EventArgs e) =>
-                SelectedDiffResult = (sender as GitFileViewModel)?.DiffResult;
+            void NotifyDiffResultPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            {
+                if (sender is not GitFileViewModel vm)
+                {
+                    return;
+                }
+                if (e.PropertyName == nameof(GitFileViewModel.DiffResult))
+                {
+                    SelectedDiffResult = vm.DiffResult;
+                }
+                else if (e.PropertyName == nameof(GitFileViewModel.IsLoading) && !vm.IsLoading)
+                {
+                    StopLoadingIndicator();
+                }
+            }
         }
+    }
+
+    public bool IsLoadingSlow
+    {
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public EditPatchViewModel? EditHunk
@@ -416,6 +447,7 @@ public class GitStageViewModel
     public ICommand DiffSelectedFilesCommand { get; }
     public ICommand DecreaseContextLinesCommand { get; }
     public ICommand IncreaseContextLinesCommand { get; }
+    public ICommand CancelLoadCommand { get; }
 
     public string FallbackPageName => typeof(GitLogPage).FullName!;
     public object? FallbackOptions => GitLogPageOptions.OpenRepository(Repository);
@@ -525,6 +557,8 @@ public class GitStageViewModel
             repositoryWatcher.Dispose();
             stagingOptionsHandle?.Dispose();
             refreshContextCancellationTokenSource?.Dispose();
+            loadDiffCancellationTokenSource?.Dispose();
+            loadingTimerCancellationTokenSource?.Dispose();
         }
     }
 
@@ -629,6 +663,10 @@ public class GitStageViewModel
             }
             viewmodel.UpdateOptions(optionsBuilder.Build());
             SelectedDiffResult = viewmodel.DiffResult;
+            if (viewmodel.IsLoading)
+            {
+                BeginLoadingIndicator();
+            }
         }
     }
 
@@ -671,11 +709,76 @@ public class GitStageViewModel
             _ = optionsBuilder.Cached();
         }
         _ = optionsBuilder.ContextLines(ShowWholeFile ? 999999 : ContextLines);
-        SelectedDiffResult = await DiffContext.DiffAsync(
-            Repository,
-            change,
-            optionsBuilder.Build()
-        );
+
+        loadDiffCancellationTokenSource?.Cancel();
+        var cts = new CancellationTokenSource();
+        loadDiffCancellationTokenSource = cts;
+        BeginLoadingIndicator();
+        try
+        {
+            SelectedDiffResult = await DiffContext.DiffAsync(
+                Repository,
+                change,
+                optionsBuilder.Build(),
+                cts.Token
+            );
+        }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            // Loading was cancelled by the user or superseded by another selection
+        }
+        finally
+        {
+            if (ReferenceEquals(loadDiffCancellationTokenSource, cts))
+            {
+                loadDiffCancellationTokenSource = null;
+                StopLoadingIndicator();
+            }
+            cts.Dispose();
+        }
+    }
+
+    private void CancelLoading()
+    {
+        loadingTimerCancellationTokenSource?.Cancel();
+        loadDiffCancellationTokenSource?.Cancel();
+        if (SelectedAmendChange is GitFileViewModel fileViewModel)
+        {
+            fileViewModel.CancelLoad();
+        }
+        IsLoadingSlow = false;
+    }
+
+    private void BeginLoadingIndicator()
+    {
+        StopLoadingIndicator();
+        var cts = new CancellationTokenSource();
+        loadingTimerCancellationTokenSource = cts;
+        _ = WaitAndShowCancelPopupAsync(cts.Token);
+    }
+
+    private void StopLoadingIndicator()
+    {
+        loadingTimerCancellationTokenSource?.Cancel();
+        loadingTimerCancellationTokenSource?.Dispose();
+        loadingTimerCancellationTokenSource = null;
+        IsLoadingSlow = false;
+    }
+
+    private async Task WaitAndShowCancelPopupAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(LoadPopupDelay, cancellationToken);
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                IsLoadingSlow = true;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Loading completed or was cancelled before the delay elapsed
+        }
     }
 
     private async Task StageAllFilesAsync()
